@@ -16,8 +16,7 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		/* push test */
-		plugin = this;
+		plugin = this;// test
 		new BungeeHelper().register();
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		this.getServer().getPluginManager().registerEvents(this, this);
