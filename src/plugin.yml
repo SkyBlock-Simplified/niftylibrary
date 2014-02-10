@@ -1,0 +1,8 @@
+name: NiftyBukkit
+version: 2.3
+website: http://netcoding.net/
+author: Brian Graham
+
+main: net.netcoding.niftybukkit.NiftyBukkit
+load: STARTUP
+softdepend: [Vault, ProtocolLib]
