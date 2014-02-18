@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit;
 
+import net.netcoding.niftybukkit.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 
@@ -13,10 +14,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class NiftyBukkit extends JavaPlugin implements Listener {
 
 	private static transient JavaPlugin plugin;
+	private static transient ItemDatabase itemDatabase;
 
 	@Override
 	public void onEnable() {
 		plugin = this;
+		itemDatabase = new ItemDatabase(this);
 		new BungeeHelper().register();
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		this.getServer().getPluginManager().registerEvents(this, this);
@@ -26,6 +29,10 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 	public void onDisable() {
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
+	}
+
+	public static ItemDatabase getItemDatabase() {
+		return itemDatabase;
 	}
 
 	public static JavaPlugin getPlugin() {

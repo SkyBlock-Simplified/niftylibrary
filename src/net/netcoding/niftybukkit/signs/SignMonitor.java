@@ -24,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.material.Attachable;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -34,29 +35,40 @@ import com.comphenix.protocol.events.PacketEvent;
 public class SignMonitor extends BukkitListener {
 
 	private static final transient com.comphenix.protocol.ProtocolManager protocolManager;
-	private final ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
-	private final ConcurrentSet<Location> signLocations = new ConcurrentSet<>();
+	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
+	private final transient ConcurrentSet<Location> signLocations = new ConcurrentSet<>();
 	private transient boolean listening = false;
 	private transient PacketAdapter adapter;
 
 	private static final transient List<Material> gravityItems = new ArrayList<>(
-			Arrays.asList(
-					Material.ANVIL, Material.DIODE, Material.DIODE_BLOCK_OFF,
-					Material.DIODE_BLOCK_ON, Material.DRAGON_EGG, Material.GRAVEL,
-					Material.REDSTONE, Material.REDSTONE_COMPARATOR, Material.REDSTONE_COMPARATOR_OFF,
-					Material.REDSTONE_COMPARATOR_ON, Material.REDSTONE_TORCH_OFF,
-					Material.REDSTONE_TORCH_ON, Material.REDSTONE_WIRE, Material.SAND,
-					Material.SIGN_POST, Material.SKULL_ITEM, Material.TORCH,
-					Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.WALL_SIGN
-					)
-			);
+		Arrays.asList(
+			Material.ANVIL, Material.CARPET, Material.DIODE, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
+			Material.DRAGON_EGG, Material.GRAVEL, Material.GOLD_PLATE, Material.IRON_PLATE, Material.LEVER,
+			Material.LADDER, Material.REDSTONE, Material.REDSTONE_COMPARATOR, Material.REDSTONE_COMPARATOR_OFF,
+			Material.REDSTONE_COMPARATOR_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
+			Material.REDSTONE_WIRE, Material.SAND, Material.SIGN_POST, Material.STRING, Material.TORCH,
+			Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.WOOD_PLATE
+		)
+	);
 
-	private static final transient List<BlockFace> directions = new ArrayList<>(
-			Arrays.asList(
-					BlockFace.NORTH, BlockFace.EAST,
-					BlockFace.SOUTH, BlockFace.WEST
-					)
-			);
+	private static final transient List<Material> attachableItems = new ArrayList<>(
+		Arrays.asList(
+			Material.LADDER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
+			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
+			Material.WOOD_BUTTON
+		)
+	);
+
+	private static final transient List<Material> signItems = new ArrayList<>(
+		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
+	);
+
+	private static final transient List<BlockFace> relativeDirections = new ArrayList<>(
+		Arrays.asList(
+			BlockFace.NORTH, BlockFace.EAST,
+			BlockFace.SOUTH, BlockFace.WEST
+		)
+	);
 
 	static {
 		protocolManager = NiftyBukkit.getProtocolManager();
@@ -69,6 +81,8 @@ public class SignMonitor extends BukkitListener {
 
 	public void addListener(SignListener listener, String... keys) {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
+		if (keys == null || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
+
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].length() > 15)
 				throw new IllegalArgumentException("The key must not be longer then 15 characters!");
@@ -81,20 +95,28 @@ public class SignMonitor extends BukkitListener {
 
 	public static Set<Location> getSignsThatWouldFall(Block block) {
 		Set<Location> locations = new HashSet<>();
-		if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) locations.add(block.getLocation());
+		if (signItems.contains(block.getType())) locations.add(block.getLocation());
 
-		for (BlockFace direction : directions) {
+		for (BlockFace direction : relativeDirections) {
 			Block sideBlock = block.getRelative(direction);
-			Location sideLocation = sideBlock.getLocation();
 			Material sideMaterial = sideBlock.getType();
-			boolean isWallSign = Material.WALL_SIGN.equals(sideMaterial);
 
-			if (isWallSign || Material.SIGN_POST.equals(sideMaterial)) locations.add(sideLocation);
-			if (isWallSign) locations.addAll(getSignsThatWouldFall(sideBlock.getRelative(BlockFace.UP)));
+			if (attachableItems.contains(sideMaterial)) {
+				Block attachedBlock = sideBlock.getRelative(((Attachable)sideBlock).getAttachedFace());
+
+				if (block.equals(attachedBlock)) {
+					if (signItems.contains(sideMaterial)) locations.add(sideBlock.getLocation());
+					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
+
+					if (gravityItems.contains(sideUpBlock.getType()))
+						locations.addAll(getSignsThatWouldFall(sideUpBlock));
+				}
+			}
 		}
 
-		if (gravityItems.contains(block.getType()))
-			locations.addAll(getSignsThatWouldFall(block.getRelative(BlockFace.UP)));
+		Block upBlock = block.getRelative(BlockFace.UP);
+		if (gravityItems.contains(upBlock.getType()))
+			locations.addAll(getSignsThatWouldFall(upBlock));
 
 		return locations;
 	}
