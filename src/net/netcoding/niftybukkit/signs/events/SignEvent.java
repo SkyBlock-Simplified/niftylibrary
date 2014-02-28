@@ -73,10 +73,6 @@ class SignEvent extends Event implements Cancellable {
 		return this.cancelled;
 	}
 
-	public void setCancelled() {
-		this.setCancelled(true);
-	}
-
 	@Override
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;

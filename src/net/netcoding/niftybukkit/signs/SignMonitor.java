@@ -30,7 +30,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.material.Button;
 import org.bukkit.material.Ladder;
 import org.bukkit.material.Lever;
-import org.bukkit.material.RedstoneTorch;
 import org.bukkit.material.Torch;
 import org.bukkit.material.TrapDoor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -106,8 +105,6 @@ public class SignMonitor extends BukkitListener {
 			return isThisAttached.getRelative(lever.getAttachedFace()).equals(toThisBlock);
 		case REDSTONE_TORCH_OFF:
 		case REDSTONE_TORCH_ON:
-			RedstoneTorch redtorch = (RedstoneTorch)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(redtorch.getAttachedFace()).equals(toThisBlock);
 		case TORCH:
 			Torch torch = (Torch)isThisAttached.getState().getData();
 			return isThisAttached.getRelative(torch.getAttachedFace()).equals(toThisBlock);
@@ -163,49 +160,10 @@ public class SignMonitor extends BukkitListener {
 		Set<Location> fallingSigns = getSignsThatWouldFall(block);
 		Set<Location> removeSigns = new HashSet<>();
 
-		for (Location signLocation : fallingSigns) {
-			if (this.signLocations.contains(signLocation)) {
-				Sign sign = (Sign)signLocation.getBlock().getState();
-				String[] lines = sign.getLines();
-
-				for (SignListener listener : this.listeners.keySet()) {
-					List<String> keys = this.listeners.get(listener);
-					boolean skip = false;
-
-					for (String line : lines) {
-						for (String key : keys) {
-							if (line.contains(key)) {
-								SignBreakEvent breakEvent = new SignBreakEvent(player, sign);
-								listener.onSignBreak(breakEvent);
-
-								if (breakEvent.isCancelled()) {
-									event.setCancelled(true);
-									return;
-								} else {
-									skip = true;
-									removeSigns.add(signLocation);
-									break;
-								}
-							}
-						}
-
-						if (skip) break;
-					}
-				}
-			}
-		}
-
-		for (Location signLocation : removeSigns) this.signLocations.remove(signLocation);
-	}
-
-	@EventHandler(ignoreCancelled = true)
-	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK.equals(event.getAction()) || Action.RIGHT_CLICK_BLOCK.equals(event.getAction()))) {
-			Block block = event.getClickedBlock();
-
-			if (this.signLocations.contains(block.getLocation())) {
-				if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
-					Sign sign = (Sign)block.getState();
+		if (this.isListening()) {
+			for (Location signLocation : fallingSigns) {
+				if (this.signLocations.contains(signLocation)) {
+					Sign sign = (Sign)signLocation.getBlock().getState();
 					String[] lines = sign.getLines();
 
 					for (SignListener listener : this.listeners.keySet()) {
@@ -215,19 +173,62 @@ public class SignMonitor extends BukkitListener {
 						for (String line : lines) {
 							for (String key : keys) {
 								if (line.contains(key)) {
-									SignInteractEvent interactEvent = new SignInteractEvent(event.getPlayer(), sign, event.getAction());
-									listener.onSignInteract(interactEvent);
-									if (interactEvent.isCancelled()) event.setCancelled(true);
-									skip = true;
-									break;
+									SignBreakEvent breakEvent = new SignBreakEvent(player, sign);
+									listener.onSignBreak(breakEvent);
+
+									if (breakEvent.isCancelled()) {
+										event.setCancelled(true);
+										return;
+									} else {
+										skip = true;
+										removeSigns.add(signLocation);
+										break;
+									}
 								}
 							}
 
 							if (skip) break;
 						}
 					}
-				} else
-					this.signLocations.remove(block.getLocation());
+				}
+			}
+
+			for (Location signLocation : removeSigns) this.signLocations.remove(signLocation);
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK.equals(event.getAction()) || Action.RIGHT_CLICK_BLOCK.equals(event.getAction()))) {
+			Block block = event.getClickedBlock();
+
+			if (this.isListening()) {
+				if (this.signLocations.contains(block.getLocation())) {
+					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
+						Sign sign = (Sign)block.getState();
+						String[] lines = sign.getLines();
+
+						for (SignListener listener : this.listeners.keySet()) {
+							List<String> keys = this.listeners.get(listener);
+							boolean skip = false;
+
+							for (String line : lines) {
+								for (String key : keys) {
+									if (line.contains(key)) {
+										SignInteractEvent interactEvent = new SignInteractEvent(event.getPlayer(), sign, event.getAction());
+										listener.onSignInteract(interactEvent);
+										if (interactEvent.isCancelled()) event.setCancelled(true);
+										skip = true;
+										break;
+									}
+								}
+
+								if (skip) break;
+							}
+						}
+					} else
+						this.signLocations.remove(block.getLocation());
+				}
 			}
 		}
 	}
