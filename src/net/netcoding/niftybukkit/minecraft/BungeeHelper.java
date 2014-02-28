@@ -38,19 +38,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			new BungeeChecker(NiftyBukkit.getPlugin());
 	}
 
-	public BungeeHelper() {
-		this(null);
+	public BungeeHelper(JavaPlugin plugin) {
+		this(plugin, null);
 	}
 
-	public BungeeHelper(BungeeListener listener) {
-		this(listener, false);
+	public BungeeHelper(JavaPlugin plugin, BungeeListener listener) {
+		this(plugin, listener, false);
 	}
 
-	public BungeeHelper(BungeeListener listener, boolean register) {
-		this(NiftyBukkit.getPlugin(), listener, register);
-	}
-
-	private BungeeHelper(JavaPlugin plugin, BungeeListener listener, boolean register) {
+	public BungeeHelper(JavaPlugin plugin, BungeeListener listener, boolean register) {
 		super(plugin);
 
 		if (loadedOnce) {
@@ -90,7 +86,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	public void forward(Player player, String targetServer, String subChannel, Object... data) {
 		if (subChannel.toLowerCase().startsWith("Nifty".toLowerCase())) throw new IllegalArgumentException("You cannot forward to Nifty channels!");
 		if (subChannel.matches("^(?:GetServers?|Player(?:Count|List))$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
-		forward(super.getPlugin(), player, targetServer, subChannel, data);
+		forward(this.getPlugin(), player, targetServer, subChannel, data);
 	}
 
 	private static void forward(JavaPlugin plugin, Player player, String targetServer, String subChannel, Object... data) {
@@ -227,7 +223,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public boolean isRegistered() {
-		return Bukkit.getMessenger().isIncomingChannelRegistered(super.getPlugin(), BUNGEE_CHANNEL) && Bukkit.getMessenger().isOutgoingChannelRegistered(super.getPlugin(), BUNGEE_CHANNEL);
+		return Bukkit.getMessenger().isIncomingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL) && Bukkit.getMessenger().isOutgoingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL);
 	}
 
 	public boolean isOnline() {
@@ -240,12 +236,12 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public void register() {
 		if (this.isRegistered()) return;
-		Bukkit.getMessenger().registerIncomingPluginChannel(super.getPlugin(), BUNGEE_CHANNEL, this);
+		Bukkit.getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
 	}
 
 	public void unregister() {
 		if (!this.isRegistered()) return;
-		Bukkit.getMessenger().unregisterIncomingPluginChannel(super.getPlugin(), BUNGEE_CHANNEL, this);
+		Bukkit.getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
 	}
 
 	public void uuid(Player player) {
@@ -257,7 +253,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	private void write(Player player, String channel, Object... objs) {
-		write(super.getPlugin(), player, channel, objs);
+		write(this.getPlugin(), player, channel, objs);
 	}
 
 	private static void write(JavaPlugin plugin, Player player, String channel, Object... objs) {
@@ -298,7 +294,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				BukkitServer server = serverList.get(serverName);
 
 				if (subChannel.endsWith("ServerPull"))
-					forward(super.getPlugin(), player, server.getName(), "NiftyBungeeServerPush", this.getServer().getName(), this.getServer().getAddress().getHostName(), this.getServer().getAddress().getPort());
+					forward(this.getPlugin(), player, server.getName(), "NiftyBungeeServerPush", this.getServer().getName(), this.getServer().getAddress().getHostName(), this.getServer().getAddress().getPort());
 				else if (subChannel.endsWith("ServerPush")) {
 					if (server == null) {
 						serverList.put(serverName, (server = new BukkitServer()));
@@ -312,8 +308,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				server.setName(input.readUTF());
 				server.setAddress(Bukkit.getServer().getIp(), Bukkit.getServer().getPort());
 				serverList.put(server.getName(), server);
-				forward(super.getPlugin(), player, "ALL", "NiftyBungeeServerPush", this.getServer().getName(), this.getServer().getAddress().getHostName(), this.getServer().getAddress().getPort());
-				write(super.getPlugin(), player, "GetServers");
+				forward(this.getPlugin(), player, "ALL", "NiftyBungeeServerPush", this.getServer().getName(), this.getServer().getAddress().getHostName(), this.getServer().getAddress().getPort());
+				write(this.getPlugin(), player, "GetServers");
 			} else if (subChannel.equals("GetServers")) {
 				final Set<String> serverNames = new HashSet<>(Arrays.asList(input.readUTF().split(", ")));
 
@@ -323,11 +319,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					if (!serverList.keySet().contains(serverName)) {
 						server.setName(serverName);
 						serverList.put(serverName, server);
-						forward(super.getPlugin(), player, server.getName(), "NiftyBungeeServerPull", this.getServer().getName());
+						forward(this.getPlugin(), player, server.getName(), "NiftyBungeeServerPull", this.getServer().getName());
 					}
 
 					LOADED_SERVERS++;
-					Bukkit.getScheduler().runTaskLater(super.getPlugin(), new Runnable() {
+					Bukkit.getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
 						@Override
 						public void run() {
 							Bukkit.getServer().getPluginManager().callEvent(new BungeeServerLoadedEvent(server));
@@ -359,7 +355,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				event.getHandlers().unregister(this);
 				BungeeHelper.bungeeOnline = true;
 				Player player = event.getPlayer();
-				write(super.getPlugin(), player, "GetServer");
+				write(this.getPlugin(), player, "GetServer");
 			}
 		}
 
