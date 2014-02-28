@@ -10,7 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
-import net.netcoding.niftybukkit.signs.events.*;
+import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
+import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
+import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
+import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 import net.netcoding.niftybukkit.utilities.ConcurrentSet;
 
 import org.bukkit.Location;
@@ -24,7 +27,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.material.Attachable;
+import org.bukkit.material.Button;
+import org.bukkit.material.Ladder;
+import org.bukkit.material.Lever;
+import org.bukkit.material.RedstoneTorch;
+import org.bukkit.material.Torch;
+import org.bukkit.material.TrapDoor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.PacketType;
@@ -53,7 +61,7 @@ public class SignMonitor extends BukkitListener {
 
 	private static final transient List<Material> attachableItems = new ArrayList<>(
 		Arrays.asList(
-			Material.LADDER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
+			Material.LADDER, Material.LEVER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
 			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
 			Material.WOOD_BUTTON
 		)
@@ -88,6 +96,36 @@ public class SignMonitor extends BukkitListener {
 		this.listeners.put(listener, keyList);
 	}
 
+	private static boolean isAttachedTo(Block attached, Block block) {
+		switch (attached.getType()) {
+		case LADDER:
+			Ladder ladder = (Ladder)attached.getState().getData();
+			return attached.getRelative(ladder.getAttachedFace()).equals(block);
+		case LEVER:
+			Lever lever = (Lever)attached.getState().getData();
+			return attached.getRelative(lever.getAttachedFace()).equals(block);
+		case REDSTONE_TORCH_OFF:
+		case REDSTONE_TORCH_ON:
+			RedstoneTorch redtorch = (RedstoneTorch)attached.getState().getData();
+			return attached.getRelative(redtorch.getAttachedFace()).equals(block);
+		case TORCH:
+			Torch torch = (Torch)attached.getState().getData();
+			return attached.getRelative(torch.getAttachedFace()).equals(block);
+		case TRAP_DOOR:
+			TrapDoor trap = (TrapDoor)attached.getState().getData();
+			return attached.getRelative(trap.getAttachedFace()).equals(block);
+		case WALL_SIGN:
+			org.bukkit.material.Sign sign = (org.bukkit.material.Sign)attached.getState().getData();
+			return attached.getRelative(sign.getAttachedFace()).equals(block);
+		case STONE_BUTTON:
+		case WOOD_BUTTON:
+			Button button = (Button)attached.getState().getData();
+			return attached.getRelative(button.getAttachedFace()).equals(block);
+		default:
+			return false;
+		}
+	}
+
 	public static Set<Location> getSignsThatWouldFall(Block block) {
 		Set<Location> locations = new HashSet<>();
 		if (signItems.contains(block.getType())) locations.add(block.getLocation());
@@ -97,9 +135,7 @@ public class SignMonitor extends BukkitListener {
 			Material sideMaterial = sideBlock.getType();
 
 			if (attachableItems.contains(sideMaterial)) {
-				Block attachedBlock = sideBlock.getRelative(((Attachable)sideBlock).getAttachedFace());
-
-				if (block.equals(attachedBlock)) {
+				if (isAttachedTo(sideBlock, block)) {
 					if (signItems.contains(sideMaterial)) locations.add(sideBlock.getLocation());
 					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
 
