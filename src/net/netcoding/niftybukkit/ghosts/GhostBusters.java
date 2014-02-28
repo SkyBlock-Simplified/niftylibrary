@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit;
+package net.netcoding.niftybukkit.ghosts;
 
 import java.util.HashSet;
 import java.util.Iterator;

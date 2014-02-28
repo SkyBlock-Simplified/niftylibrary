@@ -2,6 +2,8 @@ package net.netcoding.niftybukkit.hologram;
 
 import java.awt.image.BufferedImage;
 
+import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,18 +16,18 @@ public class NameTagMessage extends ImageMessage {
 	private Location location;
 	private double lineSpacing = 0.25d;
 
-	public NameTagMessage(BufferedImage image, int height, char imgChar) {
+	public NameTagMessage(BufferedImage image, int height, char imgChar) throws ProtocolLibNotFoundException {
 		super(image, height, imgChar);
 		this.spawner = new NameTagSpawner(height);
 	}
 
-	public NameTagMessage(ChatColor[][] chatColors, char imgChar) {
+	public NameTagMessage(ChatColor[][] chatColors, char imgChar) throws ProtocolLibNotFoundException {
 		super(chatColors, imgChar);
 		this.location = Preconditions.checkNotNull(location, "location cannot be NULL");
 		this.spawner = new NameTagSpawner(chatColors.length);
 	}
 
-	public NameTagMessage(String... imgLines) {
+	public NameTagMessage(String... imgLines) throws ProtocolLibNotFoundException {
 		super(imgLines);
 		this.spawner = new NameTagSpawner(imgLines.length);
 	}

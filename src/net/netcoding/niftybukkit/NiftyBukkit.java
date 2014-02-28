@@ -75,11 +75,10 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 	}
 
 	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {
-		try {
+		if (protocolManagerExists())
 			return com.comphenix.protocol.ProtocolLibrary.getProtocolManager();
-		} catch (Exception ex) { }
-
-		return null;
+		else
+			return null;
 	}
 
 	@EventHandler
@@ -90,6 +89,10 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 				Bukkit.getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(event.getPlayer()));
 			}
 		}, 10L);
+	}
+
+	public static boolean protocolManagerExists() {
+		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 	}
 
 }
