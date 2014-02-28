@@ -3,24 +3,23 @@ package net.netcoding.niftybukkit.hologram.wrapper;
 import java.lang.reflect.InvocationTargetException;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
 
 import org.bukkit.entity.Player;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
 import com.google.common.base.Objects;
 
 abstract class AbstractPacket {
 
-	protected com.comphenix.protocol.events.PacketContainer handle;
+	protected PacketContainer handle;
 
 	/**
 	 * Constructs a new strongly typed wrapper for the given packet.
 	 * @param handle - handle to the raw packet data.
 	 * @param type - the packet type.
 	 */
-	protected AbstractPacket(com.comphenix.protocol.events.PacketContainer handle, com.comphenix.protocol.PacketType type) throws ProtocolLibNotFoundException {
-		if (!NiftyBukkit.protocolManagerExists()) throw new ProtocolLibNotFoundException();
-
+	protected AbstractPacket(PacketContainer handle, PacketType type) {
 		// Make sure we're given a valid packet
 		if (handle == null)
 			throw new IllegalArgumentException("Packet handle cannot be NULL.");
@@ -34,7 +33,7 @@ abstract class AbstractPacket {
 	 * Retrieve a handle to the raw packet data.
 	 * @return Raw packet data.
 	 */
-	public com.comphenix.protocol.events.PacketContainer getHandle() {
+	public PacketContainer getHandle() {
 		return handle;
 	}
 

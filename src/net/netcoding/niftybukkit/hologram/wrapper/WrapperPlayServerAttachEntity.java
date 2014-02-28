@@ -1,20 +1,22 @@
 package net.netcoding.niftybukkit.hologram.wrapper;
 
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
-
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+
 public class WrapperPlayServerAttachEntity extends AbstractPacket {
 
-	public static final com.comphenix.protocol.PacketType TYPE = com.comphenix.protocol.PacketType.Play.Server.ATTACH_ENTITY;
+	public static final PacketType TYPE = PacketType.Play.Server.ATTACH_ENTITY;
 
-	public WrapperPlayServerAttachEntity() throws ProtocolLibNotFoundException {
-		super(new com.comphenix.protocol.events.PacketContainer(TYPE), TYPE);
+	public WrapperPlayServerAttachEntity() {
+		super(new PacketContainer(TYPE), TYPE);
 		this.handle.getModifier().writeDefaults();
 	}
 
-	public WrapperPlayServerAttachEntity(com.comphenix.protocol.events.PacketContainer packet) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerAttachEntity(PacketContainer packet) {
 		super(packet, TYPE);
 	}
 
@@ -64,7 +66,7 @@ public class WrapperPlayServerAttachEntity extends AbstractPacket {
 	 * @param event - the packet event.
 	 * @return The entity.
 	 */
-	public Entity getEntity(com.comphenix.protocol.events.PacketEvent event) {
+	public Entity getEntity(PacketEvent event) {
 		return getEntity(event.getPlayer().getWorld());
 	}
 
@@ -98,7 +100,7 @@ public class WrapperPlayServerAttachEntity extends AbstractPacket {
 	 * @param event - the packet event.
 	 * @return The vehicle.
 	 */
-	public Entity getVehicle(com.comphenix.protocol.events.PacketEvent event) {
+	public Entity getVehicle(PacketEvent event) {
 		return getVehicle(event.getPlayer().getWorld());
 	}
 }

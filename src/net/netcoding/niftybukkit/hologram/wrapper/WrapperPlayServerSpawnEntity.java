@@ -1,31 +1,36 @@
 package net.netcoding.niftybukkit.hologram.wrapper;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
 
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.injector.PacketConstructor;
+import com.comphenix.protocol.reflect.IntEnum;
+
 public class WrapperPlayServerSpawnEntity extends AbstractPacket {
 
-	public static final com.comphenix.protocol.PacketType TYPE = com.comphenix.protocol.PacketType.Play.Server.SPAWN_ENTITY;
-	private static com.comphenix.protocol.injector.PacketConstructor entityConstructor;
+	public static final PacketType TYPE = PacketType.Play.Server.SPAWN_ENTITY;
+	private static PacketConstructor entityConstructor;
 
-	public WrapperPlayServerSpawnEntity() throws ProtocolLibNotFoundException {
-		super(new com.comphenix.protocol.events.PacketContainer(TYPE), TYPE);
+	public WrapperPlayServerSpawnEntity() {
+		super(new PacketContainer(TYPE), TYPE);
 		handle.getModifier().writeDefaults();
 	}
 
-	public WrapperPlayServerSpawnEntity(com.comphenix.protocol.events.PacketContainer packet) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerSpawnEntity(PacketContainer packet) {
 		super(packet, TYPE);
 	}
 
-	public WrapperPlayServerSpawnEntity(Entity entity, int type, int objectData) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerSpawnEntity(Entity entity, int type, int objectData) {
 		super(fromEntity(entity, type, objectData), TYPE);
 	}
 
 	// Useful constructor
-	private static com.comphenix.protocol.events.PacketContainer fromEntity(Entity entity, int type, int objectData) {
+	private static PacketContainer fromEntity(Entity entity, int type, int objectData) {
 		if (entityConstructor == null)
 			entityConstructor = NiftyBukkit.getProtocolManager().createPacketConstructor(TYPE, entity, type, objectData);
 		return entityConstructor.createPacket(entity, type, objectData);
@@ -53,7 +58,7 @@ public class WrapperPlayServerSpawnEntity extends AbstractPacket {
 	 * @param event - the packet event.
 	 * @return The spawned entity.
 	 */
-	public Entity getEntity(com.comphenix.protocol.events.PacketEvent event) {
+	public Entity getEntity(PacketEvent event) {
 		return getEntity(event.getPlayer().getWorld());
 	}
 
@@ -271,7 +276,7 @@ public class WrapperPlayServerSpawnEntity extends AbstractPacket {
 	/**
 	 * Represents the different object types.
 	 */
-	public static class ObjectTypes extends com.comphenix.protocol.reflect.IntEnum {
+	public static class ObjectTypes extends IntEnum {
 		public static final int BOAT = 1;
 		public static final int ITEM_STACK = 2;
 		public static final int MINECART = 10;

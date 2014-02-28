@@ -12,7 +12,6 @@ import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.signs.events.*;
 import net.netcoding.niftybukkit.utilities.ConcurrentSet;
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,14 +25,20 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.material.Attachable;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 
 public class SignMonitor extends BukkitListener {
 
-	private static final transient com.comphenix.protocol.ProtocolManager protocolManager;
 	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
 	private final transient ConcurrentSet<Location> signLocations = new ConcurrentSet<>();
 	private transient boolean listening = false;
-	private transient com.comphenix.protocol.events.PacketAdapter adapter;
+	private transient PacketAdapter adapter;
 
 	private static final transient List<Material> gravityItems = new ArrayList<>(
 		Arrays.asList(
@@ -65,13 +70,8 @@ public class SignMonitor extends BukkitListener {
 		)
 	);
 
-	static {
-		protocolManager = NiftyBukkit.getProtocolManager();
-	}
-
-	public SignMonitor() throws ProtocolLibNotFoundException {
-		super(NiftyBukkit.getPlugin());
-		if (!NiftyBukkit.protocolManagerExists()) throw new ProtocolLibNotFoundException();
+	public SignMonitor(JavaPlugin plugin) {
+		super(plugin);
 	}
 
 	public void addListener(SignListener listener, String... keys) {
@@ -204,13 +204,13 @@ public class SignMonitor extends BukkitListener {
 	private static void sendChangePacket(Player player, Sign sign) {
 		if (sign == null) return;
 		if (player == null || !player.isOnline()) return;
-		com.comphenix.protocol.events.PacketContainer result = SignMonitor.protocolManager.createPacket(com.comphenix.protocol.PacketType.Play.Server.UPDATE_SIGN);
+		PacketContainer result = NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN);
 		Integer[] coords = new Integer[] { sign.getX(), sign.getY(), sign.getZ() };
 
 		try {
 			for (int i = 0; i < 3; i++) result.getSpecificModifier(int.class).write(i, coords[i]);
 			result.getStringArrays().write(0, sign.getLines());
-			SignMonitor.protocolManager.sendServerPacket(player, result);
+			NiftyBukkit.getProtocolManager().sendServerPacket(player, result);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -249,10 +249,10 @@ public class SignMonitor extends BukkitListener {
 		if (!this.isListening()) {
 			this.listening = true;
 
-			protocolManager.addPacketListener(this.adapter = new com.comphenix.protocol.events.PacketAdapter(super.getPlugin(), com.comphenix.protocol.events.ListenerPriority.NORMAL, com.comphenix.protocol.PacketType.Play.Server.UPDATE_SIGN) {
+			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(super.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.UPDATE_SIGN) {
 				@Override
-				public void onPacketSending(com.comphenix.protocol.events.PacketEvent event) {
-					com.comphenix.protocol.events.PacketContainer signUpdatePacket = event.getPacket();
+				public void onPacketSending(PacketEvent event) {
+					PacketContainer signUpdatePacket = event.getPacket();
 					SignPacket incoming = new SignPacket(signUpdatePacket);
 					Player player = event.getPlayer();
 					Location location = new Location(player.getWorld(), incoming.getX(), incoming.getY(), incoming.getZ());
@@ -311,7 +311,7 @@ public class SignMonitor extends BukkitListener {
 	public void stop() {
 		if (this.isListening()) {
 			this.listening = false;
-			protocolManager.removePacketListener(this.adapter);
+			NiftyBukkit.getProtocolManager().removePacketListener(this.adapter);
 		}
 	}
 

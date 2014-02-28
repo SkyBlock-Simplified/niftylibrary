@@ -3,12 +3,12 @@ package net.netcoding.niftybukkit.hologram;
 import net.netcoding.niftybukkit.hologram.wrapper.WrapperPlayServerAttachEntity;
 import net.netcoding.niftybukkit.hologram.wrapper.WrapperPlayServerSpawnEntity;
 import net.netcoding.niftybukkit.hologram.wrapper.WrapperPlayServerSpawnEntityLiving;
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 
 /**
  * Represents a spawner of name tags.
@@ -30,9 +30,7 @@ public class NameTagSpawner {
 	 * Specify a number of name tags to spawn.
 	 * @param nameTags - the maximum number of name tags we will spawn at any given time.
 	 */
-	public NameTagSpawner(int nameTagCount) throws ProtocolLibNotFoundException {
-		if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null)
-			throw new ProtocolLibNotFoundException();
+	public NameTagSpawner(int nameTagCount) {
 		//this.startEntityId = SHARED_ENTITY_ID;
 		//this.nameTagCount = nameTagCount;
 
@@ -57,23 +55,21 @@ public class NameTagSpawner {
 	 * @param message - the message to display.
 	 */
 	public void setNameTag(int index, Player observer, Location location, double dY, String message) {
-		try {
-			WrapperPlayServerAttachEntity attach = new WrapperPlayServerAttachEntity();
-			WrapperPlayServerSpawnEntityLiving horse = createHorsePacket(index, location, dY, message);
-			WrapperPlayServerSpawnEntity skull = createSkullPacket(index, location, dY);
+		WrapperPlayServerAttachEntity attach = new WrapperPlayServerAttachEntity();
+		WrapperPlayServerSpawnEntityLiving horse = createHorsePacket(index, location, dY, message);
+		WrapperPlayServerSpawnEntity skull = createSkullPacket(index, location, dY);
 
-			// The horse is riding on the skull
-			attach.setEntityId(horse.getEntityID());
-			attach.setVehicleId(skull.getEntityID());
+		// The horse is riding on the skull
+		attach.setEntityId(horse.getEntityID());
+		attach.setVehicleId(skull.getEntityID());
 
-			horse.sendPacket(observer);
-			skull.sendPacket(observer);
-			attach.sendPacket(observer);
-		} catch (ProtocolLibNotFoundException plib) { }
+		horse.sendPacket(observer);
+		skull.sendPacket(observer);
+		attach.sendPacket(observer);
 	}
 
 	// Construct the invisible horse packet
-	private WrapperPlayServerSpawnEntityLiving createHorsePacket(int index, Location location, double dY, String message) throws ProtocolLibNotFoundException {
+	private WrapperPlayServerSpawnEntityLiving createHorsePacket(int index, Location location, double dY, String message) {
 		WrapperPlayServerSpawnEntityLiving horse = new WrapperPlayServerSpawnEntityLiving();
 		horse.setEntityID(SHARED_ENTITY_ID + index * 2);
 		horse.setType(EntityType.HORSE);
@@ -81,7 +77,7 @@ public class NameTagSpawner {
 		horse.setY(location.getY() + dY + 55);
 		horse.setZ(location.getZ());
 
-		com.comphenix.protocol.wrappers.WrappedDataWatcher wdw = new com.comphenix.protocol.wrappers.WrappedDataWatcher();
+		WrappedDataWatcher wdw = new WrappedDataWatcher();
 		wdw.setObject(10, message);
 		wdw.setObject(11, (byte) 1);
 		wdw.setObject(12, -1700000);
@@ -90,7 +86,7 @@ public class NameTagSpawner {
 	}
 
 	// Construct the wither skull packet
-	private WrapperPlayServerSpawnEntity createSkullPacket(int index, Location location, double dY) throws ProtocolLibNotFoundException {
+	private WrapperPlayServerSpawnEntity createSkullPacket(int index, Location location, double dY) {
 		WrapperPlayServerSpawnEntity skull = new WrapperPlayServerSpawnEntity();
 		skull.setEntityID(SHARED_ENTITY_ID + index * 2 + 1);
 		skull.setType(WITHER_SKULL);

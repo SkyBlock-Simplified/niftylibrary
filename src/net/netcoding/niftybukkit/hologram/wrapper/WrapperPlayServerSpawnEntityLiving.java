@@ -1,32 +1,37 @@
 package net.netcoding.niftybukkit.hologram.wrapper;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
 
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.injector.PacketConstructor;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+
 public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
 
-	public static final com.comphenix.protocol.PacketType TYPE = com.comphenix.protocol.PacketType.Play.Server.SPAWN_ENTITY_LIVING;
-	private static com.comphenix.protocol.injector.PacketConstructor entityConstructor;
+	public static final PacketType TYPE = PacketType.Play.Server.SPAWN_ENTITY_LIVING;
+	private static PacketConstructor entityConstructor;
 
-	public WrapperPlayServerSpawnEntityLiving() throws ProtocolLibNotFoundException {
-		super(new com.comphenix.protocol.events.PacketContainer(TYPE), TYPE);
+	public WrapperPlayServerSpawnEntityLiving() {
+		super(new PacketContainer(TYPE), TYPE);
 		handle.getModifier().writeDefaults();
 	}
 
-	public WrapperPlayServerSpawnEntityLiving(com.comphenix.protocol.events.PacketContainer packet) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerSpawnEntityLiving(PacketContainer packet) {
 		super(packet, TYPE);
 	}
 
-	public WrapperPlayServerSpawnEntityLiving(Entity entity) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerSpawnEntityLiving(Entity entity) {
 		super(fromEntity(entity), TYPE);
 	}
 
 	// Useful constructor
-	private static com.comphenix.protocol.events.PacketContainer fromEntity(Entity entity) {
+	private static PacketContainer fromEntity(Entity entity) {
 		if (entityConstructor == null)
 			entityConstructor = NiftyBukkit.getProtocolManager().createPacketConstructor(TYPE, entity);
 
@@ -55,7 +60,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
 	 * @param event - the packet event.
 	 * @return The spawned entity.
 	 */
-	public Entity getEntity(com.comphenix.protocol.events.PacketEvent event) {
+	public Entity getEntity(PacketEvent event) {
 		return getEntity(event.getPlayer().getWorld());
 	}
 
@@ -241,7 +246,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
 	 * Content varies by mob, see Entities.
 	 * @return The current Metadata
 	 */
-	public com.comphenix.protocol.wrappers.WrappedDataWatcher getMetadata() {
+	public WrappedDataWatcher getMetadata() {
 		return handle.getDataWatcherModifier().read(0);
 	}
 
@@ -249,7 +254,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
 	 * Set the data watcher.
 	 * @param value - new value.
 	 */
-	public void setMetadata(com.comphenix.protocol.wrappers.WrappedDataWatcher value) {
+	public void setMetadata(WrappedDataWatcher value) {
 		handle.getDataWatcherModifier().write(0, value);
 	}
 

@@ -2,11 +2,11 @@ package net.netcoding.niftybukkit.signs;
 
 import com.comphenix.protocol.events.PacketContainer;
 
-public class SignPacket {
+class SignPacket {
 
 	private final transient PacketContainer updateSignPacket;
 
-	public SignPacket(PacketContainer updateSignPacket) {
+	SignPacket(PacketContainer updateSignPacket) {
 		this.updateSignPacket = updateSignPacket;
 	}
 

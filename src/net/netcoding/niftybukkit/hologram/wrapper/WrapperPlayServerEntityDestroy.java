@@ -2,20 +2,20 @@ package net.netcoding.niftybukkit.hologram.wrapper;
 
 import java.util.List;
 
-import net.netcoding.niftybukkit.utilities.ProtocolLibNotFoundException;
-
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
 import com.google.common.primitives.Ints;
 
 public class WrapperPlayServerEntityDestroy extends AbstractPacket {
 
-	public static final com.comphenix.protocol.PacketType TYPE = com.comphenix.protocol.PacketType.Play.Server.ENTITY_DESTROY;
+	public static final PacketType TYPE = PacketType.Play.Server.ENTITY_DESTROY;
 
-	public WrapperPlayServerEntityDestroy() throws ProtocolLibNotFoundException {
-		super(new com.comphenix.protocol.events.PacketContainer(TYPE), TYPE);
+	public WrapperPlayServerEntityDestroy() {
+		super(new PacketContainer(TYPE), TYPE);
 		handle.getModifier().writeDefaults();
 	}
 
-	public WrapperPlayServerEntityDestroy(com.comphenix.protocol.events.PacketContainer packet) throws ProtocolLibNotFoundException {
+	public WrapperPlayServerEntityDestroy(PacketContainer packet) {
 		super(packet, TYPE);
 	}
 
