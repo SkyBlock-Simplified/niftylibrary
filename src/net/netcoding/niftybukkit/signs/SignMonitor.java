@@ -96,31 +96,31 @@ public class SignMonitor extends BukkitListener {
 		this.listeners.put(listener, keyList);
 	}
 
-	private static boolean isAttachedTo(Block attached, Block block) {
-		switch (attached.getType()) {
+	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
+		switch (isThisAttached.getType()) {
 		case LADDER:
-			Ladder ladder = (Ladder)attached.getState().getData();
-			return attached.getRelative(ladder.getAttachedFace()).equals(block);
+			Ladder ladder = (Ladder)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(ladder.getAttachedFace()).equals(toThisBlock);
 		case LEVER:
-			Lever lever = (Lever)attached.getState().getData();
-			return attached.getRelative(lever.getAttachedFace()).equals(block);
+			Lever lever = (Lever)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(lever.getAttachedFace()).equals(toThisBlock);
 		case REDSTONE_TORCH_OFF:
 		case REDSTONE_TORCH_ON:
-			RedstoneTorch redtorch = (RedstoneTorch)attached.getState().getData();
-			return attached.getRelative(redtorch.getAttachedFace()).equals(block);
+			RedstoneTorch redtorch = (RedstoneTorch)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(redtorch.getAttachedFace()).equals(toThisBlock);
 		case TORCH:
-			Torch torch = (Torch)attached.getState().getData();
-			return attached.getRelative(torch.getAttachedFace()).equals(block);
+			Torch torch = (Torch)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(torch.getAttachedFace()).equals(toThisBlock);
 		case TRAP_DOOR:
-			TrapDoor trap = (TrapDoor)attached.getState().getData();
-			return attached.getRelative(trap.getAttachedFace()).equals(block);
+			TrapDoor trap = (TrapDoor)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(trap.getAttachedFace()).equals(toThisBlock);
 		case WALL_SIGN:
-			org.bukkit.material.Sign sign = (org.bukkit.material.Sign)attached.getState().getData();
-			return attached.getRelative(sign.getAttachedFace()).equals(block);
+			org.bukkit.material.Sign sign = (org.bukkit.material.Sign)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(sign.getAttachedFace()).equals(toThisBlock);
 		case STONE_BUTTON:
 		case WOOD_BUTTON:
-			Button button = (Button)attached.getState().getData();
-			return attached.getRelative(button.getAttachedFace()).equals(block);
+			Button button = (Button)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(button.getAttachedFace()).equals(toThisBlock);
 		default:
 			return false;
 		}
