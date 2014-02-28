@@ -28,7 +28,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs) {
 		super(plugin);
-		(this.command = super.getPlugin().getCommand(command)).setExecutor(this);
+		(this.command = this.getPlugin().getCommand(command)).setExecutor(this);
 		this.setRequireArgs(requireArgs);
 	}
 
@@ -71,8 +71,8 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	@Override
 	public boolean hasPermissions(CommandSender sender, String... permissions) {
-		boolean hasPerms = super.hasPermissions(sender, permissions);
-		if (!hasPerms) super.getLog().noPerms(sender, permissions);
+		boolean hasPerms = this.hasPermissions(sender, permissions);
+		if (!hasPerms) this.getLog().noPerms(sender, permissions);
 		return hasPerms;
 	}
 
@@ -89,7 +89,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (!this.storeArgs(sender, args)) {
-			super.getLog().error(sender, "Processing previous request. Try again in a few seconds.");
+			this.getLog().error(sender, "Processing previous request. Try again in a few seconds.");
 			return true;
 		}
 
@@ -99,7 +99,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			try {
 				this.command(sender, args);
 			} catch (Exception ex) {
-				super.getLog().console(ex);
+				this.getLog().console(ex);
 			}
 		}
 
@@ -147,7 +147,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			}
 		}
 
-		super.getLog().message(sender, super.getLog().getPrefix("Usage") + " " + usage);
+		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
 	}
 
 }

@@ -4,6 +4,8 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 import org.bukkit.ChatColor;
@@ -59,7 +61,7 @@ public class ImageMessage {
 		for (int y = 0; y < lines.length; y++) {
 			if (text.length > y) {
 				int len = ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH - lines[y].length();
-				lines[y] = lines[y] + center(text[y], len);
+				lines[y] += center(text[y], len);
 			} else
 				return this;
 		}
@@ -84,18 +86,30 @@ public class ImageMessage {
 
 	private String[] toImgMessage(ChatColor[][] colors, char imgchar) {
 		String[] lines = new String[colors[0].length];
+
 		for (int y = 0; y < colors[0].length; y++) {
-			String line = "";
+			StringBuilder line = new StringBuilder();
 
-			for (int x = 0; x < colors.length; x++)
-				line += colors[x][y].toString() + imgchar;
+			for (int x = 0; x < colors.length; x++) {
+				ChatColor color = colors[x][y];
+				line.append(color != null ? color.toString() + imgchar : ' ');
+			}
 
-			lines[y] = line + ChatColor.RESET;
+			lines[y] = line.append(ChatColor.RESET).toString();
 		}
+
 		return lines;
 	}
 
 	private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
+		AffineTransform af = new AffineTransform();
+		af.scale(width / (double)originalImage.getWidth(), height / (double)originalImage.getHeight());
+		AffineTransformOp operation = new AffineTransformOp(af, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		return operation.filter(originalImage, null);
+	}
+
+	@SuppressWarnings("unused")
+	private BufferedImage resizeImageOriginal(BufferedImage originalImage, int width, int height) {
 		BufferedImage resizedImage = new BufferedImage(width, height, 6);
 		Graphics2D g = resizedImage.createGraphics();
 		g.drawImage(originalImage, 0, 0, width, height, null);
@@ -104,6 +118,7 @@ public class ImageMessage {
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 		return resizedImage;
 	}
 
@@ -126,7 +141,7 @@ public class ImageMessage {
 	}
 
 	private ChatColor getClosestChatColor(Color color) {
-		if (color.getAlpha() < 128) return ChatColor.BLACK;
+		if (color.getAlpha() < 128) return null;
 		int index = 0;
 		double best = -1;
 

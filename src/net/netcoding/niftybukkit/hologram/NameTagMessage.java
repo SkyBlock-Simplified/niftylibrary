@@ -12,27 +12,22 @@ public class NameTagMessage extends ImageMessage {
 
 	private NameTagSpawner spawner;
 	private Location location;
-
 	private double lineSpacing = 0.25d;
 
 	public NameTagMessage(BufferedImage image, int height, char imgChar) {
 		super(image, height, imgChar);
-		initialize(height);
+		this.spawner = new NameTagSpawner(height);
 	}
 
 	public NameTagMessage(ChatColor[][] chatColors, char imgChar) {
 		super(chatColors, imgChar);
 		this.location = Preconditions.checkNotNull(location, "location cannot be NULL");
-		initialize(chatColors.length);
+		this.spawner = new NameTagSpawner(chatColors.length);
 	}
 
 	public NameTagMessage(String... imgLines) {
 		super(imgLines);
-		initialize(imgLines.length);
-	}
-
-	private void initialize(int height) {
-		this.spawner = new NameTagSpawner(height);
+		this.spawner = new NameTagSpawner(imgLines.length);
 	}
 
 	@Override

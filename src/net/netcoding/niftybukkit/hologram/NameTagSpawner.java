@@ -15,14 +15,14 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
  */
 public class NameTagSpawner {
 
+	private static final int SHARED_ENTITY_ID = Short.MAX_VALUE;
 	private static final int WITHER_SKULL = 66;
 
 	// Shared entity ID allocator
-	private static int SHARED_ENTITY_ID = Short.MAX_VALUE;
 
 	// The starting entity ID
-	private int startEntityId;
-	private int nameTagCount;
+	//private int startEntityId;
+	//private int nameTagCount;
 
 	/**
 	 * Construct a new name tag spawner.
@@ -31,11 +31,11 @@ public class NameTagSpawner {
 	 * @param nameTags - the maximum number of name tags we will spawn at any given time.
 	 */
 	public NameTagSpawner(int nameTagCount) {
-		this.startEntityId = SHARED_ENTITY_ID;
-		this.nameTagCount = nameTagCount;
+		//this.startEntityId = SHARED_ENTITY_ID;
+		//this.nameTagCount = nameTagCount;
 
 		// We need to reserve two entity IDs per name tag
-		SHARED_ENTITY_ID += nameTagCount * 2;
+		//SHARED_ENTITY_ID += nameTagCount * 2;
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class NameTagSpawner {
 	 * @return The maximum number.
 	 */
 	public int getNameTagCount() {
-		return nameTagCount;
+		return 0;
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class NameTagSpawner {
 	// Construct the invisible horse packet
 	private WrapperPlayServerSpawnEntityLiving createHorsePacket(int index, Location location, double dY, String message) {
 		WrapperPlayServerSpawnEntityLiving horse = new WrapperPlayServerSpawnEntityLiving();
-		horse.setEntityID(startEntityId + index * 2);
+		horse.setEntityID(SHARED_ENTITY_ID + index * 2);
 		horse.setType(EntityType.HORSE);
 		horse.setX(location.getX());
 		horse.setY(location.getY() + dY + 55);
@@ -88,7 +88,7 @@ public class NameTagSpawner {
 	// Construct the wither skull packet
 	private WrapperPlayServerSpawnEntity createSkullPacket(int index, Location location, double dY) {
 		WrapperPlayServerSpawnEntity skull = new WrapperPlayServerSpawnEntity();
-		skull.setEntityID(startEntityId + index * 2 + 1);
+		skull.setEntityID(SHARED_ENTITY_ID + index * 2 + 1);
 		skull.setType(WITHER_SKULL);
 		skull.setX(location.getX());
 		skull.setY(location.getY() + dY + 55);

@@ -7,7 +7,7 @@ public abstract class BukkitListener extends BukkitHelper implements Listener {
 
 	public BukkitListener(JavaPlugin plugin) {
 		super(plugin);
-		super.getPlugin().getServer().getPluginManager().registerEvents(this, super.getPlugin());
+		this.getPlugin().getServer().getPluginManager().registerEvents(this, this.getPlugin());
 	}
 
 }

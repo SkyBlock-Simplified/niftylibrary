@@ -17,7 +17,7 @@ class SignEvent extends Event implements Cancellable {
 	private final transient Action action;
 	private transient boolean cancelled = false;
 
-	public SignEvent(Player player, Sign sign, Action action) {
+	SignEvent(Player player, Sign sign, Action action) {
 		this.player = player;
 		this.sign = sign;
 		this.action = action;
@@ -71,6 +71,10 @@ class SignEvent extends Event implements Cancellable {
 	@Override
 	public boolean isCancelled() {
 		return this.cancelled;
+	}
+
+	public void setCancelled() {
+		this.setCancelled(true);
 	}
 
 	@Override

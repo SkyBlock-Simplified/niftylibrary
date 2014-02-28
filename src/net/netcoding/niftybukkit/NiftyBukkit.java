@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit;
 
+import java.lang.reflect.Field;
+
 import net.netcoding.niftybukkit.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
@@ -11,10 +13,26 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@SuppressWarnings("rawtypes")
 public class NiftyBukkit extends JavaPlugin implements Listener {
 
 	private static transient JavaPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
+	private static final transient String bukkitPath;
+	private static final transient String minecraftPath;
+
+	static {
+		Class craftServer = Bukkit.getServer().getClass();
+		bukkitPath = craftServer.getPackage().getName();
+		String mcPath = "";
+
+		try {
+			Field mcServer = craftServer.getDeclaredField("console");
+			mcPath = mcServer.getType().getPackage().getName();
+		} catch (Exception ex) { }
+		
+		minecraftPath = mcPath;
+	}
 
 	@Override
 	public void onEnable() {
@@ -31,8 +49,16 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 	}
 
+	public static String getBukkitPackage() {
+		return bukkitPath;
+	}
+
 	public static ItemDatabase getItemDatabase() {
 		return itemDatabase;
+	}
+
+	public static String getMinecraftPackage() {
+		return minecraftPath;
 	}
 
 	public static JavaPlugin getPlugin() {

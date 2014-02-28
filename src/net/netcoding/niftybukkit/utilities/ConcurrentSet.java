@@ -24,27 +24,19 @@ public class ConcurrentSet<T> implements Set<T> {
 			Set<T> current = this.ref.get();
 			if (current.contains(item)) return false;
 			Set<T> modified = new HashSet<T>(current);
-			modified.add( item );
-			if (this.ref.compareAndSet(current, modified)) return true;
-		}
-	}
-
-	@Override
-	public boolean remove(Object item) {
-		while (true) {
-			Set<T> current = this.ref.get();
-			if (!current.contains(item)) return false;
-			Set<T> modified = new HashSet<T>(current);
-			modified.remove(item);
+			modified.add(item);
 			if (this.ref.compareAndSet(current, modified)) return true;
 		}
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends T> collection) {
-		boolean changed = false;
-		for (T item : collection) changed = this.add(item) || changed;
-		return changed;
+		while (true) {
+			Set<T> current = this.ref.get();
+			Set<T> modified = new HashSet<T>(current);
+			modified.addAll(collection);
+			if (this.ref.compareAndSet(current, modified)) return true;
+		}
 	}
 
 	@Override
@@ -70,6 +62,17 @@ public class ConcurrentSet<T> implements Set<T> {
 	@Override
 	public Iterator<T> iterator() {
 		return this.ref.get().iterator();
+	}
+
+	@Override
+	public boolean remove(Object item) {
+		while (true) {
+			Set<T> current = this.ref.get();
+			if (!current.contains(item)) return false;
+			Set<T> modified = new HashSet<T>(current);
+			modified.remove(item);
+			if (this.ref.compareAndSet(current, modified)) return true;
+		}
 	}
 
 	@Override
