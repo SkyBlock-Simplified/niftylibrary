@@ -16,10 +16,8 @@ public class SignUpdateEvent extends SignEvent {
 
 	public void updateLine(String value) {
 		for (int i = 0; i < 4; i++) {
-			if (this.getLine(i).contains(this.key)) {
-				this.setLine(i, value);
-				break;
-			}
+			if (this.getLine(i).contains(this.key))
+				this.setLine(i, this.getLine(i).replace(this.key, value));
 		}
 	}
 

@@ -107,7 +107,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return true;
 	}
 
-	public void removeArgs(CommandSender sender, String... args) {
+	private void removeArgs(CommandSender sender, String... args) {
 		String senderName = sender.getName();
 		if (this.argCache.containsKey(senderName)) this.argCache.remove(senderName);
 	}

@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import java.util.Arrays;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
@@ -13,19 +15,19 @@ public class SignInfo {
 	public SignInfo(Sign sign) {
 		this.sign = sign;
 		this.lines = sign.getLines();
-		this.modified = sign.getLines();
+		this.modified = sign.getLines().clone();
 	}
 
 	public String getLine(int index) {
 		return this.lines[index];
 	}
 
-	public Location getLocation() {
-		return this.sign.getLocation();
-	}
-
 	public String[] getLines() {
 		return this.lines;
+	}
+
+	public Location getLocation() {
+		return this.sign.getLocation();
 	}
 
 	public String getModifiedLine(int index) {
@@ -53,7 +55,7 @@ public class SignInfo {
 	}
 
 	public boolean isModified() {
-		return !this.lines.equals(this.modified);
+		return !Arrays.equals(this.lines, this.modified);
 	}
 
 	void setLine(int index, String value) {

@@ -44,9 +44,9 @@ import com.comphenix.protocol.events.PacketEvent;
 public class SignMonitor extends BukkitListener {
 
 	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
-	private final transient ConcurrentHashMap<Location, SignInfo> signLocations = new ConcurrentHashMap<>();
-	private transient boolean listening = false;
+	private final ConcurrentHashMap<Location, SignInfo> signLocations = new ConcurrentHashMap<>();
 	private transient PacketAdapter adapter;
+	private boolean listening = false;
 
 	private static final transient List<Material> gravityItems = new ArrayList<>(
 		Arrays.asList(
@@ -103,7 +103,8 @@ public class SignMonitor extends BukkitListener {
 				throw new IllegalArgumentException("The key must not be longer then 15 characters!");
 		}
 
-		List<String> newKeys = new ArrayList<>(this.listeners.get(listener));
+		List<String> newKeys = new ArrayList<>();
+		if (this.listeners.get(listener) != null) newKeys.addAll(this.listeners.get(listener));
 		for (int i = 0; i < keys.length; i++) {
 			if (!newKeys.contains(keys[i]))
 				newKeys.add(String.format("[%s]", keys[i]));
@@ -180,18 +181,17 @@ public class SignMonitor extends BukkitListener {
 		if (this.isListening()) {
 			for (Location location : fallingSigns) {
 				if (this.signLocations.containsKey(location)) {
-					Sign sign = (Sign)location.getBlock().getState();
-					String[] lines = sign.getLines();
+					SignInfo signInfo = this.signLocations.get(location);
 
 					for (SignListener listener : this.listeners.keySet()) {
 						List<String> keys = this.listeners.get(listener);
 
-						for (String line : lines) {
+						for (String line : signInfo.getLines()) {
 							for (String key : keys) {
-								if (line.contains(key)) {
-									SignInfo signInfo = this.signLocations.get(location);
+								if (line.toLowerCase().contains(key.toLowerCase())) {
 									SignBreakEvent breakEvent = new SignBreakEvent(player, signInfo, key);
 									listener.onSignBreak(breakEvent);
+									Sign sign = (Sign)location.getBlock().getState();
 									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
 									if (breakEvent.isCancelled()) {
@@ -220,18 +220,17 @@ public class SignMonitor extends BukkitListener {
 			if (this.isListening()) {
 				if (this.signLocations.containsKey(block.getLocation())) {
 					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
-						Sign sign = (Sign)block.getState();
-						String[] lines = sign.getLines();
+						SignInfo signInfo = this.signLocations.get(block.getLocation());
 
 						for (SignListener listener : this.listeners.keySet()) {
 							List<String> keys = this.listeners.get(listener);
 
-							for (String line : lines) {
+							for (String line : signInfo.getLines()) {
 								for (String key : keys) {
-									if (line.contains(key)) {
-										SignInfo signInfo = this.signLocations.get(block.getLocation());
+									if (line.toLowerCase().contains(key.toLowerCase())) {
 										SignInteractEvent interactEvent = new SignInteractEvent(event.getPlayer(), signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
+										Sign sign = (Sign)block.getState();
 										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
 										if (interactEvent.isCancelled()) {
@@ -257,20 +256,19 @@ public class SignMonitor extends BukkitListener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onSignChange(SignChangeEvent event) {
 		Block block = event.getBlock();
-		Sign sign = (Sign)block.getState();
-		SignInfo signInfo = new SignInfo(sign);
-		for (int i = 0; i < 4; i++) sign.setLine(i, event.getLine(i));
 
 		if (this.isListening()) {
 			if (!this.signLocations.containsKey(block.getLocation())) {
+				Sign sign = (Sign)block.getState();
+				for (int i = 0; i < 4; i++) sign.setLine(i, event.getLine(i));
+				SignInfo signInfo = new SignInfo(sign);
+
 				for (SignListener listener : this.listeners.keySet()) {
 					List<String> keys = this.listeners.get(listener);
 
-					for (int i = 0; i < 4; i++) {
-						String line = sign.getLine(i);
-
+					for (String line : signInfo.getLines()) {
 						for (String key : keys) {
-							if (line.contains(key)) {
+							if (line.toLowerCase().contains(key.toLowerCase())) {
 								SignCreateEvent createEvent = new SignCreateEvent(event.getPlayer(), signInfo, key);
 								listener.onSignCreate(createEvent);
 								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
@@ -287,6 +285,10 @@ public class SignMonitor extends BukkitListener {
 				this.signLocations.put(block.getLocation(), signInfo);
 			}
 		}
+	}
+
+	public void removeListener(SignListener listener) {
+		if (listener != null) this.listeners.remove(listener);
 	}
 
 	public void sendSignUpdate() {
@@ -308,15 +310,16 @@ public class SignMonitor extends BukkitListener {
 
 					if (Material.WALL_SIGN.equals(material) || Material.SIGN_POST.equals(material)) {
 						Sign sign = (Sign)location.getBlock().getState();
+						SignInfo signInfo = this.signLocations.get(sign.getLocation());
 
-						for (String line : sign.getLines()) {
-							if ("".equals(key) || line.contains(key)) {
+						for (String line : signInfo.getLines()) {
+							if ("".equals(key) || line.toLowerCase().contains(key.toLowerCase())) {
 								PacketContainer result = NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN);
 								Integer[] coords = new Integer[] { sign.getX(), sign.getY(), sign.getZ() };
 
 								try {
 									for (int i = 0; i < 3; i++) result.getSpecificModifier(int.class).write(i, coords[i]);
-									result.getStringArrays().write(0, sign.getLines());
+									result.getStringArrays().write(0, signInfo.getLines());
 									NiftyBukkit.getProtocolManager().sendServerPacket(player, result);
 								} catch (Exception ex) {
 									ex.printStackTrace();
@@ -347,22 +350,22 @@ public class SignMonitor extends BukkitListener {
 
 					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
 						Sign sign = (Sign)block.getState();
+						SignInfo signInfo = signLocations.get(location);
+						if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
 
 						for (SignListener listener : listeners.keySet()) {
 							List<String> keys = listeners.get(listener);
 
 							for (int i = 0; i < 4; i++) {
-								String line = sign.getLine(i);
+								String line = signInfo.getLine(i);
 
 								for (String key : keys) {
-									if (line.contains(key)) {
-										SignInfo signInfo = signLocations.get(location);
-										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
+									if (line.toLowerCase().contains(key.toLowerCase())) {
 										SignUpdateEvent updateEvent = new SignUpdateEvent(player, signInfo, key);
 										listener.onSignUpdate(updateEvent);
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
-											String[] changed = updateEvent.getLines();
+											String[] changed = updateEvent.getModifiedLines();
 
 											for (int j = 0; j < changed.length; j++) {
 												if (changed[i].length() > 15) {

@@ -50,7 +50,11 @@ abstract class SignEvent extends Event implements Cancellable {
 	}
 
 	public String getKey() {
-		return this.key;
+		return this.key.replaceAll("[\\[\\]]", "");
+	}
+
+	public String getModifiedLine(int index) {
+		return this.signInfo.getModifiedLine(index);
 	}
 
 	public String[] getModifiedLines() {
