@@ -6,8 +6,8 @@ import org.bukkit.event.block.Action;
 
 public class SignBreakEvent extends SignEvent {
 
-	public SignBreakEvent(Player player, Sign sign) {
-		super(player, sign, Action.LEFT_CLICK_BLOCK);
+	public SignBreakEvent(Player player, Sign sign, String key) {
+		super(player, sign, Action.LEFT_CLICK_BLOCK, key);
 	}
 
 }

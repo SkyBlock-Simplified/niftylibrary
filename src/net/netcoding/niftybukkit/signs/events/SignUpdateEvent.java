@@ -7,15 +7,15 @@ import org.bukkit.event.block.Action;
 public class SignUpdateEvent extends SignEvent {
 
 	private String[] lines;
+	private String[] modifiedLines;
 	private boolean modified = false;
-	private final String key;
 	private final int index;
 
 	public SignUpdateEvent(Player player, Sign sign, int index, String key) {
-		super(player, sign, Action.PHYSICAL);
+		super(player, sign, Action.PHYSICAL, key);
 		this.lines = sign.getLines();
+		this.modifiedLines = this.lines;
 		this.index = index;
-		this.key = key;
 	}
 
 	@Override
@@ -23,13 +23,13 @@ public class SignUpdateEvent extends SignEvent {
 		return this.lines[index];
 	}
 
-	@Override
-	public String[] getLines() {
-		return this.lines;
+	public String getModifiedLine(int index) {
+		return this.modifiedLines[index];
 	}
 
-	public String getKey() {
-		return this.key.replaceAll("[\\[\\]]", "");
+	@Override
+	public String[] getLines() {
+		return this.isModified() ? this.modifiedLines : this.lines;
 	}
 
 	public boolean isModified() {
@@ -39,7 +39,7 @@ public class SignUpdateEvent extends SignEvent {
 	public void setLine(int index, String value) throws IndexOutOfBoundsException {
 		if ("".equals(value)) value = "";
 		this.modified = true;
-		this.lines[index] = value;
+		this.modifiedLines[index] = value;
 	}
 
 	public void replaceKey(String value) {
@@ -47,7 +47,7 @@ public class SignUpdateEvent extends SignEvent {
 		if ("".equals(current)) current = "";
 		if ("".equals(value)) value = "";
 		this.modified = true;
-		this.setLine(this.index, current.replace(this.key, value));
+		this.setLine(this.index, current.replace(this.getKey(), value));
 	}
 
 }

@@ -15,12 +15,14 @@ class SignEvent extends Event implements Cancellable {
 	private final transient Player player;
 	private final transient Sign sign;
 	private final transient Action action;
-	private transient boolean cancelled = false;
+	private final String key;
+	private boolean cancelled = false;
 
-	SignEvent(Player player, Sign sign, Action action) {
+	SignEvent(Player player, Sign sign, Action action, String key) {
 		this.player = player;
 		this.sign = sign;
 		this.action = action;
+		this.key = key;
 	}
 
 	public static HandlerList getHandlerList() {
@@ -46,6 +48,10 @@ class SignEvent extends Event implements Cancellable {
 
 	public Location getLocation() {
 		return this.sign.getLocation();
+	}
+
+	public String getKey() {
+		return this.key.replaceAll("[\\[\\]]", "");
 	}
 
 	public Player getPlayer() {

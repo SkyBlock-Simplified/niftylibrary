@@ -6,8 +6,8 @@ import org.bukkit.event.block.Action;
 
 public class SignInteractEvent extends SignEvent {
 
-	public SignInteractEvent(Player player, Sign sign, Action action) {
-		super(player, sign, action);
+	public SignInteractEvent(Player player, Sign sign, Action action, String key) {
+		super(player, sign, action, key);
 	}
 
 }
