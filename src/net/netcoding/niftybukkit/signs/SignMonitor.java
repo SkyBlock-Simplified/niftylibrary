@@ -82,15 +82,34 @@ public class SignMonitor extends BukkitListener {
 		super(plugin);
 	}
 
-	public void addListener(SignListener listener, String key) {
+	/*public void addListener(SignListener listener, String key) {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
 		if ("".equals(key)) throw new IllegalArgumentException("You cannot listen to signs without a key!");
 		if (key.length() > 15) throw new IllegalArgumentException("The key must not be longer then 15 characters!");
 
+		List<String> newKeys = new ArrayList<>(this.listeners.get(listener));
 		if (this.listeners.get(listener) != null)
 			this.listeners.get(listener).add(key);
 		else
 			this.listeners.put(listener, new ArrayList<>(Arrays.asList(String.format("[%s]", key))));
+	}*/
+
+	public void addListener(SignListener listener, String... keys) {
+		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
+		if ("".equals(keys) || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
+
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].length() > 15)
+				throw new IllegalArgumentException("The key must not be longer then 15 characters!");
+		}
+
+		List<String> newKeys = new ArrayList<>(this.listeners.get(listener));
+		for (int i = 0; i < keys.length; i++) {
+			if (!newKeys.contains(keys[i]))
+				newKeys.add(String.format("[%s]", keys[i]));
+		}
+
+		this.listeners.put(listener, newKeys);
 	}
 
 	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
