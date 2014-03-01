@@ -28,6 +28,10 @@ public class SignInfo {
 		return this.lines;
 	}
 
+	public String getModifiedLine(int index) {
+		return this.modified[index];
+	}
+
 	public String[] getModifiedLines() {
 		return this.modified;
 	}

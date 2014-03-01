@@ -173,6 +173,7 @@ public class SignMonitor extends BukkitListener {
 									SignInfo signInfo = this.signLocations.get(location);
 									SignBreakEvent breakEvent = new SignBreakEvent(player, signInfo, key);
 									listener.onSignBreak(breakEvent);
+									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
 									if (breakEvent.isCancelled()) {
 										event.setCancelled(true);
@@ -212,6 +213,7 @@ public class SignMonitor extends BukkitListener {
 										SignInfo signInfo = this.signLocations.get(block.getLocation());
 										SignInteractEvent interactEvent = new SignInteractEvent(event.getPlayer(), signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
+										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
 										if (interactEvent.isCancelled()) {
 											event.setCancelled(true);
@@ -252,6 +254,7 @@ public class SignMonitor extends BukkitListener {
 							if (line.contains(key)) {
 								SignCreateEvent createEvent = new SignCreateEvent(event.getPlayer(), signInfo, key);
 								listener.onSignCreate(createEvent);
+								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
 								if (createEvent.isCancelled()) {
 									event.setCancelled(true);
