@@ -124,7 +124,7 @@ public abstract class FakeInventoryFrame extends BukkitHelper {
 	}
 
 	public void setTotalSlots(int totalSlots) {
-		this.totalSlots = totalSlots >= 9 ? (totalSlots % 9 == 0 ? totalSlots : (Math.round(totalSlots / 9) * 9)) : 9;
+		this.totalSlots = totalSlots >= 9 ? (totalSlots % 9 == 0 ? totalSlots : ((int)Math.ceil(totalSlots / 9) * 9)) : 9;
 	}
 
 }
