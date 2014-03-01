@@ -25,7 +25,7 @@ public abstract class BukkitTabCommand extends BukkitCommand implements TabExecu
 	@Override
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-		if (this.hasPermissions(sender, super.getCommand().getPermission()))
+		if (this.hasPermissions(sender, this.getCommand().getPermission()))
 			return this.tabComplete(sender, args);
 		else
 			return Collections.emptyList();

@@ -271,7 +271,7 @@ public class SignMonitor extends BukkitListener {
 	}
 
 	public void sendSignUpdate() {
-		for (Player player : super.getPlugin().getServer().getOnlinePlayers())
+		for (Player player : this.getPlugin().getServer().getOnlinePlayers())
 			this.sendSignUpdate(player, "");
 	}
 
@@ -317,7 +317,7 @@ public class SignMonitor extends BukkitListener {
 		if (!this.isListening()) {
 			this.listening = true;
 
-			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(super.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
+			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
 				@Override
 				public void onPacketSending(PacketEvent event) {
 					PacketContainer signUpdatePacket = event.getPacket();

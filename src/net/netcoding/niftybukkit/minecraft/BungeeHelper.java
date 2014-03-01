@@ -334,7 +334,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					this.listener.onMessageReceived(subChannel, player, message);
 			}
 		} catch (Exception ex) {
-			super.getLog().console(ex);
+			this.getLog().console(ex);
 		}
 
 	}

@@ -196,7 +196,7 @@ public class ItemDatabase extends BukkitHelper {
 			if (this.itemsFile.exists())
 				reader = new BufferedReader(new FileReader(this.itemsFile));
 			else
-				reader = new BufferedReader(new InputStreamReader(super.getPlugin().getResource(this.itemsFile.getName())));
+				reader = new BufferedReader(new InputStreamReader(this.getPlugin().getResource(this.itemsFile.getName())));
 
 			try {
 				final List<String> lines = new ArrayList<String>();
@@ -211,7 +211,7 @@ public class ItemDatabase extends BukkitHelper {
 				reader.close();
 			}
 		} catch (IOException ex) {
-			super.getLog().console(ex);
+			this.getLog().console(ex);
 			return Collections.emptyList();
 		}
 	}

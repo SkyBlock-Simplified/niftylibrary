@@ -40,7 +40,7 @@ public class GhostBusters extends BukkitHelper {
 	}
 
 	private BukkitTask createTask() {
-		return Bukkit.getScheduler().runTaskTimerAsynchronously(super.getPlugin(), new Runnable() {
+		return Bukkit.getScheduler().runTaskTimerAsynchronously(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
 				for (OfflinePlayer member : getMembers()) {

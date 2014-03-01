@@ -37,7 +37,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		super(plugin, autoCancel);
 		opened.put(this.getUUID(), new ConcurrentSet<String>());
 		this.listener = listener;
-		super.getPlugin().getServer().getPluginManager().registerEvents(this, this.getPlugin());
+		this.getPlugin().getServer().getPluginManager().registerEvents(this, this.getPlugin());
 	}
 
 	public void close(Player player) {
