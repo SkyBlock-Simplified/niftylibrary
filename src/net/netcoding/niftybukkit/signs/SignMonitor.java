@@ -350,17 +350,17 @@ public class SignMonitor extends BukkitListener {
 
 					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
 						Sign sign = (Sign)block.getState();
-						SignInfo signInfo = signLocations.get(location);
-						if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
 
 						for (SignListener listener : listeners.keySet()) {
 							List<String> keys = listeners.get(listener);
 
 							for (int i = 0; i < 4; i++) {
-								String line = signInfo.getLine(i);
+								String line = sign.getLine(i);
 
 								for (String key : keys) {
 									if (line.toLowerCase().contains(key.toLowerCase())) {
+										SignInfo signInfo = signLocations.get(location);
+										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
 										SignUpdateEvent updateEvent = new SignUpdateEvent(player, signInfo, key);
 										listener.onSignUpdate(updateEvent);
 
