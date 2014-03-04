@@ -126,9 +126,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public int getPlayerCount(String serverName) {
 		if (this.isOnline()) {
-			if (serverName.equalsIgnoreCase("CURRENT") && this.getServer() != null)
-				return this.getServer().getPlayerCount();
-			else if (serverName.equalsIgnoreCase("ALL")) {
+			if (serverName.equalsIgnoreCase("ALL")) {
 				int playerCount = 0;
 
 				for (BukkitServer server : serverList.values())
@@ -157,9 +155,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public List<String> getPlayerList(String serverName) {
 		if (this.isOnline()) {
-			if (serverName.equalsIgnoreCase("CURRENT") && this.getServer() != null)
-				return this.getServer().getPlayerList();
-			else if (serverName.equalsIgnoreCase("ALL")) {
+			if (serverName.equalsIgnoreCase("ALL")) {
 				List<String> playerNames = new ArrayList<>();
 
 				for (BukkitServer server : serverList.values())
@@ -338,7 +334,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					this.listener.onMessageReceived(subChannel, player, message);
 			}
 		} catch (Exception ex) {
-			super.getLog().console(ex);
+			this.getLog().console(ex);
 		}
 
 	}

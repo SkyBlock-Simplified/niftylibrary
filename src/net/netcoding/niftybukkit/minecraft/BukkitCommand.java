@@ -71,7 +71,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	@Override
 	public boolean hasPermissions(CommandSender sender, String... permissions) {
-		boolean hasPerms = this.hasPermissions(sender, permissions);
+		boolean hasPerms = super.hasPermissions(sender, permissions);
 		if (!hasPerms) this.getLog().noPerms(sender, permissions);
 		return hasPerms;
 	}
@@ -107,7 +107,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return true;
 	}
 
-	public void removeArgs(CommandSender sender, String... args) {
+	private void removeArgs(CommandSender sender, String... args) {
 		String senderName = sender.getName();
 		if (this.argCache.containsKey(senderName)) this.argCache.remove(senderName);
 	}
