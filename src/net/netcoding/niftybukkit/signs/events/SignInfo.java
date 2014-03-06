@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
 public class SignInfo {
@@ -16,6 +17,10 @@ public class SignInfo {
 		this.sign = sign;
 		this.lines = sign.getLines();
 		this.modified = sign.getLines().clone();
+	}
+
+	public Block getBlock() {
+		return this.sign.getBlock();
 	}
 
 	public String getLine(int index) {

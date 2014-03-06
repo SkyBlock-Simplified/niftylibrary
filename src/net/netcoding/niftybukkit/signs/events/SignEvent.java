@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.signs.events;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -35,6 +36,10 @@ abstract class SignEvent extends Event implements Cancellable {
 	@Override
 	public HandlerList getHandlers() {
 		return handlers;
+	}
+
+	public Block getBlock() {
+		return this.signInfo.getBlock();
 	}
 
 	public String getLine(int index) {
