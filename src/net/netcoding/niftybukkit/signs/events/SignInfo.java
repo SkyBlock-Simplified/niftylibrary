@@ -60,6 +60,7 @@ public class SignInfo {
 
 	void setLine(int index, String value) {
 		if ("".equals(value)) value = "";
+		if (value.length() > 15) value = value.substring(0, 15);
 		this.modified[index] = value;
 	}
 
