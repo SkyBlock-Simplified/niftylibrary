@@ -47,7 +47,7 @@ public class SignMonitor extends BukkitListener {
 	private transient PacketAdapter adapter;
 	private boolean listening = false;
 
-	private static final transient List<Material> attachableItems = new ArrayList<>(
+	private static final transient List<Material> ATTACHABLE_ITEMS = new ArrayList<>(
 		Arrays.asList(
 			Material.LADDER, Material.LEVER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
 			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
@@ -55,7 +55,7 @@ public class SignMonitor extends BukkitListener {
 		)
 	);
 
-	private static final transient List<Material> gravityItems = new ArrayList<>(
+	private static final transient List<Material> GRAVITY_ITEMS = new ArrayList<>(
 		Arrays.asList(
 			Material.ANVIL, Material.CARPET, Material.DIODE, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
 			Material.DRAGON_EGG, Material.GRAVEL, Material.GOLD_PLATE, Material.IRON_PLATE, Material.LEVER,
@@ -66,14 +66,14 @@ public class SignMonitor extends BukkitListener {
 		)
 	);
 
-	private static final transient List<BlockFace> relativeDirections = new ArrayList<>(
+	private static final transient List<BlockFace> RELATIVE_DIRECTIONS = new ArrayList<>(
 		Arrays.asList(
 			BlockFace.NORTH, BlockFace.EAST,
 			BlockFace.SOUTH, BlockFace.WEST
 		)
 	);
 
-	private static final transient List<Material> signItems = new ArrayList<>(
+	private static final transient List<Material> SIGN_ITEMS = new ArrayList<>(
 		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
 	);
 
@@ -102,25 +102,25 @@ public class SignMonitor extends BukkitListener {
 
 	public static Set<Location> getSignsThatWouldFall(Block block) {
 		Set<Location> locations = new HashSet<>();
-		if (signItems.contains(block.getType())) locations.add(block.getLocation());
+		if (SIGN_ITEMS.contains(block.getType())) locations.add(block.getLocation());
 
-		for (BlockFace direction : relativeDirections) {
+		for (BlockFace direction : RELATIVE_DIRECTIONS) {
 			Block sideBlock = block.getRelative(direction);
 			Material sideMaterial = sideBlock.getType();
 
-			if (attachableItems.contains(sideMaterial)) {
+			if (ATTACHABLE_ITEMS.contains(sideMaterial)) {
 				if (isAttachedTo(sideBlock, block)) {
-					if (signItems.contains(sideMaterial)) locations.add(sideBlock.getLocation());
+					if (SIGN_ITEMS.contains(sideMaterial)) locations.add(sideBlock.getLocation());
 					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
 
-					if (gravityItems.contains(sideUpBlock.getType()))
+					if (GRAVITY_ITEMS.contains(sideUpBlock.getType()))
 						locations.addAll(getSignsThatWouldFall(sideUpBlock));
 				}
 			}
 		}
 
 		Block upBlock = block.getRelative(BlockFace.UP);
-		if (gravityItems.contains(upBlock.getType()))
+		if (GRAVITY_ITEMS.contains(upBlock.getType()))
 			locations.addAll(getSignsThatWouldFall(upBlock));
 
 		return locations;
@@ -206,7 +206,7 @@ public class SignMonitor extends BukkitListener {
 
 			if (this.isListening()) {
 				if (this.signLocations.containsKey(block.getLocation())) {
-					if (signItems.contains(block.getType())) {
+					if (SIGN_ITEMS.contains(block.getType())) {
 						SignInfo signInfo = this.signLocations.get(block.getLocation());
 
 						for (SignListener listener : this.listeners.keySet()) {
@@ -295,7 +295,7 @@ public class SignMonitor extends BukkitListener {
 				if (player.getLocation().distance(location) < 16) {
 					Material material = location.getBlock().getType();
 
-					if (signItems.contains(material)) {
+					if (SIGN_ITEMS.contains(material)) {
 						Sign sign = (Sign)location.getBlock().getState();
 						SignInfo signInfo = this.signLocations.get(sign.getLocation());
 
@@ -335,7 +335,7 @@ public class SignMonitor extends BukkitListener {
 					Location location = new Location(player.getWorld(), incoming.getX(), incoming.getY(), incoming.getZ());
 					Block block = location.getBlock();
 
-					if (signItems.contains(block.getType())) {
+					if (SIGN_ITEMS.contains(block.getType())) {
 						Sign sign = (Sign)block.getState();
 
 						for (SignListener listener : listeners.keySet()) {
