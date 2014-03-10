@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.utilities;
+package net.netcoding.niftybukkit.util;
 
 import java.util.Comparator;
 

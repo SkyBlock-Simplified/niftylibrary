@@ -15,8 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftybukkit.utilities.LengthCompare;
-import net.netcoding.niftybukkit.utilities.NumberUtil;
+import net.netcoding.niftybukkit.util.LengthCompare;
+import net.netcoding.niftybukkit.util.NumberUtil;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

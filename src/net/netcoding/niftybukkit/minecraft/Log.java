@@ -3,8 +3,8 @@ package net.netcoding.niftybukkit.minecraft;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.netcoding.niftybukkit.utilities.RegexUtil;
-import net.netcoding.niftybukkit.utilities.StringUtil;
+import net.netcoding.niftybukkit.util.RegexUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

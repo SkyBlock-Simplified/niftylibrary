@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftybukkit.utilities.ConcurrentSet;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
