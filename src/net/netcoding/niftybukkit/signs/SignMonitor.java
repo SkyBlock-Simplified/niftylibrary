@@ -12,7 +12,6 @@ import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
-import net.netcoding.niftybukkit.signs.events.SignInfo;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 

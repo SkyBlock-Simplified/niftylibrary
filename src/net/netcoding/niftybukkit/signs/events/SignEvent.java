@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.signs.SignInfo;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;

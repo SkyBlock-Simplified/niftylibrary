@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.signs.events;
+package net.netcoding.niftybukkit.signs;
 
 import java.util.Arrays;
 
@@ -63,7 +63,7 @@ public class SignInfo {
 		return !Arrays.equals(this.lines, this.modified);
 	}
 
-	void setLine(int index, String value) {
+	public void setLine(int index, String value) {
 		if ("".equals(value)) value = "";
 		if (value.length() > 15) value = value.substring(0, 15);
 		this.modified[index] = value;
