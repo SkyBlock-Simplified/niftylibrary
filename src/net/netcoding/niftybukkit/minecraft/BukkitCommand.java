@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.netcoding.niftybukkit.utilities.StringUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.signs.SignInfo;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 

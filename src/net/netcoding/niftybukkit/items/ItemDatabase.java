@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftybukkit.utilities.LengthCompare;
-import net.netcoding.niftybukkit.utilities.NumberUtil;
+import net.netcoding.niftybukkit.util.LengthCompare;
+import net.netcoding.niftybukkit.util.NumberUtil;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -246,15 +247,12 @@ public class ItemDatabase extends BukkitHelper {
 			this.items.put(itemName, numeric);
 			ItemData itemData = new ItemData(numeric, data);
 
-			if (this.names.containsKey(itemData)) {
-				List<String> nameList = this.names.get(itemData);
-				nameList.add(itemName);
-				Collections.sort(nameList, compare);
-			} else {
-				List<String> nameList = new ArrayList<String>();
-				nameList.add(itemName);
-				this.names.put(itemData, nameList);
+			if (!this.names.containsKey(itemData)) {
+				this.names.put(itemData, new ArrayList<String>(Arrays.asList(itemName)));
 				this.primaryName.put(itemData, itemName);
+			} else {
+				this.names.get(itemData).add(itemName);
+				Collections.sort(this.names.get(itemData), compare);
 			}
 		}
 	}

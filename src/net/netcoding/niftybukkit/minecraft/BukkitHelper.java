@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit.minecraft;
 
 import java.util.List;
 
-import net.netcoding.niftybukkit.utilities.StringUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

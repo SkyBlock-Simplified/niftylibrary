@@ -10,7 +10,7 @@ import java.util.Set;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
-import net.netcoding.niftybukkit.utilities.CIHashMap;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentIHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -30,7 +30,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	public static final transient String BUNGEE_CHANNEL = "BungeeCord";
 	private static transient boolean bungeeOnline = false;
 	private static transient boolean loadedOnce = false;
-	private static final transient CIHashMap<BukkitServer> serverList = new CIHashMap<>();
+	private static final transient ConcurrentIHashMap<BukkitServer> serverList = new ConcurrentIHashMap<>();
 	private transient BungeeListener listener;
 
 	static {

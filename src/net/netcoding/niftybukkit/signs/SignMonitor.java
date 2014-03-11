@@ -12,7 +12,6 @@ import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
-import net.netcoding.niftybukkit.signs.events.SignInfo;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 
@@ -48,7 +47,15 @@ public class SignMonitor extends BukkitListener {
 	private transient PacketAdapter adapter;
 	private boolean listening = false;
 
-	private static final transient List<Material> gravityItems = new ArrayList<>(
+	private static final transient List<Material> ATTACHABLE_ITEMS = new ArrayList<>(
+		Arrays.asList(
+			Material.LADDER, Material.LEVER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
+			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
+			Material.WOOD_BUTTON
+		)
+	);
+
+	private static final transient List<Material> GRAVITY_ITEMS = new ArrayList<>(
 		Arrays.asList(
 			Material.ANVIL, Material.CARPET, Material.DIODE, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
 			Material.DRAGON_EGG, Material.GRAVEL, Material.GOLD_PLATE, Material.IRON_PLATE, Material.LEVER,
@@ -59,40 +66,20 @@ public class SignMonitor extends BukkitListener {
 		)
 	);
 
-	private static final transient List<Material> attachableItems = new ArrayList<>(
-		Arrays.asList(
-			Material.LADDER, Material.LEVER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
-			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
-			Material.WOOD_BUTTON
-		)
-	);
-
-	private static final transient List<Material> signItems = new ArrayList<>(
-		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
-	);
-
-	private static final transient List<BlockFace> relativeDirections = new ArrayList<>(
+	private static final transient List<BlockFace> RELATIVE_DIRECTIONS = new ArrayList<>(
 		Arrays.asList(
 			BlockFace.NORTH, BlockFace.EAST,
 			BlockFace.SOUTH, BlockFace.WEST
 		)
 	);
 
+	private static final transient List<Material> SIGN_ITEMS = new ArrayList<>(
+		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
+	);
+
 	public SignMonitor(JavaPlugin plugin) {
 		super(plugin);
 	}
-
-	/*public void addListener(SignListener listener, String key) {
-		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
-		if ("".equals(key)) throw new IllegalArgumentException("You cannot listen to signs without a key!");
-		if (key.length() > 15) throw new IllegalArgumentException("The key must not be longer then 15 characters!");
-
-		List<String> newKeys = new ArrayList<>(this.listeners.get(listener));
-		if (this.listeners.get(listener) != null)
-			this.listeners.get(listener).add(key);
-		else
-			this.listeners.put(listener, new ArrayList<>(Arrays.asList(String.format("[%s]", key))));
-	}*/
 
 	public void addListener(SignListener listener, String... keys) {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
@@ -111,6 +98,32 @@ public class SignMonitor extends BukkitListener {
 		}
 
 		this.listeners.put(listener, newKeys);
+	}
+
+	public static Set<Location> getSignsThatWouldFall(Block block) {
+		Set<Location> locations = new HashSet<>();
+		if (SIGN_ITEMS.contains(block.getType())) locations.add(block.getLocation());
+
+		for (BlockFace direction : RELATIVE_DIRECTIONS) {
+			Block sideBlock = block.getRelative(direction);
+			Material sideMaterial = sideBlock.getType();
+
+			if (ATTACHABLE_ITEMS.contains(sideMaterial)) {
+				if (isAttachedTo(sideBlock, block)) {
+					if (SIGN_ITEMS.contains(sideMaterial)) locations.add(sideBlock.getLocation());
+					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
+
+					if (GRAVITY_ITEMS.contains(sideUpBlock.getType()))
+						locations.addAll(getSignsThatWouldFall(sideUpBlock));
+				}
+			}
+		}
+
+		Block upBlock = block.getRelative(BlockFace.UP);
+		if (GRAVITY_ITEMS.contains(upBlock.getType()))
+			locations.addAll(getSignsThatWouldFall(upBlock));
+
+		return locations;
 	}
 
 	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
@@ -139,32 +152,6 @@ public class SignMonitor extends BukkitListener {
 		default:
 			return false;
 		}
-	}
-
-	public static Set<Location> getSignsThatWouldFall(Block block) {
-		Set<Location> locations = new HashSet<>();
-		if (signItems.contains(block.getType())) locations.add(block.getLocation());
-
-		for (BlockFace direction : relativeDirections) {
-			Block sideBlock = block.getRelative(direction);
-			Material sideMaterial = sideBlock.getType();
-
-			if (attachableItems.contains(sideMaterial)) {
-				if (isAttachedTo(sideBlock, block)) {
-					if (signItems.contains(sideMaterial)) locations.add(sideBlock.getLocation());
-					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
-
-					if (gravityItems.contains(sideUpBlock.getType()))
-						locations.addAll(getSignsThatWouldFall(sideUpBlock));
-				}
-			}
-		}
-
-		Block upBlock = block.getRelative(BlockFace.UP);
-		if (gravityItems.contains(upBlock.getType()))
-			locations.addAll(getSignsThatWouldFall(upBlock));
-
-		return locations;
 	}
 
 	public boolean isListening() {
@@ -219,7 +206,7 @@ public class SignMonitor extends BukkitListener {
 
 			if (this.isListening()) {
 				if (this.signLocations.containsKey(block.getLocation())) {
-					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
+					if (SIGN_ITEMS.contains(block.getType())) {
 						SignInfo signInfo = this.signLocations.get(block.getLocation());
 
 						for (SignListener listener : this.listeners.keySet()) {
@@ -308,7 +295,7 @@ public class SignMonitor extends BukkitListener {
 				if (player.getLocation().distance(location) < 16) {
 					Material material = location.getBlock().getType();
 
-					if (Material.WALL_SIGN.equals(material) || Material.SIGN_POST.equals(material)) {
+					if (SIGN_ITEMS.contains(material)) {
 						Sign sign = (Sign)location.getBlock().getState();
 						SignInfo signInfo = this.signLocations.get(sign.getLocation());
 
@@ -348,7 +335,7 @@ public class SignMonitor extends BukkitListener {
 					Location location = new Location(player.getWorld(), incoming.getX(), incoming.getY(), incoming.getZ());
 					Block block = location.getBlock();
 
-					if (Material.WALL_SIGN.equals(block.getType()) || Material.SIGN_POST.equals(block.getType())) {
+					if (SIGN_ITEMS.contains(block.getType())) {
 						Sign sign = (Sign)block.getState();
 
 						for (SignListener listener : listeners.keySet()) {
@@ -366,16 +353,6 @@ public class SignMonitor extends BukkitListener {
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
 											String[] changed = updateEvent.getModifiedLines();
-
-											for (int j = 0; j < changed.length; j++) {
-												if (changed[i].length() > 15) {
-													if (i < changed.length - 1 && changed[i + 1].isEmpty())
-														changed[i + 1] = changed[i].substring(15);
-
-													changed[i] = changed[i].substring(0, 15);
-												}
-											}
-
 											SignPacket outgoing = new SignPacket(signUpdatePacket.shallowClone());
 											outgoing.setLines(changed);
 											event.setPacket(outgoing.getPacket());
@@ -384,10 +361,8 @@ public class SignMonitor extends BukkitListener {
 								}
 							}
 						}
-					} else {
-						if (signLocations.containsKey(location))
-							signLocations.remove(location);
-					}
+					} else
+						signLocations.remove(location);
 				}
 			});
 		}

@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.netcoding.niftybukkit.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftybukkit.utilities.ConcurrentList;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

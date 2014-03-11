@@ -25,13 +25,13 @@ import net.minecraft.util.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.StatusResponse.Player;
 import net.netcoding.niftybukkit.minecraft.StatusResponse.Players;
-import net.netcoding.niftybukkit.utilities.CIHashMap;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentIHashMap;
 
 @SuppressWarnings("unused")
 public class BukkitServer {
 
 	private final transient UUID uuid = UUID.randomUUID();
-	private static final transient CIHashMap<BukkitServer> serverList = new CIHashMap<>();
+	private static final transient ConcurrentIHashMap<BukkitServer> serverList = new ConcurrentIHashMap<>();
 	private static final transient int PING_INTERVAL = 5;
 	private static final transient Gson gson = new Gson();
 	private InetSocketAddress address;

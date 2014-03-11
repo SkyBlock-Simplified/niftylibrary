@@ -1,9 +1,10 @@
-package net.netcoding.niftybukkit.signs.events;
+package net.netcoding.niftybukkit.signs;
 
 import java.util.Arrays;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
 public class SignInfo {
@@ -16,6 +17,10 @@ public class SignInfo {
 		this.sign = sign;
 		this.lines = sign.getLines();
 		this.modified = sign.getLines().clone();
+	}
+
+	public Block getBlock() {
+		return this.sign.getBlock();
 	}
 
 	public String getLine(int index) {
@@ -58,8 +63,9 @@ public class SignInfo {
 		return !Arrays.equals(this.lines, this.modified);
 	}
 
-	void setLine(int index, String value) {
+	public void setLine(int index, String value) {
 		if ("".equals(value)) value = "";
+		if (value.length() > 15) value = value.substring(0, 15);
 		this.modified[index] = value;
 	}
 

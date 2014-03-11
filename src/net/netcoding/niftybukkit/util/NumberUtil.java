@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.utilities;
+package net.netcoding.niftybukkit.util;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;

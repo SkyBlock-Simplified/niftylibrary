@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.netcoding.niftybukkit.utilities.StringUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 public class DatabaseNotification {
 

@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.utilities;
+package net.netcoding.niftybukkit.util.concurrent;
 
 import java.util.Collection;
 import java.util.HashSet;
