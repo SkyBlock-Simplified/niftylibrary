@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitTabCommand extends BukkitCommand implements TabExecutor {
 
-	// Binder
 	public BukkitTabCommand(JavaPlugin plugin, String command) {
 		super(plugin, command);
 		this.getCommand().setTabCompleter(this);
@@ -25,14 +24,14 @@ public abstract class BukkitTabCommand extends BukkitCommand implements TabExecu
 	@Override
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-		if (this.hasPermissions(sender, this.getCommand().getPermission()))
+		if ("".equals(this.getCommand().getPermission()) || this.hasPermissions(sender, this.getCommand().getPermission()))
 			return this.tabComplete(sender, args);
 		else
 			return Collections.emptyList();
 	}
 
 	protected static <T> List<T> iterableToList(Iterator<T> list) {
-		List<T> copy = new ArrayList<T>();
+		List<T> copy = new ArrayList<>();
 		while (list.hasNext()) copy.add(list.next());
 		return copy;
 	}
