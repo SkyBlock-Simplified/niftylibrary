@@ -21,19 +21,19 @@ public class DatabaseNotification {
 	private final transient List<String> primaryColumnNames = new ArrayList<String>();
 	private final transient String table;
 
-	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener) throws SQLException, Exception {
+	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener) throws SQLException {
 		this(mysql, table, event, listener, MySQL.DEFAULT_DELAY, false);
 	}
 
-	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay) throws SQLException, Exception {
+	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay) throws SQLException {
 		this(mysql, table, event, listener, delay, false);
 	}
 
-	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, boolean overwrite) throws SQLException, Exception {
+	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, boolean overwrite) throws SQLException {
 		this(mysql, table, event, listener, MySQL.DEFAULT_DELAY, overwrite);
 	}
 
-	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay, boolean overwrite) throws SQLException, Exception {
+	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay, boolean overwrite) throws SQLException {
 		createLogTable(mysql);
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
 		this.mysql    = mysql;
@@ -54,20 +54,21 @@ public class DatabaseNotification {
 		return this.stopped;
 	}
 
-	private void loadPrimaryKeys() throws SQLException, Exception {
-		this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultSetCallbackNR() {
+	private void loadPrimaryKeys() throws SQLException {
+		this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<Void>() {
 			@Override
-			public void handleResult(ResultSet result) throws SQLException, Exception {
+			public Void handle(ResultSet result) throws SQLException {
 				while (result.next()) primaryColumnNames.add(result.getString("COLUMN_NAME"));
+				return null;
 			}
 		}, this.getSchema(), this.getTable());
 	}
 
-	private static void createLogTable(MySQL mysql) throws SQLException, Exception {
+	private static void createLogTable(MySQL mysql) throws SQLException {
 		mysql.createTable(ACTIVITY_TABLE, "`id` INT AUTO_INCREMENT PRIMARY KEY, `schema` VARCHAR(255) NOT NULL, `table` VARCHAR(255) NOT NULL, `action` ENUM('insert', 'delete', 'update') NOT NULL, `time` INT NOT NULL, `keys` VARCHAR(255), `old` VARCHAR(255), `new` VARCHAR(255)");
 	}
 
-	private void createTrigger() throws SQLException, Exception {
+	private void createTrigger() throws SQLException {
 		try {
 
 			if (this.primaryColumnNames.size() > 0) {
@@ -100,30 +101,32 @@ public class DatabaseNotification {
 		return new Date(this.recent);
 	}
 
-	public HashMap<String, Object> getDeletedData() throws SQLException, Exception {
+	public HashMap<String, Object> getDeletedData() throws SQLException {
 		if (this.getEvent() != TriggerEvent.DELETE) throw new SQLException("Can only retrieve deleted information!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
-		this.mysql.query(String.format("SELECT `old` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultSetCallbackNR() {
+		this.mysql.query(String.format("SELECT `old` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
 			@Override
-			public void handleResult(ResultSet result) throws SQLException, Exception {
+			public Void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
 					String[] _old = result.getString("old").split(",");
 					int keyCount = primaryColumnNames.size();
 					for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
 				}
+
+				return null;
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toLowercase(), this.recent);
 
 		return deleted;
 	}
 
-	public void getUpdatedRow(final ResultSetCallbackNR resultSetCallback) throws SQLException, Exception {
+	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
 		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
 
-		this.mysql.query(String.format("SELECT `new` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultSetCallbackNR() {
+		this.mysql.query(String.format("SELECT `new` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
 			@Override
-			public void handleResult(ResultSet result) throws SQLException, Exception {
+			public Void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
 					List<String> whereClause = new ArrayList<String>();
 					int keyCount = primaryColumnNames.size();
@@ -131,9 +134,11 @@ public class DatabaseNotification {
 
 					if (keyCount != 0) {
 						for (int i = 0; i < keyCount; i++) whereClause.add(String.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`%s`, ',', %s), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
-						mysql.query(String.format("SELECT * FROM `%s` WHERE %s;", getTable(), StringUtil.implode(" AND ", whereClause)), resultSetCallback, (Object[])_new);
+						mysql.query(String.format("SELECT * FROM `%s` WHERE %s;", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
 					}
 				}
+
+				return null;
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toLowercase(), this.recent);
 	}
@@ -152,9 +157,9 @@ public class DatabaseNotification {
 
 	boolean query() {
 		try {
-			return (boolean)this.mysql.query(String.format("SELECT `time` FROM `%s` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC;", ACTIVITY_TABLE), new ResultSetCallback() {
+			return this.mysql.query(String.format("SELECT `time` FROM `%s` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
 				@Override
-				public Object handleResult(ResultSet result) throws SQLException, Exception {
+				public Boolean handle(ResultSet result) throws SQLException {
 					if (result.next()) {
 						int last = result.getInt("time");
 
@@ -167,7 +172,7 @@ public class DatabaseNotification {
 					return false;
 				}
 			}, this.table, this.event.toLowercase(), this.recent);
-		} catch (Exception ex) {
+		} catch (SQLException ex) {
 			ex.printStackTrace();
 			this.stop();
 		}
@@ -190,14 +195,12 @@ public class DatabaseNotification {
 
 	private boolean triggerExists() {
 		try {
-			boolean exists = (boolean)this.mysql.query("SELECT `TRIGGER_NAME` FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA` = ? AND `TRIGGER_NAME` = ?;", new ResultSetCallback() {
+			return this.mysql.query("SELECT `TRIGGER_NAME` FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA` = ? AND `TRIGGER_NAME` = ?;", new ResultCallback<Boolean>() {
 				@Override
-				public Object handleResult(ResultSet result) throws SQLException, Exception {
+				public Boolean handle(ResultSet result) throws SQLException {
 					return result.next();
 				}
 			}, this.getSchema(), this.getName());
-
-			return exists;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

@@ -4,7 +4,6 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -20,6 +19,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class MySQL implements Runnable {
 
+	private final static boolean JDBC_DRIVER_LOADED;
+	private boolean autoReconnect = false;
 	private final String username;
 	private final String schema;
 	private final String password;
@@ -28,6 +29,17 @@ public class MySQL implements Runnable {
 	static final transient int DEFAULT_DELAY = 10;
 	private final transient List<DatabaseNotification> listeners = Collections.synchronizedList(new ArrayList<DatabaseNotification>());
 	private transient BukkitTask task;
+
+	static {
+		boolean loaded = false;
+
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			loaded = true;
+		} catch (ClassNotFoundException ex) { }
+
+		JDBC_DRIVER_LOADED = loaded;
+	}
 
 	public MySQL(String host, String schema, String user, String pass) {
 		this(host, 3306, schema, user, pass);
@@ -111,36 +123,26 @@ public class MySQL implements Runnable {
 		}
 	}
 
-	public static void closeConnections(Connection connection, Statement statement, ResultSet resultset) {
-		if (resultset != null) try { resultset.close(); } catch (SQLException ex) { }
-		if (statement != null) try { statement.close(); } catch (SQLException ex) { }
-		if (connection != null) try { connection.close(); } catch (SQLException ex) { }
-	}
-
-	public boolean createTable(String name, String query) throws SQLException, Exception {
-		Connection con = null;
-		Statement st   = null;
-
-		try {
-			con = getConnection();
-			st = con.createStatement();
-			return st.executeUpdate(String.format("CREATE TABLE IF NOT EXISTS `%1$s` (%2$s);", name, query)) > 0;
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			closeConnections(con, st, null);
+	public boolean createDatabase() throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (Statement statement = connection.createStatement()) {
+				return statement.executeUpdate(String.format("CREATE SCHEMA IF NOT EXISTS `%s`;", this.getSchema())) > 0;
+			}
 		}
 	}
 
-	public Connection getConnection() throws SQLException, ClassNotFoundException, Exception {
+	public boolean createTable(String name, String query) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (Statement statement = connection.createStatement()) {
+				return statement.executeUpdate(String.format("CREATE TABLE IF NOT EXISTS `%s` (%s);", name, query)) > 0;
+			}
+		}
+	}
+
+	public Connection getConnection() throws SQLException {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			return DriverManager.getConnection(String.format("jdbc:mysql://%1$s:%2$s/%3$s?autoReconnect=true", this.hostname, this.port, this.schema), this.username, this.password);
+			return DriverManager.getConnection(this.getUrl(true) + (this.isAutoReconnect() ? "?autoReconnect=true" : ""), this.username, this.password);
 		} catch (SQLException ex) {
-			throw ex;
-		} catch (ClassNotFoundException ex) {
-			throw ex;
-		} catch (Exception ex) {
 			throw ex;
 		}
 	}
@@ -161,82 +163,38 @@ public class MySQL implements Runnable {
 		return this.schema;
 	}
 
+	public String getUrl() {
+		return this.getUrl(false);
+	}
+
+	public String getUrl(boolean includeSchema) {
+		return String.format("jdbc:mysql://%s:%s", this.getHostname(), this.getPort()) + (includeSchema ? "/" + this.getSchema() : "");
+	}
+
 	public String getUsername() {
 		return this.username;
 	}
 
-	private Object internalQuery(String sql, boolean getKeys, ResultSetCallback callback, Object... args) throws SQLException, Exception {
-		Connection connection       = null;
-		PreparedStatement statement = null;
-		ResultSet result            = null;
+	public boolean isAutoReconnect() {
+		return this.autoReconnect;
+	}
 
-		try {
-			connection = getConnection();
-			statement  = connection.prepareStatement(sql);
-			assign(statement, args);
-			statement.executeQuery();
+	public boolean isDriverAvailable() {
+		return JDBC_DRIVER_LOADED;
+	}
 
-			if (getKeys)
-				result = statement.getGeneratedKeys();
-			else
-				result = statement.getResultSet();
+	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assign(statement, args);
+				statement.executeQuery();
 
-			if (callback != null) return callback.handleResult(result);
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			closeConnections(connection, statement, result);
+				if (callback != null)
+					return callback.handle(statement.getResultSet());
+				else
+					return null;
+			}
 		}
-
-		return null;
-	}
-
-	private void internalQueryNR(String sql, boolean getKeys, ResultSetCallbackNR callback, Object... args) throws SQLException, Exception {
-		Connection connection       = null;
-		PreparedStatement statement = null;
-		ResultSet result            = null;
-
-		try {
-			connection = getConnection();
-			statement  = connection.prepareStatement(sql);
-			assign(statement, args);
-			statement.executeQuery();
-
-			if (getKeys)
-				result = statement.getGeneratedKeys();
-			else
-				result = statement.getResultSet();
-
-			if (callback != null) callback.handleResult(result);
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			closeConnections(connection, statement, result);
-		}
-	}
-
-	public Object query(String sql, ResultSetCallback callback, Object... args) throws SQLException, Exception {
-		return this.internalQuery(sql, false, callback, args);
-	}
-
-	public Object query(String sql, boolean getKeys, ResultSetCallback callback, Object... args) throws SQLException, Exception {
-		return this.internalQuery(sql, getKeys, callback, args);
-	}
-
-	public void query(String sql, Object... args) throws SQLException, Exception {
-		this.internalQueryNR(sql, false, null, args);
-	}
-
-	public void query(String sql, boolean getKeys, Object... args) throws SQLException, Exception {
-		this.internalQueryNR(sql, getKeys, null, args);
-	}
-
-	public void query(String sql, ResultSetCallbackNR callback, Object... args) throws SQLException, Exception {
-		this.internalQueryNR(sql, false, callback, args);
-	}
-
-	public void query(String sql, boolean getKeys, ResultSetCallbackNR callback, Object... args) throws SQLException, Exception {
-		this.internalQueryNR(sql, getKeys, callback, args);
 	}
 
 	public void removeListener(String table) {
@@ -263,6 +221,14 @@ public class MySQL implements Runnable {
 		}
 	}
 
+	public void setAutoReconnect() {
+		this.setAutoReconnect(true);
+	}
+
+	public void setAutoReconnect(boolean autoReconnect) {
+		this.autoReconnect = autoReconnect;
+	}
+
 	public void stopListening() {
 		this.stopListening(false);
 	}
@@ -276,31 +242,19 @@ public class MySQL implements Runnable {
 	}
 
 	public boolean testConnection() {
-		Connection connection = null;
-
-		try {
-			connection = getConnection();
+		try (Connection connection = this.getConnection()) {
 			return true;
-		} catch (Exception ex) {
+		} catch (SQLException ex) {
 			return false;
-		} finally {
-			closeConnections(connection, null, null);
 		}
 	}
 
-	public boolean update(String sql, Object... args) throws SQLException, Exception {
-		Connection connection       = null;
-		PreparedStatement statement = null;
-
-		try {
-			connection = getConnection();
-			statement  = connection.prepareStatement(sql);
-			assign(statement, args);
-			return statement.executeUpdate() > 0;
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			closeConnections(connection, statement, null);
+	public boolean update(String sql, Object... args) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assign(statement, args);
+				return statement.executeUpdate() > 0;
+			}
 		}
 	}
 
