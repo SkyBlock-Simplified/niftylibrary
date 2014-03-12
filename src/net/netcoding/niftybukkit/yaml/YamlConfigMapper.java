@@ -5,9 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -51,21 +51,17 @@ public class YamlConfigMapper extends ConfigBasic {
 			String key = entry.getKey().toString();
 			Object value = entry.getValue();
 
-			if (value instanceof Map) {
+			if (value instanceof Map)
 				convertMapsToSections((Map<?, ?>) value, section.create(key));
-			} else {
+			else
 				section.set(key, value);
-			}
 		}
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {
 		try (FileWriter fileWriter = new FileWriter(CONFIG_FILE)) {
 			if (CONFIG_HEADER != null) {
-				for (String line : CONFIG_HEADER) {
-					fileWriter.write("# " + line + "\n");
-				}
-
+				for (String line : CONFIG_HEADER) fileWriter.write("# " + line + "\n");
 				fileWriter.write("\n");
 			}
 
@@ -76,50 +72,39 @@ public class YamlConfigMapper extends ConfigBasic {
 			for (String line : yamlString.split("\n")) {
 				if (line.startsWith(new String(new char[depth]).replace("\0", " "))) {
 					keyChain.add(line.split(":")[0].trim());
-					depth = depth + 2;
+					depth += 2;
 				} else {
-					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " "))) {
+					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
-					} else {
-						//Check how much spaces are infront of the line
+					else {
 						int spaces = 0;
 						for (int i = 0; i < line.length(); i++) {
-							if (line.charAt(i) == ' ') {
+							if (line.charAt(i) == ' ')
 								spaces++;
-							} else {
+							else
 								break;
-							}
 						}
 
 						depth = spaces;
-
 						if (spaces == 0) {
 							keyChain = new ArrayList<>();
 							depth = 2;
 						} else {
 							ArrayList<String> temp = new ArrayList<>();
 							int index = 0;
-							for (int i = 0; i < spaces; i = i + 2, index++) {
+
+							for (int i = 0; i < spaces; i = i + 2, index++)
 								temp.add(keyChain.get(index));
-							}
 
 							keyChain = temp;
-
-							depth = depth + 2;
+							depth += 2;
 						}
 					}
 
 					keyChain.add(line.split(":")[0].trim());
 				}
 
-				String search;
-				if (keyChain.size() > 0) {
-					search = join(keyChain, ".");
-				} else {
-					search = "";
-				}
-
-
+				String search = (keyChain.size() > 0 ? StringUtil.implode(".", keyChain) : "");
 				if (comments.containsKey(search)) {
 					for (String comment : comments.get(search)) {
 						writeLines.append(new String(new char[depth - 2]).replace("\0", " "));
@@ -139,24 +124,9 @@ public class YamlConfigMapper extends ConfigBasic {
 		}
 	}
 
-	private static String join(List<String> list, String conjunction) {
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for (String item : list) {
-			if (first)
-				first = false;
-			else
-				sb.append(conjunction);
-			sb.append(item);
-		}
-
-		return sb.toString();
-	}
-
 	public void addComment(String key, String value) {
-		if (!comments.containsKey(key)) {
+		if (!comments.containsKey(key))
 			comments.put(key, new ArrayList<String>());
-		}
 
 		comments.get(key).add(value);
 	}

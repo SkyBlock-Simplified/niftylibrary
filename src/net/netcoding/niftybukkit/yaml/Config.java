@@ -13,6 +13,7 @@ import net.netcoding.niftybukkit.yaml.annotations.Comments;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
+@SuppressWarnings("rawtypes")
 public class Config extends MapConfigMapper implements IConfig {
 
 	public Config(String filename, String... header) {
@@ -22,55 +23,35 @@ public class Config extends MapConfigMapper implements IConfig {
 
 	@Override
 	public void save() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) {
-			throw new IllegalArgumentException("Saving a config without given File");
-		}
-
-		if (root == null) {
-			root = new ConfigSection();
-		}
-
+		if (CONFIG_FILE == null) throw new IllegalArgumentException("Saving a config without given File");
+		if (root == null) root = new ConfigSection();
 		clearComments();
-
 		internalSave(getClass());
-
 		saveToYaml();
 	}
 
 	private void internalSave(Class clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) {
-			internalSave(clazz.getSuperclass());
-		}
+		if (!clazz.getSuperclass().equals(Config.class)) internalSave(clazz.getSuperclass());
 
 		for (Field field : clazz.getDeclaredFields()) {
-			String path = (CONFIG_MODE.equals(ConfigMode.DEFAULT)) ? field.getName().replaceAll("_", ".") : field.getName();
-
+			String path = field.getName().replaceAll("_", ".");
 			if (doSkip(field)) continue;
-
 			ArrayList<String> comments = new ArrayList<>();
+
 			for (Annotation annotation : field.getAnnotations()) {
-				if (annotation instanceof Comment) {
-					Comment comment = (Comment) annotation;
-					comments.add(comment.value());
+				if (annotation instanceof Comment)
+					comments.add(((Comment)annotation).value());
 
-				}
+				if (annotation instanceof Comments)
+					comments.addAll(Arrays.asList(((Comments)annotation).value()));
 
-				if (annotation instanceof Comments) {
-					Comments comment = (Comments) annotation;
-
-					comments.addAll(Arrays.asList(comment.value()));
-				}
-
-				if (annotation instanceof Path) {
-					Path path1 = (Path) annotation;
-					path = path1.value();
-				}
+				if (annotation instanceof Path)
+					path = ((Path)annotation).value();
 			}
 
 			if (comments.size() > 0) {
-				for (String comment : comments) {
+				for (String comment : comments)
 					addComment(path, comment);
-				}
 			}
 
 			if (Modifier.isPrivate(field.getModifiers()))
@@ -86,10 +67,7 @@ public class Config extends MapConfigMapper implements IConfig {
 
 	@Override
 	public void save(File file) throws InvalidConfigurationException {
-		if (file == null) {
-			throw new IllegalArgumentException("File argument can not be null");
-		}
-
+		if (file == null) throw new IllegalArgumentException("File argument can not be null");
 		CONFIG_FILE = file;
 		save();
 	}
@@ -113,10 +91,7 @@ public class Config extends MapConfigMapper implements IConfig {
 
 	@Override
 	public void init(File file) throws InvalidConfigurationException {
-		if (file == null) {
-			throw new IllegalArgumentException("File argument can not be null");
-		}
-
+		if (file == null) throw new IllegalArgumentException("File argument can not be null");
 		CONFIG_FILE = file;
 		init();
 	}
@@ -129,23 +104,18 @@ public class Config extends MapConfigMapper implements IConfig {
 
 	@Override
 	public void load() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) {
-			throw new IllegalArgumentException("Loading a config without given File");
-		}
-
+		if (CONFIG_FILE == null) throw new IllegalArgumentException("Loading a config without given File");
 		loadFromYaml();
 		update(root);
 		internalLoad(getClass());
 	}
 
 	private void internalLoad(Class clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) {
-			internalLoad(clazz.getSuperclass());
-		}
-
+		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
 		boolean save = false;
+
 		for (Field field : clazz.getDeclaredFields()) {
-			String path = (CONFIG_MODE.equals(ConfigMode.DEFAULT)) ? field.getName().replaceAll("_", ".") : field.getName();
+			String path = field.getName().replaceAll("_", ".");
 
 			for (Annotation annotation : field.getAnnotations()) {
 				if (annotation instanceof Path) {
@@ -175,17 +145,12 @@ public class Config extends MapConfigMapper implements IConfig {
 			}
 		}
 
-		if (save) {
-			save();
-		}
+		if (save) save();
 	}
 
 	@Override
 	public void load(File file) throws InvalidConfigurationException {
-		if (file == null) {
-			throw new IllegalArgumentException("File argument can not be null");
-		}
-
+		if (file == null) throw new IllegalArgumentException("File argument can not be null");
 		CONFIG_FILE = file;
 		load();
 	}

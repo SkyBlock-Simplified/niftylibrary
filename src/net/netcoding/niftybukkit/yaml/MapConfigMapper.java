@@ -11,8 +11,8 @@ public class MapConfigMapper extends YamlConfigMapper {
 	public Map saveToMap() {
 		Map<String, Object> returnMap = new HashMap<>();
 
-		for (Field field : getClass().getDeclaredFields()) {
-			String path = (CONFIG_MODE.equals(ConfigMode.DEFAULT)) ? field.getName().replaceAll("_", ".") : field.getName();
+		for (Field field : this.getClass().getDeclaredFields()) {
+			String path = field.getName().replaceAll("_", ".");
 			if (doSkip(field)) continue;
 			if(Modifier.isPrivate(field.getModifiers())) field.setAccessible(true);
 			try { returnMap.put(path, field.get(this)); } catch (IllegalAccessException e) { }
@@ -22,8 +22,8 @@ public class MapConfigMapper extends YamlConfigMapper {
 	}
 
 	public void loadFromMap(Map section) throws NoSuchFieldException, IllegalAccessException {
-		for(Map.Entry<String, Object> entry : ((Map<String, Object>) section).entrySet()) {
-			String path = (CONFIG_MODE.equals(ConfigMode.DEFAULT)) ? entry.getKey().replace(".", "_") : entry.getKey();
+		for (Map.Entry<String, Object> entry : ((Map<String, Object>) section).entrySet()) {
+			String path = entry.getKey().replace(".", "_");
 			Field field = this.getClass().getDeclaredField(path);
 			if (Modifier.isPrivate(field.getModifiers())) field.setAccessible(true);
 			field.set(this, entry.getValue());

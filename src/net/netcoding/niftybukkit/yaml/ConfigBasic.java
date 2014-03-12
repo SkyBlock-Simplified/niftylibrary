@@ -11,7 +11,6 @@ public class ConfigBasic {
 
 	protected transient File CONFIG_FILE = null;
 	protected transient String[] CONFIG_HEADER = null;
-	protected transient ConfigMode CONFIG_MODE = ConfigMode.DEFAULT;
 
 	protected transient InternalConverter converter = new InternalConverter();
 
