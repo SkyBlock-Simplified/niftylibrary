@@ -6,13 +6,11 @@ import java.util.Map;
 import net.netcoding.niftybukkit.yaml.ConfigSection;
 import net.netcoding.niftybukkit.yaml.InternalConverter;
 
-@SuppressWarnings({ "rawtypes", "unused" })
-public class Config implements Converter {
-
-	private InternalConverter internalConverter;
+@SuppressWarnings("unchecked")
+public class Config extends Converter {
 
 	public Config(InternalConverter internalConverter) {
-		this.internalConverter = internalConverter;
+		super(internalConverter);
 	}
 
 	@Override
@@ -21,9 +19,9 @@ public class Config implements Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class type, Object section, ParameterizedType genericType) throws Exception {
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		net.netcoding.niftybukkit.yaml.Config obj = (net.netcoding.niftybukkit.yaml.Config)type.cast(type.newInstance());
-		obj.loadFromMap((section instanceof Map) ? (Map)section : ((ConfigSection)section).getRawMap());
+		obj.loadFromMap((section instanceof Map) ? (Map<?, Object>)section : ((ConfigSection)section).getRawMap());
 		return obj;
 	}
 

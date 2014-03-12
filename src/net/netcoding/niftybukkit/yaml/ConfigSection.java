@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit.yaml;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings("unchecked")
 public class ConfigSection {
 
 	private String fullPath;
@@ -118,7 +118,7 @@ public class ConfigSection {
 		return (T)(section == this ? map.get(key) : section.get(key));
 	}
 
-	public Map getRawMap() {
+	public Map<Object, Object> getRawMap() {
 		return map;
 	}
 

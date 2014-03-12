@@ -4,13 +4,11 @@ import java.lang.reflect.ParameterizedType;
 
 import net.netcoding.niftybukkit.yaml.InternalConverter;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
-public class Array implements Converter {
-
-	private InternalConverter internalConverter;
+@SuppressWarnings("unchecked")
+public class Array extends Converter {
 
 	public Array(InternalConverter internalConverter) {
-		this.internalConverter = internalConverter;
+		super(internalConverter);
 	}
 
 	@Override
@@ -20,11 +18,11 @@ public class Array implements Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.List values = (java.util.List) section;
+		java.util.List<Object> values = (java.util.List<Object>)section;
 		return getArray(type, values);
 	}
 
-	private static <T> T[] getArray(Class<T> type, java.util.List list) {
+	private static <T> T[] getArray(Class<T> type, java.util.List<Object> list) {
 		T[] array = (T[]) java.lang.reflect.Array.newInstance(type, list.size());
 		return (T[]) list.toArray(array);
 	}

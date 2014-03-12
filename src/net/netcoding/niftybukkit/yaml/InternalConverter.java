@@ -5,35 +5,46 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.LinkedHashSet;
 
-import net.netcoding.niftybukkit.yaml.converters.Array;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.yaml.converters.Converter;
-import net.netcoding.niftybukkit.yaml.converters.List;
-import net.netcoding.niftybukkit.yaml.converters.Map;
-import net.netcoding.niftybukkit.yaml.converters.Primitive;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConverterException;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
-public class InternalConverter {
+public class InternalConverter extends BukkitHelper {
 
-	private LinkedHashSet<Converter> converters = new LinkedHashSet<>();
+	private static transient LinkedHashSet<Converter> converters = new LinkedHashSet<>();
 
-	public InternalConverter() {
+	static {
 		try {
-			addConverter(Primitive.class);
-			addConverter(Config.class);
-			addConverter(List.class);
-			addConverter(Map.class);
-			addConverter(Array.class);
-		} catch (InvalidConverterException e) {
-			throw new IllegalStateException(e);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Primitive.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Config.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.List.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Map.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Array.class);
+		} catch (InvalidConverterException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
-	public void addConverter(Class converter) throws InvalidConverterException {
-		if (!Converter.class.isAssignableFrom(converter)) throw new InvalidConverterException("Converter does not implement the Interface Converter");
+	protected InternalConverter(JavaPlugin plugin) {
+		super(plugin);
+	}
 
+	/**
+	 * Add a Custom Converter. A Converter can take Objects and return a pretty Object which gets saved/loaded from
+	 * the Converter. How a Converter must be build can be looked up in the Converter Interface.
+	 *
+	 * @param addConverter Converter to be added
+	 * @throws InvalidConverterException If the Converter has any errors this Exception tells you what
+	 */
+	public void addConverter(Class<? extends Converter> converter) throws InvalidConverterException {
+		addInternalConverter(converter);
+	}
+
+	private static void addInternalConverter(Class<? extends Converter> converter) throws InvalidConverterException {
 		try {
-			converters.add((Converter)converter.getConstructor(InternalConverter.class).newInstance(this));
+			converters.add((Converter)converter.getConstructor(InternalConverter.class).newInstance(InternalConverter.class));
 		} catch (NoSuchMethodException e) {
 			throw new InvalidConverterException("Converter does not implement a Constructor which takes the InternalConverter instance", e);
 		} catch (InvocationTargetException e) {
@@ -45,8 +56,8 @@ public class InternalConverter {
 		}
 	}
 
-	public Converter getConverter(Class type) {
-		for(Converter converter : converters) {
+	public Converter getConverter(Class<?> type) {
+		for (Converter converter : converters) {
 			if (converter.supports(type))
 				return converter;
 		}
@@ -92,13 +103,13 @@ public class InternalConverter {
 			converter = getConverter(obj.getClass());
 
 			if (converter != null) {
-				root.set(path, converter.toConfig(obj.getClass(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				root.set(path, converter.toConfig(obj.getClass(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType)field.getGenericType() : null));
 				return;
 			} else {
 				converter = getConverter(field.getType());
 
 				if (converter != null) {
-					root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+					root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType)field.getGenericType() : null));
 					return;
 				}
 			}
@@ -106,7 +117,7 @@ public class InternalConverter {
 			converter = getConverter(field.getType());
 
 			if (converter != null) {
-				root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType)field.getGenericType() : null));
 				return;
 			}
 		}

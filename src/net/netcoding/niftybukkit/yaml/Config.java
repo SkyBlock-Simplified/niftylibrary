@@ -13,24 +13,76 @@ import net.netcoding.niftybukkit.yaml.annotations.Comments;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
-@SuppressWarnings("rawtypes")
-public class Config extends MapConfigMapper implements IConfig {
+import org.bukkit.plugin.java.JavaPlugin;
 
-	public Config(String filename, String... header) {
-		CONFIG_FILE = new File(filename + (filename.endsWith(".yml") ? "" : ".yml"));
-		CONFIG_HEADER = header;
+public class Config extends ConfigMapper {
+
+	public Config(JavaPlugin plugin, String fileName, String... header) {
+		super(plugin, fileName, header);
+		if (CONFIG_FILE == null) throw new IllegalArgumentException("Filename cannot be null!");
 	}
 
-	@Override
-	public void save() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) throw new IllegalArgumentException("Saving a config without given File");
-		if (root == null) root = new ConfigSection();
-		clearComments();
-		internalSave(getClass());
-		saveToYaml();
+	public void init() throws InvalidConfigurationException {
+		if (!CONFIG_FILE.exists()) {
+			if (CONFIG_FILE.getParentFile() != null)
+				CONFIG_FILE.getParentFile().mkdirs();
+
+			try {
+				CONFIG_FILE.createNewFile();
+				this.save();
+			} catch (IOException ex) {
+				throw new InvalidConfigurationException("Could not create new empty config!", ex);
+			}
+		} else
+			this.load();
 	}
 
-	private void internalSave(Class clazz) throws InvalidConfigurationException {
+	public void init(File file) throws InvalidConfigurationException {
+		if (file == null) throw new IllegalArgumentException("File cannot be null!");
+		CONFIG_FILE = file;
+		init();
+	}
+
+	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
+		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
+		boolean save = false;
+
+		for (Field field : clazz.getDeclaredFields()) {
+			String path = field.getName().replaceAll("_", ".");
+
+			for (Annotation annotation : field.getAnnotations()) {
+				if (annotation instanceof Path) {
+					path = ((Path)annotation).value();
+					break;
+				}
+			}
+
+			if (doSkip(field))
+				continue;
+
+			if (Modifier.isPrivate(field.getModifiers()))
+				field.setAccessible(true);
+
+			if (root.has(path)) {
+				try {
+					this.fromConfig(this, field, root, path);
+				} catch (Exception ex) {
+					throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
+				}
+			} else {
+				try {
+					this.toConfig(this, field, root, path);
+					save = true;
+				} catch (Exception ex) {
+					throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
+				}
+			}
+		}
+
+		if (save) save();
+	}
+
+	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {
 		if (!clazz.getSuperclass().equals(Config.class)) internalSave(clazz.getSuperclass());
 
 		for (Field field : clazz.getDeclaredFields()) {
@@ -58,100 +110,50 @@ public class Config extends MapConfigMapper implements IConfig {
 				field.setAccessible(true);
 
 			try {
-				converter.toConfig(this, field, root, path);
-			} catch (Exception e) {
-				throw new InvalidConfigurationException("Could not save the Field", e);
+				this.toConfig(this, field, root, path);
+			} catch (Exception ex) {
+				throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);
 			}
 		}
 	}
 
-	@Override
+	public void load() throws InvalidConfigurationException {
+		if (CONFIG_FILE == null) throw new IllegalArgumentException("Cannot load config without file!");
+		this.loadFromYaml();
+		this.update(root);
+		this.internalLoad(this.getClass());
+	}
+
+	public void load(File file) throws InvalidConfigurationException {
+		if (file == null) throw new IllegalArgumentException("File cannot be null!");
+		CONFIG_FILE = file;
+		this.load();
+	}
+
+	public void reload() throws InvalidConfigurationException {
+		this.loadFromYaml();
+		this.internalLoad(this.getClass());
+	}
+
+	public void save() throws InvalidConfigurationException {
+		if (CONFIG_FILE == null) throw new IllegalArgumentException("Saving a config without given File");
+		if (root == null) root = new ConfigSection();
+		this.clearComments();
+		this.internalSave(this.getClass());
+		this.saveToYaml();
+	}
+
 	public void save(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File argument can not be null");
 		CONFIG_FILE = file;
-		save();
+		this.save();
 	}
 
-	@Override
-	public void init() throws InvalidConfigurationException {
-		if (!CONFIG_FILE.exists()) {
-			if (CONFIG_FILE.getParentFile() != null)
-				CONFIG_FILE.getParentFile().mkdirs();
+	/**
+	 * This function gets called after the File has been loaded and before the Converter gets it.
+	 * This is used to manually edit the configSection when you updated the config or something
+	 * @param configSection The root ConfigSection with all Subnodes loaded into
+	 */
+	public void update(ConfigSection configSection) { }
 
-			try {
-				CONFIG_FILE.createNewFile();
-				save();
-			} catch (IOException e) {
-				throw new InvalidConfigurationException("Could not create new empty net.cubespace.Yamler.Config", e);
-			}
-		} else {
-			load();
-		}
-	}
-
-	@Override
-	public void init(File file) throws InvalidConfigurationException {
-		if (file == null) throw new IllegalArgumentException("File argument can not be null");
-		CONFIG_FILE = file;
-		init();
-	}
-
-	@Override
-	public void reload() throws InvalidConfigurationException {
-		loadFromYaml();
-		internalLoad(getClass());
-	}
-
-	@Override
-	public void load() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) throw new IllegalArgumentException("Loading a config without given File");
-		loadFromYaml();
-		update(root);
-		internalLoad(getClass());
-	}
-
-	private void internalLoad(Class clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
-		boolean save = false;
-
-		for (Field field : clazz.getDeclaredFields()) {
-			String path = field.getName().replaceAll("_", ".");
-
-			for (Annotation annotation : field.getAnnotations()) {
-				if (annotation instanceof Path) {
-					Path path1 = (Path) annotation;
-					path = path1.value();
-				}
-			}
-
-			if (doSkip(field)) continue;
-
-			if (Modifier.isPrivate(field.getModifiers()))
-				field.setAccessible(true);
-
-			if (root.has(path)) {
-				try {
-					converter.fromConfig(this, field, root, path);
-				} catch (Exception e) {
-					throw new InvalidConfigurationException("Could not set field", e);
-				}
-			} else {
-				try {
-					converter.toConfig(this, field, root, path);
-					save = true;
-				} catch (Exception e) {
-					throw new InvalidConfigurationException("Could not get field", e);
-				}
-			}
-		}
-
-		if (save) save();
-	}
-
-	@Override
-	public void load(File file) throws InvalidConfigurationException {
-		if (file == null) throw new IllegalArgumentException("File argument can not be null");
-		CONFIG_FILE = file;
-		load();
-	}
 }
