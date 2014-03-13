@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.mojang;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,6 +69,7 @@ public class ProfileRepository {
 		List<MojangProfile> profiles = new ArrayList<>();
 		MySQL mysql = NiftyBukkit.getMySQL();
 		MojangProfileCache profileCache = new MojangProfileCache();
+		boolean shouldSave = false;
 
 		if (!NiftyBukkit.isMysqlMode()) {
 			try {
@@ -146,7 +146,7 @@ public class ProfileRepository {
 				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
 
 				for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
-					ProfileSearchResult result = search(new URL("https://api.mojang.com/profiles/page/" + i), body, headers);
+					NameSearchResult result = gson.fromJson(httpClient.post(new URL("https://api.mojang.com/profiles/page/" + i), body, headers), NameSearchResult.class);
 					if (result.getSize() == 0) break;
 					profiles.addAll(Arrays.asList(result.getProfiles()));
 				}
@@ -158,15 +158,17 @@ public class ProfileRepository {
 		for (MojangProfile profile : profiles) {
 			if (NiftyBukkit.isMysqlMode()) {
 				try {
-					mysql.update("INSERT IGNORE INTO `ndb_users` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
+					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
 				} catch (SQLException ex) {
 					NiftyBukkit.getPlugin().getLog().console(ex);
 				}
-			} else
+			} else {
 				profileCache.add(profile);
+				shouldSave = true;
+			}
 		}
 
-		if (!NiftyBukkit.isMysqlMode()) {
+		if (!NiftyBukkit.isMysqlMode() && shouldSave) {
 			try {
 				profileCache.save();
 			} catch (InvalidConfigurationException ex) {
@@ -186,6 +188,7 @@ public class ProfileRepository {
 		MySQL mysql = NiftyBukkit.getMySQL();
 		MojangProfileCache profileCache = new MojangProfileCache();
 		MojangProfile profile = null;
+		boolean shouldSave = false;
 
 		if (!NiftyBukkit.isMysqlMode()) {
 			try {
@@ -223,7 +226,35 @@ public class ProfileRepository {
 				if (names.size() > 0) {
 					profile = new MojangProfile(names.get(0), uuid);
 					profile.setNames(names);
-					return profile;
+				}
+			}
+		}
+
+		if (profile == null) {
+			try {
+				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
+				UUIDSearchResult result = gson.fromJson(httpClient.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid), headers), UUIDSearchResult.class);
+
+				if (result != null) {
+					profile = new MojangProfile(result.getUniqueId(), result.getName());
+					shouldSave = true;
+				}
+			} catch (Exception ex) {
+				NiftyBukkit.getPlugin().getLog().console(ex);
+			}
+		}
+
+		if (shouldSave) {
+			if (NiftyBukkit.isMysqlMode()) {
+				try {
+					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
+				} catch (SQLException ex) {
+					NiftyBukkit.getPlugin().getLog().console(ex);
+				}
+			} else {
+				if (profileCache.exists()) {
+					profileCache.add(profile);
+					profileCache.save();
 				}
 			}
 		}
@@ -234,11 +265,44 @@ public class ProfileRepository {
 			return profile;
 	}
 
-	private static ProfileSearchResult search(URL url, HttpBody body, List<HttpHeader> headers) throws IOException {
-		return gson.fromJson(httpClient.post(url, body, headers), ProfileSearchResult.class);
+	@SuppressWarnings("unused")
+	private static class UUIDSearchResult {
+
+		private String id;
+		private String name;
+		private UUIDProperties properties;
+
+		public String getUniqueId() {
+			return this.id;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		private static class UUIDProperties {
+			
+			private String name;
+			private String value;
+			private String signature;
+
+			public String getName() {
+				return this.name;
+			}
+			
+			public String getValue() {
+				return this.value;
+			}
+			
+			public String getSignature() {
+				return this.value;
+			}
+			
+		}
+
 	}
 
-	private static class ProfileSearchResult {
+	private static class NameSearchResult {
 
 		private MojangProfile[] profiles;
 		private int size;

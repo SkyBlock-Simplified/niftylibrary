@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class MojangProfile {
 
-	private static final transient Pattern UUID_PATTERN = Pattern.compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)");
+	static final transient Pattern UUID_PATTERN = Pattern.compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)");
 	private String id;
 	private String name;
 	private final List<String> names = new ArrayList<>();
