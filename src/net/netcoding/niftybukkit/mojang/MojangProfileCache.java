@@ -8,12 +8,7 @@ import java.util.Map;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.yaml.Config;
 
-import org.bukkit.Bukkit;
-
 class MojangProfileCache extends Config {
-
-	@SuppressWarnings("unused")
-	private org.bukkit.block.Block block = Bukkit.getServer().getWorld("world").getBlockAt(3, 72, -107);
 
 	private Map<String, String> users = new HashMap<>();
 
