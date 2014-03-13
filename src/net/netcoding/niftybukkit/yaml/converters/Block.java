@@ -24,7 +24,8 @@ public class Block extends Converter {
 		return saveMap;
 	}
 
-	public Object fromConfig2(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+	@Override
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		java.util.Map<String, Object> blockMap = (java.util.Map<String, Object>)((ConfigSection)section).getRawMap();
 		java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>)((ConfigSection)blockMap.get("location")).getRawMap();
 		org.bukkit.Location location = new org.bukkit.Location(Bukkit.getWorld((String)locationMap.get("world")), (Double)locationMap.get("x"), (Double)locationMap.get("y"), (Double)locationMap.get("z"));
@@ -32,17 +33,6 @@ public class Block extends Converter {
 		ItemStack stack = NiftyBukkit.getItemDatabase().get((String)blockMap.get("id"));
 		block.setType(stack.getType());
 
-		return block;
-	}
-
-	@Override
-	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.Map<String, Object> blockInfo = (java.util.Map<String, Object>)section;
-		Converter converter = InternalConverter.getConverter(net.netcoding.niftybukkit.yaml.converters.Location.class);
-		org.bukkit.Location location = (org.bukkit.Location)converter.fromConfig(org.bukkit.Location.class, blockInfo.get("location"), null);
-		org.bukkit.block.Block block = Bukkit.getServer().getWorld(location.getWorld().getName()).getBlockAt(location);
-		ItemStack itemData = NiftyBukkit.getItemDatabase().get((String)blockInfo.get("id"));
-		block.setType(itemData.getType());
 		return block;
 	}
 
