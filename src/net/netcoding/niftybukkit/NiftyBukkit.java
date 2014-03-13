@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.items.ItemDatabase;
+import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 
 import org.bukkit.Bukkit;
@@ -11,7 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class NiftyBukkit extends JavaPlugin {
+public class NiftyBukkit extends BukkitPlugin {
 
 	private static transient JavaPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
@@ -49,9 +50,9 @@ public class NiftyBukkit extends JavaPlugin {
 
 		if (isMysqlMode = mysql.testConnection()) {
 			mysql.setAutoReconnect();
-			//this.getLog().console("Using MySQL Storage");
-		}// else
-			//this.getLog().console("Using YAML Storage");
+			this.getLog().console("Using MySQL Storage");
+		} else
+			this.getLog().console("Using YAML Storage");
 
 		new BungeeHelper(this).register();
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
