@@ -11,7 +11,7 @@ public class List extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> values = (java.util.List<Object>)obj;
-		java.util.List<Object> newList = new ArrayList<Object>();
+		java.util.List<Object> newList = new ArrayList<>();
 
 		try {
 			newList = ((java.util.List<Object>)type.newInstance());
@@ -20,7 +20,7 @@ public class List extends Converter {
 		if (genericType.getActualTypeArguments()[0] instanceof Class && net.netcoding.niftybukkit.yaml.Config.class.isAssignableFrom((Class<?>)genericType.getActualTypeArguments()[0])) {
 			Converter converter = InternalConverter.getConverter(net.netcoding.niftybukkit.yaml.Config.class);
 
-			for(int i = 0; i < values.size(); i++)
+			for (int i = 0; i < values.size(); i++)
 				newList.add(converter.toConfig((Class<?>)genericType.getActualTypeArguments()[0], values.get(i), null));
 		} else
 			newList = values;
@@ -31,7 +31,7 @@ public class List extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> values = (java.util.List<Object>)section;
-		java.util.List<Object> newList = new ArrayList<Object>();
+		java.util.List<Object> newList = new ArrayList<>();
 
 		try {
 			newList = (java.util.List<Object>)type.newInstance();
@@ -40,7 +40,7 @@ public class List extends Converter {
 		if (genericType.getActualTypeArguments()[0] instanceof Class && net.netcoding.niftybukkit.yaml.Config.class.isAssignableFrom((Class<?>)genericType.getActualTypeArguments()[0])) {
 			Converter converter = InternalConverter.getConverter(net.netcoding.niftybukkit.yaml.Config.class);
 
-			for(int i = 0; i < values.size(); i++)
+			for (int i = 0; i < values.size(); i++)
 				newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], values.get(i), null));
 		} else
 			newList = values;
