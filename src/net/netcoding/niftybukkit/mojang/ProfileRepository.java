@@ -34,7 +34,8 @@ public class ProfileRepository {
 	}
 
 	public static MojangProfile searchByExactPlayer(Player player) {
-		return searchByPlayer(player)[0];
+		MojangProfile[] profiles = searchByPlayer(player);
+		return profiles != null ? profiles[0] : null;
 	}
 
 	public static MojangProfile searchByExactUsername(Player player) {
@@ -61,9 +62,9 @@ public class ProfileRepository {
 	public static MojangProfile[] searchByPlayer(List<Player> players) {
 		List<String> usernames = new ArrayList<>();
 
-		for (int i = 0; i < usernames.size(); i++) {
-			if (players.get(i) != null)
-				usernames.add(players.get(i).getName());
+		for (Player player : players) {
+			if (player != null)
+				usernames.add(player.getName());
 		}
 
 		return searchByUsername(usernames);
@@ -74,6 +75,7 @@ public class ProfileRepository {
 	}
 
 	public static MojangProfile[] searchByUsername(List<String> usernames) {
+		if (usernames == null || usernames.size() == 0) return null;
 		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
 		List<MojangProfile> profiles = new ArrayList<>();
 		MySQL mysql = NiftyBukkit.getMySQL();
@@ -134,7 +136,7 @@ public class ProfileRepository {
 				if (profileCache.exists()) {
 					String uuid = profileCache.findUUID(criteria.getName());
 
-					if (!"".equals(uuid)) {
+					if (uuid != null) {
 						MojangProfile profile = new MojangProfile(criteria.getName(), uuid);
 						profile.setNames(profileCache.getNames(uuid));
 						profiles.add(profile);
@@ -145,16 +147,18 @@ public class ProfileRepository {
 			}
 		}
 
-		try {
-			HttpBody body = new HttpBody(gson.toJson(criterion));
-			List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
+		if (criterion.size() > 0) {
+			try {
+				HttpBody body = new HttpBody(gson.toJson(criterion));
+				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
 
-			for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
-				ProfileSearchResult result = search(new URL("https://api.mojang.com/profiles/page/" + i), body, headers);
-				if (result.getSize() == 0) break;
-				profiles.addAll(Arrays.asList(result.getProfiles()));
-			}
-		} catch (Exception ex) { }
+				for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
+					ProfileSearchResult result = search(new URL("https://api.mojang.com/profiles/page/" + i), body, headers);
+					if (result.getSize() == 0) break;
+					profiles.addAll(Arrays.asList(result.getProfiles()));
+				}
+			} catch (Exception ex) { }
+		}
 
 		for (MojangProfile profile : profiles) {
 			if (NiftyBukkit.isMysqlMode()) {
@@ -163,8 +167,6 @@ public class ProfileRepository {
 				} catch (SQLException ex) { }
 			} else
 				profileCache.add(profile);
-
-			profiles.add(profile);
 		}
 
 		if (!NiftyBukkit.isMysqlMode()) {
