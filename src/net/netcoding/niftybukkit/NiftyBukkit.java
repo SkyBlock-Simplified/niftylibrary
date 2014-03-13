@@ -53,9 +53,9 @@ public class NiftyBukkit extends BukkitPlugin {
 		} else
 			this.getLog().console("Using YAML Storage");
 
+		new NiftyListener(this);
 		new BungeeHelper(this).register();
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
-		this.getServer().getPluginManager().registerEvents(new NiftyListener(this), this);
 	}
 
 	@Override
