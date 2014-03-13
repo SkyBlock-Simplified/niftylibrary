@@ -17,7 +17,6 @@ public class Location extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		String[] locationArr = ((String)section).split(":");
-		//1408, unit d, the orange line
 
 		if (locationArr.length >= 1) {
 			String[] locationStr = locationArr[0].split(",");
