@@ -75,7 +75,7 @@ public class ProfileRepository {
 			try {
 				profileCache.init();
 			} catch (InvalidConfigurationException ex) {
-				profileCache.getLog().console(ex);
+				NiftyBukkit.getPlugin().getLog().console(ex);
 				profileCache.delete();
 			}
 		}
@@ -122,7 +122,7 @@ public class ProfileRepository {
 						criterion.remove(criteria);
 					}
 				} catch (SQLException ex) {
-					ex.printStackTrace();
+					NiftyBukkit.getPlugin().getLog().console(ex);
 					break;
 				}
 			} else {
@@ -150,14 +150,18 @@ public class ProfileRepository {
 					if (result.getSize() == 0) break;
 					profiles.addAll(Arrays.asList(result.getProfiles()));
 				}
-			} catch (Exception ex) { }
+			} catch (Exception ex) {
+				NiftyBukkit.getPlugin().getLog().console(ex);
+			}
 		}
 
 		for (MojangProfile profile : profiles) {
 			if (NiftyBukkit.isMysqlMode()) {
 				try {
 					mysql.update("INSERT IGNORE INTO `ndb_users` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
-				} catch (SQLException ex) { }
+				} catch (SQLException ex) {
+					NiftyBukkit.getPlugin().getLog().console(ex);
+				}
 			} else
 				profileCache.add(profile);
 		}
@@ -166,7 +170,7 @@ public class ProfileRepository {
 			try {
 				profileCache.save();
 			} catch (InvalidConfigurationException ex) {
-				profileCache.getLog().console(ex);
+				NiftyBukkit.getPlugin().getLog().console(ex);
 				profileCache.delete();
 			}
 		}
@@ -187,7 +191,7 @@ public class ProfileRepository {
 			try {
 				profileCache.init();
 			} catch (InvalidConfigurationException ex) {
-				profileCache.getLog().console(ex);
+				NiftyBukkit.getPlugin().getLog().console(ex);
 				profileCache.delete();
 			}
 		}
@@ -210,7 +214,7 @@ public class ProfileRepository {
 					}
 				}, uuid);
 			} catch (SQLException ex) {
-				ex.printStackTrace();
+				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
 		} else {
 			if (profileCache.exists()) {

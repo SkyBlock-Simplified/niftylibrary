@@ -3,7 +3,6 @@ package net.netcoding.niftybukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.ProfileRepository;
-import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -30,9 +29,7 @@ class NiftyListener extends BukkitListener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onPlayerLogin(final PlayerLoginEvent event) {
-		try {
-			ProfileRepository.searchByExactPlayer(event.getPlayer());
-		} catch (ProfileNotFoundException ex) { }
+		ProfileRepository.searchByExactPlayer(event.getPlayer());
 	}
 
 }

@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.yaml.exceptions;
 
 @SuppressWarnings("serial")
-public class InvalidConfigurationException extends Exception {
+public class InvalidConfigurationException extends RuntimeException {
 
 	public InvalidConfigurationException() { }
 

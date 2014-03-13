@@ -5,7 +5,7 @@ import java.util.List;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 @SuppressWarnings("serial")
-public class ProfileNotFoundException extends Exception {
+public class ProfileNotFoundException extends RuntimeException {
 
 	ProfileNotFoundException(String message) {
 		super(message);

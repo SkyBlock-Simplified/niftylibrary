@@ -10,11 +10,10 @@ import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class NiftyBukkit extends BukkitPlugin {
 
-	private static transient JavaPlugin plugin;
+	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
 	private static final transient String bukkitPath;
 	private static final transient String minecraftPath;
@@ -81,7 +80,7 @@ public class NiftyBukkit extends BukkitPlugin {
 		return mysql;
 	}
 
-	public static JavaPlugin getPlugin() {
+	public static BukkitPlugin getPlugin() {
 		return plugin;
 	}
 

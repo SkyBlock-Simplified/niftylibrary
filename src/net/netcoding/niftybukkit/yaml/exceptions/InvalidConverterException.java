@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.yaml.exceptions;
 
 @SuppressWarnings("serial")
-public class InvalidConverterException extends Exception {
+public class InvalidConverterException extends RuntimeException {
 
 	public InvalidConverterException() { }
 
