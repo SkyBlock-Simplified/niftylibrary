@@ -3,7 +3,6 @@ package net.netcoding.niftybukkit.yaml.converters;
 import java.lang.reflect.ParameterizedType;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 
 public class Location extends Converter {
 
@@ -16,11 +15,7 @@ public class Location extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		String[] location = ((String)section).split(",");
-		World w  = Bukkit.getWorld(location[0]);
-		double x = new Double(location[1]).doubleValue();
-		double y = new Double(location[2]).doubleValue();
-		double z = new Double(location[3]).doubleValue();
-		return new org.bukkit.Location(w, x, y, z);
+		return new org.bukkit.Location(Bukkit.getWorld(location[0]), new Double(location[1]), new Double(location[2]), new Double(location[3]));
 	}
 
 	@Override
