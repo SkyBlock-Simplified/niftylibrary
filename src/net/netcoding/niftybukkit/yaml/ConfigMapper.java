@@ -108,7 +108,7 @@ public class ConfigMapper extends BukkitHelper {
 
 	protected void saveToYaml() throws InvalidConfigurationException {
 		try (FileWriter fileWriter = new FileWriter(CONFIG_FILE)) {
-			if (CONFIG_HEADER != null) {
+			if (CONFIG_HEADER != null && CONFIG_HEADER.length > 0) {
 				for (String line : CONFIG_HEADER) fileWriter.write("# " + line + "\n");
 				fileWriter.write("\n");
 			}
@@ -117,6 +117,7 @@ public class ConfigMapper extends BukkitHelper {
 			ArrayList<String> keyChain = new ArrayList<>();
 			String yamlString = yaml.dump(root.getValues(true));
 			StringBuilder writeLines = new StringBuilder();
+
 			for (String line : yamlString.split("\n")) {
 				if (line.startsWith(new String(new char[depth]).replace("\0", " "))) {
 					keyChain.add(line.split(":")[0].trim());
@@ -163,7 +164,7 @@ public class ConfigMapper extends BukkitHelper {
 				}
 
 				writeLines.append(line);
-				writeLines.append("\n");
+				writeLines.append("\n\n");
 			}
 
 			fileWriter.write(writeLines.toString());

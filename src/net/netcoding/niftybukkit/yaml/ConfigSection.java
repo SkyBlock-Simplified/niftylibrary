@@ -70,9 +70,8 @@ public class ConfigSection {
 					Map<Object, Object> result = new LinkedHashMap<>();
 					output.put(entry.getKey(), result);
 					if (deep) mapChildrenValues(result, (ConfigSection) entry.getValue(), true);
-				} else {
+				} else
 					output.put(entry.getKey(), entry.getValue());
-				}
 			}
 		}
 	}
@@ -118,7 +117,7 @@ public class ConfigSection {
 		return (T)(section == this ? map.get(key) : section.get(key));
 	}
 
-	public Map<Object, Object> getRawMap() {
+	public Map<?, ?> getRawMap() {
 		return map;
 	}
 

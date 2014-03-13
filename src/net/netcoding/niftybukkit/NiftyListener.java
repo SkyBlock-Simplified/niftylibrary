@@ -7,8 +7,8 @@ import net.netcoding.niftybukkit.mojang.ProfileRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 class NiftyListener extends BukkitListener {
@@ -28,8 +28,8 @@ class NiftyListener extends BukkitListener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-	public void onPlayerLogin(final PlayerLoginEvent event) {
-		ProfileRepository.searchByExactPlayer(event.getPlayer());
+	public void onPlayerLogin(final AsyncPlayerPreLoginEvent event) {
+		ProfileRepository.searchByExactUsername(event.getName());
 	}
 
 }
