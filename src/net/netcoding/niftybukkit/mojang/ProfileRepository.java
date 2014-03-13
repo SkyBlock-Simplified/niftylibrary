@@ -6,9 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import net.minecraft.util.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
@@ -111,10 +109,10 @@ public class ProfileRepository {
 					if (uuid != null) {
 						MojangProfile profile = new MojangProfile(criteria.getName(), uuid);
 
-						profile.setNames(mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<Set<String>>() {
+						profile.setNames(mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<List<String>>() {
 							@Override
-							public Set<String> handle(ResultSet result) throws SQLException {
-								Set<String> names = new HashSet<>();
+							public List<String> handle(ResultSet result) throws SQLException {
+								List<String> names = new ArrayList<>();
 								while (result.next()) names.add(result.getString("user"));
 								return names;
 							}
@@ -204,7 +202,7 @@ public class ProfileRepository {
 
 						if (names.size() > 0) {
 							MojangProfile profile = new MojangProfile(names.get(0), uuid);
-							profile.setNames(new HashSet<>(names));
+							profile.setNames(names);
 							return profile;
 						}
 
@@ -216,10 +214,10 @@ public class ProfileRepository {
 			}
 		} else {
 			if (profileCache.exists()) {
-				Set<String> names = profileCache.getNames(uuid);
+				List<String> names = profileCache.getNames(uuid);
 
 				if (names.size() > 0) {
-					profile = new MojangProfile(new ArrayList<>(names).get(0), uuid);
+					profile = new MojangProfile(names.get(0), uuid);
 					profile.setNames(names);
 					return profile;
 				}

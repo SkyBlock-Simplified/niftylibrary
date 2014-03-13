@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.mojang;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class MojangProfile {
@@ -9,7 +9,7 @@ public class MojangProfile {
 	private static final transient Pattern UUID_PATTERN = Pattern.compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)");
 	private String id;
 	private String name;
-	private final Set<String> names = new HashSet<>();
+	private final List<String> names = new ArrayList<>();
 
 	MojangProfile(String name, String id) {
 		this.name = name;
@@ -28,11 +28,11 @@ public class MojangProfile {
 		return this.name;
 	}
 
-	public Set<String> getNames() {
+	public List<String> getNames() {
 		return this.names;
 	}
 
-	void setNames(Set<String> names) {
+	void setNames(List<String> names) {
 		this.names.addAll(names);
 	}
 
