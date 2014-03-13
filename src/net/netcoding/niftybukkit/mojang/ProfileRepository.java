@@ -31,10 +31,6 @@ public class ProfileRepository {
 	private static final transient HttpClient httpClient = new HttpClient();
 
 	public static MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
-		return searchByPlayer(player)[0];
-	}
-
-	public static MojangProfile searchByExactUsername(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
 	}
 
@@ -48,7 +44,7 @@ public class ProfileRepository {
 			}
 		}
 
-		throw new ProfileNotFoundException(username);
+		throw ProfileNotFoundException.InvalidUsername(username);
 	}
 
 	public static MojangProfile[] searchByPlayer(Player... players) throws ProfileNotFoundException {
@@ -71,7 +67,7 @@ public class ProfileRepository {
 	}
 
 	public static MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
-		if (usernames == null || usernames.size() == 0) return null;
+		if (usernames == null || usernames.size() == 0) throw ProfileNotFoundException.InvalidUsernames(usernames);
 		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
 		List<MojangProfile> profiles = new ArrayList<>();
 		MySQL mysql = NiftyBukkit.getMySQL();
@@ -110,10 +106,11 @@ public class ProfileRepository {
 						public String handle(ResultSet result) throws SQLException {
 							return result.next() ? result.getString("uuid") : null;
 						}
-					});
+					}, criteria.getName());
 
 					if (uuid != null) {
 						MojangProfile profile = new MojangProfile(criteria.getName(), uuid);
+
 						profile.setNames(mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<Set<String>>() {
 							@Override
 							public Set<String> handle(ResultSet result) throws SQLException {
@@ -122,11 +119,13 @@ public class ProfileRepository {
 								return names;
 							}
 						}, uuid));
+
 						profiles.add(profile);
 						criterion.remove(criteria);
 					}
 				} catch (SQLException ex) {
 					ex.printStackTrace();
+					break;
 				}
 			} else {
 				if (profileCache.exists()) {
@@ -175,13 +174,62 @@ public class ProfileRepository {
 		}
 
 		if (profiles.size() == 0)
-			throw new ProfileNotFoundException(usernames);
+			throw ProfileNotFoundException.InvalidUsernames(usernames);
 		else
 			return profiles.toArray(new MojangProfile[profiles.size()]);
 	}
 
-	public static MojangProfile searchByExactUUID(String uuid) {
-		return null; // TODO
+	public static MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
+		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
+		MySQL mysql = NiftyBukkit.getMySQL();
+		MojangProfileCache profileCache = new MojangProfileCache();
+		MojangProfile profile = null;
+
+		if (!NiftyBukkit.isMysqlMode()) {
+			try {
+				profileCache.init();
+			} catch (InvalidConfigurationException ex) {
+				profileCache.getLog().console(ex);
+				profileCache.delete();
+			}
+		}
+
+		if (NiftyBukkit.isMysqlMode()) {
+			try {
+				profile = mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ? GROUP BY `time`;", new ResultCallback<MojangProfile>() {
+					@Override
+					public MojangProfile handle(ResultSet result) throws SQLException {
+						List<String> names = new ArrayList<>();
+						while (result.next()) names.add(result.getString("user"));
+
+						if (names.size() > 0) {
+							MojangProfile profile = new MojangProfile(names.get(0), uuid);
+							profile.setNames(new HashSet<>(names));
+							return profile;
+						}
+
+						return null;
+					}
+				}, uuid);
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		} else {
+			if (profileCache.exists()) {
+				Set<String> names = profileCache.getNames(uuid);
+
+				if (names.size() > 0) {
+					profile = new MojangProfile(new ArrayList<>(names).get(0), uuid);
+					profile.setNames(names);
+					return profile;
+				}
+			}
+		}
+
+		if (profile == null)
+			throw ProfileNotFoundException.InvalidUUID(uuid);
+		else
+			return profile;
 	}
 
 	private static ProfileSearchResult search(URL url, HttpBody body, List<HttpHeader> headers) throws IOException {

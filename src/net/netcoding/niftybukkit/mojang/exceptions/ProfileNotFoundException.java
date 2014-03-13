@@ -7,12 +7,20 @@ import net.netcoding.niftybukkit.util.StringUtil;
 @SuppressWarnings("serial")
 public class ProfileNotFoundException extends Exception {
 
-	public ProfileNotFoundException(String name) {
-		super(String.format("The mojang profile data for user %s could not be found!", name));
+	ProfileNotFoundException(String message) {
+		super(message);
 	}
 
-	public ProfileNotFoundException(List<String> names) {
-		super(String.format("The mojang profile data for users %s could not be found!", StringUtil.implode(", ", names)));
+	public static ProfileNotFoundException InvalidUUID(String uuid) {
+		return new ProfileNotFoundException(String.format("The mojang profile data for uuid [%s] could not be found!", uuid));
+	}
+
+	public static ProfileNotFoundException InvalidUsername(String name) {
+		return new ProfileNotFoundException(String.format("The mojang profile data for user [%s] could not be found!", name));
+	}
+
+	public static ProfileNotFoundException InvalidUsernames(List<String> names) {
+		return new ProfileNotFoundException(String.format("The mojang profile data for users [%s] could not be found!", StringUtil.implode(", ", names)));
 	}
 
 }
