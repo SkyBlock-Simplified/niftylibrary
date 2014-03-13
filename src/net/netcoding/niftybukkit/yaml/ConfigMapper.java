@@ -117,16 +117,19 @@ public class ConfigMapper extends BukkitHelper {
 			ArrayList<String> keyChain = new ArrayList<>();
 			String yamlString = yaml.dump(root.getValues(true));
 			StringBuilder writeLines = new StringBuilder();
+			String[] yamlSplit = yamlString.split("\n");
 
-			for (String line : yamlString.split("\n")) {
+			for (int y = 0; y < yamlSplit.length; y++) {
+				String line = yamlSplit[y];
+
 				if (line.startsWith(new String(new char[depth]).replace("\0", " "))) {
 					keyChain.add(line.split(":")[0].trim());
 					depth += 2;
-					writeLines.append("\n");
 				} else {
 					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
 					else {
+						writeLines.append("\n");
 						int spaces = 0;
 						for (int i = 0; i < line.length(); i++) {
 							if (line.charAt(i) == ' ')
@@ -165,7 +168,7 @@ public class ConfigMapper extends BukkitHelper {
 				}
 
 				writeLines.append(line);
-				writeLines.append("\n");
+				if (y < yamlSplit.length - 1) writeLines.append("\n");
 			}
 
 			fileWriter.write(writeLines.toString());
