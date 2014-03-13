@@ -15,29 +15,32 @@ class MojangProfileCache extends Config {
 	@SuppressWarnings("unused")
 	private org.bukkit.block.Block block = Bukkit.getServer().getWorld("world").getBlockAt(3, 72, -107);
 
-	private Map<String, List<String>> users = new HashMap<>();
+	private Map<String, String> users = new HashMap<>();
 
 	MojangProfileCache() {
 		super(NiftyBukkit.getPlugin(), "uuids.yml");
 	}
 
 	void add(MojangProfile profile) {
-		if (this.users.get(profile.getUniqueId()) == null) this.users.put(profile.getUniqueId(), new ArrayList<String>());
-		this.users.get(profile.getUniqueId()).add(profile.getName());
+		this.users.put(profile.getUniqueId(), profile.getName());
 	}
 
 	public List<String> getUUIDs() {
 		return new ArrayList<>(this.users.keySet());
 	}
 
-	public List<String> getNames(String uuid) {
+	public List<String> getNames() {
+		return new ArrayList<>(this.users.keySet());
+	}
+
+	public String getUsername(String uuid) {
 		return this.users.get(uuid);
 	}
 
-	public String findUUID(String username) {
-		for (String uuid : this.getUUIDs()) {
-			for (String search : this.getNames(uuid)) {
-				if (search.equals(username))
+	public String getUUID(String username) {
+		if (this.users.containsValue(username)) {
+			for (String uuid : this.getUUIDs()) {
+				if (this.users.get(uuid).equalsIgnoreCase(username))
 					return uuid;
 			}
 		}

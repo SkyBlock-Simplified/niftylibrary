@@ -107,18 +107,7 @@ public class ProfileRepository {
 					}, criteria.getName());
 
 					if (uuid != null) {
-						MojangProfile profile = new MojangProfile(criteria.getName(), uuid);
-
-						profile.setNames(mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<List<String>>() {
-							@Override
-							public List<String> handle(ResultSet result) throws SQLException {
-								List<String> names = new ArrayList<>();
-								while (result.next()) names.add(result.getString("user"));
-								return names;
-							}
-						}, uuid));
-
-						profiles.add(profile);
+						profiles.add(new MojangProfile(criteria.getName(), uuid));
 						criterion.remove(criteria);
 					}
 				} catch (SQLException ex) {
@@ -127,12 +116,10 @@ public class ProfileRepository {
 				}
 			} else {
 				if (profileCache.exists()) {
-					String uuid = profileCache.findUUID(criteria.getName());
+					String uuid = profileCache.getUUID(criteria.getName());
 
 					if (uuid != null) {
-						MojangProfile profile = new MojangProfile(criteria.getName(), uuid);
-						profile.setNames(profileCache.getNames(uuid));
-						profiles.add(profile);
+						profiles.add(new MojangProfile(criteria.getName(), uuid));
 						criterion.remove(criteria);
 					}
 				} else
@@ -163,8 +150,10 @@ public class ProfileRepository {
 					NiftyBukkit.getPlugin().getLog().console(ex);
 				}
 			} else {
-				profileCache.add(profile);
 				shouldSave = true;
+
+				if (!profileCache.getUUIDs().contains(profile.getUniqueId()))
+					profileCache.add(profile);
 			}
 		}
 
@@ -188,7 +177,6 @@ public class ProfileRepository {
 		MySQL mysql = NiftyBukkit.getMySQL();
 		MojangProfileCache profileCache = new MojangProfileCache();
 		MojangProfile profile = null;
-		boolean shouldSave = false;
 
 		if (!NiftyBukkit.isMysqlMode()) {
 			try {
@@ -206,14 +194,7 @@ public class ProfileRepository {
 					public MojangProfile handle(ResultSet result) throws SQLException {
 						List<String> names = new ArrayList<>();
 						while (result.next()) names.add(result.getString("user"));
-
-						if (names.size() > 0) {
-							MojangProfile profile = new MojangProfile(names.get(0), uuid);
-							profile.setNames(names);
-							return profile;
-						}
-
-						return null;
+						return names.size() > 0 ? new MojangProfile(names.get(0), uuid) : null;
 					}
 				}, uuid);
 			} catch (SQLException ex) {
@@ -221,12 +202,8 @@ public class ProfileRepository {
 			}
 		} else {
 			if (profileCache.exists()) {
-				List<String> names = profileCache.getNames(uuid);
-
-				if (names.size() > 0) {
-					profile = new MojangProfile(names.get(0), uuid);
-					profile.setNames(names);
-				}
+				if (profileCache.getUUIDs().contains(uuid))
+					profile = new MojangProfile(profileCache.getUsername(uuid), uuid);
 			}
 		}
 
@@ -234,28 +211,24 @@ public class ProfileRepository {
 			try {
 				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
 				UUIDSearchResult result = gson.fromJson(httpClient.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid), headers), UUIDSearchResult.class);
-
 				if (result != null) {
 					profile = new MojangProfile(result.getUniqueId(), result.getName());
-					shouldSave = true;
+
+					if (NiftyBukkit.isMysqlMode()) {
+						try {
+							mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
+						} catch (SQLException ex) {
+							NiftyBukkit.getPlugin().getLog().console(ex);
+						}
+					} else {
+						if (profileCache.exists()) {
+							if (profileCache.getUUIDs().contains(uuid))
+								profileCache.add(profile);
+						}
+					}
 				}
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
-			}
-		}
-
-		if (shouldSave) {
-			if (NiftyBukkit.isMysqlMode()) {
-				try {
-					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
-				} catch (SQLException ex) {
-					NiftyBukkit.getPlugin().getLog().console(ex);
-				}
-			} else {
-				if (profileCache.exists()) {
-					profileCache.add(profile);
-					profileCache.save();
-				}
 			}
 		}
 
@@ -281,7 +254,7 @@ public class ProfileRepository {
 		}
 
 		private static class UUIDProperties {
-			
+
 			private String name;
 			private String value;
 			private String signature;
@@ -289,15 +262,15 @@ public class ProfileRepository {
 			public String getName() {
 				return this.name;
 			}
-			
+
 			public String getValue() {
 				return this.value;
 			}
-			
+
 			public String getSignature() {
 				return this.value;
 			}
-			
+
 		}
 
 	}
