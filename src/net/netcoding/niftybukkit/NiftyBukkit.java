@@ -2,27 +2,26 @@ package net.netcoding.niftybukkit;
 
 import java.lang.reflect.Field;
 
+import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
-import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-@SuppressWarnings("rawtypes")
-public class NiftyBukkit extends JavaPlugin implements Listener {
+public class NiftyBukkit extends JavaPlugin {
 
 	private static transient JavaPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
 	private static final transient String bukkitPath;
 	private static final transient String minecraftPath;
+	private static transient MySQL mysql;
+	private static boolean isMysqlMode;
 
 	static {
-		Class craftServer = Bukkit.getServer().getClass();
+		Class<?> craftServer = Bukkit.getServer().getClass();
 		bukkitPath = craftServer.getPackage().getName();
 		String mcPath = "";
 
@@ -36,11 +35,27 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		this.saveDefaultConfig();
+		this.saveConfig();
 		plugin = this;
 		itemDatabase = new ItemDatabase(this);
+
+		try {
+			FileConfiguration config = this.getConfig();
+			mysql = new MySQL(config.getString("host"), config.getInt("port"),
+					config.getString("schema"), config.getString("user"),
+					config.getString("pass"));
+		} catch (Exception ex) { }
+
+		if (isMysqlMode = mysql.testConnection()) {
+			mysql.setAutoReconnect();
+			//this.getLog().console("Using MySQL Storage");
+		}// else
+			//this.getLog().console("Using YAML Storage");
+
 		new BungeeHelper(this).register();
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
-		this.getServer().getPluginManager().registerEvents(this, this);
+		this.getServer().getPluginManager().registerEvents(new NiftyListener(this), this);
 	}
 
 	@Override
@@ -61,6 +76,10 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 		return minecraftPath;
 	}
 
+	public static MySQL getMySQL() {
+		return mysql;
+	}
+
 	public static JavaPlugin getPlugin() {
 		return plugin;
 	}
@@ -70,29 +89,26 @@ public class NiftyBukkit extends JavaPlugin implements Listener {
 			RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 			return (permissionProvider != null ? permissionProvider.getProvider() : null);
 		} catch (Exception ex) { }
-
+	
 		return null;
 	}
 
 	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {
-		if (protocolManagerExists())
+		try {
 			return com.comphenix.protocol.ProtocolLibrary.getProtocolManager();
-		else
-			return null;
+		} catch (Exception ex) { return null; }
 	}
 
-	@EventHandler
-	public void onPlayerJoin(final PlayerJoinEvent event) {
-		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
-			@Override
-			public void run() {
-				Bukkit.getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(event.getPlayer()));
-			}
-		}, 10L);
+	public static boolean isMysqlMode() {
+		return isMysqlMode;
 	}
 
 	public static boolean protocolManagerExists() {
 		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("ProtocolLib") != null;
+	}
+
+	public static boolean vaultExists() {
+		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("Vault") != null;
 	}
 
 }

@@ -29,10 +29,10 @@ public class WrapperPlayServerSpawnEntity extends AbstractPacket {
 		super(fromEntity(entity, type, objectData), TYPE);
 	}
 
-	// Useful constructor
 	private static PacketContainer fromEntity(Entity entity, int type, int objectData) {
 		if (entityConstructor == null)
 			entityConstructor = NiftyBukkit.getProtocolManager().createPacketConstructor(TYPE, entity, type, objectData);
+
 		return entityConstructor.createPacket(entity, type, objectData);
 	}
 

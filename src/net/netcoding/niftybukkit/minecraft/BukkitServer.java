@@ -9,8 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,14 +16,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
-
 import net.minecraft.util.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.minecraft.StatusResponse.Player;
-import net.netcoding.niftybukkit.minecraft.StatusResponse.Players;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentIHashMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 @SuppressWarnings("unused")
 public class BukkitServer {
@@ -177,11 +173,11 @@ public class BukkitServer {
 			this.setMaxPlayers(response.getPlayers().getMax());
 			this.setPlayerCount(response.getPlayers().getOnline());
 			this.online = true;
-
 			this.playerList.clear();
-			Players players = response.getPlayers();
+			StatusResponse.Players players = response.getPlayers();
+
 			if (players.getSample() != null) {
-				for (Player player : players.getSample())
+				for (StatusResponse.Player player : players.getSample())
 					this.playerList.add(player.getName());
 			}
 		} catch (IOException ex) {
@@ -287,6 +283,90 @@ public class BukkitServer {
 
 	public void setSocketTimeout(int timeout) {
 		this.socketTimeout = timeout;
+	}
+
+	private static class StatusResponse {
+
+		private String description;
+		private Players players;
+		private Version version;
+		private String favicon;
+		private int time;
+
+		public String getMotd() {
+			return description;
+		}
+
+		public Players getPlayers() {
+			return players;
+		}
+
+		public Version getVersion() {
+			return version;
+		}
+
+		public String getFavicon() {
+			return favicon;
+		}
+
+		public int getTime() {
+			return time;
+		}
+
+		public void setTime(int time) {
+			this.time = time;
+		}
+
+		protected static class Players {
+
+			private int max;
+			private int online;
+			private List<Player> sample;
+
+			public int getMax() {
+				return max;
+			}
+
+			public int getOnline() {
+				return online;
+			}
+
+			public List<Player> getSample() {
+				return sample;
+			}
+
+		}
+
+		protected static class Player {
+
+			private String name;
+			private String id;
+
+			public String getName() {
+				return name;
+			}
+
+			public String getId() {
+				return id;
+			}
+
+		}
+
+		protected static class Version {
+
+			private String name;
+			private int protocol;
+
+			public String getName() {
+				return name;
+			}
+
+			public int getProtocol() {
+				return protocol;
+			}
+
+		}
+
 	}
 
 }

@@ -21,7 +21,6 @@ public class List extends Converter {
 			newList = ((java.util.List<Object>)type.newInstance());
 		} catch (Exception e) { }
 
-
 		if (genericType.getActualTypeArguments()[0] instanceof Class && net.netcoding.niftybukkit.yaml.Config.class.isAssignableFrom((Class<?>)genericType.getActualTypeArguments()[0])) {
 			Converter converter = this.getConverter().getConverter(net.netcoding.niftybukkit.yaml.Config.class);
 
@@ -46,7 +45,7 @@ public class List extends Converter {
 			Converter converter = this.getConverter().getConverter(net.netcoding.niftybukkit.yaml.Config.class);
 
 			for(int i = 0; i < values.size(); i++)
-				newList.add(converter.fromConfig((Class<?>) genericType.getActualTypeArguments()[0], values.get(i), null));
+				newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], values.get(i), null));
 		} else
 			newList = values;
 

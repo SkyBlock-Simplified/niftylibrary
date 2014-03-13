@@ -40,7 +40,7 @@ public class DatabaseNotification {
 		this.table    = table;
 		this.event    = event;
 		this.name     = String.format("on%s%s", this.table, this.event.toUppercase());
-		this.query(); // Load latest activity to avoid errors
+		this.query();
 		this.listener = listener;
 		this.loadPrimaryKeys();
 

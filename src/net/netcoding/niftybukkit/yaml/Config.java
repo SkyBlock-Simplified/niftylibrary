@@ -22,8 +22,16 @@ public class Config extends ConfigMapper {
 		if (CONFIG_FILE == null) throw new IllegalArgumentException("Filename cannot be null!");
 	}
 
+	public boolean exists() {
+		return CONFIG_FILE.exists();
+	}
+
+	public boolean delete() {
+		return CONFIG_FILE.delete();
+	}
+
 	public void init() throws InvalidConfigurationException {
-		if (!CONFIG_FILE.exists()) {
+		if (!this.exists()) {
 			if (CONFIG_FILE.getParentFile() != null)
 				CONFIG_FILE.getParentFile().mkdirs();
 
