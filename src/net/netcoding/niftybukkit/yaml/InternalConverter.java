@@ -14,6 +14,7 @@ public class InternalConverter {
 	static {
 		try {
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Array.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Block.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Config.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.List.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Location.class);
