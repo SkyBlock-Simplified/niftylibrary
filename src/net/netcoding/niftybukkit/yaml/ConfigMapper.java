@@ -122,6 +122,7 @@ public class ConfigMapper extends BukkitHelper {
 				if (line.startsWith(new String(new char[depth]).replace("\0", " "))) {
 					keyChain.add(line.split(":")[0].trim());
 					depth += 2;
+					writeLines.append("\n");
 				} else {
 					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
@@ -164,7 +165,7 @@ public class ConfigMapper extends BukkitHelper {
 				}
 
 				writeLines.append(line);
-				writeLines.append("\n\n");
+				writeLines.append("\n");
 			}
 
 			fileWriter.write(writeLines.toString());

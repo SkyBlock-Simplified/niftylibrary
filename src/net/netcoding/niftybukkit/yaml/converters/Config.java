@@ -15,6 +15,7 @@ public class Config extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+		if (section instanceof Config) return section;
 		net.netcoding.niftybukkit.yaml.Config obj = (net.netcoding.niftybukkit.yaml.Config)type.cast(type.newInstance());
 		obj.loadFromMap((Map<?, Object>)((section instanceof Map) ? section : ((ConfigSection)section).getRawMap()));
 		return obj;

@@ -17,7 +17,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Config extends ConfigMapper {
 
+	private transient boolean skipFailedConversion = false;
+
 	public Config(JavaPlugin plugin, String fileName, String... header) {
+		this(plugin, fileName, false, header);
+	}
+
+	public Config(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) {
 		super(plugin, fileName, header);
 		if (CONFIG_FILE == null) throw new IllegalArgumentException("Filename cannot be null!");
 	}
@@ -75,14 +81,16 @@ public class Config extends ConfigMapper {
 				try {
 					InternalConverter.fromConfig(this, field, root, path);
 				} catch (Exception ex) {
-					throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
+					if (!this.isSuppressingFailures())
+						throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
 				}
 			} else {
 				try {
 					InternalConverter.toConfig(this, field, root, path);
 					save = true;
 				} catch (Exception ex) {
-					throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
+					if (!this.isSuppressingFailures())
+						throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
 				}
 			}
 		}
@@ -120,9 +128,14 @@ public class Config extends ConfigMapper {
 			try {
 				InternalConverter.toConfig(this, field, root, path);
 			} catch (Exception ex) {
-				throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);
+				if (!this.isSuppressingFailures())
+					throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);
 			}
 		}
+	}
+
+	public boolean isSuppressingFailures() {
+		return this.skipFailedConversion;
 	}
 
 	public void load() throws InvalidConfigurationException {
@@ -155,6 +168,14 @@ public class Config extends ConfigMapper {
 		if (file == null) throw new IllegalArgumentException("File argument can not be null");
 		CONFIG_FILE = file;
 		this.save();
+	}
+
+	public void setSuppressFailures() {
+		this.setSuppressFailures(true);
+	}
+
+	public void setSuppressFailures(boolean suppress) {
+		this.skipFailedConversion = suppress;
 	}
 
 	/**
