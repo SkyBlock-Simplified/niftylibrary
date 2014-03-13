@@ -18,6 +18,7 @@ import net.netcoding.niftybukkit.http.HttpBody;
 import net.netcoding.niftybukkit.http.HttpClient;
 import net.netcoding.niftybukkit.http.HttpHeader;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
@@ -27,22 +28,17 @@ public class ProfileRepository {
 
 	private static final int MAX_PAGES_TO_CHECK = 100;
 	private static final transient Gson gson = new Gson();
-	private static final transient HttpClient httpClient;
+	private static final transient HttpClient httpClient = new HttpClient();
 
-	static {
-		httpClient = new HttpClient();
+	public static MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
+		return searchByPlayer(player)[0];
 	}
 
-	public static MojangProfile searchByExactPlayer(Player player) {
-		MojangProfile[] profiles = searchByPlayer(player);
-		return profiles != null ? profiles[0] : null;
-	}
-
-	public static MojangProfile searchByExactUsername(Player player) {
+	public static MojangProfile searchByExactUsername(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
 	}
 
-	public static MojangProfile searchByExactUsername(String username) {
+	public static MojangProfile searchByExactUsername(String username) throws ProfileNotFoundException {
 		MojangProfile[] profiles = searchByUsername(username);
 
 		if (profiles.length > 0) {
@@ -52,14 +48,14 @@ public class ProfileRepository {
 			}
 		}
 
-		return null;
+		throw new ProfileNotFoundException(username);
 	}
 
-	public static MojangProfile[] searchByPlayer(Player... players) {
+	public static MojangProfile[] searchByPlayer(Player... players) throws ProfileNotFoundException {
 		return searchByPlayer(Arrays.asList(players));
 	}
 
-	public static MojangProfile[] searchByPlayer(List<Player> players) {
+	public static MojangProfile[] searchByPlayer(List<Player> players) throws ProfileNotFoundException {
 		List<String> usernames = new ArrayList<>();
 
 		for (Player player : players) {
@@ -70,11 +66,11 @@ public class ProfileRepository {
 		return searchByUsername(usernames);
 	}
 
-	public static MojangProfile[] searchByUsername(String... usernames) {
+	public static MojangProfile[] searchByUsername(String... usernames) throws ProfileNotFoundException {
 		return searchByUsername(Arrays.asList(usernames));
 	}
 
-	public static MojangProfile[] searchByUsername(List<String> usernames) {
+	public static MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
 		if (usernames == null || usernames.size() == 0) return null;
 		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
 		List<MojangProfile> profiles = new ArrayList<>();
@@ -178,7 +174,10 @@ public class ProfileRepository {
 			}
 		}
 
-		return profiles.toArray(new MojangProfile[profiles.size()]);
+		if (profiles.size() == 0)
+			throw new ProfileNotFoundException(usernames);
+		else
+			return profiles.toArray(new MojangProfile[profiles.size()]);
 	}
 
 	public static MojangProfile searchByExactUUID(String uuid) {
