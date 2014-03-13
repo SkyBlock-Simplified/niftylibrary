@@ -12,12 +12,20 @@ import java.util.List;
 
 public class HttpClient {
 
+	public String post(URL url, HttpHeader... headers) throws IOException {
+		return post(url, null, null, headers);
+	}
+
 	public String post(URL url, HttpBody body, HttpHeader... headers) throws IOException {
 		return post(url, null, body, headers);
 	}
 
 	public String post(URL url, Proxy proxy, HttpBody body, HttpHeader... headers) throws IOException {
 		return post(url, proxy, body, Arrays.asList(headers));
+	}
+
+	public String post(URL url, List<HttpHeader> headers) throws IOException {
+		return post(url, null, null, headers);
 	}
 
 	public String post(URL url, HttpBody body, List<HttpHeader> headers) throws IOException {
@@ -38,9 +46,10 @@ public class HttpClient {
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 
-		try (DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
-			writer.write(body.getBytes());
-			//writer.flush();
+		if (body != null) {
+			try (DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
+				writer.write(body.getBytes());
+			}
 		}
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
