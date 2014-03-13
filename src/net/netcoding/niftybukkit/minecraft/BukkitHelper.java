@@ -1,7 +1,5 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.util.List;
-
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
@@ -18,31 +16,13 @@ public class BukkitHelper {
 	public BukkitHelper(JavaPlugin plugin) {
 		this.javaPlugin = plugin;
 		this.logger = new Log(plugin.getLogger());
-	}	public List<String> getAuthor() {
-		return this.getDescriptionFile().getAuthors();
 	}
 
-	public String getDescription() {
-		return this.getDescriptionFile().getDescription();
-	}
-
-	private PluginDescriptionFile getDescriptionFile() {
-		return this.getPlugin().getDescription();
-	}
-
-	public String getName() {
-		return this.getDescriptionFile().getName();
-	}
-
-	public String getVersion() {
-		return this.getDescriptionFile().getVersion();
-	}
-
-	public synchronized Log getLog() {
+	public Log getLog() {
 		return this.logger;
 	}
 
-	public synchronized JavaPlugin getPlugin() {
+	public JavaPlugin getPlugin() {
 		return this.javaPlugin;
 	}
 
@@ -75,7 +55,7 @@ public class BukkitHelper {
 		return !senderName.equalsIgnoreCase("console");
 	}
 
-	public static Player matchPlayer(String playerName) {
+	public static Player findPlayer(String playerName) {
 		Player player = Bukkit.getPlayer(playerName);
 
 		if (player != null)
@@ -90,8 +70,8 @@ public class BukkitHelper {
 		}
 	}
 
-	public static String matchPlayerName(String playerName) {
-		Player player = matchPlayer(playerName);
+	public static String findPlayerName(String playerName) {
+		Player player = findPlayer(playerName);
 
 		if (player != null)
 			return player.getName();

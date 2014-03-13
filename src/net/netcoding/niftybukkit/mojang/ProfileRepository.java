@@ -97,7 +97,7 @@ public class ProfileRepository {
 
 		if (NiftyBukkit.getPlugin().getServer().getOnlineMode()) {
 			for (ProfileCriteria criteria : criterion) {
-				Player player = BukkitHelper.matchPlayer(criteria.getName());
+				Player player = BukkitHelper.findPlayer(criteria.getName());
 
 				if (player != null) {
 					profiles.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));

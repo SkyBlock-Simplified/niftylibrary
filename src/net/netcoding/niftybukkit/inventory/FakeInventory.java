@@ -45,7 +45,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	}
 
 	public void close(String playerName) {
-		this.close(BukkitHelper.matchPlayer(playerName));
+		this.close(BukkitHelper.findPlayer(playerName));
 	}
 
 	public ItemStack getItemOpener() {
@@ -87,7 +87,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	}
 
 	public static boolean isOpenAnywhere(String playerName) {
-		return isOpenAnywhere(matchPlayer(playerName));
+		return isOpenAnywhere(findPlayer(playerName));
 	}
 
 	public FakeInventoryInstance newInstance(Player player) {
@@ -183,7 +183,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	}
 
 	public void open(String playerName, ItemStack[] items) {
-		Player player = matchPlayer(playerName);
+		Player player = findPlayer(playerName);
 		if (player != null) this.open(player, items);
 	}
 

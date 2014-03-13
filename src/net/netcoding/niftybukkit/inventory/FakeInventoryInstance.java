@@ -24,7 +24,7 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 	}
 
 	public Player getPlayer() {
-		return matchPlayer(playerName);
+		return findPlayer(playerName);
 	}
 
 	public String getPlayerName() {
