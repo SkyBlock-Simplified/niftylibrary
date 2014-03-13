@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.yaml.converters;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import net.netcoding.niftybukkit.yaml.InternalConverter;
@@ -11,10 +12,10 @@ public class Set extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.Set<Object> values = (java.util.Set<Object>)obj;
-		java.util.Set<Object> newList = new HashSet<Object>();
+		java.util.List<Object> newList = new ArrayList<Object>();
 
 		try {
-			newList = ((java.util.Set<Object>)type.newInstance());
+			newList = ((java.util.List<Object>)type.newInstance());
 		} catch (Exception e) { }
 
 		if (genericType.getActualTypeArguments()[0] instanceof Class && net.netcoding.niftybukkit.yaml.Config.class.isAssignableFrom((Class<?>)genericType.getActualTypeArguments()[0])) {
@@ -23,14 +24,14 @@ public class Set extends Converter {
 			for (Object valObj : values)
 				newList.add(converter.toConfig((Class<?>)genericType.getActualTypeArguments()[0], valObj, null));
 		} else
-			newList = values;
+			newList.addAll(values);
 
 		return newList;
 	}
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.Set<Object> values = (java.util.Set<Object>)section;
+		java.util.List<Object> values = (java.util.List<Object>)section;
 		java.util.Set<Object> newList = new HashSet<Object>();
 
 		try {
@@ -43,7 +44,7 @@ public class Set extends Converter {
 			for (Object valObj : values)
 				newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], valObj, null));
 		} else
-			newList = values;
+			newList.addAll(values);
 
 		return newList;
 	}
