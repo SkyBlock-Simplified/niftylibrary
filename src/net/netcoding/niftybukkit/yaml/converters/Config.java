@@ -4,14 +4,9 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
 import net.netcoding.niftybukkit.yaml.ConfigSection;
-import net.netcoding.niftybukkit.yaml.InternalConverter;
 
 @SuppressWarnings("unchecked")
 public class Config extends Converter {
-
-	public Config(InternalConverter internalConverter) {
-		super(internalConverter);
-	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) {

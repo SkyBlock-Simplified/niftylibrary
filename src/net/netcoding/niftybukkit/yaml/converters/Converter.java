@@ -2,19 +2,7 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import java.lang.reflect.ParameterizedType;
 
-import net.netcoding.niftybukkit.yaml.InternalConverter;
-
 public abstract class Converter {
-
-	private final transient InternalConverter converter;
-
-	public Converter(InternalConverter converter) {
-		this.converter = converter;
-	}
-
-	protected final InternalConverter getConverter() {
-		return this.converter;
-	}
 
 	/**
 	 * This method gets called when we want to load something out of the File. You get that what you give into the Config

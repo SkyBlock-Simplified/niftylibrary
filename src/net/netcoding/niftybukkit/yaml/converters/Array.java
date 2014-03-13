@@ -2,14 +2,8 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import java.lang.reflect.ParameterizedType;
 
-import net.netcoding.niftybukkit.yaml.InternalConverter;
-
 @SuppressWarnings("unchecked")
 public class Array extends Converter {
-
-	public Array(InternalConverter internalConverter) {
-		super(internalConverter);
-	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {

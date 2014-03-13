@@ -5,18 +5,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.netcoding.niftybukkit.yaml.InternalConverter;
-
 public class Primitive extends Converter {
 
 	private static final transient Set<String> types = new HashSet<>();
 
 	static {
 		types.addAll(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double"));
-	}
-
-	public Primitive(InternalConverter internalConverter) {
-		super(internalConverter);
 	}
 
 	@Override

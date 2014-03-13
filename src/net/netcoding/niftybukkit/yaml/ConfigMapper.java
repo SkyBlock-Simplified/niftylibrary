@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
@@ -20,7 +21,7 @@ import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
 
-public class ConfigMapper extends InternalConverter {
+public class ConfigMapper extends BukkitHelper {
 
 	private final transient Yaml yaml;
 	private final transient HashMap<String, ArrayList<String>> comments = new HashMap<>();

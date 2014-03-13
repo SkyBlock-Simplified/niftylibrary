@@ -9,10 +9,6 @@ import net.netcoding.niftybukkit.yaml.InternalConverter;
 @SuppressWarnings("unchecked")
 public class Map extends Converter {
 
-	public Map(InternalConverter internalConverter) {
-		super(internalConverter);
-	}
-
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		if (genericType != null) {
@@ -28,7 +24,7 @@ public class Map extends Converter {
 						clazz = (Class<?>)genericType.getActualTypeArguments()[1];
 					}
 
-					Converter converter = this.getConverter().getConverter(clazz);
+					Converter converter = InternalConverter.getConverter(clazz);
 					map1.put(entry.getKey(), ( converter != null ) ? converter.toConfig(clazz, entry.getValue(), (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType) genericType.getActualTypeArguments()[1] : null) : entry.getValue());
 				}
 
@@ -79,11 +75,11 @@ public class Map extends Converter {
 						clazz = (Class<?>)genericType.getActualTypeArguments()[1];
 					}
 
-					Converter converter = this.getConverter().getConverter(clazz);
+					Converter converter = InternalConverter.getConverter(clazz);
 					map.put(key, ( converter != null ) ? converter.fromConfig(clazz, entry.getValue(), (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType) genericType.getActualTypeArguments()[1] : null) : entry.getValue());
 				}
 			} else {
-				Converter converter = this.getConverter().getConverter((Class<?>) genericType.getRawType());
+				Converter converter = InternalConverter.getConverter((Class<?>) genericType.getRawType());
 
 				if (converter != null) {
 					return converter.fromConfig((Class<?>) genericType.getRawType(), section, null);

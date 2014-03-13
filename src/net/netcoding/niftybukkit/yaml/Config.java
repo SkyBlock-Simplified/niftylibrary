@@ -73,13 +73,13 @@ public class Config extends ConfigMapper {
 
 			if (root.has(path)) {
 				try {
-					this.fromConfig(this, field, root, path);
+					InternalConverter.fromConfig(this, field, root, path);
 				} catch (Exception ex) {
 					throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
 				}
 			} else {
 				try {
-					this.toConfig(this, field, root, path);
+					InternalConverter.toConfig(this, field, root, path);
 					save = true;
 				} catch (Exception ex) {
 					throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
@@ -118,7 +118,7 @@ public class Config extends ConfigMapper {
 				field.setAccessible(true);
 
 			try {
-				this.toConfig(this, field, root, path);
+				InternalConverter.toConfig(this, field, root, path);
 			} catch (Exception ex) {
 				throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);
 			}
