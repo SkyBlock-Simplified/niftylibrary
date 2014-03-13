@@ -13,11 +13,12 @@ public class InternalConverter {
 
 	static {
 		try {
-			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Primitive.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Array.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Config.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.List.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Set.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Map.class);
-			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Array.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Primitive.class);
 		} catch (InvalidConverterException ex) {
 			throw new IllegalStateException(ex);
 		}
