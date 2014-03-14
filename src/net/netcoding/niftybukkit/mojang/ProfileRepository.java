@@ -72,7 +72,24 @@ public class ProfileRepository {
 		final MojangProfileCache profileCache = new MojangProfileCache();
 		boolean shouldSave = false;
 
-		if (!NiftyBukkit.isMysqlMode()) {
+		if (NiftyBukkit.isMysqlMode()) {
+			if (profileCache.exists()) {
+				NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+					@Override
+					public void run() {
+						for (String uuid : profileCache.getUUIDs()) {
+							try {
+								mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", uuid, profileCache.getUsername(uuid));
+							} catch (SQLException ex) {
+								NiftyBukkit.getPlugin().getLog().console(ex);
+							}
+						}
+
+						profileCache.delete();
+					}
+				});
+			}
+		} else {
 			try {
 				profileCache.init();
 			} catch (InvalidConfigurationException ex) {
@@ -160,24 +177,7 @@ public class ProfileRepository {
 			if (!profiles.contains(profile)) profiles.add(profile);
 		}
 
-		if (NiftyBukkit.isMysqlMode()) {
-			if (profileCache.exists()) {
-				NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
-					@Override
-					public void run() {
-						for (String uuid : profileCache.getUUIDs()) {
-							try {
-								mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", uuid, profileCache.getUsername(uuid));
-							} catch (SQLException ex) {
-								NiftyBukkit.getPlugin().getLog().console(ex);
-							}
-						}
-
-						profileCache.delete();
-					}
-				});
-			}
-		} else if (shouldSave) {
+		if (!NiftyBukkit.isMysqlMode() && shouldSave) {
 			try {
 				profileCache.save();
 			} catch (InvalidConfigurationException ex) {
