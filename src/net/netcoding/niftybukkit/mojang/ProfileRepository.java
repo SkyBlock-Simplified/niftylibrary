@@ -26,6 +26,28 @@ public class ProfileRepository {
 	private static final int MAX_PAGES_TO_CHECK = 100;
 	private static final transient Gson gson = new Gson();
 	private static final transient HttpClient httpClient = new HttpClient();
+	private static final transient MojangProfileCache profileCache = new MojangProfileCache();
+
+	static {
+		if (!NiftyBukkit.isMysqlMode()) {
+			try {
+				profileCache.init();
+			} catch (InvalidConfigurationException ex) {
+				NiftyBukkit.getPlugin().getLog().console(ex);
+				profileCache.delete();
+			}
+		}
+	}
+
+	public static void save() {
+		if (!NiftyBukkit.isMysqlMode()) {
+			try {
+				profileCache.save();
+			} catch (InvalidConfigurationException ex) {
+				NiftyBukkit.getPlugin().getLog().console(ex);
+			}
+		}
+	}
 
 	public static MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
@@ -69,17 +91,6 @@ public class ProfileRepository {
 		List<MojangProfile> profiles = new ArrayList<>();
 		List<MojangProfile> temporary = new ArrayList<>();
 		final MySQL mysql = NiftyBukkit.getMySQL();
-		final MojangProfileCache profileCache = new MojangProfileCache();
-		boolean shouldSave = false;
-
-		if (!NiftyBukkit.isMysqlMode()) {
-			try {
-				profileCache.init();
-			} catch (InvalidConfigurationException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
-				profileCache.delete();
-			}
-		}
 
 		for (String username : usernames) {
 			if (!"".equals(username))
@@ -151,8 +162,6 @@ public class ProfileRepository {
 					NiftyBukkit.getPlugin().getLog().console(ex);
 				}
 			} else {
-				shouldSave = true;
-
 				if (!profileCache.getUUIDs().contains(profile.getUniqueId()))
 					profileCache.add(profile);
 			}
@@ -177,13 +186,6 @@ public class ProfileRepository {
 					}
 				});
 			}
-		} else if (shouldSave) {
-			try {
-				profileCache.save();
-			} catch (InvalidConfigurationException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
-				profileCache.delete();
-			}
 		}
 
 		if (profiles.size() == 0)
@@ -195,17 +197,7 @@ public class ProfileRepository {
 	public static MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
 		MySQL mysql = NiftyBukkit.getMySQL();
-		MojangProfileCache profileCache = new MojangProfileCache();
 		MojangProfile profile = null;
-
-		if (!NiftyBukkit.isMysqlMode()) {
-			try {
-				profileCache.init();
-			} catch (InvalidConfigurationException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
-				profileCache.delete();
-			}
-		}
 
 		if (NiftyBukkit.isMysqlMode()) {
 			try {

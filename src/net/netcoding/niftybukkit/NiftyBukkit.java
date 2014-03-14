@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
+import net.netcoding.niftybukkit.mojang.ProfileRepository;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -62,6 +63,7 @@ public class NiftyBukkit extends BukkitPlugin {
 	public void onDisable() {
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
+		ProfileRepository.save();
 	}
 
 	public static String getBukkitPackage() {
