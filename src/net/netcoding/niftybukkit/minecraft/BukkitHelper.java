@@ -76,7 +76,7 @@ public class BukkitHelper {
 		if (player != null)
 			return player.getName();
 		else
-			return playerName;
+			return null;
 	}
 
 }
