@@ -40,7 +40,7 @@ public class ProfileRepository {
 		}
 	}
 
-	public static void save() {
+	public void save() {
 		if (!NiftyBukkit.isMysqlMode()) {
 			try {
 				if (profileCache.exists())
@@ -51,11 +51,11 @@ public class ProfileRepository {
 		}
 	}
 
-	public static MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
+	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
 	}
 
-	public static MojangProfile searchByExactUsername(String username) throws ProfileNotFoundException {
+	public MojangProfile searchByExactUsername(String username) throws ProfileNotFoundException {
 		MojangProfile[] profiles = searchByUsername(username);
 
 		if (profiles.length > 0) {
@@ -68,11 +68,11 @@ public class ProfileRepository {
 		throw ProfileNotFoundException.InvalidUsername(username);
 	}
 
-	public static MojangProfile[] searchByPlayer(Player... players) throws ProfileNotFoundException {
+	public MojangProfile[] searchByPlayer(Player... players) throws ProfileNotFoundException {
 		return searchByPlayer(Arrays.asList(players));
 	}
 
-	public static MojangProfile[] searchByPlayer(List<Player> players) throws ProfileNotFoundException {
+	public MojangProfile[] searchByPlayer(List<Player> players) throws ProfileNotFoundException {
 		List<String> usernames = new ArrayList<>();
 
 		for (Player player : players) {
@@ -83,11 +83,11 @@ public class ProfileRepository {
 		return searchByUsername(usernames);
 	}
 
-	public static MojangProfile[] searchByUsername(String... usernames) throws ProfileNotFoundException {
+	public MojangProfile[] searchByUsername(String... usernames) throws ProfileNotFoundException {
 		return searchByUsername(Arrays.asList(usernames));
 	}
 
-	public static MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
+	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
 		if (usernames == null || usernames.size() == 0) throw ProfileNotFoundException.InvalidUsernames(usernames);
 		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
 		List<MojangProfile> profiles = new ArrayList<>();
@@ -179,7 +179,7 @@ public class ProfileRepository {
 			return profiles.toArray(new MojangProfile[profiles.size()]);
 	}
 
-	public static MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
+	public MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
 		MojangProfile profile = null;
 

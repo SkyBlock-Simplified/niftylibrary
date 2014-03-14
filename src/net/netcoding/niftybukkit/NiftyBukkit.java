@@ -19,7 +19,8 @@ public class NiftyBukkit extends BukkitPlugin {
 	private static final transient String bukkitPath;
 	private static final transient String minecraftPath;
 	private static transient MySQL mysql;
-	private static boolean isMysqlMode;
+	private static transient boolean isMysqlMode;
+	private static transient ProfileRepository repository;
 
 	static {
 		Class<?> craftServer = Bukkit.getServer().getClass();
@@ -40,6 +41,7 @@ public class NiftyBukkit extends BukkitPlugin {
 		this.saveConfig();
 		plugin = this;
 		itemDatabase = new ItemDatabase(this);
+		repository = new ProfileRepository();
 
 		try {
 			FileConfiguration config = this.getConfig();
@@ -63,7 +65,7 @@ public class NiftyBukkit extends BukkitPlugin {
 	public void onDisable() {
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
-		ProfileRepository.save();
+		repository.save();
 	}
 
 	public static String getBukkitPackage() {
@@ -76,6 +78,10 @@ public class NiftyBukkit extends BukkitPlugin {
 
 	public static String getMinecraftPackage() {
 		return minecraftPath;
+	}
+
+	public static ProfileRepository getMojangRepository() {
+		return repository;
 	}
 
 	public static MySQL getMySQL() {
