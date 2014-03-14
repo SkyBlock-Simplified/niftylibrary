@@ -37,6 +37,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.command = this.getPlugin().getCommand(command);
 		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
 		this.setRequireArgs(requireArgs);
+		this.setCheckPermissions(checkPerms);
 		this.getCommand().setPermissionMessage("");
 
 		if (StringUtil.notEmpty(this.getCommand().getPermission())) {
