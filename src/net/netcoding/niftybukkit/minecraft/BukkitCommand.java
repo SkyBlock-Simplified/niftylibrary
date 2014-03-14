@@ -48,7 +48,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.getCommand().setExecutor(this);
 	}
 
-	public abstract void command(CommandSender sender, String args[]) throws SQLException, Exception;
+	public abstract void command(CommandSender sender, String label, String args[]) throws SQLException, Exception;
 
 	public void editUsage(int index, String arg, String usage) {
 		if (this.usages.containsKey(index)) {
@@ -145,7 +145,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			this.showUsage(sender);
 		else {
 			try {
-				this.command(sender, args);
+				this.command(sender, label, args);
 			} catch (Exception ex) {
 				this.getLog().console(ex);
 			}
