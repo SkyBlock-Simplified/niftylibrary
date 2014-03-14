@@ -11,25 +11,40 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitCommand extends BukkitHelper implements CommandExecutor {
 
 	private transient PluginCommand command = null;
 	private transient boolean requireArgs = true;
+	private transient boolean consoleOnly = false;
+	private transient boolean playerOnly = false;
+	private transient boolean checkPerms = true;
 	private transient Map<Integer, Map<String, String>> usages = new HashMap<>();
 	private transient Map<String, String[]> argCache = new HashMap<>();
+	private transient String permission;
 
 	public BukkitCommand(JavaPlugin plugin, String command) {
 		this(plugin, command, true);
 	}
 
 	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs) {
+		this(plugin, command, requireArgs, true);
+	}
+
+	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs, boolean checkPerms) {
 		super(plugin);
-		(this.command = this.getPlugin().getCommand(command)).setExecutor(this);
+		this.command = this.getPlugin().getCommand(command);
+		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
 		this.setRequireArgs(requireArgs);
+		this.getCommand().setPermissionMessage("");
+
+		if (StringUtil.notEmpty(this.getCommand().getPermission())) {
+			this.permission = this.getCommand().getPermission();
+			this.getCommand().setPermission("");
+		}
+
+		this.getCommand().setExecutor(this);
 	}
 
 	public abstract void command(CommandSender sender, String args[]) throws SQLException, Exception;
@@ -72,8 +87,24 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	@Override
 	public boolean hasPermissions(CommandSender sender, String... permissions) {
 		boolean hasPerms = super.hasPermissions(sender, permissions);
-		if (!hasPerms) this.getLog().noPerms(sender, permissions);
+		if (!hasPerms) this.noPerms(sender, permissions);
 		return hasPerms;
+	}
+
+	public boolean isArgsRequired() {
+		return this.requireArgs;
+	}
+
+	public boolean isCheckingPermissions() {
+		return this.checkPerms;
+	}
+
+	public boolean isConsoleOnly() {
+		return this.consoleOnly;
+	}
+
+	public boolean isPlayerOnly() {
+		return this.playerOnly;
 	}
 
 	private boolean isHelp(String... args) {
@@ -86,10 +117,26 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	@Override
-	@EventHandler(priority = EventPriority.HIGHEST)
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (this.isConsoleOnly() && isPlayer(sender)) {
+			this.getLog().error(sender, "The command %s is only possible from console", this.getCommand().getName());
+			return true;
+		}
+
+		if (this.isPlayerOnly() && isConsole(sender)) {
+			this.getLog().error(sender, "The command %s is not possible from console", this.getCommand().getName());
+			return true;
+		}
+
+		if (isPlayer(sender)) {
+			if (this.isCheckingPermissions() && !sender.hasPermission(permission)) {
+				this.noPerms(sender, permission);
+				return true;
+			}
+		}
+
 		if (!this.storeArgs(sender, args)) {
-			this.getLog().error(sender, "Processing previous request. Try again in a few seconds.");
+			this.getLog().error(sender, "Processing previous request. Try again in a second.");
 			return true;
 		}
 
@@ -107,9 +154,39 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return true;
 	}
 
+	private void noPerms(CommandSender sender, String... permissions) {
+		this.getLog().message(sender, "You do not have the required permission {%1$s}", (Object[])permissions);
+	}
+
 	private void removeArgs(CommandSender sender, String... args) {
 		String senderName = sender.getName();
 		if (this.argCache.containsKey(senderName)) this.argCache.remove(senderName);
+	}
+
+	public void setCheckPermissions() {
+		this.setCheckPermissions(true);
+	}
+
+	public void setCheckPermissions(boolean value) {
+		this.checkPerms = value;
+	}
+
+	public void setConsoleOnly() {
+		this.setConsoleOnly(true);
+	}
+
+	public void setConsoleOnly(boolean value) {
+		this.playerOnly = false;
+		this.consoleOnly = value;
+	}
+
+	public void setPlayerOnly() {
+		this.setPlayerOnly(true);
+	}
+
+	public void setPlayerOnly(boolean value) {
+		this.consoleOnly = false;
+		this.playerOnly = value;
 	}
 
 	public void setRequireArgs() {

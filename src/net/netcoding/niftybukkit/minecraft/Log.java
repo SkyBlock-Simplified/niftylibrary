@@ -31,10 +31,6 @@ public class Log {
 		return String.format("%1$s[%2$s%3$s%1$s]%4$s", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
 	}
 
-	private String getPluginName() throws ClassNotFoundException {
-		return Class.forName(this.logger.getName()).getSimpleName();
-	}
-
 	public void console(Object... args) {
 		console("", null, args);
 	}
@@ -48,6 +44,8 @@ public class Log {
 	}
 
 	public void console(String message, Throwable exception, Object... args) {
+		message = (StringUtil.isEmpty(message) ? "null" : message);
+
 		if (exception != null)
 			this.logger.log(Level.SEVERE, String.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args), exception);
 		else
@@ -78,16 +76,6 @@ public class Log {
 
 		if (!isConsole)
 			sender.sendMessage(parse(message, args));
-	}
-
-	public void noPerms(CommandSender sender, String... permissions) {
-		String message = StringUtil.implode(".", permissions);
-
-		try {
-			message = String.format("%s.%s", this.getPluginName().toLowerCase(), message);
-		} catch (ClassNotFoundException ex) { }
-
-		message(sender, "You do not have the required permission {%1$s}", message);
 	}
 
 	public String parse(String message, Object... args) {
