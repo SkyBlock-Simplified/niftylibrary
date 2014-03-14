@@ -57,10 +57,10 @@ public class StringUtil {
 	}
 
 	public static String implode(String glue, List<String> pieces, int startIndex) throws NullPointerException, IllegalArgumentException, IndexOutOfBoundsException {
-		if (pieces == null) throw new NullPointerException();
+		if (pieces == null) throw new NullPointerException("Pieces cannot be null!");
 		int length = pieces.size();
-		if (length == 0) throw new IllegalArgumentException();
-		if (startIndex > length) throw new IndexOutOfBoundsException();
+		if (length == 0) throw new IllegalArgumentException("Pieces cannot be empty!");
+		if (startIndex > length) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", startIndex, length));
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(pieces.get(startIndex));
