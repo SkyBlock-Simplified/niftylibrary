@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Material;
@@ -34,7 +35,7 @@ public abstract class FakeInventoryFrame extends BukkitHelper {
 	public boolean add(ItemData item, int amount, String displayName, List<String> lore) {
 		ItemStack stack = new ItemStack(item.getId(), amount, item.getData());
 		ItemMeta meta = stack.getItemMeta();
-		if (!"".equals(displayName)) meta.setDisplayName(displayName);
+		if (StringUtil.notEmpty(displayName)) meta.setDisplayName(displayName);
 		List<String> combinedLore = meta.getLore();
 		if (lore != null && lore.size() > 0) combinedLore.addAll(lore);
 		meta.setLore(combinedLore);

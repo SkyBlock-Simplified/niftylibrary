@@ -76,6 +76,14 @@ public class StringUtil {
 		return builder.toString();
 	}
 
+	public static boolean isEmpty(String value) {
+		return "".equals(value) || value == null;
+	}
+
+	public static boolean notEmpty(String value) {
+		return !isEmpty(value);
+	}
+
 	public static List<String> toList(String... strArray) {
 		return new ArrayList<String>(Arrays.asList(strArray));
 	}

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -24,7 +26,7 @@ public abstract class BukkitTabCommand extends BukkitCommand implements TabExecu
 	@Override
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-		if ("".equals(this.getCommand().getPermission()) || this.hasPermissions(sender, this.getCommand().getPermission()))
+		if (StringUtil.isEmpty(this.getCommand().getPermission()) || this.hasPermissions(sender, this.getCommand().getPermission()))
 			return this.tabComplete(sender, args);
 		else
 			return Collections.emptyList();

@@ -16,6 +16,7 @@ import net.netcoding.niftybukkit.http.HttpClient;
 import net.netcoding.niftybukkit.http.HttpHeader;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
+import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
@@ -94,7 +95,7 @@ public class ProfileRepository {
 		final List<MojangProfile> temporary = new ArrayList<>();
 
 		for (String username : usernames) {
-			if (!"".equals(username))
+			if (StringUtil.notEmpty(username))
 				criterion.add(new ProfileCriteria(username));
 		}
 

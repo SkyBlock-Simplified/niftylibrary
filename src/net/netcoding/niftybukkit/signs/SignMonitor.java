@@ -14,6 +14,7 @@ import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -83,7 +84,7 @@ public class SignMonitor extends BukkitListener {
 
 	public void addListener(SignListener listener, String... keys) {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
-		if ("".equals(keys) || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
+		if (keys == null || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
 
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].length() > 15)
@@ -300,7 +301,7 @@ public class SignMonitor extends BukkitListener {
 						SignInfo signInfo = this.signLocations.get(sign.getLocation());
 
 						for (String line : signInfo.getLines()) {
-							if ("".equals(key) || line.toLowerCase().contains(key.toLowerCase())) {
+							if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
 								PacketContainer result = NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN);
 								Integer[] coords = new Integer[] { sign.getX(), sign.getY(), sign.getZ() };
 

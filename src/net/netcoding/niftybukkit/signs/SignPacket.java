@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.signs;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 import com.comphenix.protocol.events.PacketContainer;
 
 class SignPacket {
@@ -51,7 +53,7 @@ class SignPacket {
 		if (lines.length < 1 || lines.length > 4) throw new IllegalArgumentException("You must provide 1-4 lines.");
 
 		String[] push = new String[4];
-		for (int i = 0; i < 4; i++) push[i] = (!"".equals(lines[i]) ? lines[i] : "");
+		for (int i = 0; i < 4; i++) push[i] = (StringUtil.notEmpty(lines[i]) ? lines[i] : "");
 		this.updateSignPacket.getStringArrays().write(0, lines);
 	}
 

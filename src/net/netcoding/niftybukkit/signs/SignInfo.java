@@ -2,6 +2,8 @@ package net.netcoding.niftybukkit.signs;
 
 import java.util.Arrays;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -64,7 +66,7 @@ public class SignInfo {
 	}
 
 	public void setLine(int index, String value) {
-		if ("".equals(value)) value = "";
+		if (StringUtil.isEmpty(value)) value = "";
 		if (value.length() > 15) value = value.substring(0, 15);
 		this.modified[index] = value;
 	}
