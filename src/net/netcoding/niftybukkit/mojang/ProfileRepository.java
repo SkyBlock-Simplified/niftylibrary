@@ -67,8 +67,9 @@ public class ProfileRepository {
 		if (usernames == null || usernames.size() == 0) throw ProfileNotFoundException.InvalidUsernames(usernames);
 		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
 		List<MojangProfile> profiles = new ArrayList<>();
-		MySQL mysql = NiftyBukkit.getMySQL();
-		MojangProfileCache profileCache = new MojangProfileCache();
+		List<MojangProfile> temporary = new ArrayList<>();
+		final MySQL mysql = NiftyBukkit.getMySQL();
+		final MojangProfileCache profileCache = new MojangProfileCache();
 		boolean shouldSave = false;
 
 		if (!NiftyBukkit.isMysqlMode()) {
@@ -90,7 +91,7 @@ public class ProfileRepository {
 				Player player = BukkitHelper.findPlayer(criteria.getName());
 
 				if (player != null) {
-					profiles.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));
+					temporary.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));
 					criterion.remove(criteria);
 				}
 			}
@@ -99,7 +100,7 @@ public class ProfileRepository {
 		for (ProfileCriteria criteria : criterion) {
 			if (NiftyBukkit.isMysqlMode()) {
 				try {
-					String uuid = mysql.query("SELECT `uuid` FROM `ndb_uuids` WHERE `user` = ? GROUP BY `time` LIMIT 1;", new ResultCallback<String>() {
+					String uuid = mysql.query("SELECT `uuid` FROM `ndb_uuids` WHERE `user` = ?;", new ResultCallback<String>() {
 						@Override
 						public String handle(ResultSet result) throws SQLException {
 							return result.next() ? result.getString("uuid") : null;
@@ -135,17 +136,17 @@ public class ProfileRepository {
 				for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
 					NameSearchResult result = gson.fromJson(httpClient.post(new URL("https://api.mojang.com/profiles/page/" + i), body, headers), NameSearchResult.class);
 					if (result.getSize() == 0) break;
-					profiles.addAll(Arrays.asList(result.getProfiles()));
+					temporary.addAll(Arrays.asList(result.getProfiles()));
 				}
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
 		}
 
-		for (MojangProfile profile : profiles) {
+		for (MojangProfile profile : temporary) {
 			if (NiftyBukkit.isMysqlMode()) {
 				try {
-					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
+					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", profile.getUniqueId(), profile.getName());
 				} catch (SQLException ex) {
 					NiftyBukkit.getPlugin().getLog().console(ex);
 				}
@@ -155,9 +156,28 @@ public class ProfileRepository {
 				if (!profileCache.getUUIDs().contains(profile.getUniqueId()))
 					profileCache.add(profile);
 			}
+
+			if (!profiles.contains(profile)) profiles.add(profile);
 		}
 
-		if (!NiftyBukkit.isMysqlMode() && shouldSave) {
+		if (NiftyBukkit.isMysqlMode()) {
+			if (profileCache.exists()) {
+				NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+					@Override
+					public void run() {
+						for (String uuid : profileCache.getUUIDs()) {
+							try {
+								mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", uuid, profileCache.getUsername(uuid));
+							} catch (SQLException ex) {
+								NiftyBukkit.getPlugin().getLog().console(ex);
+							}
+						}
+
+						profileCache.delete();
+					}
+				});
+			}
+		} else if (shouldSave) {
 			try {
 				profileCache.save();
 			} catch (InvalidConfigurationException ex) {
@@ -189,7 +209,7 @@ public class ProfileRepository {
 
 		if (NiftyBukkit.isMysqlMode()) {
 			try {
-				profile = mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ? GROUP BY `time`;", new ResultCallback<MojangProfile>() {
+				profile = mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<MojangProfile>() {
 					@Override
 					public MojangProfile handle(ResultSet result) throws SQLException {
 						List<String> names = new ArrayList<>();
@@ -216,7 +236,7 @@ public class ProfileRepository {
 
 					if (NiftyBukkit.isMysqlMode()) {
 						try {
-							mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`, `time`) VALUES (?, ?, UNIX_TIMESTAMP());", profile.getUniqueId(), profile.getName());
+							mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", profile.getUniqueId(), profile.getName());
 						} catch (SQLException ex) {
 							NiftyBukkit.getPlugin().getLog().console(ex);
 						}
