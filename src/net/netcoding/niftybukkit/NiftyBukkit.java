@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit;
 import java.lang.reflect.Field;
 
 import net.netcoding.niftybukkit.database.MySQL;
-import net.netcoding.niftybukkit.items.ItemDatabase;
+import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 

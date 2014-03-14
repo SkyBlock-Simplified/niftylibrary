@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import net.netcoding.niftybukkit.items.ItemData;
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 

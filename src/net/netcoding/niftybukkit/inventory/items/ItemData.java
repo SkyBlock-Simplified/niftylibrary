@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.items;
+package net.netcoding.niftybukkit.inventory.items;
 
 public class ItemData {
 
