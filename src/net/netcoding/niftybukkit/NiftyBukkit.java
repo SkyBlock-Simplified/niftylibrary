@@ -40,8 +40,9 @@ public class NiftyBukkit extends BukkitPlugin {
 		this.saveDefaultConfig();
 		this.saveConfig();
 		plugin = this;
-		itemDatabase = new ItemDatabase(this);
 		repository = new ProfileRepository();
+		itemDatabase = new ItemDatabase(this);
+		itemDatabase.reload();
 
 		try {
 			FileConfiguration config = this.getConfig();
