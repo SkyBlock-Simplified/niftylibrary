@@ -19,26 +19,26 @@ public class Primitive extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
 		switch(type.getSimpleName()) {
 		case "boolean":
-			return (section instanceof Boolean) ? section : new Boolean((boolean)section).booleanValue();
+			return (obj instanceof Boolean) ? obj : new Boolean((boolean)obj).booleanValue();
 		case "int":
-			return (section instanceof Integer) ? section : new Integer((int)section).intValue();
+			return (obj instanceof Integer) ? obj : new Integer((int)obj).intValue();
 		case "long":
-			return (section instanceof Long) ? section : new Long((int)section).longValue();
+			return (obj instanceof Long) ? obj : new Long((int)obj).longValue();
 		case "short":
-			return (section instanceof Short) ? section : new Integer((int)section).shortValue();
+			return (obj instanceof Short) ? obj : new Integer((int)obj).shortValue();
 		case "byte":
-			return (section instanceof Byte) ? section : new Integer((int)section).byteValue();
+			return (obj instanceof Byte) ? obj : new Integer((int)obj).byteValue();
 		case "double":
-			return (section instanceof Double) ? section : new Double((double)section).doubleValue();
+			return (obj instanceof Double) ? obj : new Double((double)obj).doubleValue();
 		case "float":
-			return (section instanceof Float) ? section : new Double((double)section).floatValue();
+			return (obj instanceof Float) ? obj : new Double((double)obj).floatValue();
 		case "char":
-			return (section instanceof Character) ? section : ((String)section).charAt(0);
+			return (obj instanceof Character) ? obj : ((String)obj).charAt(0);
 		default:
-			return section;
+			return obj;
 		}
 	}
 

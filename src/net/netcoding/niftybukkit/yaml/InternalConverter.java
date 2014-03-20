@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.yaml;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 import net.netcoding.niftybukkit.yaml.converters.Converter;
@@ -10,6 +11,7 @@ import net.netcoding.niftybukkit.yaml.exceptions.InvalidConverterException;
 public class InternalConverter {
 
 	private static transient LinkedHashSet<Converter> converters = new LinkedHashSet<>();
+	private static transient LinkedHashMap<Class<?>, Converter> foundConverters = new LinkedHashMap<>();
 
 	static {
 		try {
@@ -44,9 +46,12 @@ public class InternalConverter {
 	}
 
 	public static Converter getConverter(Class<?> type) {
+		if (foundConverters.containsKey(type))
+			return foundConverters.get(type);
+
 		for (Converter converter : converters) {
 			if (converter.supports(type))
-				return converter;
+				return foundConverters.put(type, converter);
 		}
 
 		return null;

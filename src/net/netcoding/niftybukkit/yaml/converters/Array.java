@@ -11,8 +11,8 @@ public class Array extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.List<Object> values = (java.util.List<Object>)section;
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		java.util.List<Object> values = (java.util.List<Object>)obj;
 		return getArray(type, values);
 	}
 

@@ -11,7 +11,7 @@ import net.netcoding.niftybukkit.yaml.InternalConverter;
 public class ItemStack extends Converter {
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
 		org.bukkit.inventory.ItemStack itemStack = (org.bukkit.inventory.ItemStack)obj;
 		java.util.Map<String, Object> saveMap = new HashMap<>();
 		saveMap.put("id", itemStack.getType() + ((itemStack.getDurability() > 0) ? ":" + itemStack.getDurability() : ""));
@@ -26,8 +26,8 @@ public class ItemStack extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.Map<String, Object> itemstackMap = (java.util.Map<String, Object>)((ConfigSection) section).getRawMap();
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		java.util.Map<String, Object> itemstackMap = (java.util.Map<String, Object>)((ConfigSection) obj).getRawMap();
 		java.util.Map<String, Object> metaMap = (java.util.Map<String, Object>)((ConfigSection) itemstackMap.get("meta")).getRawMap();
 		org.bukkit.inventory.ItemStack stack = NiftyBukkit.getItemDatabase().get((String)itemstackMap.get("id"));
 		stack.setAmount((int)itemstackMap.get("amount"));

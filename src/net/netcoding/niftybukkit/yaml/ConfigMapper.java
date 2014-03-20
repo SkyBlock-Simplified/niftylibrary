@@ -12,6 +12,8 @@ import java.util.Map;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.yaml.annotations.Path;
+import net.netcoding.niftybukkit.yaml.converters.Converter;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +54,12 @@ public class ConfigMapper extends BukkitHelper {
 		comments.clear();
 	}
 
+	public static ConfigSection convertFromMap(Map<?, ?> config) {
+		ConfigSection section = new ConfigSection();
+		section.map.putAll(config);
+		return section;
+	}
+
 	private void convertMapsToSections(Map<?, ?> input, ConfigSection section) {
 		if (input == null) return;
 
@@ -60,7 +68,7 @@ public class ConfigMapper extends BukkitHelper {
 			Object value = entry.getValue();
 
 			if (value instanceof Map)
-				convertMapsToSections((Map<?, ?>) value, section.create(key));
+				convertMapsToSections((Map<?, ?>)value, section.create(key));
 			else
 				section.set(key, value);
 		}
@@ -70,13 +78,18 @@ public class ConfigMapper extends BukkitHelper {
 		return Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers());
 	}
 
-	@SuppressWarnings("unchecked")
-	public void loadFromMap(Map<?, Object> section) throws NoSuchFieldException, IllegalAccessException {
-		for (Map.Entry<String, Object> entry : ((Map<String, Object>)section).entrySet()) {
-			String path = entry.getKey().replace(".", "_");
-			Field field = this.getClass().getDeclaredField(path);
-			if (Modifier.isPrivate(field.getModifiers())) field.setAccessible(true);
-			field.set(this, entry.getValue());
+	public void loadFromMap(Map<?, ?> section) throws Exception {
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (doSkip(field)) continue;
+			String path = field.getName().replace(".", "_");
+
+			if (field.isAnnotationPresent(Path.class))
+				path = field.getAnnotation(Path.class).value();
+
+			if(Modifier.isPrivate(field.getModifiers()))
+				field.setAccessible(true);
+
+			InternalConverter.fromConfig((Config)this, field, convertFromMap(section), path);
 		}
 	}
 
@@ -93,17 +106,26 @@ public class ConfigMapper extends BukkitHelper {
 		}
 	}
 
-	public Map<String, Object> saveToMap() {
+	public Map<?, ?> saveToMap() throws Exception {
 		Map<String, Object> returnMap = new HashMap<>();
 
 		for (Field field : this.getClass().getDeclaredFields()) {
-			String path = field.getName().replaceAll("_", ".");
 			if (doSkip(field)) continue;
-			if(Modifier.isPrivate(field.getModifiers())) field.setAccessible(true);
-			try { returnMap.put(path, field.get(this)); } catch (IllegalAccessException e) { }
+			String path = field.getName().replaceAll("_", ".");
+
+			if (field.isAnnotationPresent(Path.class))
+				path = field.getAnnotation(Path.class).value();
+
+			if(Modifier.isPrivate(field.getModifiers()))
+				field.setAccessible(true);
+
+			try {
+				returnMap.put(path, field.get(this));
+			} catch (IllegalAccessException e) { }
 		}
 
-		return returnMap;
+		Converter converter = InternalConverter.getConverter(Map.class);
+		return (Map<?, ?>)converter.toConfig(HashMap.class, returnMap, null);
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {

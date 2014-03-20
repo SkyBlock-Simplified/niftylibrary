@@ -62,17 +62,11 @@ public class Config extends ConfigMapper {
 		boolean save = false;
 
 		for (Field field : clazz.getDeclaredFields()) {
+			if (doSkip(field)) continue;
 			String path = field.getName().replaceAll("_", ".");
 
-			for (Annotation annotation : field.getAnnotations()) {
-				if (annotation instanceof Path) {
-					path = ((Path)annotation).value();
-					break;
-				}
-			}
-
-			if (doSkip(field))
-				continue;
+			if (field.isAnnotationPresent(Path.class))
+				path = field.getAnnotation(Path.class).value();
 
 			if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
@@ -102,8 +96,8 @@ public class Config extends ConfigMapper {
 		if (!clazz.getSuperclass().equals(Config.class)) internalSave(clazz.getSuperclass());
 
 		for (Field field : clazz.getDeclaredFields()) {
-			String path = field.getName().replaceAll("_", ".");
 			if (doSkip(field)) continue;
+			String path = field.getName().replaceAll("_", ".");
 			ArrayList<String> comments = new ArrayList<>();
 
 			for (Annotation annotation : field.getAnnotations()) {
@@ -116,6 +110,9 @@ public class Config extends ConfigMapper {
 				if (annotation instanceof Path)
 					path = ((Path)annotation).value();
 			}
+
+			if (field.isAnnotationPresent(Path.class))
+				path = field.getAnnotation(Path.class).value();
 
 			if (comments.size() > 0) {
 				for (String comment : comments)
@@ -162,6 +159,7 @@ public class Config extends ConfigMapper {
 		this.clearComments();
 		this.internalSave(this.getClass());
 		this.saveToYaml();
+		this.internalLoad(this.getClass());
 	}
 
 	public void save(File file) throws InvalidConfigurationException {
