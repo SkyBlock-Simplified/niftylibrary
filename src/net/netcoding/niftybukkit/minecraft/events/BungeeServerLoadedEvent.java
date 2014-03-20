@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftybukkit.minecraft.BukkitServer;
+import net.netcoding.niftybukkit.minecraft.BungeeServer;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,9 +8,9 @@ import org.bukkit.event.HandlerList;
 public class BungeeServerLoadedEvent extends Event {
 
 	private static final transient HandlerList handlers = new HandlerList();
-	private final transient BukkitServer server;
+	private final transient BungeeServer server;
 
-	public BungeeServerLoadedEvent(BukkitServer server) {
+	public BungeeServerLoadedEvent(BungeeServer server) {
 		this.server = server;
 	}
 
@@ -23,7 +23,7 @@ public class BungeeServerLoadedEvent extends Event {
 		return handlers;
 	}
 
-	public BukkitServer getServer() {
+	public BungeeServer getServer() {
 		return this.server;
 	}
 
