@@ -1,11 +1,11 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import net.netcoding.niftybukkit.minecraft.BukkitServer;
+import net.netcoding.niftybukkit.minecraft.BungeeServer;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -13,10 +13,10 @@ import org.bukkit.event.HandlerList;
 public class BungeeLoadedEvent extends Event {
 
 	private static final transient HandlerList handlers = new HandlerList();
-	private final transient List<BukkitServer> serverList;
+	private final transient Set<BungeeServer> serverList;
 
-	public BungeeLoadedEvent(Collection<BukkitServer> serverList) {
-		this.serverList = new ArrayList<>(serverList);
+	public BungeeLoadedEvent(Collection<BungeeServer> serverList) {
+		this.serverList = new HashSet<>(serverList);
 	}
 
 	@Override
@@ -28,8 +28,8 @@ public class BungeeLoadedEvent extends Event {
 		return handlers;
 	}
 
-	public List<BukkitServer> getServers() {
-		return Collections.unmodifiableList(serverList);
+	public Set<BungeeServer> getServers() {
+		return Collections.unmodifiableSet(serverList);
 	}
 
 }
