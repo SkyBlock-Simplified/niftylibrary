@@ -24,16 +24,29 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private transient Map<String, String[]> argCache = new HashMap<>();
 	private transient String permission;
 
+	public BukkitCommand(JavaPlugin plugin) {
+		this(plugin, null);
+	}
+
 	public BukkitCommand(JavaPlugin plugin, String command) {
 		this(plugin, command, true);
+	}
+
+	public BukkitCommand(JavaPlugin plugin, boolean requireArgs) {
+		this(plugin, null, requireArgs);
 	}
 
 	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs) {
 		this(plugin, command, requireArgs, true);
 	}
 
+	public BukkitCommand(JavaPlugin plugin, boolean requireArgs, boolean checkPerms) {
+		this(plugin, null, requireArgs, checkPerms);
+	}
+
 	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs, boolean checkPerms) {
 		super(plugin);
+		if (StringUtil.isEmpty(command)) command = this.getClass().getSimpleName().toLowerCase();
 		this.command = this.getPlugin().getCommand(command);
 		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
 		this.setRequireArgs(requireArgs);
@@ -160,8 +173,8 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	private void removeArgs(CommandSender sender, String... args) {
-		String senderName = sender.getName();
-		if (this.argCache.containsKey(senderName)) this.argCache.remove(senderName);
+		if (this.argCache.containsKey(sender.getName()))
+			this.argCache.remove(sender.getName());
 	}
 
 	public void setCheckPermissions() {
