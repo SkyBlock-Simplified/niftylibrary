@@ -1,24 +1,21 @@
 package net.netcoding.niftybukkit.mojang;
 
 import java.net.URL;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.util.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.database.MySQL;
-import net.netcoding.niftybukkit.database.ResultCallback;
 import net.netcoding.niftybukkit.http.HttpBody;
 import net.netcoding.niftybukkit.http.HttpClient;
 import net.netcoding.niftybukkit.http.HttpHeader;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.minecraft.BungeeHelper;
+import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftybukkit.util.StringUtil;
-import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
-import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.entity.Player;
 
@@ -27,30 +24,7 @@ public class ProfileRepository {
 	private static final int MAX_PAGES_TO_CHECK = 100;
 	private static final transient Gson gson = new Gson();
 	private static final transient HttpClient httpClient = new HttpClient();
-	private static final transient MojangProfileCache profileCache = new MojangProfileCache();
-	private static final transient MySQL mysql = NiftyBukkit.getMySQL();
-
-	static {
-		if (!NiftyBukkit.isMysqlMode()) {
-			try {
-				profileCache.init();
-			} catch (InvalidConfigurationException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
-				profileCache.delete();
-			}
-		}
-	}
-
-	public void save() {
-		if (!NiftyBukkit.isMysqlMode()) {
-			try {
-				if (profileCache.exists())
-					profileCache.save();
-			} catch (InvalidConfigurationException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
-			}
-		}
-	}
+	private static final ConcurrentSet<MojangProfile> profileCache = new ConcurrentSet<>();
 
 	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
@@ -90,7 +64,7 @@ public class ProfileRepository {
 
 	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
 		if (usernames == null || usernames.size() == 0) throw ProfileNotFoundException.InvalidUsernames(usernames);
-		ConcurrentList<ProfileCriteria> criterion = new ConcurrentList<>();
+		ConcurrentSet<ProfileCriteria> criterion = new ConcurrentSet<>();
 		List<MojangProfile> profiles = new ArrayList<>();
 		final List<MojangProfile> temporary = new ArrayList<>();
 
@@ -108,36 +82,34 @@ public class ProfileRepository {
 					criterion.remove(criteria);
 				}
 			}
+		} else if (BungeeHelper.bungeeOnline()) {
+			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
+
+			for (ProfileCriteria criteria : criterion) {
+				for (BungeeServer server : helper.getServers()) {
+					if (server.isOnline()) {
+						if (server.getPlayerList().contains(criteria.getName())) {
+							// TODO: Store Mojang Profile
+							criterion.remove(criteria);
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		for (ProfileCriteria criteria : criterion) {
-			if (NiftyBukkit.isMysqlMode()) {
-				try {
-					String uuid = mysql.query("SELECT `uuid` FROM `ndb_uuids` WHERE `user` = ?;", new ResultCallback<String>() {
-						@Override
-						public String handle(ResultSet result) throws SQLException {
-							return result.next() ? result.getString("uuid") : null;
-						}
-					}, criteria.getName());
+			for (MojangProfile profile : profileCache) {
+				if (profile.hasExpired()) {
+					profileCache.remove(profile);
+					continue;
+				}
 
-					if (uuid != null) {
-						profiles.add(new MojangProfile(criteria.getName(), uuid));
-						criterion.remove(criteria);
-					}
-				} catch (SQLException ex) {
-					NiftyBukkit.getPlugin().getLog().console(ex);
+				if (profile.getName().equalsIgnoreCase(criteria.getName())) {
+					profiles.add(profile);
+					criterion.remove(criteria);
 					break;
 				}
-			} else {
-				if (profileCache.exists()) {
-					String uuid = profileCache.getUUID(criteria.getName());
-
-					if (uuid != null) {
-						profiles.add(new MojangProfile(criteria.getName(), uuid));
-						criterion.remove(criteria);
-					}
-				} else
-					break;
 			}
 		}
 
@@ -149,30 +121,12 @@ public class ProfileRepository {
 				for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
 					NameSearchResult result = gson.fromJson(httpClient.post(new URL("https://api.mojang.com/profiles/page/" + i), body, headers), NameSearchResult.class);
 					if (result.getSize() == 0) break;
-					temporary.addAll(Arrays.asList(result.getProfiles()));
+					profiles.addAll(Arrays.asList(result.getProfiles()));
 				}
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
 		}
-
-		for (MojangProfile profile : temporary) {
-			if (NiftyBukkit.isMysqlMode()) {
-				try {
-					mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", profile.getUniqueId(), profile.getName());
-				} catch (SQLException ex) {
-					NiftyBukkit.getPlugin().getLog().console(ex);
-					break;
-				}
-			} else {
-				if (!profileCache.getUUIDs().contains(profile.getUniqueId()))
-					profileCache.add(profile);
-			}
-
-			if (!profiles.contains(profile)) profiles.add(profile);
-		}
-
-		migrate(temporary);
 
 		if (profiles.size() == 0)
 			throw ProfileNotFoundException.InvalidUsernames(usernames);
@@ -182,93 +136,34 @@ public class ProfileRepository {
 
 	public MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
-		MojangProfile profile = null;
+		MojangProfile found = null;
 
-		if (NiftyBukkit.isMysqlMode()) {
-			try {
-				profile = mysql.query("SELECT `user` FROM `ndb_uuids` WHERE `uuid` = ?;", new ResultCallback<MojangProfile>() {
-					@Override
-					public MojangProfile handle(ResultSet result) throws SQLException {
-						List<String> names = new ArrayList<>();
-						while (result.next()) names.add(result.getString("user"));
-						return names.size() > 0 ? new MojangProfile(names.get(0), uuid) : null;
-					}
-				}, uuid);
-			} catch (SQLException ex) {
-				NiftyBukkit.getPlugin().getLog().console(ex);
+		for (MojangProfile profile : profileCache) {
+			if (profile.hasExpired()) {
+				profileCache.remove(profile);
+				continue;
 			}
-		} else {
-			if (profileCache.exists()) {
-				if (profileCache.getUUIDs().contains(uuid))
-					profile = new MojangProfile(profileCache.getUsername(uuid), uuid);
+
+			if (profile.getUniqueId().equalsIgnoreCase(uuid)) {
+				found = profile;
+				break;
 			}
 		}
 
-		if (profile == null) {
+		if (found == null) {
 			try {
 				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
 				UUIDSearchResult result = gson.fromJson(httpClient.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid), headers), UUIDSearchResult.class);
-
-				if (result != null) {
-					profile = new MojangProfile(result.getUniqueId(), result.getName());
-
-					if (NiftyBukkit.isMysqlMode()) {
-						try {
-							mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", profile.getUniqueId(), profile.getName());
-						} catch (SQLException ex) {
-							NiftyBukkit.getPlugin().getLog().console(ex);
-						}
-					} else {
-						if (profileCache.exists()) {
-							if (profileCache.getUUIDs().contains(uuid))
-								profileCache.add(profile);
-						}
-					}
-				}
+				if (result != null) found = new MojangProfile(result.getUniqueId(), result.getName());
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
 		}
 
-		migrate(profile);
-
-		if (profile == null)
+		if (found == null)
 			throw ProfileNotFoundException.InvalidUUID(uuid);
 		else
-			return profile;
-	}
-
-	private static void migrate(final MojangProfile moveMe) {
-		migrate(Arrays.asList(moveMe));
-	}
-
-	private static void migrate(final List<MojangProfile> moveMe) {
-		if (NiftyBukkit.isMysqlMode()) {
-			if (profileCache.exists()) {
-				NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
-					@Override
-					public void run() {
-						List<String> uuids = profileCache.getUUIDs();
-
-						for (MojangProfile profile : moveMe) {
-							if (!uuids.contains(profile.getUniqueId()))
-								uuids.add(profile.getUniqueId());
-						}
-
-						for (String uuid : uuids) {
-							try {
-								mysql.update("INSERT IGNORE INTO `ndb_uuids` (`uuid`, `user`) VALUES (?, ?);", uuid, profileCache.getUsername(uuid));
-							} catch (SQLException ex) {
-								NiftyBukkit.getPlugin().getLog().console(ex);
-								break;
-							}
-						}
-
-						profileCache.delete();
-					}
-				});
-			}
-		}
+			return found;
 	}
 
 	@SuppressWarnings("unused")
