@@ -80,7 +80,15 @@ public class StringUtil {
 		return "".equals(value) || value == null;
 	}
 
+	public static boolean isEmpty(String[] value) {
+		return value == null || value.length == 0;
+	}
+
 	public static boolean notEmpty(String value) {
+		return !isEmpty(value);
+	}
+
+	public static boolean notEmpty(String[] value) {
 		return !isEmpty(value);
 	}
 
