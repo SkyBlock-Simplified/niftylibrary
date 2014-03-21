@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.util.com.google.common.base.Joiner;
+
 public class StringUtil {
 
-	private static final transient Map<String, MessageFormat> cache = new HashMap<String, MessageFormat>();
+	private static final transient Map<String, MessageFormat> messageCache = new HashMap<>();
 
 	public static String join(String format, String... objects) {
-		MessageFormat messageFormat = cache.get(format);
+		MessageFormat messageFormat = messageCache.get(format);
 
 		if (messageFormat == null) {
 			try {
@@ -22,22 +24,22 @@ public class StringUtil {
 				messageFormat = new MessageFormat(format);
 			}
 
-			cache.put(format, messageFormat);
+			messageCache.put(format, messageFormat);
 		}
 
 		return messageFormat.format(objects);
 	}
 
 	public static String implode(String[] pieces) {
-		return implode(toList(pieces), 0);
+		return implode(toList(pieces));
 	}
 
 	public static String implode(List<String> pieces) {
-		return implode("", pieces, 0);
+		return implode("", pieces);
 	}
 
 	public static String implode(String glue, String[] pieces) {
-		return implode(glue, toList(pieces), 0);
+		return implode(glue, toList(pieces));
 	}
 
 	public static String implode(String glue, List<String> pieces) {
@@ -56,24 +58,16 @@ public class StringUtil {
 		return implode(glue, toList(pieces), startIndex);
 	}
 
-	public static String implode(String glue, List<String> pieces, int startIndex) throws NullPointerException, IllegalArgumentException, IndexOutOfBoundsException {
-		if (pieces == null) throw new NullPointerException("Pieces cannot be null!");
-		int length = pieces.size();
-		if (length == 0) throw new IllegalArgumentException("Pieces cannot be empty!");
-		if (startIndex > length) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", startIndex, length));
+	public static String implode(String glue, List<String> pieces, int startIndex) {
+		if (isEmpty(glue)) glue = "";
+		if (isEmpty(pieces)) throw new IllegalArgumentException("Pieces cannot be empty!");
+		if (startIndex > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", startIndex, pieces.size()));
+		List<String> newPieces = new ArrayList<>();
 
-		StringBuilder builder = new StringBuilder();
-		builder.append(pieces.get(startIndex));
-		int _continue = startIndex + 1;
+		for (int i = startIndex; i < pieces.size(); i++)
+			newPieces.add(pieces.get(i));
 
-		if (length >= _continue) {
-			for (int i = _continue; i < length; i++) {
-				builder.append(glue);
-				builder.append(pieces.get(i));
-			}
-		}
-
-		return builder.toString();
+		return Joiner.on(glue).join(newPieces);
 	}
 
 	public static boolean isEmpty(String value) {
@@ -84,11 +78,19 @@ public class StringUtil {
 		return value == null || value.length == 0;
 	}
 
+	public static boolean isEmpty(List<String> value) {
+		return value == null || value.size() == 0;
+	}
+
 	public static boolean notEmpty(String value) {
 		return !isEmpty(value);
 	}
 
 	public static boolean notEmpty(String[] value) {
+		return !isEmpty(value);
+	}
+
+	public static boolean notEmpty(List<String> value) {
 		return !isEmpty(value);
 	}
 
