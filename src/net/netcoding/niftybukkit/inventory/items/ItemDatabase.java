@@ -43,7 +43,7 @@ public class ItemDatabase extends BukkitHelper {
 	}
 
 	@SuppressWarnings("deprecation")
-	public ItemStack get(final String id) throws Exception {
+	public ItemStack get(final String id) throws RuntimeException {
 		int itemid = 0;
 		String itemname = id;
 		short metaData = 0;
@@ -70,31 +70,31 @@ public class ItemDatabase extends BukkitHelper {
 			} else if (Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)) != null)
 				itemid = Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)).getId();
 			else
-				throw new Exception("Unknown item name: " + itemname);
+				throw new RuntimeException("Unknown item name: " + itemname);
 		}
 
-		if (itemid < 1) throw new Exception("Unknown item name: " + itemname);
+		if (itemid < 1) throw new RuntimeException("Unknown item name: " + itemname);
 		final Material mat = Material.getMaterial(itemid);
-		if (mat == null) throw new Exception("Unknown item id: " + itemid);
+		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
 		final ItemStack retval = new ItemStack(mat);
 		retval.setAmount(mat.getMaxStackSize());
 		retval.setDurability(metaData);
 		return retval;
 	}
 
-	public ItemStack get(final String id, final int quantity) throws Exception {
+	public ItemStack get(final String id, final int quantity) throws RuntimeException {
 		final ItemStack retval = get(id.toLowerCase(Locale.ENGLISH));
 		retval.setAmount(quantity);
 		return retval;
 	}
 
 	@SuppressWarnings("deprecation")
-	public int getId(final String itemName) throws Exception {
+	public int getId(final String itemName) throws RuntimeException {
 		return this.get(itemName).getTypeId();
 	}
 
 	@SuppressWarnings("deprecation")
-	public List<ItemStack> getMatching(Player player, String[] args) throws Exception {
+	public List<ItemStack> getMatching(Player player, String[] args) throws RuntimeException {
 		List<ItemStack> is = new ArrayList<ItemStack>();
 
 		if (args.length < 1)
@@ -115,7 +115,7 @@ public class ItemDatabase extends BukkitHelper {
 			is.add(get(args[0]));
 
 		if (is.isEmpty() || is.get(0).getType() == Material.AIR)
-			throw new Exception("No item found!");
+			throw new RuntimeException("No item found!");
 
 		return is;
 	}
@@ -149,7 +149,7 @@ public class ItemDatabase extends BukkitHelper {
 		return name;
 	}
 
-	public List<ItemData> parse(String itemCommaList) throws Exception {
+	public List<ItemData> parse(String itemCommaList) throws NumberFormatException {
 		List<ItemData> itemDataList = new ArrayList<>();
 		String[] itemList = itemCommaList.split(",(?![^\\[]*\\])");
 
