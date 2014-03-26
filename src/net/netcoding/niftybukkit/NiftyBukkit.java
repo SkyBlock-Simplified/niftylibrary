@@ -1,7 +1,5 @@
 package net.netcoding.niftybukkit;
 
-import java.lang.reflect.Field;
-
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
@@ -14,23 +12,8 @@ public class NiftyBukkit extends BukkitPlugin {
 
 	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
-	private static final transient String bukkitPath;
-	private static final transient String minecraftPath;
 	private static transient ProfileRepository repository;
 	private static transient BungeeHelper bungeeHelper;
-
-	static {
-		Class<?> craftServer = Bukkit.getServer().getClass();
-		bukkitPath = craftServer.getPackage().getName();
-		String mcPath = "";
-
-		try {
-			Field mcServer = craftServer.getDeclaredField("console");
-			mcPath = mcServer.getType().getPackage().getName();
-		} catch (Exception ex) { }
-		
-		minecraftPath = mcPath;
-	}
 
 	@Override
 	public void onEnable() {
@@ -57,20 +40,12 @@ public class NiftyBukkit extends BukkitPlugin {
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
 	}
 
-	public static String getBukkitPackage() {
-		return bukkitPath;
-	}
-
 	public static BungeeHelper getBungeeHelper() {
 		return bungeeHelper;
 	}
 
 	public static ItemDatabase getItemDatabase() {
 		return itemDatabase;
-	}
-
-	public static String getMinecraftPackage() {
-		return minecraftPath;
 	}
 
 	public static ProfileRepository getMojangRepository() {
