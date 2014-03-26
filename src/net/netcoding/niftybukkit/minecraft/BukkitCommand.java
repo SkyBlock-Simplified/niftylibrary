@@ -61,7 +61,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.getCommand().setExecutor(this);
 	}
 
-	public abstract void command(CommandSender sender, String alias, String args[]) throws SQLException, Exception;
+	public abstract void onCommand(CommandSender sender, String alias, String[] args) throws SQLException, Exception;
 
 	public void editUsage(int index, String arg, String usage) {
 		if (this.usages.containsKey(index)) {
@@ -158,7 +158,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			this.showUsage(sender);
 		else {
 			try {
-				this.command(sender, label, args);
+				this.onCommand(sender, label, args);
 			} catch (Exception ex) {
 				this.getLog().console(ex);
 			}
@@ -169,7 +169,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	private void noPerms(CommandSender sender, String... permissions) {
-		this.getLog().message(sender, "You do not have the required permission {%1$s}", (Object[])permissions);
+		this.getLog().message(sender, "You do not have the required permission {%1$s}!", (Object[])permissions);
 	}
 
 	private void removeArgs(CommandSender sender, String... args) {
