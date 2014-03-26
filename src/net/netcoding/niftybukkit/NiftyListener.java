@@ -28,7 +28,14 @@ class NiftyListener extends BukkitListener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onPlayerLogin(final AsyncPlayerPreLoginEvent event) {
-		NiftyBukkit.getMojangRepository().searchByExactUsername(event.getName());
+		//NiftyBukkit.getMojangRepository().searchByExactUsername(event.getName());
+
+		/*new BukkitServer("hub.thechunk.net", new ServerPingListener() {
+			@Override
+			public void onServerPing(BukkitServer server) {
+				System.out.println("derp: " + server.getMotd());
+			}
+		}).ping();*/
 	}
 
 }
