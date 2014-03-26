@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.util.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
 public class StringUtil {
 
 	private static final transient Map<String, MessageFormat> messageCache = new HashMap<>();
 
-	public static String join(String format, String... objects) {
+	public static String format(String format, String... objects) {
 		MessageFormat messageFormat = messageCache.get(format);
 
 		if (messageFormat == null) {
