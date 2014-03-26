@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -322,7 +323,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					}
 				}
 			} catch (Exception ex) {
-				this.getLog().console(ex);
+				if (!ex.getClass().equals(EOFException.class))
+					this.getLog().console(ex);
 			}
 		}
 	}
