@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-public class DatabaseNotification {
+public class DatabaseNotification extends BukkitHelper {
 
 	public static final String ACTIVITY_TABLE = "nifty_activity";
 	private final transient TriggerEvent event;
@@ -34,6 +36,7 @@ public class DatabaseNotification {
 	}
 
 	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay, boolean overwrite) throws SQLException {
+		super(NiftyBukkit.getPlugin());
 		createLogTable(mysql);
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
 		this.mysql    = mysql;
@@ -83,7 +86,7 @@ public class DatabaseNotification {
 			} else
 				throw new Exception(String.format("The table `%s`.`%s` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			this.getLog().console(ex);
 		}
 	}
 
@@ -157,7 +160,7 @@ public class DatabaseNotification {
 
 	boolean query() {
 		try {
-			return this.mysql.query(String.format("SELECT `time` FROM `%s` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
+			return this.mysql.query(String.format("SELECT `time` FROM `%s` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC LIMIT 1;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
 					if (result.next()) {
@@ -173,7 +176,7 @@ public class DatabaseNotification {
 				}
 			}, this.table, this.event.toLowercase(), this.recent);
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			this.getLog().console(ex);
 			this.stop();
 		}
 
@@ -202,7 +205,7 @@ public class DatabaseNotification {
 				}
 			}, this.getSchema(), this.getName());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			this.getLog().console(ex);
 		}
 
 		return false;

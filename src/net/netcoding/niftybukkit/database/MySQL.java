@@ -123,14 +123,6 @@ public class MySQL implements Runnable {
 		}
 	}
 
-	public boolean createDatabase() throws SQLException {
-		try (Connection connection = this.getConnection()) {
-			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(String.format("CREATE SCHEMA IF NOT EXISTS `%s`;", this.getSchema())) > 0;
-			}
-		}
-	}
-
 	public boolean createTable(String name, String query) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
