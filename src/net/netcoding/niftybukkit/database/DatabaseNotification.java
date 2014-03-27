@@ -11,7 +11,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class DatabaseNotification {
 
-	public static final String ACTIVITY_TABLE = "ndb_activity";
+	public static final String ACTIVITY_TABLE = "nifty_activity";
 	private final transient TriggerEvent event;
 	private transient int recent;
 	private transient boolean stopped;
