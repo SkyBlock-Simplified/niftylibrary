@@ -54,12 +54,11 @@ public class Config extends ConfigMapper {
 	public void init(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File cannot be null!");
 		CONFIG_FILE = file;
-		init();
+		this.init();
 	}
 
 	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
 		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
-		boolean save = false;
 
 		for (Field field : clazz.getDeclaredFields()) {
 			if (doSkip(field)) continue;
@@ -81,15 +80,13 @@ public class Config extends ConfigMapper {
 			} else {
 				try {
 					InternalConverter.toConfig(this, field, root, path);
-					save = true;
+					InternalConverter.fromConfig(this,  field, root, path);
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
 						throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
 				}
 			}
 		}
-
-		if (save) save();
 	}
 
 	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {
@@ -106,9 +103,6 @@ public class Config extends ConfigMapper {
 
 				if (annotation instanceof Comments)
 					comments.addAll(Arrays.asList(((Comments)annotation).value()));
-
-				if (annotation instanceof Path)
-					path = ((Path)annotation).value();
 			}
 
 			if (field.isAnnotationPresent(Path.class))
@@ -124,6 +118,7 @@ public class Config extends ConfigMapper {
 
 			try {
 				InternalConverter.toConfig(this, field, root, path);
+				InternalConverter.fromConfig(this, field, root, path);
 			} catch (Exception ex) {
 				if (!this.isSuppressingFailures())
 					throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);
@@ -159,7 +154,6 @@ public class Config extends ConfigMapper {
 		this.clearComments();
 		this.internalSave(this.getClass());
 		this.saveToYaml();
-		this.internalLoad(this.getClass());
 	}
 
 	public void save(File file) throws InvalidConfigurationException {
