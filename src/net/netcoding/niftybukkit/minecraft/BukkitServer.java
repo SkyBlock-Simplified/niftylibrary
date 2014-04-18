@@ -96,23 +96,25 @@ public class BukkitServer extends MinecraftServer {
 										setMaxPlayers(response.getPlayers().getMax());
 										setOnline(true);
 										StatusResponse.Players players = response.getPlayers();
-			
-										if (players.getSample() != null) {
-											List<String> current = new ArrayList<>();
 
-											for (StatusResponse.Players.Player player : players.getSample())
-												current.add(player.getName());
+										if (players != null) {
+											if (players.getSample() != null) {
+												List<String> current = new ArrayList<>();
 
-											ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
+												for (StatusResponse.Players.Player player : players.getSample())
+													current.add(player.getName());
 
-											for (MojangProfile profile : playerList) {
-												if (profiles.contains(profile))
-													profiles.remove(profile);
-												else
-													playerList.remove(profile);
+												ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
+
+												for (MojangProfile profile : playerList) {
+													if (profiles.contains(profile))
+														profiles.remove(profile);
+													else
+														playerList.remove(profile);
+												}
+
+												playerList.addAll(profiles);
 											}
-
-											playerList.addAll(profiles);
 										}
 
 										if (listener != null)

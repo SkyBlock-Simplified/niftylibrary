@@ -2,9 +2,7 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.util.StringUtil;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BukkitPlugin extends JavaPlugin {
@@ -38,30 +36,6 @@ public class BukkitPlugin extends JavaPlugin {
 
 	public static boolean isPlayer(String senderName) {
 		return !senderName.equalsIgnoreCase("console");
-	}
-
-	public static Player findPlayer(String playerName) {
-		Player player = Bukkit.getPlayer(playerName);
-
-		if (player != null)
-			return player;
-		else {
-			for (Player iPlayer : Bukkit.getOnlinePlayers()) {
-				if (iPlayer.getName().toLowerCase().startsWith(playerName.toLowerCase()))
-					return iPlayer;
-			}
-
-			return null;
-		}
-	}
-
-	public static String findPlayerName(String playerName) {
-		Player player = findPlayer(playerName);
-
-		if (player != null)
-			return player.getName();
-		else
-			return playerName;
 	}
 
 }

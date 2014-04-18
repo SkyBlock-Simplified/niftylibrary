@@ -5,8 +5,6 @@ import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,18 +22,6 @@ class NiftyListener extends BukkitListener {
 				Bukkit.getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(event.getPlayer()));
 			}
 		}, 10L);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-	public void onPlayerLogin(final AsyncPlayerPreLoginEvent event) {
-		//NiftyBukkit.getMojangRepository().searchByExactUsername(event.getName());
-
-		/*new BukkitServer("hub.thechunk.net", new ServerPingListener() {
-			@Override
-			public void onServerPing(BukkitServer server) {
-				System.out.println("derp: " + server.getMotd());
-			}
-		}).ping();*/
 	}
 
 }

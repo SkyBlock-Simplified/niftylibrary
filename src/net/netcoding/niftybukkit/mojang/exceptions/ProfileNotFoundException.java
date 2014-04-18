@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.mojang.exceptions;
 
 import java.util.List;
+import java.util.UUID;
 
 import net.netcoding.niftybukkit.util.StringUtil;
 
@@ -11,8 +12,8 @@ public class ProfileNotFoundException extends RuntimeException {
 		super(message);
 	}
 
-	public static ProfileNotFoundException InvalidUUID(String uuid) {
-		return new ProfileNotFoundException(String.format("The mojang profile data for uuid [%s] could not be found!", uuid));
+	public static ProfileNotFoundException InvalidUUID(UUID uuid) {
+		return new ProfileNotFoundException(String.format("The mojang profile data for uuid [%s] could not be found!", uuid.toString()));
 	}
 
 	public static ProfileNotFoundException InvalidUsername(String name) {

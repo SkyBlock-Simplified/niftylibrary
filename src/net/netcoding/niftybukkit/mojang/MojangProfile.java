@@ -1,22 +1,24 @@
 package net.netcoding.niftybukkit.mojang;
 
-import net.netcoding.niftybukkit.NiftyBukkit;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class MojangProfile {
 
-	private String id;
+	private UUID id;
 	private String name;
 	private long cached;
+	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
-	MojangProfile(String name, String id) {
+	public MojangProfile(String name, String id) {
 		this.name = name;
-		this.id = id;
+		this.id = UUID.fromString(UUID_FIX.matcher(id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
 		this.updateCacheTime();
 	}
 
-	public String getUniqueId() {
+	public UUID getUniqueId() {
 		if (this.hasExpired()) {
-			this.id = NiftyBukkit.getMojangRepository().searchByExactUsername(this.getName()).getUniqueId();
+			//this.id = NiftyBukkit.getMojangRepository().searchByExactUsername(this.getName()).getUniqueId();
 			this.updateCacheTime();
 		}
 
@@ -32,7 +34,7 @@ public class MojangProfile {
 	}
 
 	void updateCacheTime() {
-		this.cached = System.currentTimeMillis() + 120;
+		this.cached = System.currentTimeMillis() + 60000;
 	}
 
 }

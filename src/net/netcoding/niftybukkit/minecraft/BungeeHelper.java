@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
@@ -281,13 +280,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.setMaxPlayers(input.readInt());
 							int count = input.readInt();
 							server.playerList.clear();
-							List<String> players = new ArrayList<>();
 
-							for (int i = 0; i < count; i++)
-								players.add(input.readUTF());
-
-							if (players.size() > 0)
-								server.playerList.addAll(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(players)));
+							for (int i = 0; i < count; i += 2)
+								server.playerList.add(new MojangProfile(input.readUTF(), input.readUTF()));
 						} else
 							server.reset();
 
@@ -309,13 +304,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						String playerName = input.readUTF();
 
 						if (subChannel.endsWith("Join")) {
-							server.playerList.add(NiftyBukkit.getMojangRepository().searchByExactUsername(playerName));
-							manager.callEvent(new BungeePlayerJoinEvent(server, playerName));
+							MojangProfile profile = new MojangProfile(playerName, input.readUTF());
+							server.playerList.add(profile);
+							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
 							for (MojangProfile profile : server.playerList) {
 								if (profile.getName().equals(playerName)) {
 									server.playerList.remove(profile);
-									manager.callEvent(new BungeePlayerLeaveEvent(server, playerName));
+									manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
 									break;
 								}
 							}

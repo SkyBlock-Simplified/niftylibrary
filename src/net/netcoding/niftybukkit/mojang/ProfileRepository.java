@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import net.minecraft.util.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
@@ -24,7 +25,6 @@ public class ProfileRepository {
 	private static final int MAX_PAGES_TO_CHECK = 100;
 	private static final transient Gson gson = new Gson();
 	private static final transient HttpClient httpClient = new HttpClient();
-	private static final ConcurrentSet<MojangProfile> profileCache = new ConcurrentSet<>();
 
 	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
@@ -63,10 +63,9 @@ public class ProfileRepository {
 	}
 
 	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
-		if (usernames == null || usernames.size() == 0) throw ProfileNotFoundException.InvalidUsernames(usernames);
+		if (StringUtil.isEmpty(usernames)) throw ProfileNotFoundException.InvalidUsernames(usernames);
 		ConcurrentSet<ProfileCriteria> criterion = new ConcurrentSet<>();
 		List<MojangProfile> profiles = new ArrayList<>();
-		final List<MojangProfile> temporary = new ArrayList<>();
 
 		for (String username : usernames) {
 			if (StringUtil.notEmpty(username))
@@ -78,7 +77,7 @@ public class ProfileRepository {
 				Player player = BukkitHelper.findPlayer(criteria.getName());
 
 				if (player != null) {
-					temporary.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));
+					profiles.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));
 					criterion.remove(criteria);
 				}
 			}
@@ -87,28 +86,20 @@ public class ProfileRepository {
 
 			for (ProfileCriteria criteria : criterion) {
 				for (BungeeServer server : helper.getServers()) {
+					boolean skip = false;
+
 					if (server.isOnline()) {
-						if (server.getPlayerList().contains(criteria.getName())) {
-							// TODO: Store Mojang Profile
-							criterion.remove(criteria);
-							break;
+						for (MojangProfile profile : server.getPlayerList()) {
+							if (profile.getName().equalsIgnoreCase(criteria.getName())) {
+								profiles.add(new MojangProfile(profile.getName(), profile.getUniqueId().toString()));
+								criterion.remove(criteria);
+								skip = true;
+								break;
+							}
 						}
 					}
-				}
-			}
-		}
 
-		for (ProfileCriteria criteria : criterion) {
-			for (MojangProfile profile : profileCache) {
-				if (profile.hasExpired()) {
-					profileCache.remove(profile);
-					continue;
-				}
-
-				if (profile.getName().equalsIgnoreCase(criteria.getName())) {
-					profiles.add(profile);
-					criterion.remove(criteria);
-					break;
+					if (skip) break;
 				}
 			}
 		}
@@ -134,19 +125,33 @@ public class ProfileRepository {
 			return profiles.toArray(new MojangProfile[profiles.size()]);
 	}
 
-	public MojangProfile searchByExactUUID(final String uuid) throws ProfileNotFoundException {
+	public MojangProfile searchByExactUUID(final UUID uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
 		MojangProfile found = null;
 
-		for (MojangProfile profile : profileCache) {
-			if (profile.hasExpired()) {
-				profileCache.remove(profile);
-				continue;
-			}
+		if (NiftyBukkit.getPlugin().getServer().getOnlineMode()) {
+			for (Player player : NiftyBukkit.getPlugin().getServer().getOnlinePlayers()) {
+				MojangProfile profile = this.searchByExactPlayer(player);
 
-			if (profile.getUniqueId().equalsIgnoreCase(uuid)) {
-				found = profile;
-				break;
+				if (profile.getUniqueId().equals(uuid)) {
+					found = profile;
+					break;
+				}
+			}
+		} else if (BungeeHelper.bungeeOnline()) {
+			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
+
+			for (BungeeServer server : helper.getServers()) {
+				if (server.isOnline()) {
+					for (MojangProfile profile : server.getPlayerList()) {
+						if (profile.getUniqueId().equals(uuid)) {
+							found = profile;
+							break;
+						}
+					}
+				}
+
+				if (found != null) break;
 			}
 		}
 

@@ -17,19 +17,15 @@ public class NiftyBukkit extends BukkitPlugin {
 
 	@Override
 	public void onEnable() {
-		this.saveDefaultConfig();
-		this.saveConfig();
 		plugin = this;
 		repository = new ProfileRepository();
-		itemDatabase = new ItemDatabase(this);
-		itemDatabase.reload();
+		(itemDatabase = new ItemDatabase(this)).reload();
 
 		new NiftyListener(this);
-		bungeeHelper = new BungeeHelper(this);
-		bungeeHelper.register();
+		(bungeeHelper = new BungeeHelper(this)).register();
+		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL, bungeeHelper);
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 	}
 
 	@Override

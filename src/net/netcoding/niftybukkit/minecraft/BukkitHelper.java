@@ -56,27 +56,19 @@ public class BukkitHelper {
 	}
 
 	public static Player findPlayer(String playerName) {
-		Player player = Bukkit.getPlayer(playerName);
+		playerName = playerName.toLowerCase();
 
-		if (player != null)
-			return player;
-		else {
-			for (Player iPlayer : Bukkit.getOnlinePlayers()) {
-				if (iPlayer.getName().toLowerCase().startsWith(playerName.toLowerCase()))
-					return iPlayer;
-			}
-
-			return null;
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getName().equalsIgnoreCase(playerName))
+				return player;
 		}
-	}
 
-	public static String findPlayerName(String playerName) {
-		Player player = findPlayer(playerName);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getName().toLowerCase().startsWith(playerName))
+				return player;
+		}
 
-		if (player != null)
-			return player.getName();
-		else
-			return null;
+		return null;
 	}
 
 }

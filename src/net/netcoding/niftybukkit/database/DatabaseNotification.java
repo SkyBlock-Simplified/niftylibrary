@@ -184,7 +184,11 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	void sendNotification() {
-		this.listener.onDatabaseNotification(this);
+		try {
+			this.listener.onDatabaseNotification(this);
+		} catch (SQLException ex) {
+			this.getLog().console(ex);
+		}
 	}
 
 	public void stop() {
