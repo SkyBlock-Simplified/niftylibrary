@@ -16,28 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitTabCommand extends BukkitCommand implements TabExecutor {
 
-	public BukkitTabCommand(JavaPlugin plugin) {
-		this(plugin, null);
-	}
-
 	public BukkitTabCommand(JavaPlugin plugin, String command) {
-		this(plugin, command, true);
-	}
-
-	public BukkitTabCommand(JavaPlugin plugin, boolean requireArgs) {
-		this(plugin, null, requireArgs);
-	}
-
-	public BukkitTabCommand(JavaPlugin plugin, String command, boolean requireArgs) {
-		this(plugin, command, requireArgs, true);
-	}
-
-	public BukkitTabCommand(JavaPlugin plugin, boolean requireArgs, boolean checkPerms) {
-		this(plugin, null, requireArgs, checkPerms);
-	}
-
-	public BukkitTabCommand(JavaPlugin plugin, String command, boolean requireArgs, boolean checkPerms) {
-		super(plugin, command, requireArgs, checkPerms);
+		super(plugin, command);
 		this.getCommand().setTabCompleter(this);
 	}
 

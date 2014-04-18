@@ -24,33 +24,11 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private transient Map<String, String[]> argCache = new HashMap<>();
 	private transient String permission;
 
-	public BukkitCommand(JavaPlugin plugin) {
-		this(plugin, null);
-	}
-
 	public BukkitCommand(JavaPlugin plugin, String command) {
-		this(plugin, command, true);
-	}
-
-	public BukkitCommand(JavaPlugin plugin, boolean requireArgs) {
-		this(plugin, null, requireArgs);
-	}
-
-	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs) {
-		this(plugin, command, requireArgs, true);
-	}
-
-	public BukkitCommand(JavaPlugin plugin, boolean requireArgs, boolean checkPerms) {
-		this(plugin, null, requireArgs, checkPerms);
-	}
-
-	public BukkitCommand(JavaPlugin plugin, String command, boolean requireArgs, boolean checkPerms) {
 		super(plugin);
-		if (StringUtil.isEmpty(command)) command = this.getClass().getSimpleName().toLowerCase();
+		if (StringUtil.isEmpty(command)) throw new IllegalArgumentException("Command cannot be null!");
 		this.command = this.getPlugin().getCommand(command);
 		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
-		this.setRequireArgs(requireArgs);
-		this.setCheckPermissions(checkPerms);
 		this.getCommand().setPermissionMessage("");
 
 		if (StringUtil.notEmpty(this.getCommand().getPermission())) {
@@ -133,12 +111,12 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (this.isConsoleOnly() && isPlayer(sender)) {
-			this.getLog().error(sender, "The command %s is only possible from console", this.getCommand().getName());
+			this.getLog().error(sender, "The command {%s} is only possible from console!", this.getCommand().getName());
 			return true;
 		}
 
 		if (this.isPlayerOnly() && isConsole(sender)) {
-			this.getLog().error(sender, "The command %s is not possible from console", this.getCommand().getName());
+			this.getLog().error(sender, "The command %s is not possible from console!", this.getCommand().getName());
 			return true;
 		}
 
