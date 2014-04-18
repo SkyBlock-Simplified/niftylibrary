@@ -13,7 +13,7 @@ public class StringUtil {
 
 	private static final transient Map<String, MessageFormat> messageCache = new HashMap<>();
 
-	public static String format(String format, String... objects) {
+	public static String format(String format, Object... objects) {
 		MessageFormat messageFormat = messageCache.get(format);
 
 		if (messageFormat == null) {

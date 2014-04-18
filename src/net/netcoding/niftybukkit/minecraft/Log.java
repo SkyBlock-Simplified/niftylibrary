@@ -79,7 +79,7 @@ public class Log {
 	}
 
 	public String parse(String message, Object... args) {
-		return ChatColor.GRAY + String.format(RegexUtil.replace(message, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY)), args);
+		return ChatColor.GRAY + StringUtil.format(RegexUtil.replace(message, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY)), args);
 	}
 
 }

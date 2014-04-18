@@ -98,7 +98,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	private boolean isHelp(String... args) {
-		if (args.length > 0 && args[args.length - 1].matches("^\\?|help$"))
+		if (args.length > 0 && args[args.length - 1].matches("^[\\?]{1,}|help$"))
 			return true;
 		else if (this.requireArgs && args.length == 0)
 			return true;
@@ -109,19 +109,19 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (this.isConsoleOnly() && isPlayer(sender)) {
-			this.getLog().error(sender, "The command {%s} is only possible from console!", this.getCommand().getName());
+			this.getLog().error(sender, "The command {{0}} is only possible from console!", this.getCommand().getName());
 			return true;
 		}
 
 		if (this.isPlayerOnly() && isConsole(sender)) {
-			this.getLog().error(sender, "The command %s is not possible from console!", this.getCommand().getName());
+			this.getLog().error(sender, "The command {0} is not possible from console!", this.getCommand().getName());
 			return true;
 		}
 
 		if (isPlayer(sender)) {
-			if (this.isCheckingPerms() && !this.hasPermissions(sender, permission)) {
+			if (this.isCheckingPerms() && !this.hasPermissions(sender, this.permission)) {
 				if (this.isUsingDefaultPermsError())
-					this.getLog().message(sender, "You do not have the required permission {%1$s}!", permission);
+					this.getLog().message(sender, "You do not have the required permission {{0}}!", this.permission);
 
 				return true;
 			}
