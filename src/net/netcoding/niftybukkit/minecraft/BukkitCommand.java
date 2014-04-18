@@ -20,6 +20,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private transient boolean consoleOnly = false;
 	private transient boolean playerOnly = false;
 	private transient boolean checkPerms = true;
+	private transient boolean defaultPermsError = true;
 	private transient Map<Integer, Map<String, String>> usages = new HashMap<>();
 	private transient Map<String, String[]> argCache = new HashMap<>();
 	private transient String permission;
@@ -76,18 +77,11 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return argList;
 	}
 
-	@Override
-	public boolean hasPermissions(CommandSender sender, String... permissions) {
-		boolean hasPerms = super.hasPermissions(sender, permissions);
-		if (!hasPerms) this.noPerms(sender, permissions);
-		return hasPerms;
-	}
-
 	public boolean isArgsRequired() {
 		return this.requireArgs;
 	}
 
-	public boolean isCheckingPermissions() {
+	public boolean isCheckingPerms() {
 		return this.checkPerms;
 	}
 
@@ -97,6 +91,10 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	public boolean isPlayerOnly() {
 		return this.playerOnly;
+	}
+
+	public boolean isUsingDefaultPermsError() {
+		return this.defaultPermsError;
 	}
 
 	private boolean isHelp(String... args) {
@@ -121,8 +119,10 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		}
 
 		if (isPlayer(sender)) {
-			if (this.isCheckingPermissions() && !sender.hasPermission(permission)) {
-				this.noPerms(sender, permission);
+			if (this.isCheckingPerms() && !this.hasPermissions(sender, permission)) {
+				if (this.isUsingDefaultPermsError())
+					this.getLog().message(sender, "You do not have the required permission {%1$s}!", permission);
+
 				return true;
 			}
 		}
@@ -146,20 +146,16 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return true;
 	}
 
-	private void noPerms(CommandSender sender, String... permissions) {
-		this.getLog().message(sender, "You do not have the required permission {%1$s}!", (Object[])permissions);
-	}
-
 	private void removeArgs(CommandSender sender, String... args) {
 		if (this.argCache.containsKey(sender.getName()))
 			this.argCache.remove(sender.getName());
 	}
 
-	public void setCheckPermissions() {
-		this.setCheckPermissions(true);
+	public void setCheckPerms() {
+		this.setCheckPerms(true);
 	}
 
-	public void setCheckPermissions(boolean value) {
+	public void setCheckPerms(boolean value) {
 		this.checkPerms = value;
 	}
 
@@ -217,6 +213,14 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		}
 
 		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
+	}
+
+	public void useDefaultPermsError() {
+		this.useDefaultPermsError(true);
+	}
+
+	public void useDefaultPermsError(boolean value) {
+		this.defaultPermsError = value;
 	}
 
 }
