@@ -39,10 +39,10 @@ public class DatabaseNotification extends BukkitHelper {
 		super(NiftyBukkit.getPlugin());
 		createLogTable(mysql);
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
-		this.mysql    = mysql;
-		this.table    = table;
-		this.event    = event;
-		this.name     = String.format("on%s%s", this.table, this.event.toUppercase());
+		this.mysql = mysql;
+		this.table = table;
+		this.event = event;
+		this.name = String.format("on%s%s", this.table, this.event.toUppercase());
 		this.query();
 		this.listener = listener;
 		this.loadPrimaryKeys();
@@ -58,6 +58,8 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	private void loadPrimaryKeys() throws SQLException {
+		this.primaryColumnNames.clear();
+
 		this.primaryColumnNames.addAll(this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<List<String>>() {
 			@Override
 			public List<String> handle(ResultSet result) throws SQLException {
@@ -74,18 +76,17 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private void createTrigger() throws SQLException {
 		try {
-
 			if (this.primaryColumnNames.size() > 0) {
 				String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
-				String trigger = String.format("CREATE TRIGGER `%s`.`%s` AFTER %s ON `%s` FOR EACH ROW INSERT INTO `%s`.`%s` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES ('%s', '%s', '%s', UNIX_TIMESTAMP(), '%s', ",
-						this.getSchema(), this.getName(), this.getEvent().toUppercase(), this.getTable(), this.getSchema(), ACTIVITY_TABLE, this.getSchema(), this.getTable(), this.getEvent().toLowercase(), primaryKeys);
+				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES ('{0}', '{3}', '{2}', UNIX_TIMESTAMP(), '{5}', ",
+						this.getSchema(), this.getName(), this.getEvent(), this.getTable(), ACTIVITY_TABLE, primaryKeys);
 				String _old = null;
 				String _new = null;
 				if (this.getEvent() != TriggerEvent.INSERT) _old = String.format("CONCAT(OLD.`%s`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
 				if (this.getEvent() != TriggerEvent.DELETE) _new = String.format("CONCAT(NEW.`%s`)", StringUtil.implode("`, ',', NEW.`", this.primaryColumnNames));
-				this.mysql.update(String.format(trigger + "%s, %s);", _old, _new));
+				this.mysql.update(StringUtil.format(trigger + "{0}, {1});", _old, _new));
 			} else
-				throw new Exception(String.format("The table `%s`.`%s` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
+				throw new Exception(StringUtil.format("The table `{0}`.`{1}` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 		} catch (Exception ex) {
 			this.getLog().console(ex);
 		}
@@ -93,7 +94,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private void dropTrigger() {
 		try {
-			this.mysql.update(String.format("DROP TRIGGER IF EXISTS `%s`;", this.name));
+			this.mysql.update(StringUtil.format("DROP TRIGGER IF EXISTS `{0}`;", this.name));
 		} catch (Exception ex) { }
 	}
 
@@ -109,7 +110,7 @@ public class DatabaseNotification extends BukkitHelper {
 		if (this.getEvent() != TriggerEvent.DELETE) throw new SQLException("Can only retrieve deleted information!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
-		this.mysql.query(String.format("SELECT `old` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
+		this.mysql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
 			@Override
 			public Void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
@@ -120,31 +121,9 @@ public class DatabaseNotification extends BukkitHelper {
 
 				return null;
 			}
-		}, this.getSchema(), this.getTable(), this.getEvent().toLowercase(), this.recent);
+		}, this.getSchema(), this.getTable(), this.getEvent(), this.recent);
 
 		return deleted;
-	}
-
-	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
-		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
-
-		this.mysql.query(String.format("SELECT `new` FROM `%s` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
-			@Override
-			public Void handle(ResultSet result) throws SQLException {
-				if (result.next()) {
-					List<String> whereClause = new ArrayList<String>();
-					int keyCount = primaryColumnNames.size();
-					String[] _new = result.getString("new").split(",");
-
-					if (keyCount != 0) {
-						for (int i = 0; i < keyCount; i++) whereClause.add(String.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`%s`, ',', %s), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
-						mysql.query(String.format("SELECT * FROM `%s` WHERE %s;", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
-					}
-				}
-
-				return null;
-			}
-		}, this.getSchema(), this.getTable(), this.getEvent().toLowercase(), this.recent);
 	}
 
 	public String getName() {
@@ -159,9 +138,31 @@ public class DatabaseNotification extends BukkitHelper {
 		return this.table;
 	}
 
+	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
+		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
+
+		this.mysql.query(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
+			@Override
+			public Void handle(ResultSet result) throws SQLException {
+				if (result.next()) {
+					List<String> whereClause = new ArrayList<String>();
+					int keyCount = primaryColumnNames.size();
+					String[] _new = result.getString("new").split(",");
+
+					if (keyCount != 0) {
+						for (int i = 0; i < keyCount; i++) whereClause.add(String.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`%s`, ',', %s), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
+						mysql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
+					}
+				}
+
+				return null;
+			}
+		}, this.getSchema(), this.getTable(), this.getEvent(), this.recent);
+	}
+
 	boolean query() {
 		try {
-			return this.mysql.query(String.format("SELECT `time` FROM `%s` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC LIMIT 1;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
+			return this.mysql.query(StringUtil.format("SELECT `time` FROM `{0}` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC LIMIT 1;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
 					if (result.next()) {
