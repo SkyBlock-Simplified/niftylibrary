@@ -78,13 +78,13 @@ public class DatabaseNotification extends BukkitHelper {
 		try {
 			if (this.primaryColumnNames.size() > 0) {
 				String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
-				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES ('{0}', '{3}', '{2}', UNIX_TIMESTAMP(), '{5}', ",
+				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES (''{0}'', ''{3}'', ''{2}'', UNIX_TIMESTAMP(), ''{5}'', ",
 						this.getSchema(), this.getName(), this.getEvent().toUppercase(), this.getTable(), ACTIVITY_TABLE, primaryKeys);
 				String _old = null;
 				String _new = null;
-				if (this.getEvent() != TriggerEvent.INSERT) _old = String.format("CONCAT(OLD.`%s`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
-				if (this.getEvent() != TriggerEvent.DELETE) _new = String.format("CONCAT(NEW.`%s`)", StringUtil.implode("`, ',', NEW.`", this.primaryColumnNames));
-				this.mysql.update(StringUtil.format(trigger + "{0}, {1});", _old, _new));
+				if (this.getEvent() != TriggerEvent.INSERT) _old = StringUtil.format("CONCAT(OLD.`{0}`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
+				if (this.getEvent() != TriggerEvent.DELETE) _new = StringUtil.format("CONCAT(NEW.`{0}`)", StringUtil.implode("`, ',', NEW.`", this.primaryColumnNames));
+				this.mysql.update(String.format(trigger + "%s, %s);", _old, _new));
 			} else
 				throw new Exception(StringUtil.format("The table `{0}`.`{1}` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 		} catch (Exception ex) {
