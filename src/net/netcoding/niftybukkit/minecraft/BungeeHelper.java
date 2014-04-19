@@ -213,11 +213,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	public void register() {
 		if (this.isRegistered()) return;
 		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 	}
 
 	public void unregister() {
 		if (!this.isRegistered()) return;
 		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 	}
 
 	private void write(Player player, String channel, Object... objs) {
@@ -238,6 +240,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	@Override
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+		if (!this.isRegistered()) return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
 
@@ -286,11 +289,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						} else
 							server.reset();
 
-						if (!server.loadedOnce) {
-							server.loadedOnce = true;
-							manager.callEvent(new BungeeServerLoadedEvent(server));
-						}
-
+						if (!server.loadedOnce) server.loadedOnce = true;
+						manager.callEvent(new BungeeServerLoadedEvent(server));
 						int loaded = 0;
 
 						for (BungeeServer serv : serverList.values())

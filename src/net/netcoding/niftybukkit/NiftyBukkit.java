@@ -23,15 +23,13 @@ public class NiftyBukkit extends BukkitPlugin {
 
 		new NiftyListener(this);
 		(bungeeHelper = new BungeeHelper(this)).register();
-		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL, bungeeHelper);
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
 	}
 
 	@Override
 	public void onDisable() {
-		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
-		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.BUNGEE_CHANNEL);
+		bungeeHelper.unregister();
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
 	}
