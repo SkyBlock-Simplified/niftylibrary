@@ -17,11 +17,12 @@ public class InternalConverter {
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Array.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Block.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Config.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.ItemStack.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.List.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Location.class);
-			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Set.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Map.class);
 			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Primitive.class);
+			addInternalConverter(net.netcoding.niftybukkit.yaml.converters.Set.class);
 		} catch (InvalidConverterException ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -31,9 +32,9 @@ public class InternalConverter {
 		try {
 			this.converters.add((Converter)converter.newInstance());
 		} catch (InstantiationException ex) {
-			throw new InvalidConverterException("Converter could not be instantiated", ex);
+			throw new InvalidConverterException("Converter could not be instantiated!", ex);
 		} catch (IllegalAccessException ex) {
-			throw new InvalidConverterException("Converter does not implement a public Constructor which takes the InternalConverter instance", ex);
+			throw new InvalidConverterException("Converter does not implement a public Constructor which takes the InternalConverter instance!", ex);
 		}
 	}
 
@@ -41,9 +42,9 @@ public class InternalConverter {
 		try {
 			internalConverters.add((Converter)converter.newInstance());
 		} catch (InstantiationException ex) {
-			throw new InvalidConverterException("Converter could not be instantiated", ex);
+			throw new InvalidConverterException("Converter could not be instantiated!", ex);
 		} catch (IllegalAccessException ex) {
-			throw new InvalidConverterException("Converter does not implement a public Constructor which takes the InternalConverter instance", ex);
+			throw new InvalidConverterException("Converter does not implement a public Constructor which takes the InternalConverter instance!", ex);
 		}
 	}
 
