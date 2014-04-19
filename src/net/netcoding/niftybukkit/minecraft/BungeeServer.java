@@ -10,12 +10,6 @@ public class BungeeServer extends MinecraftServer {
 		this.serverName = serverName;
 	}
 
-	@Override
-	void reset() {
-		super.reset();
-		this.loadedOnce = false;
-	}
-
 	void setAddress(String ip, int port) {
 		this.setAddress(new InetSocketAddress(ip, port));
 	}

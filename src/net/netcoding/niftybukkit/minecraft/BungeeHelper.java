@@ -289,7 +289,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						} else
 							server.reset();
 
-						if (!server.loadedOnce) server.loadedOnce = true;
+						server.loadedOnce = true;
 						manager.callEvent(new BungeeServerLoadedEvent(server));
 						int loaded = 0;
 
@@ -300,6 +300,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							bungeeLoaded = true;
 							manager.callEvent(new BungeeLoadedEvent(serverList.values()));
 						}
+					} else if (subChannel.equals("ServerOffline")) {
+						server.reset();
 					} else if (subChannel.startsWith("Player")) {
 						String playerName = input.readUTF();
 
