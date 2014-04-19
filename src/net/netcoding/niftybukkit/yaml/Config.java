@@ -19,6 +19,10 @@ public class Config extends ConfigMapper {
 
 	private transient boolean skipFailedConversion = false;
 
+	public Config(JavaPlugin plugin) {
+		super(plugin);
+	}
+
 	public Config(JavaPlugin plugin, String fileName, String... header) {
 		this(plugin, fileName, false, header);
 	}
@@ -72,15 +76,15 @@ public class Config extends ConfigMapper {
 
 			if (root.has(path)) {
 				try {
-					InternalConverter.fromConfig(this, field, root, path);
+					this.converter.fromConfig(this, field, root, path);
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
 						throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
 				}
 			} else {
 				try {
-					InternalConverter.toConfig(this, field, root, path);
-					InternalConverter.fromConfig(this,  field, root, path);
+					this.converter.toConfig(this, field, root, path);
+					this.converter.fromConfig(this,  field, root, path);
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
 						throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
@@ -117,8 +121,8 @@ public class Config extends ConfigMapper {
 				field.setAccessible(true);
 
 			try {
-				InternalConverter.toConfig(this, field, root, path);
-				InternalConverter.fromConfig(this, field, root, path);
+				this.converter.toConfig(this, field, root, path);
+				this.converter.fromConfig(this, field, root, path);
 			} catch (Exception ex) {
 				if (!this.isSuppressingFailures())
 					throw new InvalidConfigurationException(String.format("Could not save field %s!", field.getName()), ex);

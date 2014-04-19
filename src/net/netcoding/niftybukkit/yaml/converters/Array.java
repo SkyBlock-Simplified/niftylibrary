@@ -5,9 +5,9 @@ import java.lang.reflect.ParameterizedType;
 @SuppressWarnings("unchecked")
 public class Array extends Converter {
 
-	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		return obj;
+	private static <T> T[] getArray(Class<T> type, java.util.List<Object> list) {
+		T[] array = (T[])java.lang.reflect.Array.newInstance(type, list.size());
+		return (T[]) list.toArray(array);
 	}
 
 	@Override
@@ -16,9 +16,9 @@ public class Array extends Converter {
 		return getArray(type, values);
 	}
 
-	private static <T> T[] getArray(Class<T> type, java.util.List<Object> list) {
-		T[] array = (T[])java.lang.reflect.Array.newInstance(type, list.size());
-		return (T[]) list.toArray(array);
+	@Override
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		return obj;
 	}
 
 	@Override

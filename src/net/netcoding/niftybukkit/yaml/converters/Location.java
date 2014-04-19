@@ -11,6 +11,12 @@ import org.bukkit.Bukkit;
 public class Location extends Converter {
 
 	@Override
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>)((ConfigSection)obj).getRawMap();
+		return new org.bukkit.Location(Bukkit.getWorld((String)locationMap.get("world")), (Double)locationMap.get("x"), (Double)locationMap.get("y"), (Double)locationMap.get("z"));
+	}
+
+	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
 		org.bukkit.Location location = (org.bukkit.Location)obj;
 		java.util.Map<String, Object> saveMap = new HashMap<>();
@@ -20,12 +26,6 @@ public class Location extends Converter {
 		saveMap.put("z", location.getZ());
 
 		return saveMap;
-	}
-
-	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>)((ConfigSection) obj).getRawMap();
-		return new org.bukkit.Location(Bukkit.getWorld((String)locationMap.get("world")), (Double)locationMap.get("x"), (Double)locationMap.get("y"), (Double)locationMap.get("z"));
 	}
 
 	@Override

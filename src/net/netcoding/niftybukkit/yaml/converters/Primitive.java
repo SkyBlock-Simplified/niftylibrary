@@ -14,11 +14,6 @@ public class Primitive extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		return obj;
-	}
-
-	@Override
 	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
 		switch(type.getSimpleName().toLowerCase()) {
 		case "boolean":
@@ -42,6 +37,11 @@ public class Primitive extends Converter {
 		default:
 			return obj;
 		}
+	}
+
+	@Override
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		return obj;
 	}
 
 	@Override

@@ -4,24 +4,9 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
 import net.netcoding.niftybukkit.yaml.ConfigSection;
-import net.netcoding.niftybukkit.yaml.InternalConverter;
 
 @SuppressWarnings("unchecked")
 public class Map extends Converter {
-
-	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		java.util.Map<Object, Object> map = (java.util.Map<Object, Object>)obj;
-
-		for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {
-			if (entry.getValue() == null) continue;
-			Class<?> clazz = entry.getValue().getClass();
-			Converter converter = InternalConverter.getConverter(clazz);
-			map.put(entry.getKey(), (converter != null ? converter.toConfig(clazz, entry.getValue(), null) : entry.getValue()));
-		}
-
-		return map;
-	}
 
 	@Override
 	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
@@ -61,11 +46,11 @@ public class Map extends Converter {
 					} else
 						clazz = (Class<?>)parameterizedType.getActualTypeArguments()[1];
 
-					Converter converter = InternalConverter.getConverter(clazz);
+					Converter converter = this.getConverter(clazz);
 					map.put(key, ( converter != null ) ? converter.fromConfig(clazz, entry.getValue(), (parameterizedType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType)parameterizedType.getActualTypeArguments()[1] : null) : entry.getValue());
 				}
 			} else {
-				Converter converter = InternalConverter.getConverter((Class<?>)parameterizedType.getRawType());
+				Converter converter = this.getConverter((Class<?>)parameterizedType.getRawType());
 				if (converter != null) return converter.fromConfig((Class<?>)parameterizedType.getRawType(), obj, null);
 				return (obj instanceof java.util.Map) ? (java.util.Map<Object, Object>) obj : ((ConfigSection) obj).getRawMap();
 			}
@@ -73,6 +58,20 @@ public class Map extends Converter {
 			return map;
 		} else
 			return obj;
+	}
+
+	@Override
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+		java.util.Map<Object, Object> map = (java.util.Map<Object, Object>)obj;
+
+		for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {
+			if (entry.getValue() == null) continue;
+			Class<?> clazz = entry.getValue().getClass();
+			Converter converter = this.getConverter(clazz);
+			map.put(entry.getKey(), (converter != null ? converter.toConfig(clazz, entry.getValue(), null) : entry.getValue()));
+		}
+
+		return map;
 	}
 
 	@Override

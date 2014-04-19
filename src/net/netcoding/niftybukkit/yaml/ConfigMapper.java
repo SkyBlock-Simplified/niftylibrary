@@ -28,13 +28,18 @@ public class ConfigMapper extends BukkitHelper {
 	private final transient Yaml yaml;
 	private final transient HashMap<String, ArrayList<String>> comments = new HashMap<>();
 	private final transient Representer yamlRepresenter = new Representer();
+	protected final transient InternalConverter converter = new InternalConverter();
 	protected transient File CONFIG_FILE;
 	protected transient String[] CONFIG_HEADER;
 	protected transient ConfigSection root;
 
+	protected ConfigMapper(JavaPlugin plugin) {
+		this(plugin, null);
+	}
+
 	protected ConfigMapper(JavaPlugin plugin, String fileName, String... header) {
 		super(plugin);
-		CONFIG_FILE = new File(this.getPlugin().getDataFolder(), fileName + (fileName.endsWith(".yml") ? "" : ".yml"));
+		if (fileName != null) CONFIG_FILE = new File(this.getPlugin().getDataFolder(), fileName + (fileName.endsWith(".yml") ? "" : ".yml"));
 		CONFIG_HEADER = header;
 		DumperOptions yamlOptions = new DumperOptions();
 		yamlOptions.setIndent(2);
@@ -48,6 +53,10 @@ public class ConfigMapper extends BukkitHelper {
 			comments.put(key, new ArrayList<String>());
 
 		comments.get(key).add(value);
+	}
+
+	public void addConverter(Class<? extends Converter> converter) {
+		this.converter.addConverter(converter);
 	}
 
 	public void clearComments() {
@@ -89,7 +98,7 @@ public class ConfigMapper extends BukkitHelper {
 			if(Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
 
-			InternalConverter.fromConfig((Config)this, field, convertFromMap(section), path);
+			this.converter.fromConfig((Config)this, field, convertFromMap(section), path);
 		}
 	}
 
@@ -124,7 +133,7 @@ public class ConfigMapper extends BukkitHelper {
 			} catch (IllegalAccessException e) { }
 		}
 
-		Converter converter = InternalConverter.getConverter(Map.class);
+		Converter converter = this.converter.getConverter(Map.class);
 		return (Map<?, ?>)converter.toConfig(HashMap.class, returnMap, null);
 	}
 
