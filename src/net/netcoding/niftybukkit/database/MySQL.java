@@ -58,7 +58,7 @@ public class MySQL implements Runnable {
 			this.schema = schema;
 		else {
 			this.schema = "";
-			throw new UnsupportedOperationException(StringUtil.format("Unsupported schema name! Valid characters are {0}", VALID_SCHEMA_NAMES));
+			throw new UnsupportedOperationException(StringUtil.format("Unsupported schema {0}! Valid characters are {1}", schema, VALID_SCHEMA_NAMES));
 		}
 	}
 
