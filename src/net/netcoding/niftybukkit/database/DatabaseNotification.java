@@ -13,7 +13,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class DatabaseNotification extends BukkitHelper {
 
-	public static final String ACTIVITY_TABLE = "nifty_activity";
+	public static final String ACTIVITY_TABLE = "niftybukkit_activity";
 	private final transient TriggerEvent event;
 	private transient int recent;
 	private transient boolean stopped;
@@ -58,13 +58,14 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	private void loadPrimaryKeys() throws SQLException {
-		this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<Void>() {
+		this.primaryColumnNames.addAll(this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<List<String>>() {
 			@Override
-			public Void handle(ResultSet result) throws SQLException {
-				while (result.next()) primaryColumnNames.add(result.getString("COLUMN_NAME"));
-				return null;
+			public List<String> handle(ResultSet result) throws SQLException {
+				List<String> priKeyNames = new ArrayList<>();
+				while (result.next()) priKeyNames.add(result.getString("COLUMN_NAME"));
+				return priKeyNames;
 			}
-		}, this.getSchema(), this.getTable());
+		}, this.getSchema(), this.getTable()));
 	}
 
 	private static void createLogTable(MySQL mysql) throws SQLException {
