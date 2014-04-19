@@ -62,7 +62,6 @@ abstract class MinecraftServer {
 	}
 
 	void reset() {
-		this.address = null;
 		this.protocolVersion = -1;
 		this.gameVersion = "";
 		this.motd = "";
