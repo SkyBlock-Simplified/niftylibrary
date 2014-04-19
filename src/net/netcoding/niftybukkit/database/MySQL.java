@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.UUID;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 public class MySQL implements Runnable {
 
+	private final static transient String VALID_SCHEMA_NAMES = "[a-zA-Z0-9$_]+";
 	private final static boolean JDBC_DRIVER_LOADED;
 	private boolean autoReconnect = false;
 	private final String username;
@@ -42,16 +44,22 @@ public class MySQL implements Runnable {
 		JDBC_DRIVER_LOADED = loaded;
 	}
 
-	public MySQL(String host, String schema, String user, String pass) {
-		this(host, 3306, schema, user, pass);
+	public MySQL(String host, String user, String pass, String schema) {
+		this(host, 3306, user, pass, schema);
 	}
 
-	public MySQL(String host, int port, String schema, String user, String pass) {
+	public MySQL(String host, int port, String user, String pass, String schema) {
 		this.hostname = host;
 		this.port = port;
-		this.schema = schema;
 		this.username = user;
 		this.password = pass;
+
+		if (schema.matches(VALID_SCHEMA_NAMES))
+			this.schema = schema;
+		else {
+			this.schema = "";
+			throw new UnsupportedOperationException(StringUtil.format("Unsupported schema name! Valid characters are {0}", VALID_SCHEMA_NAMES));
+		}
 	}
 
 	public List<DatabaseNotification> addDatabaseListener(String table, DatabaseListener notifier) throws SQLException, Exception {
