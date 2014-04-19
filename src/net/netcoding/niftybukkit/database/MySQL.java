@@ -208,8 +208,10 @@ public class MySQL implements Runnable {
 		}
 
 		if (this.listeners.size() == 0) {
-			this.task.cancel();
-			this.task = null;
+			if (this.task != null) {
+				this.task.cancel();
+				this.task = null;
+			}
 		}
 	}
 
@@ -226,8 +228,10 @@ public class MySQL implements Runnable {
 	}
 
 	public void stopListening(boolean dropTriggers) {
-		this.task.cancel();
-		this.task = null;
+		if (this.task != null) {
+			this.task.cancel();
+			this.task = null;
+		}
 
 		for (DatabaseNotification listener : this.listeners)
 			listener.stop(dropTriggers);
