@@ -137,7 +137,7 @@ public class MySQL implements Runnable {
 	public boolean createTable(String name, String query) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(String.format("CREATE TABLE IF NOT EXISTS `%s` (%s);", name, query)) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}` ({1}) ENGINE=InnoDB;", name, query)) > 0;
 			}
 		}
 	}
