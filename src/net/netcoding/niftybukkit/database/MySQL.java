@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 
@@ -104,6 +105,8 @@ public class MySQL implements Runnable {
 
 			if (args[i] instanceof String)
 				statement.setString(index, (String)args[i]);
+			else if (args[i] instanceof UUID)
+				statement.setString(index, ((UUID)args[i]).toString());
 			else if (args[i] instanceof Short)
 				statement.setShort(index, (short)args[i]);
 			else if (args[i] instanceof Integer)
@@ -119,7 +122,7 @@ public class MySQL implements Runnable {
 			else if (args[i] == null)
 				statement.setNull(index, Types.NULL);
 			else
-				statement.setObject(index, Types.OTHER);
+				statement.setObject(index, args[i]);
 		}
 	}
 
