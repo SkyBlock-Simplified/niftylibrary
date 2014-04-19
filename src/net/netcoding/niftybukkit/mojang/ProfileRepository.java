@@ -85,21 +85,30 @@ public class ProfileRepository {
 			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
 
 			for (ProfileCriteria criteria : criterion) {
-				for (BungeeServer server : helper.getServers()) {
-					boolean skip = false;
+				String criteriaName = criteria.getName().toLowerCase();
 
+				for (BungeeServer server : helper.getServers()) {
 					if (server.isOnline()) {
+						MojangProfile found = null;
+
 						for (MojangProfile profile : server.getPlayerList()) {
-							if (profile.getName().equalsIgnoreCase(criteria.getName())) {
-								profiles.add(new MojangProfile(profile.getName(), profile.getUniqueId().toString()));
-								criterion.remove(criteria);
-								skip = true;
-								break;
+							if (profile.getName().toLowerCase().equals(criteriaName)) found = profile;
+							if (found != null) break;
+						}
+
+						if (found == null) {
+							for (MojangProfile profile : server.getPlayerList()) {
+								if (profile.getName().toLowerCase().startsWith(criteriaName)) found = profile;
+								if (found != null) break;
 							}
 						}
-					}
 
-					if (skip) break;
+						if (found != null) {
+							profiles.add(found);
+							criterion.remove(criteria);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -146,6 +155,7 @@ public class ProfileRepository {
 					for (MojangProfile profile : server.getPlayerList()) {
 						if (profile.getUniqueId().equals(uuid)) {
 							found = profile;
+							// TODO: Test this to make sure it's working
 							break;
 						}
 					}
