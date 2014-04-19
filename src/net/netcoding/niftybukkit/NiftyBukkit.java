@@ -56,7 +56,7 @@ public class NiftyBukkit extends BukkitPlugin {
 		try {
 			RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 			return (permissionProvider != null ? permissionProvider.getProvider() : null);
-		} catch (Exception ex) { }
+		} catch (NoClassDefFoundError ex) { }
 	
 		return null;
 	}
@@ -64,7 +64,7 @@ public class NiftyBukkit extends BukkitPlugin {
 	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {
 		try {
 			return com.comphenix.protocol.ProtocolLibrary.getProtocolManager();
-		} catch (Exception ex) { return null; }
+		} catch (NoClassDefFoundError ex) { return null; }
 	}
 
 	public static boolean protocolManagerExists() {
