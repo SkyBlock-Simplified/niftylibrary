@@ -42,7 +42,7 @@ public class DatabaseNotification extends BukkitHelper {
 		this.mysql = mysql;
 		this.table = table;
 		this.event = event;
-		this.name = String.format("on%s%s", this.table, this.event.toUppercase());
+		this.name = StringUtil.format("on{0}{1}", this.table, this.event.toUppercase());
 		this.query();
 		this.listener = listener;
 		this.loadPrimaryKeys();
@@ -79,7 +79,7 @@ public class DatabaseNotification extends BukkitHelper {
 			if (this.primaryColumnNames.size() > 0) {
 				String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
 				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES ('{0}', '{3}', '{2}', UNIX_TIMESTAMP(), '{5}', ",
-						this.getSchema(), this.getName(), this.getEvent(), this.getTable(), ACTIVITY_TABLE, primaryKeys);
+						this.getSchema(), this.getName(), this.getEvent().toUppercase(), this.getTable(), ACTIVITY_TABLE, primaryKeys);
 				String _old = null;
 				String _new = null;
 				if (this.getEvent() != TriggerEvent.INSERT) _old = String.format("CONCAT(OLD.`%s`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
@@ -121,7 +121,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 				return null;
 			}
-		}, this.getSchema(), this.getTable(), this.getEvent(), this.recent);
+		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.recent);
 
 		return deleted;
 	}
@@ -150,14 +150,14 @@ public class DatabaseNotification extends BukkitHelper {
 					String[] _new = result.getString("new").split(",");
 
 					if (keyCount != 0) {
-						for (int i = 0; i < keyCount; i++) whereClause.add(String.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`%s`, ',', %s), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
+						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, ',', {1}), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
 						mysql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
 					}
 				}
 
 				return null;
 			}
-		}, this.getSchema(), this.getTable(), this.getEvent(), this.recent);
+		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.recent);
 	}
 
 	boolean query() {
@@ -176,7 +176,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 					return false;
 				}
-			}, this.table, this.event.toLowercase(), this.recent);
+			}, this.table, this.event.toUppercase(), this.recent);
 		} catch (SQLException ex) {
 			this.getLog().console(ex);
 			this.stop();
