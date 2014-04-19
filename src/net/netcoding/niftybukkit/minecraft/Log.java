@@ -61,7 +61,7 @@ public class Log {
 	}
 
 	public void error(CommandSender sender, String message, Throwable exception, Object... args) {
-		message(sender, StringUtil.format("%s %s", getPrefix("Error"), message), exception, args);
+		message(sender, StringUtil.format("{0} {1}", getPrefix("Error"), message), exception, args);
 	}
 
 	public void message(CommandSender sender, String message, Object... args) {
