@@ -5,11 +5,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.netcoding.niftybukkit.yaml.InternalConverter;
+
 @SuppressWarnings("unchecked")
 public class Set extends Converter {
 
+	public Set(InternalConverter converter) {
+		super(converter);
+	}
+
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> values = (java.util.List<Object>)obj;
 		java.util.Set<Object> newList = new HashSet<Object>();
 
@@ -25,7 +31,7 @@ public class Set extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.Set<Object> values = (java.util.Set<Object>)obj;
 		java.util.List<Object> newList = new ArrayList<Object>();
 		Iterator<Object> iterator = values.iterator();

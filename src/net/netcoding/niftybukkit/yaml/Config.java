@@ -63,6 +63,7 @@ public class Config extends ConfigMapper {
 
 	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
 		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
+		boolean save = false;
 
 		for (Field field : clazz.getDeclaredFields()) {
 			if (doSkip(field)) continue;
@@ -85,12 +86,15 @@ public class Config extends ConfigMapper {
 				try {
 					this.converter.toConfig(this, field, root, path);
 					this.converter.fromConfig(this,  field, root, path);
+					save = true;
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
 						throw new InvalidConfigurationException(String.format("Could not get field %s!", field.getName()), ex);
 				}
 			}
 		}
+
+		if (save) this.saveToYaml();
 	}
 
 	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {

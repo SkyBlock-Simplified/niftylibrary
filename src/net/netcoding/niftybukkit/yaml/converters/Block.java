@@ -5,14 +5,19 @@ import java.util.HashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.yaml.ConfigSection;
+import net.netcoding.niftybukkit.yaml.InternalConverter;
 
 import org.bukkit.inventory.ItemStack;
 
 @SuppressWarnings({ "unchecked", "deprecation" })
 public class Block extends Converter {
 
+	public Block(InternalConverter converter) {
+		super(converter);
+	}
+
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.Map<String, Object> blockMap = (java.util.Map<String, Object>)((ConfigSection)obj).getRawMap();
 		java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>)((ConfigSection)blockMap.get("location")).getRawMap();
 		Converter locationConverter = this.getConverter(org.bukkit.Location.class);
@@ -25,7 +30,7 @@ public class Block extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		org.bukkit.block.Block block = (org.bukkit.block.Block) obj;
 		Converter locationConverter = this.getConverter(org.bukkit.Location.class);
 		java.util.Map<String, Object> saveMap = new HashMap<>();

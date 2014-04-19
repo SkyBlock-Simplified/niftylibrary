@@ -6,7 +6,11 @@ import net.netcoding.niftybukkit.yaml.InternalConverter;
 
 public abstract class Converter {
 
-	protected final transient InternalConverter converter = new InternalConverter();
+	protected final transient InternalConverter converter;
+
+	public Converter(InternalConverter converter) {
+		this.converter = converter;
+	}
 
 	public Converter getConverter(Class<?> type) {
 		return this.converter.getConverter(type);
@@ -18,11 +22,11 @@ public abstract class Converter {
 	 *
 	 * @param type The type (Class) of the Field
 	 * @param obj The Object from toConfig
-	 * @param parameterizedType If the Class has some generic informations, otherwise null
+	 * @param genericType If the Class has some generic informations, otherwise null
 	 * @return The correct Object which can be hold by the Field
 	 * @throws Exception Some generic exception when something went wrong. This gets caught by the Converter
 	 */
-	public abstract Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception;
+	public abstract Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception;
 
 	/**
 	 * This method gets called on save. It gets the Fields Type and the object the Config wants to save into it. This
@@ -30,11 +34,11 @@ public abstract class Converter {
 	 *
 	 * @param type The type (Class) of the Field
 	 * @param obj The object which is stored in the Config Object
-	 * @param parameterizedType If the Class has some generic informations, otherwise null
+	 * @param genericType If the Class has some generic informations, otherwise null
 	 * @return An Object (mostly a Map or a List)
 	 * @throws Exception Some generic exception when something went wrong. This gets caught by the Converter
 	 */
-	public abstract Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception;
+	public abstract Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception;
 
 	/**
 	 * This checks if this Converter can convert the given Class

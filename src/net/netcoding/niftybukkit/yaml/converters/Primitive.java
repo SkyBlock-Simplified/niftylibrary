@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.netcoding.niftybukkit.yaml.InternalConverter;
+
 public class Primitive extends Converter {
 
 	private static final transient Set<String> types = new HashSet<>();
@@ -13,8 +15,12 @@ public class Primitive extends Converter {
 		types.addAll(Arrays.asList("boolean", "char", "byte", "short", "integer", "long", "float", "double", "string"));
 	}
 
+	public Primitive(InternalConverter converter) {
+		super(converter);
+	}
+
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		switch(type.getSimpleName().toLowerCase()) {
 		case "boolean":
 			return (obj instanceof Boolean) ? obj : new Boolean((boolean)obj).booleanValue();
@@ -40,7 +46,7 @@ public class Primitive extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		return obj;
 	}
 

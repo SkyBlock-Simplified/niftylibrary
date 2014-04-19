@@ -3,23 +3,32 @@ package net.netcoding.niftybukkit.yaml.converters;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 
+import net.netcoding.niftybukkit.yaml.InternalConverter;
+
 @SuppressWarnings("unchecked")
 public class List extends Converter {
 
+	public List(InternalConverter converter) {
+		super(converter);
+	}
+
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		java.util.List<Object> values = (java.util.List<Object>)obj;
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> newList = new ArrayList<>();
+		java.util.List<Object> values = (java.util.List<Object>)obj;
 
 		try {
 			newList = (java.util.List<Object>)type.newInstance();
 		} catch (Exception e) { }
 
-		if (parameterizedType.getActualTypeArguments()[0] instanceof Class && net.netcoding.niftybukkit.yaml.Config.class.isAssignableFrom((Class<?>)parameterizedType.getActualTypeArguments()[0])) {
-			Converter converter = this.getConverter(net.netcoding.niftybukkit.yaml.Config.class);
+		if (genericType != null && genericType.getActualTypeArguments()[0] instanceof Class) {
+			Converter converter = this.getConverter((Class<?>)genericType.getActualTypeArguments()[0]);
 
-			for (int i = 0; i < values.size(); i++)
-				newList.add(converter.fromConfig((Class<?>)parameterizedType.getActualTypeArguments()[0], values.get(i), null));
+			if (converter != null) {
+				for (int i = 0; i < values.size(); i++)
+					newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], values.get(i), null));
+			} else
+				newList = values;
 		} else
 			newList = values;
 
@@ -27,7 +36,7 @@ public class List extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> values = (java.util.List<Object>)obj;
 		java.util.List<Object> newList = new ArrayList<>();
 

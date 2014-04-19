@@ -4,23 +4,28 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
 import net.netcoding.niftybukkit.yaml.ConfigSection;
+import net.netcoding.niftybukkit.yaml.InternalConverter;
 
 @SuppressWarnings("unchecked")
 public class Map extends Converter {
 
+	public Map(InternalConverter converter) {
+		super(converter);
+	}
+
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
-		if (parameterizedType != null) {
+	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
+		if (genericType != null) {
 			java.util.Map<Object, Object> map;
 
 			try {
-				map = ((java.util.Map<Object, Object>)((Class<?>)parameterizedType.getRawType()).newInstance());
+				map = ((java.util.Map<Object, Object>)((Class<?>)genericType.getRawType()).newInstance());
 			} catch (InstantiationException e) {
 				map = new HashMap<Object, Object>();
 			}
 
-			if (parameterizedType.getActualTypeArguments().length == 2) {
-				Class<?> keyClass = ((Class<?>)parameterizedType.getActualTypeArguments()[0]);
+			if (genericType.getActualTypeArguments().length == 2) {
+				Class<?> keyClass = ((Class<?>)genericType.getActualTypeArguments()[0]);
 
 				java.util.Map<?, ?> map1 = (obj instanceof java.util.Map) ? (java.util.Map<Object, Object>)obj : ((ConfigSection)obj).getRawMap();
 				for (java.util.Map.Entry<?, ?> entry : map1.entrySet()) {
@@ -40,18 +45,18 @@ public class Map extends Converter {
 						key = entry.getKey();
 
 					Class<?> clazz;
-					if (parameterizedType.getActualTypeArguments()[1] instanceof ParameterizedType) {
-						ParameterizedType parameterizedType1 = (ParameterizedType) parameterizedType.getActualTypeArguments()[1];
+					if (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) {
+						ParameterizedType parameterizedType1 = (ParameterizedType) genericType.getActualTypeArguments()[1];
 						clazz = (Class<?>)parameterizedType1.getRawType();
 					} else
-						clazz = (Class<?>)parameterizedType.getActualTypeArguments()[1];
+						clazz = (Class<?>)genericType.getActualTypeArguments()[1];
 
 					Converter converter = this.getConverter(clazz);
-					map.put(key, ( converter != null ) ? converter.fromConfig(clazz, entry.getValue(), (parameterizedType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType)parameterizedType.getActualTypeArguments()[1] : null) : entry.getValue());
+					map.put(key, ( converter != null ) ? converter.fromConfig(clazz, entry.getValue(), (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType)genericType.getActualTypeArguments()[1] : null) : entry.getValue());
 				}
 			} else {
-				Converter converter = this.getConverter((Class<?>)parameterizedType.getRawType());
-				if (converter != null) return converter.fromConfig((Class<?>)parameterizedType.getRawType(), obj, null);
+				Converter converter = this.getConverter((Class<?>)genericType.getRawType());
+				if (converter != null) return converter.fromConfig((Class<?>)genericType.getRawType(), obj, null);
 				return (obj instanceof java.util.Map) ? (java.util.Map<Object, Object>) obj : ((ConfigSection) obj).getRawMap();
 			}
 
@@ -61,7 +66,7 @@ public class Map extends Converter {
 	}
 
 	@Override
-	public Object toConfig(Class<?> type, Object obj, ParameterizedType parameterizedType) throws Exception {
+	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		java.util.Map<Object, Object> map = (java.util.Map<Object, Object>)obj;
 
 		for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {

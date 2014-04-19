@@ -21,13 +21,16 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 public class ConfigMapper extends BukkitHelper {
 
 	private final transient Yaml yaml;
 	private final transient HashMap<String, ArrayList<String>> comments = new HashMap<>();
-	private final transient Representer yamlRepresenter = new Representer();
+	private final transient NullRepresenter representer = new NullRepresenter();
 	protected final transient InternalConverter converter = new InternalConverter();
 	protected transient File CONFIG_FILE;
 	protected transient String[] CONFIG_HEADER;
@@ -41,11 +44,11 @@ public class ConfigMapper extends BukkitHelper {
 		super(plugin);
 		if (fileName != null) CONFIG_FILE = new File(this.getPlugin().getDataFolder(), fileName + (fileName.endsWith(".yml") ? "" : ".yml"));
 		CONFIG_HEADER = header;
-		DumperOptions yamlOptions = new DumperOptions();
-		yamlOptions.setIndent(2);
-		yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), yamlRepresenter, yamlOptions);
+		DumperOptions options = new DumperOptions();
+		options.setIndent(2);
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), representer, options);
 	}
 
 	public void addComment(String key, String value) {
@@ -160,7 +163,6 @@ public class ConfigMapper extends BukkitHelper {
 					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
 					else {
-						writeLines.append("\n");
 						int spaces = 0;
 						for (int i = 0; i < line.length(); i++) {
 							if (line.charAt(i) == ' ')
@@ -177,7 +179,7 @@ public class ConfigMapper extends BukkitHelper {
 							ArrayList<String> temp = new ArrayList<>();
 							int index = 0;
 
-							for (int i = 0; i < spaces; i = i + 2, index++)
+							for (int i = 0; i < spaces; i += 2, index++)
 								temp.add(keyChain.get(index));
 
 							keyChain = temp;
@@ -206,6 +208,22 @@ public class ConfigMapper extends BukkitHelper {
 		} catch (IOException e) {
 			throw new InvalidConfigurationException("Could not save YML", e);
 		}
+	}
+
+	private class NullRepresenter extends Representer {
+
+		public NullRepresenter() {
+			this.nullRepresenter = new RepresentNull();
+		}
+
+		private class RepresentNull implements Represent {
+
+			public Node representData(Object data) {
+				return representScalar(Tag.NULL, "");
+			}
+
+		}
+
 	}
 
 }
