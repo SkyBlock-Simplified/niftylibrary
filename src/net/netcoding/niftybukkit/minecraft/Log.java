@@ -47,9 +47,9 @@ public class Log {
 		message = (StringUtil.isEmpty(message) ? "null" : message);
 
 		if (exception != null)
-			this.logger.log(Level.SEVERE, String.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args), exception);
+			this.logger.log(Level.SEVERE, StringUtil.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args), exception);
 		else
-			this.logger.log(Level.INFO, String.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args));
+			this.logger.log(Level.INFO, StringUtil.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args));
 	}
 
 	public void error(CommandSender sender, Object... args) {
@@ -61,7 +61,7 @@ public class Log {
 	}
 
 	public void error(CommandSender sender, String message, Throwable exception, Object... args) {
-		message(sender, String.format("%s %s", getPrefix("Error"), message), exception, args);
+		message(sender, StringUtil.format("%s %s", getPrefix("Error"), message), exception, args);
 	}
 
 	public void message(CommandSender sender, String message, Object... args) {
