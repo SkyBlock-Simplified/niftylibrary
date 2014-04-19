@@ -5,14 +5,16 @@ import java.util.regex.Pattern;
 
 public class MojangProfile {
 
-	private UUID id;
+	private String id;
+	private UUID uuid;
 	private String name;
 	private long cached;
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
 	public MojangProfile(String name, String id) {
 		this.name = name;
-		this.id = UUID.fromString(UUID_FIX.matcher(id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
+		this.id = id.replace("-", "");
+		this.uuid = UUID.fromString(UUID_FIX.matcher(this.id).replaceAll("$1-$2-$3-$4-$5"));
 		this.updateCacheTime();
 	}
 
@@ -22,7 +24,7 @@ public class MojangProfile {
 			this.updateCacheTime();
 		}
 
-		return this.id;
+		return this.uuid;
 	}
 
 	public String getName() {
