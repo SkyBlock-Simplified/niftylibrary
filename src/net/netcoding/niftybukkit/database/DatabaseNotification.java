@@ -150,7 +150,7 @@ public class DatabaseNotification extends BukkitHelper {
 					String[] _new = result.getString("new").split(",");
 
 					if (keyCount != 0) {
-						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, ',', {1}), ',', -1) = ?", primaryColumnNames.get(i), (i + 1)));
+						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, '','', {1}), '','', -1) = ?", primaryColumnNames.get(i), (i + 1)));
 						mysql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
 					}
 				}
