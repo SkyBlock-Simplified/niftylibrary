@@ -20,7 +20,7 @@ import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.entity.Player;
 
-public class ProfileRepository {
+public class MojangRepository {
 
 	private static final int MAX_PAGES_TO_CHECK = 100;
 	private static final transient Gson gson = new Gson();
@@ -155,20 +155,19 @@ public class ProfileRepository {
 					for (MojangProfile profile : server.getPlayerList()) {
 						if (profile.getUniqueId().equals(uuid)) {
 							found = profile;
-							// TODO: Test this to make sure it's working
 							break;
 						}
 					}
-				}
 
-				if (found != null) break;
+					if (found != null) break;
+				}
 			}
 		}
 
 		if (found == null) {
 			try {
 				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
-				UUIDSearchResult result = gson.fromJson(httpClient.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid), headers), UUIDSearchResult.class);
+				UUIDSearchResult result = gson.fromJson(httpClient.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")), headers), UUIDSearchResult.class);
 				if (result != null) found = new MojangProfile(result.getUniqueId(), result.getName());
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);

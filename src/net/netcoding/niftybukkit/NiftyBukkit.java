@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
-import net.netcoding.niftybukkit.mojang.ProfileRepository;
+import net.netcoding.niftybukkit.mojang.MojangRepository;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -12,13 +12,13 @@ public class NiftyBukkit extends BukkitPlugin {
 
 	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
-	private static transient ProfileRepository repository;
+	private static transient MojangRepository repository;
 	private static transient BungeeHelper bungeeHelper;
 
 	@Override
 	public void onEnable() {
 		plugin = this;
-		repository = new ProfileRepository();
+		repository = new MojangRepository();
 		(itemDatabase = new ItemDatabase(this)).reload();
 
 		new NiftyListener(this);
@@ -42,7 +42,7 @@ public class NiftyBukkit extends BukkitPlugin {
 		return itemDatabase;
 	}
 
-	public static ProfileRepository getMojangRepository() {
+	public static MojangRepository getMojangRepository() {
 		return repository;
 	}
 
