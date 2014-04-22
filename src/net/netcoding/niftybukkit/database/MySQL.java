@@ -2,7 +2,6 @@ package net.netcoding.niftybukkit.database;
 
 import java.sql.Blob;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,22 +13,17 @@ import java.util.List;
 import java.util.UUID;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.database.pooling.ConnectionPool;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-public class MySQL implements Runnable {
+public class MySQL extends ConnectionPool implements Runnable {
 
-	private final static transient String VALID_SCHEMA_NAMES = "[a-zA-Z0-9$_]+";
 	private final static boolean JDBC_DRIVER_LOADED;
-	private boolean autoReconnect = false;
-	private final String username;
 	private final String schema;
-	private final String password;
-	private final int port;
-	private final String hostname;
-	static final transient int DEFAULT_DELAY = 10;
+	static final transient int DEFAULT_DELAY = 20;
 	private final transient List<DatabaseNotification> listeners = Collections.synchronizedList(new ArrayList<DatabaseNotification>());
 	private transient BukkitTask task;
 
@@ -44,22 +38,13 @@ public class MySQL implements Runnable {
 		JDBC_DRIVER_LOADED = loaded;
 	}
 
-	public MySQL(String host, String user, String pass, String schema) {
+	public MySQL(String host, String user, String pass, String schema) throws SQLException {
 		this(host, 3306, user, pass, schema);
 	}
 
-	public MySQL(String host, int port, String user, String pass, String schema) {
-		this.hostname = host;
-		this.port = port;
-		this.username = user;
-		this.password = pass;
-
-		if (schema.matches(VALID_SCHEMA_NAMES))
-			this.schema = schema;
-		else {
-			this.schema = "";
-			throw new UnsupportedOperationException(StringUtil.format("Unsupported schema {0}! Valid characters are {1}", schema, VALID_SCHEMA_NAMES));
-		}
+	public MySQL(String host, int port, String user, String pass, String schema) throws SQLException {
+		super(StringUtil.format("jdbc:mysql://{0}:{1,number,#}/{2}", host, port, schema), user, pass);
+		this.schema = schema;
 	}
 
 	public List<DatabaseNotification> addDatabaseListener(String table, DatabaseListener notifier) throws SQLException, Exception {
@@ -142,44 +127,8 @@ public class MySQL implements Runnable {
 		}
 	}
 
-	public Connection getConnection() throws SQLException {
-		try {
-			return DriverManager.getConnection(this.getUrl(true) + (this.isAutoReconnect() ? "?autoReconnect=true" : ""), this.username, this.password);
-		} catch (SQLException ex) {
-			throw ex;
-		}
-	}
-
-	public String getHostname() {
-		return this.hostname;
-	}
-
-	public String getPassword() {
-		return this.password;
-	}
-
-	public int getPort() {
-		return this.port;
-	}
-
 	public String getSchema() {
 		return this.schema;
-	}
-
-	public String getUrl() {
-		return this.getUrl(false);
-	}
-
-	public String getUrl(boolean includeSchema) {
-		return String.format("jdbc:mysql://%s:%s", this.getHostname(), this.getPort()) + (includeSchema ? "/" + this.getSchema() : "");
-	}
-
-	public String getUsername() {
-		return this.username;
-	}
-
-	public boolean isAutoReconnect() {
-		return this.autoReconnect;
 	}
 
 	public boolean isDriverAvailable() {
@@ -226,14 +175,6 @@ public class MySQL implements Runnable {
 		}
 	}
 
-	public void setAutoReconnect() {
-		this.setAutoReconnect(true);
-	}
-
-	public void setAutoReconnect(boolean autoReconnect) {
-		this.autoReconnect = autoReconnect;
-	}
-
 	public void stopListening() {
 		this.stopListening(false);
 	}
@@ -246,14 +187,6 @@ public class MySQL implements Runnable {
 
 		for (DatabaseNotification listener : this.listeners)
 			listener.stop(dropTriggers);
-	}
-
-	public boolean testConnection() {
-		try (Connection connection = this.getConnection()) {
-			return true;
-		} catch (SQLException ex) {
-			return false;
-		}
 	}
 
 	public boolean update(String sql, Object... args) throws SQLException {
