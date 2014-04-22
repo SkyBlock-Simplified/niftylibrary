@@ -27,12 +27,12 @@ abstract class SignEvent extends Event implements Cancellable {
 		this.key = key;
 	}
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
-
 	public Action getAction() {
 		return this.action;
+	}
+
+	public static HandlerList getHandlerList() {
+		return handlers;
 	}
 
 	@Override
