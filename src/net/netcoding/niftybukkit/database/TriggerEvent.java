@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.database;
 
 public enum TriggerEvent {
+
 	INSERT("Insert"),
 	DELETE("Delete"),
 	UPDATE("Update");
@@ -22,4 +23,5 @@ public enum TriggerEvent {
 	public String toUppercase() {
 		return this.id.toUpperCase();
 	}
+
 }
