@@ -15,6 +15,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
@@ -63,7 +64,7 @@ public class MojangRepository {
 	}
 
 	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
-		if (StringUtil.isEmpty(usernames)) throw ProfileNotFoundException.InvalidUsernames(usernames);
+		if (ListUtil.isEmpty(usernames)) throw ProfileNotFoundException.InvalidUsernames(usernames);
 		ConcurrentSet<ProfileCriteria> criterion = new ConcurrentSet<>();
 		List<MojangProfile> profiles = new ArrayList<>();
 
