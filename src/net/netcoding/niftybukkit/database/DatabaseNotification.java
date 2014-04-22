@@ -161,6 +161,8 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	boolean query() {
+		if (this.isStopped()) return false;
+
 		try {
 			return this.mysql.query(StringUtil.format("SELECT `time` FROM `{0}` WHERE `table` = ? AND `action` = ? AND `time` > ? ORDER BY `time` DESC LIMIT 1;", ACTIVITY_TABLE), new ResultCallback<Boolean>() {
 				@Override
@@ -176,7 +178,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 					return false;
 				}
-			}, this.table, this.event.toUppercase(), this.recent);
+			}, this.getTable(), this.getEvent().toUppercase(), this.recent);
 		} catch (SQLException ex) {
 			this.getLog().console(ex);
 			this.stop();
