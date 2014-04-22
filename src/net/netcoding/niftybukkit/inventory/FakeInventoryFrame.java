@@ -6,10 +6,10 @@ import java.util.List;
 
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,57 +27,42 @@ public abstract class FakeInventoryFrame extends BukkitHelper {
 		this.setAutoCancelled(autoCancel);
 	}
 
+	public void add(ItemStack item) {
+		this.items.add(item);
+	}
+
 	public void add(int index, ItemStack item) {
 		this.items.add(index, item);
 	}
 
+	public void add(ItemData item, int amount, String displayName, String... lore) {
+		this.add(this.items.size(), item, amount, displayName, Arrays.asList(lore));
+	}
+
+	public void add(ItemData item, int amount, String displayName, List<String> lore) {
+		this.add(this.items.size(), item, amount, displayName, lore);
+	}
+
+	public void add(int index, ItemData item, int amount, String displayName, String... lore) {
+		this.add(index, item, amount, displayName, Arrays.asList(lore));
+	}
+
 	@SuppressWarnings("deprecation")
-	public boolean add(ItemData item, int amount, String displayName, List<String> lore) {
+	public void add(int index, ItemData item, int amount, String displayName, List<String> lore) {
 		ItemStack stack = new ItemStack(item.getId(), amount, item.getData());
 		ItemMeta meta = stack.getItemMeta();
 		if (StringUtil.notEmpty(displayName)) meta.setDisplayName(displayName);
-		List<String> combinedLore = meta.getLore();
-		if (lore != null && lore.size() > 0) combinedLore.addAll(lore);
-		meta.setLore(combinedLore);
+		if (ListUtil.notEmpty(lore)) meta.setLore(lore);
 		stack.setItemMeta(meta);
-		return this.add(stack);
+		this.add(index, stack);
 	}
 
-	public boolean add(ItemData item, int amount, String displayName, String... lore) {
-		return this.add(item, amount, displayName, Arrays.asList(lore));
+	public void addAll(Collection<? extends ItemStack> collection) {
+		this.items.addAll(collection);
 	}
 
-	public boolean add(ItemStack item) {
-		return this.items.add(item);
-	}
-
-	public boolean add(Material material) {
-		return this.add(material, (short)0);
-	}
-
-	public boolean add(Material material, short data) {
-		return this.add(material, data, 1);
-	}
-
-	public boolean add(Material material, short data, int amount) {
-		return this.add(material, data, amount, null);
-	}
-
-	@SuppressWarnings("deprecation")
-	public boolean add(Material material, short data, int amount, String displayName, List<String> lore) {
-		return this.add(new ItemData(material.getId(), data), amount, displayName, lore);
-	}
-
-	public boolean add(Material material, short data, int amount, String displayName, String... lore) {
-		return this.add(material, data, amount, displayName, Arrays.asList(lore));
-	}
-
-	public boolean addAll(Collection<? extends ItemStack> collection) {
-		return this.items.addAll(collection);
-	}
-
-	public boolean addAll(int index, Collection<? extends ItemStack> collection) {
-		return this.items.addAll(index, collection);
+	public void addAll(int index, Collection<? extends ItemStack> collection) {
+		this.items.addAll(index, collection);
 	}
 
 	public void centerItems() {
@@ -90,6 +75,11 @@ public abstract class FakeInventoryFrame extends BukkitHelper {
 
 	ConcurrentList<ItemStack> getItems() {
 		return this.items;
+	}
+
+	ItemStack[] getItemsArray() {
+		return ListUtil.toArray(this.items, ItemStack.class);
+		//return this.items.toArray(new ItemStack[this.items.size()]);
 	}
 
 	public int getTotalSlots() {

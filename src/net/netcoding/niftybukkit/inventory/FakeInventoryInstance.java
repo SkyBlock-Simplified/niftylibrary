@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit.inventory;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
@@ -36,7 +35,7 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 	}
 
 	public void open() {
-		this.inventory.open(this.getPlayerName(), (ItemStack[])this.getItems().toArray());
+		this.inventory.open(this.getPlayer(), this.getItemsArray());
 	}
 
 }

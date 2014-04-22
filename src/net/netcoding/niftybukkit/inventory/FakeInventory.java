@@ -24,8 +24,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class FakeInventory extends FakeInventoryFrame implements Listener {
 
-	private static final transient ConcurrentHashMap<String, ConcurrentSet<String>> opened = new ConcurrentHashMap<>();
-	private final transient String uuid = UUID.randomUUID().toString();
+	private static final transient ConcurrentHashMap<UUID, ConcurrentSet<String>> opened = new ConcurrentHashMap<>();
+	private final transient UUID uuid = UUID.randomUUID();
 	private final transient FakeInventoryListener listener;
 	private transient ItemStack itemOpener;
 
@@ -52,7 +52,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		return this.itemOpener;
 	}
 
-	public String getUUID() {
+	public UUID getUUID() {
 		return this.uuid;
 	}
 
@@ -76,7 +76,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	public static boolean isOpenAnywhere(Player player) {
 		if (player == null) return false;
 
-		for (String uuid : opened.keySet()) {
+		for (UUID uuid : opened.keySet()) {
 			for (String currentPlayer : opened.get(uuid)) {
 				if (currentPlayer.equals(player.getName()))
 					return true;
@@ -165,26 +165,25 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		}
 	}
 
+	public void open(String playerName) {
+		this.open(findPlayer(playerName));
+	}
+
 	public void open(Player player) {
-		this.open(player, (ItemStack[])this.getItems().toArray());
+		this.open(player, this.getItemsArray());
 	}
 
 	void open(Player player, ItemStack[] items) {
-		if (!this.isOpen(player)) {
-			Inventory inventory = Bukkit.createInventory(player, 9, "");
-			inventory.setContents(items);
-			opened.get(this.getUUID()).add(player.getName());
-			player.openInventory(inventory);
+		if (player != null) {
+			if (items != null) {
+				if (!this.isOpen(player)) {
+					Inventory inventory = Bukkit.createInventory(player, 9, "");
+					inventory.setContents(items);
+					opened.get(this.getUUID()).add(player.getName());
+					player.openInventory(inventory);
+				}
+			}
 		}
-	}
-
-	public void open(String playerName) {
-		this.open(playerName, (ItemStack[])this.getItems().toArray());
-	}
-
-	public void open(String playerName, ItemStack[] items) {
-		Player player = findPlayer(playerName);
-		if (player != null) this.open(player, items);
 	}
 
 	public void setItemOpener(ItemStack itemOpener) {
