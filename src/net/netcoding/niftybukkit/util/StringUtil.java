@@ -60,7 +60,7 @@ public class StringUtil {
 
 	public static String implode(String glue, List<String> pieces, int startIndex) {
 		if (isEmpty(glue)) glue = "";
-		if (isEmpty(pieces)) throw new IllegalArgumentException("Pieces cannot be empty!");
+		if (ListUtil.isEmpty(pieces)) throw new IllegalArgumentException("Pieces cannot be empty!");
 		if (startIndex > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", startIndex, pieces.size()));
 		List<String> newPieces = new ArrayList<>();
 
@@ -74,23 +74,7 @@ public class StringUtil {
 		return "".equals(value) || value == null;
 	}
 
-	public static boolean isEmpty(String[] value) {
-		return value == null || value.length == 0;
-	}
-
-	public static boolean isEmpty(List<String> value) {
-		return value == null || value.size() == 0;
-	}
-
 	public static boolean notEmpty(String value) {
-		return !isEmpty(value);
-	}
-
-	public static boolean notEmpty(String[] value) {
-		return !isEmpty(value);
-	}
-
-	public static boolean notEmpty(List<String> value) {
 		return !isEmpty(value);
 	}
 
