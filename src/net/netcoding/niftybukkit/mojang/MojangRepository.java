@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.mojang;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,16 +17,23 @@ import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftybukkit.util.ListUtil;
-import net.netcoding.niftybukkit.util.StringUtil;
-import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.entity.Player;
 
 public class MojangRepository {
 
-	private static final int MAX_PAGES_TO_CHECK = 100;
+	private static final int PROFILES_PER_REQUEST = 100;
 	private static final transient Gson gson = new Gson();
 	private static final transient HttpClient httpClient = new HttpClient();
+
+	private static URL getProfilesUrl() {
+		try {
+			return new URL("https://api.mojang.com/profiles/minecraft");
+		} catch (MalformedURLException mue) { }
+
+		return null;
+	}
 
 	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
 		return searchByExactUsername(player.getName());
@@ -65,28 +73,23 @@ public class MojangRepository {
 
 	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
 		if (ListUtil.isEmpty(usernames)) throw ProfileNotFoundException.InvalidUsernames(usernames);
-		ConcurrentSet<ProfileCriteria> criterion = new ConcurrentSet<>();
 		List<MojangProfile> profiles = new ArrayList<>();
-
-		for (String username : usernames) {
-			if (StringUtil.notEmpty(username))
-				criterion.add(new ProfileCriteria(username));
-		}
+		ConcurrentList<String> userList = new ConcurrentList<>(usernames);
 
 		if (NiftyBukkit.getPlugin().getServer().getOnlineMode()) {
-			for (ProfileCriteria criteria : criterion) {
-				Player player = BukkitHelper.findPlayer(criteria.getName());
+			for (String name : userList) {
+				Player player = BukkitHelper.findPlayer(name);
 
 				if (player != null) {
 					profiles.add(new MojangProfile(player.getName(), player.getUniqueId().toString()));
-					criterion.remove(criteria);
+					userList.remove(name);
 				}
 			}
 		} else if (BungeeHelper.bungeeOnline()) {
 			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
 
-			for (ProfileCriteria criteria : criterion) {
-				String criteriaName = criteria.getName().toLowerCase();
+			for (String name : userList) {
+				String criteriaName = name.toLowerCase();
 
 				for (BungeeServer server : helper.getServers()) {
 					if (server.isOnline()) {
@@ -106,7 +109,7 @@ public class MojangRepository {
 
 						if (found != null) {
 							profiles.add(found);
-							criterion.remove(criteria);
+							userList.remove(name);
 							break;
 						}
 					}
@@ -114,16 +117,24 @@ public class MojangRepository {
 			}
 		}
 
-		if (criterion.size() > 0) {
+		if (userList.size() > 0) {
 			try {
-				HttpBody body = new HttpBody(gson.toJson(criterion));
 				List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
+				String[] userArray = ListUtil.toArray(userList, String.class);
+				int start = 0;
+				int i = 0;
 
-				for (int i = 1; i <= MAX_PAGES_TO_CHECK; i++) {
-					NameSearchResult result = gson.fromJson(httpClient.post(new URL("https://api.mojang.com/profiles/page/" + i), body, headers), NameSearchResult.class);
-					if (result.getSize() == 0) break;
-					profiles.addAll(Arrays.asList(result.getProfiles()));
-				}
+				do {
+					int end = PROFILES_PER_REQUEST * (i + 1);
+					if (end > userList.size()) end = userList.size();
+					String[] batch = Arrays.copyOfRange(userArray, start, end);
+					HttpBody body = new HttpBody(gson.toJson(batch));
+					String response = httpClient.post(getProfilesUrl(), body, headers);
+					MojangProfile[] result = gson.fromJson(response, MojangProfile[].class);
+					profiles.addAll(Arrays.asList(result));
+					start = end;
+					i++;
+				} while (start < userList.size());
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
@@ -214,37 +225,6 @@ public class MojangRepository {
 				return this.value;
 			}
 
-		}
-
-	}
-
-	private static class NameSearchResult {
-
-		private MojangProfile[] profiles;
-		private int size;
-
-		public MojangProfile[] getProfiles() {
-			return profiles;
-		}
-
-		public int getSize() {
-			return size;
-		}
-
-	}
-
-	@SuppressWarnings("unused")
-	private static class ProfileCriteria {
-
-		private final String name;
-		private final String agent = "minecraft";
-
-		public ProfileCriteria(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return this.name;
 		}
 
 	}
