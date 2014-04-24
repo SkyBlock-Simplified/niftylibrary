@@ -35,7 +35,7 @@ public class BukkitHelper {
 	}
 
 	public boolean hasPermissions(CommandSender sender, String... permissions) {
-		return this.hasPermissions(sender, true, permissions);
+		return this.hasPermissions(sender, false, permissions);
 	}
 
 	public boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
