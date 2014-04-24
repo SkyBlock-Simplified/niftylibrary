@@ -46,25 +46,44 @@ public class StringUtil {
 		return implode(glue, pieces, 0);
 	}
 
-	public static String implode(String[] pieces, int startIndex) {
-		return implode("", toList(pieces), startIndex);
+	public static String implode(String[] pieces, int start) {
+		return implode("", toList(pieces), start);
 	}
 
-	public static String implode(List<String> pieces, int startIndex) {
-		return implode("", pieces, startIndex);
+	public static String implode(List<String> pieces, int start) {
+		return implode("", pieces, start);
 	}
 
-	public static String implode(String glue, String[] pieces, int startIndex) {
-		return implode(glue, toList(pieces), startIndex);
+	public static String implode(String glue, String[] pieces, int start) {
+		return implode(glue, toList(pieces), start);
 	}
 
-	public static String implode(String glue, List<String> pieces, int startIndex) {
+	public static String implode(String glue, List<String> pieces, int start) {
+		return implode(glue, pieces, start, -1);
+	}
+
+	public static String implode(String[] pieces, int start, int end) {
+		return implode("", toList(pieces), start, end);
+	}
+
+	public static String implode(List<String> pieces, int start, int end) {
+		return implode("", pieces, start, end);
+	}
+
+	public static String implode(String glue, String[] pieces, int start, int end) {
+		return implode(glue, toList(pieces), start, end);
+	}
+
+	public static String implode(String glue, List<String> pieces, int start, int end) {
 		if (isEmpty(glue)) glue = "";
 		if (ListUtil.isEmpty(pieces)) throw new IllegalArgumentException("Pieces cannot be empty!");
-		if (startIndex > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", startIndex, pieces.size()));
+		if (start < 0) start = 0;;
+		if (start > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", start, pieces.size()));
+		if (end < 0) end = pieces.size();
+		if (end > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", end, pieces.size()));
 		List<String> newPieces = new ArrayList<>();
 
-		for (int i = startIndex; i < pieces.size(); i++)
+		for (int i = start; i < end; i++)
 			newPieces.add(pieces.get(i));
 
 		return Joiner.on(glue).join(newPieces);
