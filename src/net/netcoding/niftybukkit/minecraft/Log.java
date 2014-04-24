@@ -28,7 +28,8 @@ public class Log {
 	}
 
 	public String getPrefix(String text) {
-		return String.format("%1$s[%2$s%3$s%1$s]%4$s", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
+		return StringUtil.format("{0}[{1}{2}{0}]{3}", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
+		//return String.format("%1$s[%2$s%3$s%1$s]%4$s", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
 	}
 
 	public void console(Object... args) {
@@ -79,7 +80,7 @@ public class Log {
 	}
 
 	public String parse(String message, Object... args) {
-		return ChatColor.GRAY + StringUtil.format(RegexUtil.replace(message, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY)), args);
+		return ChatColor.GRAY + StringUtil.format(message, args);
 	}
 
 }

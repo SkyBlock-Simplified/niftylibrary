@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
+
 import com.google.common.base.Joiner;
 
 public class StringUtil {
@@ -14,6 +16,7 @@ public class StringUtil {
 	private static final transient Map<String, MessageFormat> messageCache = new HashMap<>();
 
 	public static String format(String format, Object... objects) {
+		format = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY));
 		MessageFormat messageFormat = messageCache.get(format);
 
 		if (messageFormat == null) {
