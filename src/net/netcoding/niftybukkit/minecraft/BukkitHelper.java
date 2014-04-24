@@ -35,8 +35,15 @@ public class BukkitHelper {
 	}
 
 	public boolean hasPermissions(CommandSender sender, String... permissions) {
+		return this.hasPermissions(sender, true, permissions);
+	}
+
+	public boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
 		if (isConsole(sender)) return true;
-		return sender.hasPermission(String.format("%s.%s", this.getPlugin().getDescription().getName(), StringUtil.implode(".", permissions)));
+		String permission = String.format("%s.%s", this.getPlugin().getDescription().getName(), StringUtil.implode(".", permissions));
+		boolean hasPerms = sender.hasPermission(permission);
+		if (defaultError) this.noPerms(sender, permission);
+		return hasPerms;
 	}
 
 	public static boolean isConsole(CommandSender sender) {
@@ -69,6 +76,10 @@ public class BukkitHelper {
 		}
 
 		return null;
+	}
+
+	void noPerms(CommandSender sender, String permission) {
+		this.getLog().error(sender, "You do not have the required permission {{0}}!", permission);
 	}
 
 }

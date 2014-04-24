@@ -121,7 +121,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		if (isPlayer(sender)) {
 			if (this.isCheckingPerms() && !sender.hasPermission(this.permission)) {
 				if (this.isUsingDefaultPermsError())
-					this.getLog().message(sender, "You do not have the required permission {{0}}!", this.permission);
+					this.noPerms(sender, this.permission);
 
 				return true;
 			}
