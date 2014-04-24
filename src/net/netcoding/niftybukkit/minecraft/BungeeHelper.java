@@ -206,6 +206,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return false;
 	}
 
+	public void message(String targetPlayer, String message) {
+		this.write(this.getFirstPlayer(), "Message", targetPlayer, message);
+	}
+
 	public void message(Player player, String targetPlayer, String message) {
 		this.write(player, "Message", targetPlayer, message);
 	}
