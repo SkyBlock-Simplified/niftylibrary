@@ -85,7 +85,7 @@ public class MojangRepository {
 					userList.remove(name);
 				}
 			}
-		} else if (BungeeHelper.bungeeOnline()) {
+		} else if (NiftyBukkit.getBungeeHelper().isOnline()) {
 			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
 
 			for (String name : userList) {
@@ -159,7 +159,7 @@ public class MojangRepository {
 					break;
 				}
 			}
-		} else if (BungeeHelper.bungeeOnline()) {
+		} else if (NiftyBukkit.getBungeeHelper().isOnline()) {
 			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
 
 			for (BungeeServer server : helper.getServers()) {

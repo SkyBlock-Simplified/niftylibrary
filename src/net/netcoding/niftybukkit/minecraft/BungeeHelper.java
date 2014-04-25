@@ -66,10 +66,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (this.listener != null && register) this.register();
 	}
 
-	public static boolean bungeeOnline() {
-		return bungeeOnline;
-	}
-
 	public void connect(Player player, String targetServer) {
 		this.write(player, "Connect", targetServer);
 	}
@@ -91,17 +87,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void forward(Player player, String targetServer, String subChannel, Object... data) {
-		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to Nifty channels!");
+		if (!this.isOnline()) throw new UnsupportedOperationException(String.format("No %s listener available to query remote servers!", BUNGEE_CHANNEL));
+		if (player == null) throw new IllegalArgumentException("Player cannot be null!");
+		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to NiftyBungee channels!");
 		if (subChannel.matches("^GetServers?|Player(?:Count|List)$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
-		forward(this.getPlugin(), player, targetServer, subChannel, data);
-	}
-
-	private static void forward(JavaPlugin plugin, Player player, String targetServer, String subChannel, Object... data) {
-		if (!bungeeOnline()) return;
-		if (player == null) return;
 		byte[] forward = ByteUtil.toByteArray(data);
 		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, forward.length, forward);
-		player.sendPluginMessage(plugin, BUNGEE_CHANNEL, output);
+		player.sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
 	}
 
 	public String getChannel() {
