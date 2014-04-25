@@ -208,25 +208,23 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return bungeeOnline;
 	}
 
-	public boolean isPlayerOnline(String playerName) {
-		if (StringUtil.isEmpty(playerName)) return false;
+	public boolean isPlayerOnline(MojangProfile profile) {
+		if (profile != null) return false;
 
-		for (BungeeServer server : serverList.values()) {
-			for (MojangProfile profile : server.playerList) {
-				if (profile.getName().equalsIgnoreCase(playerName))
-					return true;
-			}
+		for (BungeeServer server : this.getServers()) {
+			if (server.getPlayerList().contains(profile))
+				return true;
 		}
 
 		return false;
 	}
 
-	public void message(String targetPlayer, String message) {
-		this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "Message", targetPlayer, message);
+	public void message(MojangProfile profile, String message) {
+		this.message(this.getFirstPlayer(), profile, message);
 	}
 
-	public void message(Player player, String targetPlayer, String message) {
-		this.write(player, BUNGEE_CHANNEL, "Message", targetPlayer, message);
+	public void message(Player player, MojangProfile profile, String message) {
+		this.write(player, BUNGEE_CHANNEL, "Message", profile.getName(), message);
 	}
 
 	public void register() {

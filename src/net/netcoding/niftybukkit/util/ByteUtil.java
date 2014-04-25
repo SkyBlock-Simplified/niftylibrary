@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -34,6 +35,8 @@ public class ByteUtil {
 				output.writeShort((short)obj);
 			else if (obj instanceof String)
 				output.writeUTF((String)obj);
+			else if (obj instanceof UUID)
+				output.writeUTF(UUID.fromString((String)obj).toString());
 		}
 
 		return output.toByteArray();
