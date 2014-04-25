@@ -107,7 +107,7 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	public HashMap<String, Object> getDeletedData() throws SQLException {
-		if (this.getEvent() != TriggerEvent.DELETE) throw new SQLException("Can only retrieve deleted information!");
+		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Unable to retrieve deleted information from new rows!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
 		this.mysql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
