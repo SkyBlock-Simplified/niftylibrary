@@ -52,6 +52,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this(plugin, BUNGEE_CHANNEL, listener, false);
 	}
 
+	static int count = 0;
+
 	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener, boolean register) {
 		super(plugin);
 
@@ -257,8 +259,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (!this.isOnline()) return;
 		if (channel.equals("Forward")) return;
 		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
-		dataList.add(0, channel);
-		player.sendPluginMessage(this.getPlugin(), this.getChannel(), ByteUtil.toByteArray(dataList));
+		dataList.add(0, subChannel);
+		player.sendPluginMessage(this.getPlugin(), channel, ByteUtil.toByteArray(dataList));
 	}
 
 	@Override
@@ -266,6 +268,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (!this.isRegistered()) return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
+
+		System.out.println("test1: " + channel);
+		System.out.println("test2: " + this.getChannel());
+		System.out.println("test3: " + subChannel);
 
 		if (channel.equals(BUNGEE_CHANNEL)) {
 			if (subChannel.matches("^Player(?:Count|List)|GetServers?$"))

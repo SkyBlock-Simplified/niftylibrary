@@ -86,12 +86,10 @@ public class MojangRepository {
 				}
 			}
 		} else if (NiftyBukkit.getBungeeHelper().isOnline()) {
-			BungeeHelper helper = new BungeeHelper(NiftyBukkit.getPlugin());
-
 			for (String name : userList) {
 				String criteriaName = name.toLowerCase();
 
-				for (BungeeServer server : helper.getServers()) {
+				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
 					if (server.isOnline()) {
 						MojangProfile found = null;
 
