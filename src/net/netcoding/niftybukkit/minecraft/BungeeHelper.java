@@ -32,8 +32,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	private static boolean bungeeOnline = false;
 	private static boolean bungeeLoaded = false;
 	private static boolean loadedOnce = false;
+	private final String channel;
 	private static final ConcurrentHashMap<String, BungeeServer> serverList = new ConcurrentHashMap<>();
-	private transient BungeeListener listener;
+	private final transient BungeeListener listener;
 
 	public BungeeHelper(JavaPlugin plugin) {
 		this(plugin, null);
@@ -44,6 +45,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeHelper(JavaPlugin plugin, BungeeListener listener, boolean register) {
+		this(plugin, BUNGEE_CHANNEL, listener, register);
+	}
+
+	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener) {
+		this(plugin, BUNGEE_CHANNEL, listener, false);
+	}
+
+	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener, boolean register) {
 		super(plugin);
 
 		if (loadedOnce) {
@@ -52,6 +61,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		} else
 			loadedOnce = true;
 
+		this.channel = channel;
 		this.listener = listener;
 		if (this.listener != null && register) this.register();
 	}
@@ -92,6 +102,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		byte[] forward = ByteUtil.toByteArray(data);
 		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, forward.length, forward);
 		player.sendPluginMessage(plugin, BUNGEE_CHANNEL, output);
+	}
+
+	public String getChannel() {
+		return this.channel;
 	}
 
 	private Player getFirstPlayer() {
@@ -207,39 +221,45 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void message(String targetPlayer, String message) {
-		this.write(this.getFirstPlayer(), "Message", targetPlayer, message);
+		this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "Message", targetPlayer, message);
 	}
 
 	public void message(Player player, String targetPlayer, String message) {
-		this.write(player, "Message", targetPlayer, message);
+		this.write(player, BUNGEE_CHANNEL, "Message", targetPlayer, message);
 	}
 
 	public void register() {
 		if (this.isRegistered()) return;
-		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
+		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), this.getChannel());
+
+		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
+			this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+			this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+		}
 	}
 
 	public void unregister() {
 		if (!this.isRegistered()) return;
-		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
+		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), this.getChannel());
+
+		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
+			this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+			this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+		}
 	}
 
-	private void write(Player player, String channel, Object... objs) {
-		write(this.getPlugin(), player, channel, objs);
+	private void write(Player player, String channel, Object... data) {
+		this.write(player, this.getChannel(), channel, data);
 	}
 
-	private static void write(JavaPlugin plugin, Player player, String subChannel, Object... data) {
-		write(plugin, player, BUNGEE_CHANNEL, subChannel, data);
-	}
-
-	private static void write(JavaPlugin plugin, Player player, String channel, String subChannel, Object... data) {
-		if (!bungeeOnline()) return;
+	private void write(Player player, String channel, String subChannel, Object... data) {
+		if (!this.isOnline()) return;
 		if (channel.equals("Forward")) return;
 		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
-		dataList.add(0, subChannel);
-		player.sendPluginMessage(plugin, channel, ByteUtil.toByteArray(dataList));
+		dataList.add(0, channel);
+		player.sendPluginMessage(this.getPlugin(), this.getChannel(), ByteUtil.toByteArray(dataList));
 	}
 
 	@Override
@@ -248,7 +268,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
 
-		if (channel.equals(BUNGEE_CHANNEL)) {
+		if (channel.equals(this.getChannel())) {
 			if (subChannel.matches("^Player(?:Count|List)|GetServers?$")) return;
 
 			if (this.listener != null) {
