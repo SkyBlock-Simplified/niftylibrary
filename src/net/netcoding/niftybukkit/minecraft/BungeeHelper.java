@@ -209,7 +209,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public boolean isPlayerOnline(MojangProfile profile) {
-		if (profile != null) return false;
+		if (profile == null) return false;
 
 		for (BungeeServer server : this.getServers()) {
 			if (server.getPlayerList().contains(profile))
