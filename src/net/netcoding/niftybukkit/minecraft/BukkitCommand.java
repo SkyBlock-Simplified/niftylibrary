@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.getCommand().setExecutor(this);
 	}
 
-	public abstract void onCommand(CommandSender sender, String alias, String[] args) throws SQLException, Exception;
+	public abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
 
 	public void editUsage(int index, String arg, String usage) {
 		if (this.usages.containsKey(index)) {
