@@ -356,17 +356,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					return;
 			}
 
-			boolean isForward = channel.equals(BUNGEE_CHANNEL) && subChannel.equals(this.getChannel());
-
-			if (isForward) {
-				channel = this.getChannel();
-				message = Arrays.copyOfRange(message, subChannel.length() + 4, message.length);
-			}
-
-			if (isForward || subChannel.equals(this.getChannel())) {
+			if (channel.equals(this.getChannel())) {
 				if (this.listener != null) {
 					try {
-						this.listener.onMessageReceived(this.getChannel(), player, message);
+						this.listener.onMessageReceived(channel, player, message);
 					} catch (Exception ex) {
 						if (!ex.getClass().equals(EOFException.class))
 							this.getLog().console(ex);
