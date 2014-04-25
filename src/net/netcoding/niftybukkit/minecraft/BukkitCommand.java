@@ -133,7 +133,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		}
 
 		if (this.isHelp(args))
-			this.showUsage(sender);
+			this.showUsage(sender, label);
 		else {
 			try {
 				this.onCommand(sender, label, args);
@@ -197,7 +197,11 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	public void showUsage(CommandSender sender) {
-		String usage = this.getCommand().getUsage().replace("<command>", this.getCommand().getName());
+		this.showUsage(sender, this.getCommand().getName());
+	}
+
+	public void showUsage(CommandSender sender, String label) {
+		String usage = this.getCommand().getUsage().replace("<command>", label);
 		String[] args = this.argCache.get(sender.getName());
 		List<String> argList = this.getProperArgs(args);
 		int index = argList.size();
@@ -208,7 +212,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 			if (usageMap.containsKey(lastArg)) {
 				String argStart = (argList.size() > 0 ? String.format("%1$s ", StringUtil.implode(" ", argList)) : "");
-				usage = String.format("/%1$s %2$s%3$s", this.getCommand().getName(), argStart, usageMap.get(lastArg));
+				usage = String.format("/%1$s %2$s%3$s", label, argStart, usageMap.get(lastArg));
 			}
 		}
 
