@@ -267,9 +267,12 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
 
-		if (channel.equals(this.getChannel())) {
-			if (subChannel.matches("^Player(?:Count|List)|GetServers?$")) return;
+		if (channel.equals(BUNGEE_CHANNEL)) {
+			if (subChannel.matches("^Player(?:Count|List)|GetServers?$"))
+				return;
+		}
 
+		if (channel.equals(this.getChannel())) {
 			if (this.listener != null) {
 				try {
 					this.listener.onMessageReceived(subChannel, player, message);
@@ -277,7 +280,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					this.getLog().console(ex);
 				}
 			}
-		} else if (channel.equals("NiftyBungee")) {
+		} else if (channel.equals(NIFTY_CHANNEL)) {
 			try {
 				PluginManager manager = this.getPlugin().getServer().getPluginManager();
 
