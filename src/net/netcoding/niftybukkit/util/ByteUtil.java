@@ -36,7 +36,7 @@ public class ByteUtil {
 			else if (obj instanceof String)
 				output.writeUTF((String)obj);
 			else if (obj instanceof UUID)
-				output.writeUTF(UUID.fromString((String)obj).toString());
+				output.writeUTF(((UUID)obj).toString());
 		}
 
 		return output.toByteArray();
