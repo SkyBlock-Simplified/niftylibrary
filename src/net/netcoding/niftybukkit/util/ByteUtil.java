@@ -9,6 +9,8 @@ import net.minecraft.util.com.google.common.io.ByteStreams;
 
 public class ByteUtil {
 
+	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
 	public static byte[] toByteArray(Object... data) {
 		return toByteArray(Arrays.asList(data));
 	}
@@ -17,10 +19,12 @@ public class ByteUtil {
 		ByteArrayDataOutput output = ByteStreams.newDataOutput();
 
 		for (Object obj : data) {
-			if (obj instanceof Boolean)
-				output.writeBoolean((boolean)obj);
+			if (obj instanceof byte[])
+				output.write((byte[])obj);
 			else if (obj instanceof Byte)
 				output.writeByte((int)obj);
+			else if (obj instanceof Boolean)
+				output.writeBoolean((boolean)obj);
 			else if (obj instanceof Character)
 				output.writeChar((char)obj);
 			else if (obj instanceof Short)
@@ -40,6 +44,18 @@ public class ByteUtil {
 		}
 
 		return output.toByteArray();
+	}
+
+	public static String toHexString(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+
+		for (int i = 0; i < bytes.length; i++) {
+			int v = bytes[i] & 0xFF;
+			hexChars[i * 2] = hexArray[v >>> 4];
+			hexChars[i * 2 + 1] = hexArray[v & 0x0F];
+		}
+
+		return new String(hexChars);
 	}
 
 }
