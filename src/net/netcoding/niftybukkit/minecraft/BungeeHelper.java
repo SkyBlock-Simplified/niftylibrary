@@ -101,7 +101,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to NiftyBungee channels!");
 		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
 		byte[] forward = ByteUtil.toByteArray(data);
-		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, forward.length, forward);
+		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, (short)forward.length, forward);
 		player.sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
 	}
 
@@ -356,12 +356,20 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					return;
 			}
 
-			if (channel.equals(this.getChannel()) || subChannel.equals(this.getChannel())) {
+			boolean isForward = channel.equals(BUNGEE_CHANNEL) && subChannel.equals(this.getChannel());
+
+			if (isForward) {
+				channel = this.getChannel();
+				message = Arrays.copyOfRange(message, subChannel.length() + 4, message.length);
+			}
+
+			if (isForward || subChannel.equals(this.getChannel())) {
 				if (this.listener != null) {
 					try {
 						this.listener.onMessageReceived(this.getChannel(), player, message);
 					} catch (Exception ex) {
-						this.getLog().console(ex);
+						if (!ex.getClass().equals(EOFException.class))
+							this.getLog().console(ex);
 					}
 				}
 			}
