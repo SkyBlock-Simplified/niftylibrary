@@ -79,7 +79,7 @@ public class BukkitHelper {
 	}
 
 	void noPerms(CommandSender sender, String permission) {
-		this.getLog().error(sender, "You do not have the required permission {{0}}!", permission);
+		this.getLog().error(sender, "You do not have the permission {{0}}!", permission);
 	}
 
 }
