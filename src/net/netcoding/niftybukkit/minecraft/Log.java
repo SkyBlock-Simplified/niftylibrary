@@ -44,12 +44,13 @@ public class Log {
 	}
 
 	public void console(String message, Throwable exception, Object... args) {
-		message = (StringUtil.isEmpty(message) ? "null" : message);
+		message = StringUtil.isEmpty(message) ? "null" : message;
+		message = RegexUtil.strip(StringUtil.format(RegexUtil.replace(message, RegexUtil.LOG_PATTERN), args), RegexUtil.VANILLA_PATTERN);
 
 		if (exception != null)
-			this.logger.log(Level.SEVERE, StringUtil.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args), exception);
+			this.logger.log(Level.SEVERE, message, exception);
 		else
-			this.logger.log(Level.INFO, StringUtil.format(RegexUtil.replace(RegexUtil.strip(message, RegexUtil.VANILLA_PATTERN), RegexUtil.LOG_PATTERN), args));
+			this.logger.log(Level.INFO, message);
 	}
 
 	public void error(CommandSender sender, Object... args) {
