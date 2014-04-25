@@ -37,7 +37,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	private final transient BungeeListener listener;
 
 	public BungeeHelper(JavaPlugin plugin) {
-		this(plugin, null);
+		this(plugin, BUNGEE_CHANNEL, null);
 	}
 
 	public BungeeHelper(JavaPlugin plugin, BungeeListener listener) {
@@ -48,14 +48,21 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this(plugin, BUNGEE_CHANNEL, listener, register);
 	}
 
+	public BungeeHelper(JavaPlugin plugin, String channel) {
+		this(plugin, BUNGEE_CHANNEL, null);
+	}
+
 	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener) {
 		this(plugin, BUNGEE_CHANNEL, listener, false);
 	}
 
-	static int count = 0;
+	public BungeeHelper(JavaPlugin plugin, String channel, boolean register) {
+		this(plugin, channel, null, register);
+	}
 
 	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener, boolean register) {
 		super(plugin);
+		if (StringUtil.isEmpty(channel)) throw new IllegalArgumentException("A channel name must be passed when instantiating an instance of BungeeHelper!");
 
 		if (loadedOnce) {
 			if (!this.isOnline())
@@ -65,7 +72,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 		this.channel = channel;
 		this.listener = listener;
-		if (this.listener != null && register) this.register();
+		if (register) this.register();
 	}
 
 	public void connect(Player player, String targetServer) {
@@ -92,7 +99,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (!this.isOnline()) throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
 		if (player == null) throw new IllegalArgumentException("Player cannot be null!");
 		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to NiftyBungee channels!");
-		if (subChannel.matches("^GetServers?|Player(?:Count|List)$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
+		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
 		byte[] forward = ByteUtil.toByteArray(data);
 		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, forward.length, forward);
 		player.sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
@@ -203,7 +210,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public boolean isRegistered() {
-		return this.getPlugin().getServer().getMessenger().isIncomingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL) && this.getPlugin().getServer().getMessenger().isOutgoingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL);
+		return this.getPlugin().getServer().getMessenger().isIncomingChannelRegistered(this.getPlugin(), this.getChannel()) && this.getPlugin().getServer().getMessenger().isOutgoingChannelRegistered(this.getPlugin(), this.getChannel());
 	}
 
 	public boolean isOnline() {
@@ -269,29 +276,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
 
-		System.out.println("test1: " + channel);
-		System.out.println("test2: " + this.getChannel());
-		System.out.println("test3: " + subChannel);
-
-		if (channel.equals(BUNGEE_CHANNEL)) {
-			if (subChannel.matches("^Player(?:Count|List)|GetServers?$"))
-				return;
-		}
-
-		if (channel.equals(this.getChannel())) {
-			if (this.listener != null) {
-				try {
-					this.listener.onMessageReceived(subChannel, player, message);
-				} catch (Exception ex) {
-					this.getLog().console(ex);
-				}
-			}
-		} else if (channel.equals(NIFTY_CHANNEL)) {
+		if (channel.equals(NIFTY_CHANNEL)) {
 			try {
 				PluginManager manager = this.getPlugin().getServer().getPluginManager();
 
 				if (subChannel.equals("GetServers")) {
-					bungeeOnline = true;
 					serverList.clear();
 					int count = input.readInt();
 
@@ -301,6 +290,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						serverList.put(server.getName(), server);
 						manager.callEvent(new BungeeServerLoadedEvent(server));
 					}
+
+					bungeeOnline = true;
 				} else {
 					final BungeeServer server = this.getServer(input.readUTF());
 					if (server == null) return;
@@ -323,18 +314,21 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 						server.loadedOnce = true;
 						manager.callEvent(new BungeeServerLoadedEvent(server));
-						int loaded = 0;
 
-						for (BungeeServer serv : serverList.values())
-							loaded += serv.loadedOnce ? 1 : 0;
+						if (!bungeeLoaded) {
+							int loaded = 0;
 
-						if (loaded == serverList.size() && !bungeeLoaded) {
-							bungeeLoaded = true;
-							manager.callEvent(new BungeeLoadedEvent(serverList.values()));
+							for (BungeeServer serv : serverList.values())
+								loaded += serv.loadedOnce ? 1 : 0;
+
+							if (loaded == serverList.size()) {
+								bungeeLoaded = true;
+								manager.callEvent(new BungeeLoadedEvent(serverList.values()));
+							}
 						}
-					} else if (subChannel.equals("ServerOffline")) {
+					} else if (subChannel.equals("ServerOffline"))
 						server.reset();
-					} else if (subChannel.startsWith("Player")) {
+					else if (subChannel.startsWith("Player")) {
 						String playerName = input.readUTF();
 
 						if (subChannel.endsWith("Join")) {
@@ -355,6 +349,21 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			} catch (Exception ex) {
 				if (!ex.getClass().equals(EOFException.class))
 					this.getLog().console(ex);
+			}
+		} else {
+			if (channel.equals(BUNGEE_CHANNEL)) {
+				if (subChannel.matches("^Player(?:Count|List)|GetServers?|UUID(?:Other)?$"))
+					return;
+			}
+
+			if (channel.equals(this.getChannel()) || subChannel.equals(this.getChannel())) {
+				if (this.listener != null) {
+					try {
+						this.listener.onMessageReceived(this.getChannel(), player, message);
+					} catch (Exception ex) {
+						this.getLog().console(ex);
+					}
+				}
 			}
 		}
 	}

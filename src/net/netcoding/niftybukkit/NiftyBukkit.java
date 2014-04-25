@@ -20,18 +20,13 @@ public class NiftyBukkit extends BukkitPlugin {
 		plugin = this;
 		repository = new MojangRepository();
 		(itemDatabase = new ItemDatabase(this)).reload();
-
 		new NiftyListener(this);
-		(bungeeHelper = new BungeeHelper(this)).register();
-		Bukkit.getMessenger().registerIncomingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL, bungeeHelper);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
+		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 	}
 
 	@Override
 	public void onDisable() {
 		bungeeHelper.unregister();
-		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
-		Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, BungeeHelper.NIFTY_CHANNEL);
 	}
 
 	public static BungeeHelper getBungeeHelper() {
