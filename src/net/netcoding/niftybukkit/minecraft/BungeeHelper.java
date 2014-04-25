@@ -127,7 +127,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void getPlayerIP(Player player) {
-		this.write(player, "IP");
+		this.write(player, BUNGEE_CHANNEL, "IP");
+	}
+
+	public BungeeServer getPlayerServer(MojangProfile profile) {
+		for (BungeeServer server : this.getServers()) {
+			if (server.getPlayerList().contains(profile))
+				return server;
+		}
+
+		throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile.getName()));
 	}
 
 	public Set<MojangProfile> getPlayerList() {
@@ -242,8 +251,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		}
 	}
 
-	private void write(Player player, String channel, Object... data) {
-		this.write(player, this.getChannel(), channel, data);
+	public void write(Player player, String subChannel, Object... data) {
+		this.write(player, this.getChannel(), subChannel, data);
 	}
 
 	private void write(Player player, String channel, String subChannel, Object... data) {
