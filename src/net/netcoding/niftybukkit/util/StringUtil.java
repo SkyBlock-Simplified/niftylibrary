@@ -13,11 +13,11 @@ import com.google.common.base.Joiner;
 
 public class StringUtil {
 
-	private static final transient Map<String, MessageFormat> messageCache = new HashMap<>();
+	private static final transient Map<String, MessageFormat> MESSAGE_CACHE = new HashMap<>();
 
 	public static String format(String format, Object... objects) {
 		format = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY));
-		MessageFormat messageFormat = messageCache.get(format);
+		MessageFormat messageFormat = MESSAGE_CACHE.get(format);
 
 		if (messageFormat == null) {
 			try {
@@ -27,7 +27,7 @@ public class StringUtil {
 				messageFormat = new MessageFormat(format);
 			}
 
-			messageCache.put(format, messageFormat);
+			MESSAGE_CACHE.put(format, messageFormat);
 		}
 
 		return messageFormat.format(objects);
