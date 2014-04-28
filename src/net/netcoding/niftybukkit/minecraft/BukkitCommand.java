@@ -14,15 +14,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitCommand extends BukkitHelper implements CommandExecutor {
 
-	private transient PluginCommand command = null;
-	private transient boolean requireArgs = true;
-	private transient boolean consoleOnly = false;
-	private transient boolean playerOnly = false;
-	private transient boolean checkPerms = true;
-	private transient boolean defaultPermsError = true;
-	private transient Map<Integer, Map<String, String>> usages = new HashMap<>();
-	private transient Map<String, String[]> argCache = new HashMap<>();
-	private transient String permission;
+	private PluginCommand command = null;
+	private boolean consoleOnly = false;
+	private boolean playerOnly = false;
+	private boolean checkPerms = true;
+	private boolean defaultPermsError = true;
+	private int minimumArgsLength = 1;
+	private int maximumArgsLength = -1;
+	private Map<Integer, Map<String, String>> usages = new HashMap<>();
+	private Map<String, String[]> argCache = new HashMap<>();
+	private String permission;
 
 	public BukkitCommand(JavaPlugin plugin, String command) {
 		super(plugin);
@@ -76,10 +77,6 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return argList;
 	}
 
-	public boolean isArgsRequired() {
-		return this.requireArgs;
-	}
-
 	public boolean isCheckingPerms() {
 		return this.checkPerms;
 	}
@@ -99,22 +96,26 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private boolean isHelp(String... args) {
 		if (args.length > 0 && args[args.length - 1].matches("^[\\?]{1,}|help$"))
 			return true;
-		else if (this.requireArgs && args.length == 0)
-			return true;
 		else
 			return false;
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		this.processCommand(sender, command, label, args);
+		this.removeArgs(sender, args);
+		return true;
+	}
+
+	private void processCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (this.isConsoleOnly() && isPlayer(sender)) {
 			this.getLog().error(sender, "The command {{0}} is only possible from console!", this.getCommand().getName());
-			return true;
+			return;
 		}
 
 		if (this.isPlayerOnly() && isConsole(sender)) {
 			this.getLog().error(sender, "The command {0} is not possible from console!", this.getCommand().getName());
-			return true;
+			return;
 		}
 
 		if (isPlayer(sender)) {
@@ -122,27 +123,35 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 				if (this.isUsingDefaultPermsError())
 					this.noPerms(sender, this.permission);
 
-				return true;
+				return;
 			}
+		}
+
+		if (this.minimumArgsLength > 0 && args.length < this.minimumArgsLength) {
+			this.showUsage(sender, label);
+			return;
+		}
+
+		if (this.maximumArgsLength > 0 && args.length > this.maximumArgsLength) {
+			this.showUsage(sender, label);
+			return;
+		}
+
+		if (this.isHelp(args)) {
+			this.showUsage(sender, label);
+			return;
 		}
 
 		if (!this.storeArgs(sender, args)) {
 			this.getLog().error(sender, "Processing previous request. Try again in a second.");
-			return true;
+			return;
 		}
 
-		if (this.isHelp(args))
-			this.showUsage(sender, label);
-		else {
-			try {
-				this.onCommand(sender, label, args);
-			} catch (Exception ex) {
-				this.getLog().console(ex);
-			}
+		try {
+			this.onCommand(sender, label, args);
+		} catch (Exception ex) {
+			this.getLog().console(ex);
 		}
-
-		this.removeArgs(sender, args);
-		return true;
 	}
 
 	private void removeArgs(CommandSender sender, String... args) {
@@ -167,6 +176,14 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.consoleOnly = value;
 	}
 
+	public void setMaximumArgsLength(int value) {
+		this.maximumArgsLength = value;
+	}
+
+	public void setMinimumArgsLength(int value) {
+		this.minimumArgsLength = value;
+	}
+
 	public void setPlayerOnly() {
 		this.setPlayerOnly(true);
 	}
@@ -176,23 +193,13 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.playerOnly = value;
 	}
 
-	public void setRequireArgs() {
-		this.setRequireArgs(true);
-	}
-
-	public void setRequireArgs(boolean value) {
-		this.requireArgs = value;
-	}
-
 	private boolean storeArgs(CommandSender sender, String... args) {
-		String senderName = sender.getName();
+		if (!this.argCache.containsKey(sender.getName())) {
+			this.argCache.put(sender.getName(), args);
+			return true;
+		}
 
-		if (!this.argCache.containsKey(senderName))
-			this.argCache.put(senderName, args);
-		else
-			return false;
-
-		return true;
+		return false;
 	}
 
 	public void showUsage(CommandSender sender) {
