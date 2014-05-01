@@ -6,12 +6,16 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftybukkit.reflection.FieldEntry;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 public class Reflection {
 
 	private static final transient Map<Class<?>, Class<?>> CORRESPONDING_TYPES = new HashMap<>();
+	private static final transient Map<Class<?>[], Constructor<?>> CONSTRUCTOR_CACHE = new HashMap<>();
+	private static final transient Map<String, Class<?>> CLASS_CACHE = new HashMap<>();
+	private final String className;
+	private final String subPackage;
+	private final MinecraftPackage minecraftPackage;
 
 	static {
 		CORRESPONDING_TYPES.put(Byte.class, byte.class);
@@ -24,77 +28,52 @@ public class Reflection {
 		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
 	}
 
-	private static Class<?> getPrimitiveType(Class<?> clazz) {
-		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
+	public Reflection(String className, MinecraftPackage minecraftPackage) {
+		this(className, "", minecraftPackage);
 	}
 
-	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		int a = objects != null ? objects.length : 0;
-		Class<?>[] types = new Class<?>[a];
-
-		for (int i = 0; i < a; i++)
-			types[i] = getPrimitiveType(objects[i].getClass());
-
-		return types;
+	public Reflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
+		this.className = className;
+		subPackage = StringUtil.isEmpty(subPackage) ? "" : subPackage;
+		this.subPackage = subPackage.replaceAll("\\.$", "").replaceAll("^\\.", "");
+		this.minecraftPackage = minecraftPackage;
 	}
 
-	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		int a = classes != null ? classes.length : 0;
-		Class<?>[] types = new Class<?>[a];
-
-		for (int i = 0; i < a; i++)
-			types[i] = getPrimitiveType(classes[i]);
-
-		return types;
+	public String getClassName() {
+		return this.className;
 	}
 
-	private static boolean equalsTypeArray(Class<?>[] a, Class<?>[] o) {
-		if (a.length != o.length) return false;
-
-		for (int i = 0; i < a.length; i++) {
-			if (!a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
-				return false;
-		}
-
-		return true;
+	public Class<?> getClazz() throws Exception {
+		return CLASS_CACHE.containsKey(this.getClassPath()) ? CLASS_CACHE.get(this.getClassPath()) : CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
 	}
 
-	public static Class<?> getClass(String name, MinecraftPackage pack, String subPackage) throws Exception {
-		return Class.forName(pack + (subPackage != null && subPackage.length() > 0 ? "." + subPackage : "") + "." + name);
-	}
-
-	public static Class<?> getClass(String name, MinecraftPackage pack) throws Exception {
-		return getClass(name, pack, null);
-	}
-
-	public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... paramTypes) {
+	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
 		Class<?>[] t = toPrimitiveTypeArray(paramTypes);
 
-		for (Constructor<?> c : clazz.getConstructors()) {
-			Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
-			if (equalsTypeArray(types, t))
-				return c;
+		if (CONSTRUCTOR_CACHE.get(t) != null)
+			return CONSTRUCTOR_CACHE.get(t);
+		else {
+			for (Constructor<?> c : this.getClazz().getConstructors()) {
+				Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
+				if (equalsTypeArray(types, t)) return CONSTRUCTOR_CACHE.put(t, c);
+			}
 		}
 
-		return null;
+		return CONSTRUCTOR_CACHE.put(t, null);
 	}
 
-	public static Object newInstance(Class<?> clazz, Object... args) throws Exception {
-		return getConstructor(clazz, toPrimitiveTypeArray(args)).newInstance(args);
+	public String getClassPath() {
+		return this.getMinecraftPackage() + (StringUtil.notEmpty(subPackage) ? "." + subPackage : "") + "." + this.getClassName();
 	}
 
-	public static Object newInstance(String name, MinecraftPackage pack, String subPackage, Object... args) throws Exception {
-		return newInstance(getClass(name, pack, subPackage), args);
+	public MinecraftPackage getMinecraftPackage() {
+		return this.minecraftPackage;
 	}
 
-	public Object newInstance(String name, MinecraftPackage pack, Object... args) throws Exception {
-		return newInstance(getClass(name, pack, null), args);
-	}
-
-	public Method getMethod(String name, Class<?> clazz, Class<?>... paramTypes) {
+	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
 		Class<?>[] t = toPrimitiveTypeArray(paramTypes);
 
-		for (Method m : clazz.getMethods()) {
+		for (Method m : this.getClazz().getMethods()) {
 			Class<?>[] types = toPrimitiveTypeArray(m.getParameterTypes());
 			if (m.getName().equals(name) && equalsTypeArray(types, t))
 				return m;
@@ -103,10 +82,19 @@ public class Reflection {
 		return null;
 	}
 
-	public Object invokeMethod(String name, Class<?> clazz, Object obj, Object... args) throws Exception {
-		return getMethod(name, clazz, toPrimitiveTypeArray(args)).invoke(obj, args);
+	public String getSubPackage() {
+		return this.subPackage;
 	}
 
+	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
+		return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+	}
+
+	public Object newInstance(Object... args) throws Exception {
+		return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
+	}
+
+	// TODO
 	public Field getField(String name, Class<?> clazz) throws Exception {
 		return clazz.getDeclaredField(name);
 	}
@@ -126,6 +114,36 @@ public class Reflection {
 	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
 		for (FieldEntry f : entrys)
 			setValue(obj, f);
+	}
+	// TODO
+
+	private static Class<?> getPrimitiveType(Class<?> clazz) {
+		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
+	}
+
+	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
+		int a = objects != null ? objects.length : 0;
+		Class<?>[] types = new Class<?>[a];
+		for (int i = 0; i < a; i++) types[i] = getPrimitiveType(objects[i].getClass());
+		return types;
+	}
+
+	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
+		int a = classes != null ? classes.length : 0;
+		Class<?>[] types = new Class<?>[a];
+		for (int i = 0; i < a; i++) types[i] = getPrimitiveType(classes[i]);
+		return types;
+	}
+
+	private static boolean equalsTypeArray(Class<?>[] a, Class<?>[] o) {
+		if (a.length != o.length) return false;
+
+		for (int i = 0; i < a.length; i++) {
+			if (!a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
+				return false;
+		}
+
+		return true;
 	}
 
 }
