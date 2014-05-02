@@ -29,6 +29,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		super(plugin);
 		if (StringUtil.isEmpty(command)) throw new IllegalArgumentException("Command cannot be null!");
 		this.command = this.getPlugin().getCommand(command);
+		if (this.getCommand() == null) throw new RuntimeException(StringUtil.format("Command ''{0}'' not found in plugin {1}!", command, this.getPluginDescription().getName()));
 		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
 		this.getCommand().setPermissionMessage("");
 
