@@ -12,19 +12,30 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * A command wrapper that assists with common tasks like checking execution permissions,
+ * only allowing console or player execution, has default permissions and overrides
+ * bukkits default permission errors. Also has a simple method to show custom usage
+ * messages to {@link CommandSender}.
+ */
 public abstract class BukkitCommand extends BukkitHelper implements CommandExecutor {
 
 	private PluginCommand command = null;
 	private boolean consoleOnly = false;
 	private boolean playerOnly = false;
 	private boolean checkPerms = true;
-	private boolean defaultPermsError = true;
 	private int minimumArgsLength = 1;
 	private int maximumArgsLength = -1;
 	private Map<Integer, Map<String, String>> usages = new HashMap<>();
 	private Map<String, String[]> argCache = new HashMap<>();
 	private String permission;
 
+	/**
+	 * Creates a command wrapper.
+	 * 
+	 * @param plugin the plugin to load the command from
+	 * @param command the command name for this class
+	 */
 	public BukkitCommand(JavaPlugin plugin, String command) {
 		super(plugin);
 		if (StringUtil.isEmpty(command)) throw new IllegalArgumentException("Command cannot be null!");
@@ -43,17 +54,28 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	public abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
 
+	/**
+	 * Sets a custom usage based on label or argument.
+	 * 
+	 * @param index index of the argument. 0 will modify the command usage based on label, 1 or more will modify based on argument index
+	 * @param arg the label/argument to check
+	 * @param usage the usage to display (after the label/argument)
+	 */
 	public void editUsage(int index, String arg, String usage) {
-		if (this.usages.containsKey(index)) {
-			if (index == 0) arg = "";
+		if (this.usages.containsKey(index))
 			this.usages.get(index).put(arg, usage);
-		} else {
+		else {
 			Map<String, String> usageMap = new HashMap<>();
 			usageMap.put(arg, usage);
 			this.usages.put(index, usageMap);
 		}
 	}
 
+	/**
+	 * Gets the command created for your plugin.
+	 * 
+	 * @return the command associated to this class
+	 */
 	public PluginCommand getCommand() {
 		return this.command;
 	}
@@ -78,20 +100,31 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return argList;
 	}
 
+	/**
+	 * Gets if the users permissions will be checked immediately upon running the command.
+	 * 
+	 * @return true if checking, otherwise false
+	 */
 	public boolean isCheckingPerms() {
 		return this.checkPerms;
 	}
 
+	/**
+	 * Gets if this command can only be ran as console.
+	 * 
+	 * @return true if console only, otherwise false
+	 */
 	public boolean isConsoleOnly() {
 		return this.consoleOnly;
 	}
 
+	/**
+	 * Gets if this command can only be ran as a player.
+	 * 
+	 * @return true if player only, otherwise false
+	 */
 	public boolean isPlayerOnly() {
 		return this.playerOnly;
-	}
-
-	public boolean isUsingDefaultPermsError() {
-		return this.defaultPermsError;
 	}
 
 	private boolean isHelp(String... args) {
@@ -121,9 +154,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 		if (isPlayer(sender)) {
 			if (this.isCheckingPerms() && !sender.hasPermission(this.permission)) {
-				if (this.isUsingDefaultPermsError())
-					this.noPerms(sender, this.permission);
-
+				this.noPerms(sender, this.permission);
 				return;
 			}
 		}
@@ -160,18 +191,38 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			this.argCache.remove(sender.getName());
 	}
 
+	/**
+	 * Sets command to check if user has permission to run this command.
+	 * <p>
+	 * Defaults to true
+	 */
 	public void setCheckPerms() {
 		this.setCheckPerms(true);
 	}
 
+	/**
+	 * Sets command to check if user has permission to run this command.
+	 * 
+	 * @param value true to check permissions (default), otherwise false
+	 */
 	public void setCheckPerms(boolean value) {
 		this.checkPerms = value;
 	}
 
+	/**
+	 * Sets command to only allow console execution. This command sets {@link #setPlayerOnly() setPlayerOnly} to false.
+	 * <p>
+	 * Defaults to true
+	 */
 	public void setConsoleOnly() {
 		this.setConsoleOnly(true);
 	}
 
+	/**
+	 * Sets command to only allow console execution. This command sets {@link #setPlayerOnly() setPlayerOnly} to false.
+	 * 
+	 * @param value true to only allow console, otherwise false
+	 */
 	public void setConsoleOnly(boolean value) {
 		this.playerOnly = false;
 		this.consoleOnly = value;
@@ -185,10 +236,20 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.minimumArgsLength = value;
 	}
 
+	/**
+	 * Sets command to only allow player execution. This command sets {@link #setConsoleOnly() setConsoleOnly} to false.
+	 * <p>
+	 * Defaults to true
+	 */
 	public void setPlayerOnly() {
 		this.setPlayerOnly(true);
 	}
 
+	/**
+	 * Sets command to only allow player execution. This command sets {@link #setConsoleOnly() setConsoleOnly} to false.
+	 * 
+	 * @param value True to only allow players, otherwise false
+	 */
 	public void setPlayerOnly(boolean value) {
 		this.consoleOnly = false;
 		this.playerOnly = value;
@@ -203,35 +264,42 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return false;
 	}
 
+	/**
+	 * Shows command usage if arguments end in a question mark or help.
+	 * Also if they have too few or too many arguments.
+	 * <p>
+	 * Defaults label to {@link PluginCommand#getName()}
+	 * 
+	 * @param sender The sender to send the usage to
+	 */
 	public void showUsage(CommandSender sender) {
 		this.showUsage(sender, this.getCommand().getName());
 	}
 
+	/**
+	 * Shows command usage if arguments end in a question mark or help.
+	 * Also if they have too few or too many arguments.
+	 * 
+	 * @param sender The sender to send the usage to
+	 * @param label The label to use in the usage (defaults to {@link PluginCommand#getName()})
+	 */
 	public void showUsage(CommandSender sender, String label) {
-		String usage = this.getCommand().getUsage().replace("<command>", label);
-		String[] args = this.argCache.get(sender.getName());
+		String usage = this.getCommand().getUsage().replace("<command>", StringUtil.notEmpty(label) ? label : this.getCommand().getName());
+		String[] args = this.argCache.get(sender.getName()); // TODO: Check Null
 		List<String> argList = this.getProperArgs(args);
 		int index = argList.size();
 
 		if (this.usages.containsKey(index)) {
 			Map<String, String> usageMap = this.usages.get(index);
-			String lastArg  = this.getLastArg(args);
+			String lastArg = index == 0 ? label : this.getLastArg(args);
 
 			if (usageMap.containsKey(lastArg)) {
-				String argStart = (argList.size() > 0 ? String.format("%1$s ", StringUtil.implode(" ", argList)) : "");
-				usage = String.format("/%1$s %2$s%3$s", label, argStart, usageMap.get(lastArg));
+				String argStart = (index > 0 ? StringUtil.format(" {0} ", StringUtil.implode(" ", argList)) : "");
+				usage = StringUtil.format("/{0}{1}{2}", label, argStart, usageMap.get(lastArg));
 			}
 		}
 
 		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
-	}
-
-	public void useDefaultPermsError() {
-		this.useDefaultPermsError(true);
-	}
-
-	public void useDefaultPermsError(boolean value) {
-		this.defaultPermsError = value;
 	}
 
 }
