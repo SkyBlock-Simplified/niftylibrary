@@ -1,12 +1,22 @@
 package net.netcoding.niftybukkit.util.concurrent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A concurrent list that allows for simultaneously fast reading, iteration and
+ * modification utilizing {@link AtomicReference}.
+ * <p>
+ * The AtomicReference changes the methods that modify the list by replacing the
+ * entire list on each modification. This allows for maintaining the original speed of
+ * {@link ArrayList#contains(Object)} and makes it cross-thread-safe.
+ * 
+ * @param <T> type of elements
+ */
 public class ConcurrentList<T> implements List<T> {
 
 	private final AtomicReference<List<T>> ref;
