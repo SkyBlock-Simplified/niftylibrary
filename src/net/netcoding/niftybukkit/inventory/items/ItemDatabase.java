@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -16,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftybukkit.util.LengthCompare;
 import net.netcoding.niftybukkit.util.NumberUtil;
 
 import org.bukkit.Material;
@@ -255,6 +255,19 @@ public class ItemDatabase extends BukkitHelper {
 				Collections.sort(this.names.get(itemData), compare);
 			}
 		}
+	}
+
+	private class LengthCompare implements Comparator<String> {
+
+		public LengthCompare() {
+			super();
+		}
+
+		@Override
+		public int compare(String s1, String s2) {
+			return s1.length() - s2.length();
+		}
+
 	}
 
 }
