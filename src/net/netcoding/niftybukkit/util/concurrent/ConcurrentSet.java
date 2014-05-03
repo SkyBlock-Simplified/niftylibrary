@@ -6,16 +6,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * A concurrent set that allows for simultaneously fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the set by replacing the
- * entire set each modification. This allows for maintaining the original speed of
- * {@link HashSet#contains(Object)} and makes it cross-thread-safe.
- * 
- * @param <T> type of elements
- */
 public class ConcurrentSet<T> implements Set<T> {
 
 	private final AtomicReference<Set<T>> ref;
