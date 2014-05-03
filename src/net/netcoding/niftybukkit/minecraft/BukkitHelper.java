@@ -42,7 +42,7 @@ public class BukkitHelper {
 		if (isConsole(sender)) return true;
 		String permission = String.format("%s.%s", this.getPlugin().getDescription().getName().toLowerCase(), StringUtil.implode(".", permissions));
 		boolean hasPerms = sender.hasPermission(permission);
-		if (defaultError) this.noPerms(sender, permission);
+		if (!hasPerms && defaultError) this.noPerms(sender, permission);
 		return hasPerms;
 	}
 
