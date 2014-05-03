@@ -6,12 +6,18 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 
+/**
+ * A collection of number utilities to assist in number checking, random number generating as well as
+ * {@link #readVarInt(DataInputStream) readVarInt} and {@link #writeVarInt(DataOutputStream, int) writeVarInt}
+ * used in bukkits network protocols.
+ */
 public class NumberUtil {
 
 	/**
-	 * Check if a number is a valid number
-	 * @param value The value to check
-	 * @return True if the value is can be casted to a number
+	 * Gets if {@code value} is a valid number.
+	 * 
+	 * @param value the value to check
+	 * @return true if the value can be casted to a number, otherwise false
 	 */
 	public static boolean isInt(String value) {
 		NumberFormat formatter = NumberFormat.getInstance();
@@ -21,19 +27,21 @@ public class NumberUtil {
 	}
 
 	/**
-	 * Generates a random number
-	 * @param minimum The lowest number allowed
-	 * @return Returns a random integer between the specified boundaries
+	 * Gets a truely random number.
+	 * 
+	 * @param minimum the lowest number allowed
+	 * @return a random integer between the specified boundaries
 	 */
 	public static int rand(int minimum) {
 		return rand(minimum, Integer.MAX_VALUE);
 	}
 
 	/**
-	 * Generates a random number
-	 * @param minimum The lowest number allowed
-	 * @param maximum The highest number allowed
-	 * @return Returns a random integer between the specified boundaries
+	 * Gets a truely random number.
+	 * 
+	 * @param minimum the lowest number allowed
+	 * @param maximum the highest number allowed
+	 * @return a random integer between the specified boundaries
 	 */
 	public static int rand(int minimum, int maximum) {
 		return minimum + (int)(Math.random() * ((maximum - minimum) + 1));

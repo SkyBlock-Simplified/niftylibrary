@@ -11,10 +11,22 @@ public class ByteUtil {
 
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+	/**
+	 * Gets a byte array of converted objects.
+	 * 
+	 * @param data to convert
+	 * @return converted objects in byte array
+	 */
 	public static byte[] toByteArray(Object... data) {
 		return toByteArray(Arrays.asList(data));
 	}
 
+	/**
+	 * Gets a byte array of converted objects.
+	 * 
+	 * @param data to convert
+	 * @return converted objects in byte array
+	 */
 	public static byte[] toByteArray(List<Object> data) {
 		ByteArrayDataOutput output = ByteStreams.newDataOutput();
 
@@ -46,6 +58,12 @@ public class ByteUtil {
 		return output.toByteArray();
 	}
 
+	/**
+	 * Gets the hexadecimal string of a byte array.
+	 * 
+	 * @param bytes to convert
+	 * @return converted byte array as hexadecimal string
+	 */
 	public static String toHexString(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];
 
@@ -56,6 +74,23 @@ public class ByteUtil {
 		}
 
 		return new String(hexChars);
+	}
+
+	/**
+	 * Gets human readable ascii of a hexadecimal string.
+	 * 
+	 * @param hex to convert
+	 * @return converted hexadecimal string into ascii
+	 */
+	public static String toAsciiString(String hex) {
+		StringBuilder output = new StringBuilder();
+
+		for (int i = 0; i < hex.length(); i += 2) {
+			String str = hex.substring(i, i + 2);
+			output.append((char)Integer.parseInt(str, 16));
+		}
+
+		return output.toString();
 	}
 
 }
