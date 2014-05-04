@@ -7,6 +7,8 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.yaml.ConfigSection;
 import net.netcoding.niftybukkit.yaml.InternalConverter;
 
+import org.bukkit.inventory.meta.ItemMeta;
+
 @SuppressWarnings("unchecked")
 public class ItemStack extends Converter {
 
@@ -20,12 +22,10 @@ public class ItemStack extends Converter {
 		java.util.Map<String, Object> metaMap = (java.util.Map<String, Object>)(itemMap.get("meta") instanceof java.util.Map ? itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
 		org.bukkit.inventory.ItemStack stack = NiftyBukkit.getItemDatabase().get((String)itemMap.get("id"));
 		stack.setAmount((int)itemMap.get("amount"));
-		if (metaMap.get("name") != null) stack.getItemMeta().setDisplayName((String)metaMap.get("name"));
-
-		if (metaMap.get("lore") != null) {
-			Converter listConverter = this.getConverter(java.util.List.class);
-			stack.getItemMeta().setLore((java.util.List<String>)listConverter.fromConfig(java.util.List.class, metaMap.get("lore"), null));
-		}
+		ItemMeta meta = stack.getItemMeta();
+		if (metaMap.get("name") != null) meta.setDisplayName((String)metaMap.get("name"));
+		if (metaMap.get("lore") != null) meta.setLore((java.util.List<String>)this.getConverter(java.util.List.class).fromConfig(java.util.List.class, metaMap.get("lore"), null));
+		stack.setItemMeta(meta);
 
 		return stack;
 	}
