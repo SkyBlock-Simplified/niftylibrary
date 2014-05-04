@@ -166,13 +166,13 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			return;
 		}
 
-		if (this.isHelp(args)) {
-			this.showUsage(sender, label);
+		if (!this.storeArgs(sender, args)) {
+			this.getLog().error(sender, "Processing previous request. Try again in a second.");
 			return;
 		}
 
-		if (!this.storeArgs(sender, args)) {
-			this.getLog().error(sender, "Processing previous request. Try again in a second.");
+		if (this.isHelp(args)) {
+			this.showUsage(sender, label);
 			return;
 		}
 
@@ -282,7 +282,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	 */
 	public void showUsage(CommandSender sender, String label) {
 		String usage = this.getCommand().getUsage().replace("<command>", StringUtil.notEmpty(label) ? label : this.getCommand().getName());
-		String[] args = this.argCache.get(sender.getName()); // TODO: Check Null
+		String[] args = this.argCache.get(sender.getName());
 		List<String> argList = this.getProperArgs(args);
 		int index = argList.size();
 
