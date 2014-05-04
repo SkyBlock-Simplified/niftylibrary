@@ -228,7 +228,7 @@ public class StringUtil {
 	 * @return string array converted to string list
 	 */
 	public static List<String> toList(String... array) {
-		return new ArrayList<>(Arrays.asList(ListUtil.isEmpty(array) ? new String[] { "" } : array));
+		return new ArrayList<>(Arrays.asList(ListUtil.isEmpty(array) ? new String[] {} : array));
 	}
 
 }

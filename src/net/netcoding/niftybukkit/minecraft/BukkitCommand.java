@@ -62,13 +62,10 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	 * @param usage the usage to display (after the label/argument)
 	 */
 	public void editUsage(int index, String arg, String usage) {
-		if (this.usages.containsKey(index))
-			this.usages.get(index).put(arg, usage);
-		else {
-			Map<String, String> usageMap = new HashMap<>();
-			usageMap.put(arg, usage);
-			this.usages.put(index, usageMap);
-		}
+		if (!this.usages.containsKey(index))
+			this.usages.put(index, new HashMap<String, String>());
+
+		this.usages.get(index).put(arg, usage);
 	}
 
 	/**
@@ -294,8 +291,8 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			String lastArg = index == 0 ? label : this.getLastArg(args);
 
 			if (usageMap.containsKey(lastArg)) {
-				String argStart = (index > 0 ? StringUtil.format(" {0} ", StringUtil.implode(" ", argList)) : "");
-				usage = StringUtil.format("/{0}{1}{2}", label, argStart, usageMap.get(lastArg));
+				String argStart = (index > 0 ? StringUtil.format("{0} ", StringUtil.implode(" ", argList)) : "");
+				usage = StringUtil.format("/{0} {1}{2}", label, argStart, usageMap.get(lastArg));
 			}
 		}
 
