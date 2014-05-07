@@ -2,7 +2,9 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BukkitPlugin extends JavaPlugin {
@@ -17,9 +19,12 @@ public class BukkitPlugin extends JavaPlugin {
 		return this.log;
 	}
 
-	public boolean hasPermissions(CommandSender sender, String... permissions) {
+	public boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
 		if (isConsole(sender)) return true;
-		return sender.hasPermission(String.format("%s.%s", this.getDescription().getName(), StringUtil.implode(".", permissions)));
+		String permission = String.format("%s.%s", this.getDescription().getName().toLowerCase(), StringUtil.implode(".", permissions));
+		boolean hasPerms = sender.hasPermission(permission);
+		if (!hasPerms && defaultError) this.noPerms(sender, permission);
+		return hasPerms;
 	}
 
 	public static boolean isConsole(CommandSender sender) {
@@ -36,6 +41,26 @@ public class BukkitPlugin extends JavaPlugin {
 
 	public static boolean isPlayer(String senderName) {
 		return !senderName.equalsIgnoreCase("console");
+	}
+
+	public static Player findPlayer(String playerName) {
+		playerName = playerName.toLowerCase();
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getName().equalsIgnoreCase(playerName))
+				return player;
+		}
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getName().toLowerCase().startsWith(playerName))
+				return player;
+		}
+
+		return null;
+	}
+
+	void noPerms(CommandSender sender, String permission) {
+		this.getLog().error(sender, "You do not have the permission {{0}}!", permission);
 	}
 
 }
