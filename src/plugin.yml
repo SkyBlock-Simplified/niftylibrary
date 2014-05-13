@@ -1,7 +1,7 @@
 name: NiftyBukkit
-version: 3.2
+version: 3.2.0
 website: http://netcoding.net/
-author: Brian Graham
+author: Brian Graham (CraftedFury)
 
 main: net.netcoding.niftybukkit.NiftyBukkit
 softdepend: [Vault, ProtocolLib]
