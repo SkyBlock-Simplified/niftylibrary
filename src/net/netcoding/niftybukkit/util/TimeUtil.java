@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.util;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,8 @@ import java.util.Map;
  * into ticks and datetime values into milliseconds.
  */
 public class TimeUtil {
+
+	public static final transient SimpleDateFormat SQL_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private static final Map<String, Integer> times = new HashMap<>();
 
