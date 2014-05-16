@@ -12,6 +12,10 @@ public class ProfileNotFoundException extends RuntimeException {
 		super(message);
 	}
 
+	public static ProfileNotFoundException InvalidPlayer() {
+		return new ProfileNotFoundException(String.format("The mojang profile data for the passed player could not be found!"));
+	}
+
 	public static ProfileNotFoundException InvalidUUID(UUID uuid) {
 		return new ProfileNotFoundException(String.format("The mojang profile data for uuid [%s] could not be found!", uuid.toString()));
 	}

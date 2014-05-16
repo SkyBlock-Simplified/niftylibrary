@@ -36,6 +36,7 @@ public class MojangRepository {
 	}
 
 	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
+		if (player == null) throw ProfileNotFoundException.InvalidPlayer();
 		return searchByExactUsername(player.getName());
 	}
 
