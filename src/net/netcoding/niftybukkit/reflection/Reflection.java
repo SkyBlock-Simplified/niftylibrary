@@ -3,16 +3,16 @@ package net.netcoding.niftybukkit.reflection;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.util.StringUtil;
 
 public class Reflection {
 
-	private static final transient Map<Class<?>, Class<?>> CORRESPONDING_TYPES = new HashMap<>();
-	private static final transient Map<Class<?>[], Constructor<?>> CONSTRUCTOR_CACHE = new HashMap<>();
-	private static final transient Map<String, Class<?>> CLASS_CACHE = new HashMap<>();
+	private static final transient ConcurrentHashMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentHashMap<>();
+	private static final transient ConcurrentHashMap<Class<?>[], Constructor<?>> CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
+	private static final transient ConcurrentHashMap<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
 	private final String className;
 	private final String subPackage;
 	private final MinecraftPackage minecraftPackage;
@@ -34,8 +34,7 @@ public class Reflection {
 
 	public Reflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
 		this.className = className;
-		subPackage = StringUtil.isEmpty(subPackage) ? "" : subPackage;
-		this.subPackage = subPackage.replaceAll("\\.$", "").replaceAll("^\\.", "");
+		this.subPackage = StringUtil.stripNull(subPackage).replaceAll("\\.$", "").replaceAll("^\\.", "");
 		this.minecraftPackage = minecraftPackage;
 	}
 
@@ -44,7 +43,8 @@ public class Reflection {
 	}
 
 	public Class<?> getClazz() throws Exception {
-		return CLASS_CACHE.containsKey(this.getClassPath()) ? CLASS_CACHE.get(this.getClassPath()) : CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+		if (!CLASS_CACHE.containsKey(this.getClassPath())) CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+		return CLASS_CACHE.get(this.getClassPath());
 	}
 
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
@@ -55,19 +55,20 @@ public class Reflection {
 		else {
 			for (Constructor<?> c : this.getClazz().getConstructors()) {
 				Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
-				if (equalsTypeArray(types, t)) return CONSTRUCTOR_CACHE.put(t, c);
+
+				if (equalsTypeArray(types, t)) {
+					CONSTRUCTOR_CACHE.put(types, c);
+					return c;
+				}
 			}
 		}
 
+		System.out.println(StringUtil.format("The constructor {0} was not found!", Arrays.asList(t)));
 		return CONSTRUCTOR_CACHE.put(t, null);
 	}
 
 	public String getClassPath() {
-		return this.getMinecraftPackage() + (StringUtil.notEmpty(subPackage) ? "." + subPackage : "") + "." + this.getClassName();
-	}
-
-	public MinecraftPackage getMinecraftPackage() {
-		return this.minecraftPackage;
+		return this.getMinecraftPackage() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
@@ -75,11 +76,17 @@ public class Reflection {
 
 		for (Method m : this.getClazz().getMethods()) {
 			Class<?>[] types = toPrimitiveTypeArray(m.getParameterTypes());
+
 			if (m.getName().equals(name) && equalsTypeArray(types, t))
 				return m;
 		}
 
+		System.out.println(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(t)));
 		return null;
+	}
+
+	public MinecraftPackage getMinecraftPackage() {
+		return this.minecraftPackage;
 	}
 
 	public String getSubPackage() {
@@ -94,6 +101,28 @@ public class Reflection {
 		return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
 	}
 
+	public Field getField(String name) throws Exception {
+		return this.getClazz().getDeclaredField(name);
+	}
+
+	public Object getValue(String name, Object obj) throws Exception {
+		Field f = this.getField(name);
+		f.setAccessible(true);
+		return f.get(obj);
+	}
+
+	public void setValue(Object obj, FieldEntry entry) throws Exception {
+		Field f = this.getField(entry.getKey());
+		f.setAccessible(true);
+		f.set(obj, entry.getValue());
+	}
+
+	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
+		for (FieldEntry entry : entrys)
+			this.setValue(obj, entry);
+	}
+
+	/*
 	// TODO
 	public Field getField(String name, Class<?> clazz) throws Exception {
 		return clazz.getDeclaredField(name);
@@ -116,22 +145,21 @@ public class Reflection {
 			setValue(obj, f);
 	}
 	// TODO
+	*/
 
 	private static Class<?> getPrimitiveType(Class<?> clazz) {
 		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
 	}
 
 	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		int a = objects != null ? objects.length : 0;
-		Class<?>[] types = new Class<?>[a];
-		for (int i = 0; i < a; i++) types[i] = getPrimitiveType(objects[i].getClass());
+		Class<?>[] types = new Class<?>[objects != null ? objects.length : 0];
+		for (int i = 0; i < types.length; i++) types[i] = getPrimitiveType(objects[i].getClass());
 		return types;
 	}
 
 	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		int a = classes != null ? classes.length : 0;
-		Class<?>[] types = new Class<?>[a];
-		for (int i = 0; i < a; i++) types[i] = getPrimitiveType(classes[i]);
+		Class<?>[] types = new Class<?>[classes != null ? classes.length : 0];
+		for (int i = 0; i < types.length; i++) types[i] = getPrimitiveType(classes[i]);
 		return types;
 	}
 

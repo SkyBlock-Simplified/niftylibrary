@@ -2,8 +2,8 @@ package net.netcoding.niftybukkit.reflection;
 
 public class FieldEntry {
 
-	String key;
-	Object value;
+	private final String key;
+	private final Object value;
 
 	public FieldEntry(String key, Object value) {
 		this.key = key;

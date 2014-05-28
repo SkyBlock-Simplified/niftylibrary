@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.reflection;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 import org.bukkit.Bukkit;
 
 public enum MinecraftPackage {
@@ -7,7 +9,7 @@ public enum MinecraftPackage {
 	MINECRAFT_SERVER {
 		@Override
 		public String toString() {
-			return "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().substring(23, 30);
+			return StringUtil.format("net.minecraft.server.{0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3]);
 		}
 	},
 
