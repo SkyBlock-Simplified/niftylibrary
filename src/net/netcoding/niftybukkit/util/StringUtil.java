@@ -43,6 +43,7 @@ public class StringUtil {
 		return messageFormat.format(objects);
 	}
 
+
 	/**
 	 * Gets a concatenated string separated by nothing.
 	 * 
@@ -218,6 +219,17 @@ public class StringUtil {
 	 */
 	public static boolean notEmpty(String value) {
 		return !isEmpty(value);
+	}
+
+	/**
+	 * Removes null from string and will either be an empty
+	 * value or the original passed value.
+	 * 
+	 * @param value to safely return
+	 * @return value or empty string
+	 */
+	public static String stripNull(String value) {
+		return isEmpty(value) ? "" : value;
 	}
 
 	/**
