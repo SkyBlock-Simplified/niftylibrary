@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.NumberUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -151,7 +152,7 @@ public class ItemDatabase extends BukkitHelper {
 
 	public List<ItemData> parse(String itemCommaList) throws NumberFormatException {
 		List<ItemData> itemDataList = new ArrayList<>();
-		String[] itemList = itemCommaList.split(",(?![^\\[]*\\])");
+		String[] itemList = StringUtil.stripNull(itemCommaList).split(",(?![^\\[]*\\])");
 
 		for (String item : itemList) {
 			if (item.contains(":")) {
