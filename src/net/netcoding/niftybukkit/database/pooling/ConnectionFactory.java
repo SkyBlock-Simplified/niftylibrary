@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 public class ConnectionFactory {
 
 	private final String url;
@@ -32,7 +34,6 @@ public class ConnectionFactory {
 		this.properties = properties;
 	}
 
-
 	/**
 	 * Returns a connection to the database.
 	 *
@@ -48,7 +49,7 @@ public class ConnectionFactory {
 	}
 
 	public String getUrl() {
-		return this.url;
+		return StringUtil.format("{0}?autoReconnect=true", this.url);
 	}
 
 	public boolean isValidConnection() {
