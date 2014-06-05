@@ -10,6 +10,7 @@ import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 abstract class MinecraftServer {
 
+	private static final InetSocketAddress serverAddress = new InetSocketAddress(NiftyBukkit.getPlugin().getServer().getIp(), NiftyBukkit.getPlugin().getServer().getPort());
 	protected InetSocketAddress address;
 	private String gameVersion = "";
 	private int maxPlayers = -1;
@@ -54,7 +55,7 @@ abstract class MinecraftServer {
 	}
 
 	public final boolean isCurrentServer() {
-		return this.getAddress() != null && NiftyBukkit.getPlugin().getServer().getIp().equals(this.getAddress().getHostName()) && this.getAddress().getPort() == NiftyBukkit.getPlugin().getServer().getPort();
+		return serverAddress.equals(this.getAddress());
 	}
 
 	public boolean isOnline() {
