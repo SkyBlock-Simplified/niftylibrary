@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
@@ -312,6 +313,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 							for (int i = 0; i < count; i += 2)
 								server.playerList.add(new MojangProfile(input.readUTF(), input.readUTF()));
+
+							for (MojangProfile tempPlayer : server.tempList)
+								server.playerList.add(tempPlayer);
+
+							server.tempList.clear();
 						} else
 							server.reset();
 
@@ -329,6 +335,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 								manager.callEvent(new BungeeLoadedEvent(serverList.values()));
 							}
 						}
+
 					} else if (subChannel.equals("ServerOffline"))
 						server.reset();
 					else if (subChannel.startsWith("Player")) {
@@ -337,11 +344,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						if (subChannel.endsWith("Join")) {
 							MojangProfile profile = new MojangProfile(playerName, input.readUTF());
 							server.playerList.add(profile);
+							server.tempList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
+							UUID uniqueId = UUID.fromString(playerName);
+
 							for (MojangProfile profile : server.playerList) {
-								if (profile.getName().equals(playerName)) {
+								if (profile.getUniqueId().equals(uniqueId)) {
 									server.playerList.remove(profile);
+									server.tempList.remove(profile);
 									manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
 									break;
 								}
