@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -350,9 +349,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						}
 					}
 				}
-			} catch (Exception ex) {
-				if (!ex.getClass().equals(EOFException.class))
-					this.getLog().console(ex);
+			} catch (IllegalStateException ise) { } catch (Exception ex) {
+				this.getLog().console(ex);
 			}
 		} else {
 			if (channel.equals(BUNGEE_CHANNEL)) {
@@ -364,9 +362,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				if (this.listener != null) {
 					try {
 						this.listener.onMessageReceived(channel, player, message);
-					} catch (Exception ex) {
-						if (!ex.getClass().equals(EOFException.class))
-							this.getLog().console(ex);
+					} catch (IllegalStateException eof) { } catch (Exception ex) {
+						this.getLog().console(ex);
 					}
 				}
 			}
