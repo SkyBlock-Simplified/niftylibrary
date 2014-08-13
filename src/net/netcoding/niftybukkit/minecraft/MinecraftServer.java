@@ -22,6 +22,16 @@ abstract class MinecraftServer {
 
 	MinecraftServer() { }
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (this.getClass() != obj.getClass()) return false;
+		MinecraftServer server = (MinecraftServer)obj;
+		if (!this.getAddress().equals(server.getAddress())) return false;
+		return true;
+	}
+
 	public InetSocketAddress getAddress() {
 		return this.address;
 	}
@@ -52,6 +62,11 @@ abstract class MinecraftServer {
 
 	public int getProtocolVersion() {
 		return this.protocolVersion;
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (address == null ? 0 : address.hashCode());
 	}
 
 	public final boolean isCurrentServer() {
