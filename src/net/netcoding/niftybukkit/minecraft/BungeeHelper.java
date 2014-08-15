@@ -142,12 +142,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeServer getPlayerServer(MojangProfile profile) {
-		for (BungeeServer server : this.getServers()) {
-			if (server.getPlayerList().contains(profile))
-				return server;
-		}
+		if (this.isOnline()) {
+			for (BungeeServer server : this.getServers()) {
+				if (server.getPlayerList().contains(profile))
+					return server;
+			}
 
-		throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile.getName()));
+			throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile.getName()));
+		} else
+			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public Set<MojangProfile> getPlayerList() {
@@ -170,23 +173,26 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeServer getServer() {
-		BungeeServer currentServer = null;
+		if (this.isOnline()) {
+			BungeeServer currentServer = null;
 
-		for (BungeeServer server : serverList.values()) {
-			if (server.isCurrentServer()) {
-				currentServer = server;
-				break;
+			for (BungeeServer server : serverList.values()) {
+				if (server.isCurrentServer()) {
+					currentServer = server;
+					break;
+				}
 			}
-		}
 
-		if (currentServer == null)
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
-		else
 			return currentServer;
+		} else
+			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public BungeeServer getServer(String serverName) {
-		return serverList.get(serverName);
+		if (this.isOnline())
+			return serverList.get(serverName);
+		else
+			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public String getServerName() {
@@ -208,7 +214,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public Set<BungeeServer> getServers() {
-		return Collections.unmodifiableSet(new HashSet<>(serverList.values()));
+		if (this.isOnline())
+			return Collections.unmodifiableSet(new HashSet<>(serverList.values()));
+		else
+			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public boolean isRegistered() {
