@@ -244,10 +244,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), this.getChannel());
 
 		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
-			if (!this.getPlugin().getServer().getMessenger().isIncomingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL)) {
-				this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-				this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
-			}
+			this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+			this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 		}
 	}
 
@@ -257,10 +255,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), this.getChannel());
 
 		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
-			if (!this.getPlugin().getServer().getMessenger().isOutgoingChannelRegistered(this.getPlugin(), BUNGEE_CHANNEL)) {
-				this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-				this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
-			}
+			this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+			this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 		}
 	}
 
