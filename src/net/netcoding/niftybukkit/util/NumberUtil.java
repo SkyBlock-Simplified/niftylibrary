@@ -7,9 +7,9 @@ import java.text.NumberFormat;
 import java.text.ParsePosition;
 
 /**
- * A collection of number utilities to assist in number checking, random number generating as well as
- * {@link #readVarInt(DataInputStream) readVarInt} and {@link #writeVarInt(DataOutputStream, int) writeVarInt}
- * used in bukkits network protocols.
+ * A collection of number utilities to assist in number checking,
+ * random number generating as well as {@link #readVarInt(DataInputStream) readVarInt}
+ * and {@link #writeVarInt(DataOutputStream, int) writeVarInt} used in bukkits network protocols.
  */
 public class NumberUtil {
 

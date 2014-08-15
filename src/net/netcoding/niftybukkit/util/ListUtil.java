@@ -3,6 +3,9 @@ package net.netcoding.niftybukkit.util;
 import java.lang.reflect.Array;
 import java.util.List;
 
+/**
+ * Array and List Checking/Converting
+ */
 public class ListUtil {
 
 	/**

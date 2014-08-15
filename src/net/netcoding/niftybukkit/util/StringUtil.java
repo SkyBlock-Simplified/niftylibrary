@@ -12,7 +12,8 @@ import org.bukkit.ChatColor;
 import com.google.common.base.Joiner;
 
 /**
- * A collection of string utilities for easy string formatting, concatenation, checking and converting.
+ * A collection of string methods for easy string
+ * formatting, concatenation, checking and converting.
  */
 public class StringUtil {
 
