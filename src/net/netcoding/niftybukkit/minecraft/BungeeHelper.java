@@ -98,10 +98,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void forward(Player player, String targetServer, String subChannel, Object... data) {
-		if (!this.isOnline()) throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+		if (!this.isOnline()) throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 		if (player == null) throw new IllegalArgumentException("Player cannot be null!");
 		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to NiftyBungee channels!");
-		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?$")) throw new IllegalArgumentException(String.format("The GetServer, GetServers, PlayerCount and PlayerList %s channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
+		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?$")) throw new IllegalArgumentException(StringUtil.format("The GetServer, GetServers, PlayerCount and PlayerList {0} channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
 		byte[] forward = ByteUtil.toByteArray(data);
 		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, (short)forward.length, forward);
 		player.sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
@@ -115,11 +115,36 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return this.getPlugin().getServer().getOnlinePlayers().length > 0 ? this.getPlugin().getServer().getOnlinePlayers()[0] : null;
 	}
 
+	public int getMaxPlayers() {
+		return this.getMaxPlayers(this.getServerName());
+	}
+
+	public int getMaxPlayers(String serverName) {
+		if (this.isOnline()) {
+			if (serverName.equalsIgnoreCase("ALL")) {
+				int maxCount = 0;
+
+				for (BungeeServer server : serverList.values())
+					maxCount += server.getMaxPlayers();
+
+				return maxCount;
+			} else {
+				BungeeServer server = serverList.get(serverName);
+
+				if (server != null)
+					return server.getMaxPlayers();
+				else
+					throw new RuntimeException(StringUtil.format("The server name {0} does not exist!", serverName));
+			}
+		} else
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
+	}
+
 	public int getPlayerCount() {
 		if (this.isOnline())
 			return this.getPlayerCount(this.getServerName());
 		else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public int getPlayerCount(String serverName) {
@@ -131,10 +156,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					playerCount += server.getPlayerCount();
 
 				return playerCount;
-			} else
-				return serverList.get(serverName).getPlayerCount();
+			} else {
+				BungeeServer server = serverList.get(serverName);
+
+				if (server != null)
+					return server.getPlayerCount();
+				else
+					throw new RuntimeException(StringUtil.format("The server name {0} does not exist!", serverName));
+			}
 		} else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public void getPlayerIP(Player player) {
@@ -148,16 +179,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					return server;
 			}
 
-			throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile.getName()));
+			throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile));
 		} else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public Set<MojangProfile> getPlayerList() {
 		if (this.isOnline())
 			return this.getPlayerList(this.getServerName());
 		else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public Set<MojangProfile> getPlayerList(String serverName) {
@@ -166,10 +197,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				Set<MojangProfile> playerNames = new HashSet<>();
 				for (BungeeServer server : serverList.values()) playerNames.addAll(server.getPlayerList());
 				return Collections.unmodifiableSet(playerNames);
-			} else
-				return serverList.get(serverName).getPlayerList();
+			} else {
+				BungeeServer server = serverList.get(serverName);
+
+				if (server != null)
+					return server.getPlayerList();
+				else
+					throw new RuntimeException(StringUtil.format("The server name {0} does not exist!", serverName));
+			}
 		} else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public BungeeServer getServer() {
@@ -185,14 +222,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 			return currentServer;
 		} else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public BungeeServer getServer(String serverName) {
 		if (this.isOnline())
 			return serverList.get(serverName);
 		else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public String getServerName() {
@@ -201,7 +238,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				return server.getName();
 		}
 
-		throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public Set<String> getServerNames() {
@@ -210,14 +247,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			for (BungeeServer server : serverList.values()) serverNames.add(server.getName());
 			return Collections.unmodifiableSet(serverNames);
 		} else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public Set<BungeeServer> getServers() {
 		if (this.isOnline())
 			return Collections.unmodifiableSet(new HashSet<>(serverList.values()));
 		else
-			throw new UnsupportedOperationException(String.format("No %s listener available to query!", BUNGEE_CHANNEL));
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
 	public boolean isRegistered() {
