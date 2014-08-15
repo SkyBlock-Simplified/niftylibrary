@@ -7,6 +7,9 @@ import java.util.UUID;
 import net.minecraft.util.com.google.common.io.ByteArrayDataOutput;
 import net.minecraft.util.com.google.common.io.ByteStreams;
 
+/**
+ * Byte Array Conversion Utility
+ */
 public class ByteUtil {
 
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
