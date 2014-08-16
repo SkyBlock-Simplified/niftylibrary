@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.NumberUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
@@ -152,12 +153,14 @@ public class ItemDatabase extends BukkitHelper {
 
 	public List<ItemData> parse(String itemCommaList) throws NumberFormatException {
 		List<ItemData> itemDataList = new ArrayList<>();
+		if (StringUtil.isEmpty(itemCommaList)) return Collections.unmodifiableList(itemDataList);
 		String[] itemList = StringUtil.stripNull(itemCommaList).split(",(?![^\\[]*\\])");
+		if (ListUtil.isEmpty(itemList)) return Collections.unmodifiableList(itemDataList);
 
 		for (String item : itemList) {
 			if (item.contains(":")) {
-				String[] split  = item.split(":");
-				int itemNo      = this.getId(split[0]);
+				String[] split = item.split(":");
+				int itemNo = this.getId(split[0]);
 				String itemData = split[1];
 
 				if (NumberUtil.isInt(itemData))
