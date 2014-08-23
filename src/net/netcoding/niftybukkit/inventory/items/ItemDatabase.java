@@ -124,7 +124,7 @@ public class ItemDatabase extends BukkitHelper {
 
 	@SuppressWarnings("deprecation")
 	public List<String> names(ItemStack item) {
-		ItemData itemData     = new ItemData(item.getTypeId(), item.getDurability());
+		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
 		List<String> nameList = this.names.get(itemData);
 
 		if (nameList == null) {
@@ -140,11 +140,11 @@ public class ItemDatabase extends BukkitHelper {
 	@SuppressWarnings("deprecation")
 	public String name(ItemStack item) {
 		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
-		String name       = this.primaryName.get(itemData);
+		String name = this.primaryName.get(itemData);
 
 		if (name == null) {
 			itemData = new ItemData(item.getTypeId(), (short)0);
-			name     = this.primaryName.get(itemData);
+			name = this.primaryName.get(itemData);
 			if (name == null) return null;
 		}
 
@@ -252,7 +252,7 @@ public class ItemDatabase extends BukkitHelper {
 			ItemData itemData = new ItemData(numeric, data);
 
 			if (!this.names.containsKey(itemData)) {
-				this.names.put(itemData, new ArrayList<String>(Arrays.asList(itemName)));
+				this.names.put(itemData, new ArrayList<>(Arrays.asList(itemName)));
 				this.primaryName.put(itemData, itemName);
 			} else {
 				this.names.get(itemData).add(itemName);
