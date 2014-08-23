@@ -28,10 +28,8 @@ public class MojangProfile {
 	}
 
 	public UUID getUniqueId() {
-		if (this.uuid == null) {
+		if (this.uuid == null)
 			this.uuid = UUID.fromString(UUID_FIX.matcher(this.id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
-			MojangRepository.cache.add(this);
-		}
 
 		return this.uuid;
 	}
@@ -57,6 +55,10 @@ public class MojangProfile {
 	@Override
 	public String toString() {
 		return StringUtil.format("{{0},{1}}", this.getUniqueId(), this.getName());
+	}
+
+	public String toString2() {
+		return StringUtil.format("{{0},{1}}", this.getUniqueId().toString(), this.getName());
 	}
 
 }
