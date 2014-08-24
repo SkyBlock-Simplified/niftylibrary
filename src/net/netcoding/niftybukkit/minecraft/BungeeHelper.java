@@ -72,7 +72,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			if (!this.isOnline())
 				throw new UnsupportedOperationException(StringUtil.format("You cannot instantiate an instance of this class until {0} has been found!", BUNGEE_CHANNEL));
 			else if (channel.equals(NIFTY_CHANNEL))
-				throw new UnsupportedOperationException(StringUtil.format("You cannot instantiate an instance of this class using the channel {0}!", NIFTY_CHANNEL));
+				throw new UnsupportedOperationException(StringUtil.format("You cannot instantiate an instance of this class using the {0} channel!", NIFTY_CHANNEL));
 		} else
 			LOADED_ONCE = true;
 
