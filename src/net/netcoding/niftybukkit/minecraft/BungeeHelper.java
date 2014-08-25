@@ -82,11 +82,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void connect(Player player, String targetServer) {
-		this.write(player, "Connect", targetServer);
+		this.write(player, BUNGEE_CHANNEL, "Connect", targetServer);
 	}
 
 	public void connect(String targetPlayer, String targetServer) {
-		this.write(this.getFirstPlayer(), "ConnectOther", targetPlayer, targetServer);
+		this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "ConnectOther", targetPlayer, targetServer);
 	}
 
 	public void forward(String subChannel, Object... data) {
