@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import net.minecraft.util.com.google.common.io.ByteArrayDataOutput;
-import net.minecraft.util.com.google.common.io.ByteStreams;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 
 /**
  * A collection of byte array methods for easy object converting.
