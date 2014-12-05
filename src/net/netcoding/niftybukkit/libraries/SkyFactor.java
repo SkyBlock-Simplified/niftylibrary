@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.LibsByGolden;
+package net.netcoding.niftybukkit.libraries;
 
 import java.lang.reflect.InvocationTargetException;
 
