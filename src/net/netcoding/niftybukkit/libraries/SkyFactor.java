@@ -37,8 +37,7 @@ public class SkyFactory {
 		LIGHT_SEPIA_BLACK(2, 6),
 		BLUE_SKY_DARK_TERRAIN(3, 9);
 
-		private final float i1;
-		private final float i2;
+		private final float i1, i2;
 
 		SkyColor(float i1, float i2) {
 			this.i1 = i1;
