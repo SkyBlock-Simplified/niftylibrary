@@ -45,9 +45,9 @@ public class SkyFactory {
 			this.i2 = i2;
 		}
 
-		public void show(ProtocolManager manager, Player player) throws InvocationTargetException {
-			manager.sendServerPacket(player, changeGameState(7, i1));
-			manager.sendServerPacket(player, changeGameState(8, i2));
+		public void show(Player player) throws InvocationTargetException {
+			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(7, i1));
+			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(8, i2));
 		}
 	}
 }
