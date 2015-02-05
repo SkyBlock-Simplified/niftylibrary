@@ -19,6 +19,8 @@ class NiftyListener extends BukkitListener {
 		this.getPlugin().getServer().getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
+				if (event.getPlayer() == null) return;
+				if (!event.getPlayer().isOnline()) return;
 				Bukkit.getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(event.getPlayer()));
 			}
 		}, 10L);
