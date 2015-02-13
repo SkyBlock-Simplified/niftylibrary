@@ -13,7 +13,7 @@ abstract class MinecraftServer {
 	private static final InetSocketAddress serverAddress = new InetSocketAddress(NiftyBukkit.getPlugin().getServer().getIp(), NiftyBukkit.getPlugin().getServer().getPort());
 	protected InetSocketAddress address;
 	private String gameVersion = "";
-	private int maxPlayers = -1;
+	private int maxPlayers = 0;
 	private String motd = "";
 	protected boolean online = false;
 	protected ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>();
@@ -81,7 +81,7 @@ abstract class MinecraftServer {
 		this.protocolVersion = -1;
 		this.gameVersion = "";
 		this.motd = "";
-		this.maxPlayers = -1;
+		this.maxPlayers = 0;
 		this.playerList.clear();
 	}
 
