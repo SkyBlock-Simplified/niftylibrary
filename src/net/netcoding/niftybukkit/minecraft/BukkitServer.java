@@ -125,6 +125,7 @@ public class BukkitServer extends MinecraftServer {
 						}
 					}
 				} catch (Exception ex) {
+					online = false;
 					reset();
 				}
 			}
