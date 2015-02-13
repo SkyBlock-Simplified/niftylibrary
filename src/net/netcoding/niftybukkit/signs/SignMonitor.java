@@ -279,6 +279,7 @@ public class SignMonitor extends BukkitListener {
 		if (listener != null) this.listeners.remove(listener);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void sendSignUpdate() {
 		for (Player player : this.getPlugin().getServer().getOnlinePlayers())
 			this.sendSignUpdate(player, "");

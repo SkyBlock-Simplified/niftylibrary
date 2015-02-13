@@ -43,6 +43,7 @@ public class BukkitPlugin extends JavaPlugin {
 		return !senderName.equalsIgnoreCase("console");
 	}
 
+	@SuppressWarnings("deprecation")
 	public static Player findPlayer(String playerName) {
 		playerName = playerName.toLowerCase();
 

@@ -62,6 +62,7 @@ public class BukkitHelper {
 		return !senderName.equalsIgnoreCase("console");
 	}
 
+	@SuppressWarnings("deprecation")
 	public static Player findPlayer(String playerName) {
 		playerName = playerName.toLowerCase();
 

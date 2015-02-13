@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
+
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.http.HttpBody;
 import net.netcoding.niftybukkit.http.HttpClient;
@@ -192,6 +193,7 @@ public class MojangRepository {
 			return profiles.toArray(new MojangProfile[profiles.size()]);
 	}
 
+	@SuppressWarnings("deprecation")
 	public MojangProfile searchByExactUUID(final UUID uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw ProfileNotFoundException.InvalidUUID(uuid);
 		MojangProfile found = null;
