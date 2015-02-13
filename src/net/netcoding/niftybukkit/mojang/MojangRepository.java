@@ -151,8 +151,8 @@ public class MojangRepository {
 
 					if (player != null) {
 						JsonObject json = new JsonObject();
-						json.addProperty("name", player.getName());
 						json.addProperty("id", player.getUniqueId().toString());
+						json.addProperty("name", player.getName());
 						profiles.add(GSON.fromJson(json.toString(), MojangProfile.class));
 						userList.remove(name);
 					}
@@ -247,8 +247,8 @@ public class MojangRepository {
 
 				if (result != null) {
 					JsonObject json = new JsonObject();
-					json.addProperty("name", result.getName());
 					json.addProperty("id", result.getUniqueId());
+					json.addProperty("name", result.getName());
 					found = GSON.fromJson(json.toString(), MojangProfile.class);
 					CACHE.add(found);
 				}
