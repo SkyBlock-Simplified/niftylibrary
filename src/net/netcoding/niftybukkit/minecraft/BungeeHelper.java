@@ -400,18 +400,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					} else if (subChannel.equals("ServerOffline"))
 						server.reset();
 					else if (subChannel.startsWith("Player")) {
-						String playerName = input.readUTF();
+						UUID uniqueId = UUID.fromString(input.readUTF());
 
 						if (subChannel.endsWith("Join")) {
 							JsonObject json = new JsonObject();
-							json.addProperty("name", playerName);
-							json.addProperty("id", input.readUTF());
+							json.addProperty("name", input.readUTF());
+							json.addProperty("id", uniqueId.toString());
 							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
-							UUID uniqueId = UUID.fromString(playerName);
-
 							for (MojangProfile profile : server.playerList) {
 								if (profile.getUniqueId().equals(uniqueId)) {
 									server.playerList.remove(profile);
