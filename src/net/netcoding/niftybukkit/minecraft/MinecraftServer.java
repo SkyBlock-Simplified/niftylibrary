@@ -81,7 +81,6 @@ abstract class MinecraftServer {
 		this.protocolVersion = -1;
 		this.gameVersion = "";
 		this.motd = "";
-		this.online = false;
 		this.maxPlayers = -1;
 		this.playerList.clear();
 	}
