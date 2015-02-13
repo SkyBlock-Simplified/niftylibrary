@@ -3,7 +3,10 @@ package net.netcoding.niftybukkit.mojang;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.util.StringUtil;
+
+import org.bukkit.entity.Player;
 
 public class MojangProfile {
 
@@ -34,8 +37,15 @@ public class MojangProfile {
 		return this.uuid;
 	}
 
+	// TODO: Send update across BungeeCord to update players name
+	// if change is detected.
 	public String getName() {
-		return this.name;
+		Player player = NiftyBukkit.getPlugin().getServer().getPlayer(this.getUniqueId());
+
+		if (player == null || this.name.equals(player.getName()))
+			return this.name;
+		else
+			return this.name = player.getName();
 	}
 
 	public boolean hasExpired() {
