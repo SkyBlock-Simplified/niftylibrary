@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
-
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.http.HttpBody;
 import net.netcoding.niftybukkit.http.HttpClient;
@@ -20,9 +17,12 @@ import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftybukkit.util.ListUtil;
+import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -242,12 +242,13 @@ public class MojangRepository {
 			try {
 				long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 				if (wait > 0) Thread.sleep(wait);
-				UUIDSearchResult result = GSON.fromJson(HTTP.post(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", ""))), UUIDSearchResult.class);
+				UUIDSearchResult[] results = GSON.fromJson(HTTP.get(new URL(StringUtil.format("https://api.mojang.com/user/profiles/{0}/names", uuid.toString().replace("-", "")))), UUIDSearchResult[].class);
 				LAST_HTTP_REQUEST = System.currentTimeMillis();
 
-				if (result != null) {
+				if (results != null && results.length > 0) {
+					UUIDSearchResult result = results[0];
 					JsonObject json = new JsonObject();
-					json.addProperty("id", result.getUniqueId());
+					json.addProperty("id", uuid.toString());
 					json.addProperty("name", result.getName());
 					found = GSON.fromJson(json.toString(), MojangProfile.class);
 					CACHE.add(found);
@@ -266,36 +267,15 @@ public class MojangRepository {
 	@SuppressWarnings("unused")
 	private static class UUIDSearchResult {
 
-		private String id;
 		private String name;
-		private UUIDProperties properties;
+		private int changedToAt;
 
-		public String getUniqueId() {
-			return this.id;
+		public int getChangedToAt() {
+			return this.changedToAt;
 		}
 
 		public String getName() {
 			return this.name;
-		}
-
-		private static class UUIDProperties {
-
-			private String name;
-			private String value;
-			private String signature;
-
-			public String getName() {
-				return this.name;
-			}
-
-			public String getValue() {
-				return this.value;
-			}
-
-			public String getSignature() {
-				return this.value;
-			}
-
 		}
 
 	}
