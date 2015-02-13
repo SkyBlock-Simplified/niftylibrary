@@ -54,11 +54,7 @@ public class MojangProfile {
 
 	@Override
 	public String toString() {
-		return StringUtil.format("{{0},{1}}", this.getUniqueId(), this.getName());
-	}
-
-	public String toString2() {
-		return StringUtil.format("{{0},{1}}", this.getUniqueId().toString(), this.getName());
+		return StringUtil.format("'{'{0},{1}'}'", this.getUniqueId(), this.getName());
 	}
 
 }
