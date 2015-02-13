@@ -361,7 +361,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					BUNGEE_ONLINE = true;
 				} else {
 					final BungeeServer server = this.getServer(input.readUTF());
-					if (server == null) return;
 
 					if (subChannel.equals("ServerInfo")) {
 						server.setOnline(input.readBoolean());
@@ -371,14 +370,18 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.setGameVersion(input.readUTF());
 							server.setProtocolVersion(input.readInt());
 							server.setMaxPlayers(input.readInt());
-							int count = input.readInt();
-							server.playerList.clear();
+							boolean updatePlayers = input.readBoolean();
 
-							for (int i = 0; i < count; i += 2) {
-								JsonObject json = new JsonObject();
-								json.addProperty("name", input.readUTF());
-								json.addProperty("id", input.readUTF());
-								server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
+							if (updatePlayers) {
+								int count = input.readInt();
+								server.playerList.clear();
+
+								for (int i = 0; i < count; i += 2) {
+									JsonObject json = new JsonObject();
+									json.addProperty("id", input.readUTF());
+									json.addProperty("name", input.readUTF());
+									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
+								}
 							}
 						} else
 							server.reset();
@@ -397,15 +400,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 								manager.callEvent(new BungeeLoadedEvent(SERVERS.values()));
 							}
 						}
-					} else if (subChannel.equals("ServerOffline"))
-						server.reset();
-					else if (subChannel.startsWith("Player")) {
+					} else if (subChannel.startsWith("Player")) {
 						UUID uniqueId = UUID.fromString(input.readUTF());
 
 						if (subChannel.endsWith("Join")) {
 							JsonObject json = new JsonObject();
-							json.addProperty("name", input.readUTF());
 							json.addProperty("id", uniqueId.toString());
+							json.addProperty("name", input.readUTF());
 							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
