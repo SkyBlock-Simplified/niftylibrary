@@ -12,6 +12,44 @@ import java.util.List;
 
 public class HttpClient {
 
+	public String get(URL url, HttpHeader... headers) throws IOException {
+		return get(url, Arrays.asList(headers));
+	}
+
+	public String get(URL url, Proxy proxy, HttpHeader... headers) throws IOException {
+		return get(url, proxy, Arrays.asList(headers));
+	}
+
+	public String get(URL url, List<HttpHeader> headers) throws IOException {
+		return get(url, null, headers);
+	}
+
+	public String get(URL url, Proxy proxy, List<HttpHeader> headers) throws IOException {
+		if (proxy == null) proxy = Proxy.NO_PROXY;
+		String line;
+		StringBuffer response = new StringBuffer();
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
+		connection.setRequestMethod("GET");
+
+		for (HttpHeader header : headers)
+			connection.setRequestProperty(header.getName(), header.getValue());
+
+		connection.setUseCaches(false);
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+			while ((line = reader.readLine()) != null) {
+				response.append(line);
+				response.append('\r');
+			}
+
+			reader.close();
+		}
+
+		return response.toString();
+	}
+
 	public String post(URL url, HttpHeader... headers) throws IOException {
 		return post(url, null, null, headers);
 	}
