@@ -2,13 +2,15 @@ package net.netcoding.niftybukkit.libraries;
 
 import java.lang.reflect.InvocationTargetException;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
+
 import org.bukkit.entity.Player;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 
 public class SkyFactory {
+
 	public static PacketContainer changeGameState(int reason, float value) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.GAME_STATE_CHANGE);
 		packet.getIntegers().write(0, reason);
@@ -17,6 +19,7 @@ public class SkyFactory {
 	}
 
 	public enum SkyColor {
+
 		DARK_GOLD(2, 0),
 		DARK_RED(3, 0),
 		DARKER_RED(4, 0),
@@ -48,5 +51,7 @@ public class SkyFactory {
 			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(7, i1));
 			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(8, i2));
 		}
+
 	}
+
 }
