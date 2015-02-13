@@ -9,8 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.util.com.google.gson.Gson;
-import net.minecraft.util.com.google.gson.JsonObject;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
+
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
@@ -115,6 +116,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return this.channel;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Player getFirstPlayer() {
 		return this.getPlugin().getServer().getOnlinePlayers().length > 0 ? this.getPlugin().getServer().getOnlinePlayers()[0] : null;
 	}
@@ -378,11 +380,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 								json.addProperty("id", input.readUTF());
 								server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 							}
-
-							for (MojangProfile tempPlayer : server.tempList)
-								server.playerList.add(tempPlayer);
-
-							server.tempList.clear();
 						} else
 							server.reset();
 
@@ -411,7 +408,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							json.addProperty("id", input.readUTF());
 							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
-							server.tempList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
 							UUID uniqueId = UUID.fromString(playerName);
@@ -419,7 +415,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							for (MojangProfile profile : server.playerList) {
 								if (profile.getUniqueId().equals(uniqueId)) {
 									server.playerList.remove(profile);
-									server.tempList.remove(profile);
 									manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
 									break;
 								}
