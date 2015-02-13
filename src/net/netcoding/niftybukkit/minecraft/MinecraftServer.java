@@ -15,7 +15,7 @@ abstract class MinecraftServer {
 	private String gameVersion = "";
 	private int maxPlayers = -1;
 	private String motd = "";
-	private boolean online = false;
+	protected boolean online = false;
 	protected ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>();
 	private int protocolVersion = -1;
 	protected String serverName = "";
