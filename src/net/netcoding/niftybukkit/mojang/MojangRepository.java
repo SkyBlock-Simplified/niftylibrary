@@ -287,19 +287,19 @@ public class MojangRepository {
 		}
 
 		@EventHandler
-		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+		public void onPlayerPostLogin(final PlayerPostLoginEvent event) {
 			UUID uuid = event.getPlayer().getUniqueId();
 			String name = event.getPlayer().getName();
 
 			if (NiftyBukkit.getBungeeHelper().isOnline()) {
-				MojangProfile profile = NiftyBukkit.getMojangRepository().searchByExactPlayer(event.getPlayer());
-				uuid = profile.getUniqueId();
-				name = profile.getName();
-			}
-
-			for (MojangProfile profile : CACHE) {
-				if (profile.getUniqueId().equals(uuid) || profile.getName().equalsIgnoreCase(name))
-					CACHE.remove(profile);
+				for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
+					if (profile.getUniqueId().equals(uuid) || profile.getName().equalsIgnoreCase(name)) {
+						for (MojangProfile cache : CACHE) {
+							if (cache.equals(profile))
+								CACHE.remove(cache);
+						}
+					}
+				}
 			}
 		}
 		
