@@ -16,7 +16,7 @@ class NiftyListener extends BukkitListener {
 
 	@EventHandler
 	public void onPlayerJoin(final PlayerJoinEvent event) {
-		this.getPlugin().getServer().getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
+		this.getPlugin().getServer().getScheduler().runTaskLaterAsynchronously(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
 				if (event.getPlayer() == null) return;
