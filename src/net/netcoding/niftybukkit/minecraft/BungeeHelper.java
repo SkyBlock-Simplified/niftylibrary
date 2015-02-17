@@ -360,6 +360,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 					BUNGEE_ONLINE = true;
 				} else {
+					if (!this.isOnline()) return;
 					final BungeeServer server = this.getServer(input.readUTF());
 
 					if (subChannel.equals("ServerInfo")) {
