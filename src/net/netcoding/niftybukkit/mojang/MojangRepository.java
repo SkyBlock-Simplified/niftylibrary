@@ -39,30 +39,34 @@ public class MojangRepository {
 		new RepositoryListener();
 	}
 
-	private static URL getProfilesUrl() {
-		try {
-			return new URL("https://api.mojang.com/profiles/minecraft");
-		} catch (MalformedURLException mue) { }
-
-		return null;
+	private static URL getProfilesUrl() throws MalformedURLException {
+		return new URL("https://api.mojang.com/profiles/minecraft");
 	}
 
-	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
+	private static URL getProfilesUrl(String username) throws MalformedURLException {
+		return new URL(StringUtil.format("https://api.mojang.com/users/profiles/minecraft/{0}?at=0", username));
+	}
+
+	public MojangProfile searchByPlayer(Player player) throws ProfileNotFoundException {
+		// TODO: Speed up
 		if (player == null) throw ProfileNotFoundException.InvalidPlayer();
-		return searchByExactUsername(player.getName());
+		return searchByUsername(player.getName());
 	}
 
+	@Deprecated
+	public MojangProfile searchByExactPlayer(Player player) throws ProfileNotFoundException {
+		// TODO: Speed up
+		if (player == null) throw ProfileNotFoundException.InvalidPlayer();
+		return searchByUsername(player.getName());
+	}
+
+	@Deprecated
 	public MojangProfile searchByExactUsername(String username) throws ProfileNotFoundException {
-		MojangProfile[] profiles = searchByUsername(username);
+		return searchByUsername(username);
+	}
 
-		if (profiles.length > 0) {
-			for (MojangProfile profile : profiles) {
-				if (profile.getName().equalsIgnoreCase(username))
-					return profile;
-			}
-		}
-
-		throw ProfileNotFoundException.InvalidUsername(username);
+	public MojangProfile searchByUsername(String username) throws ProfileNotFoundException {
+		return searchByUsername(Arrays.asList(username))[0];
 	}
 
 	public MojangProfile[] searchByPlayer(Player... players) throws ProfileNotFoundException {
@@ -182,6 +186,19 @@ public class MojangRepository {
 					start = end;
 					i++;
 				} while (start < userList.size());
+
+				for (MojangProfile profile : profiles)
+					userList.remove(profile.getName());
+
+				for (String user : userList) {
+					long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
+					if (wait > 0) Thread.sleep(wait);
+					String response = HTTP.get(getProfilesUrl(user));
+					LAST_HTTP_REQUEST = System.currentTimeMillis();
+					MojangProfile result = GSON.fromJson(response, MojangProfile.class);
+					profiles.add(result);
+					CACHE.addAll(Arrays.asList(result));
+				}
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
 			}
