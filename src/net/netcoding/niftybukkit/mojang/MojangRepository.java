@@ -196,8 +196,11 @@ public class MojangRepository {
 					String response = HTTP.get(getProfilesUrl(user));
 					LAST_HTTP_REQUEST = System.currentTimeMillis();
 					MojangProfile result = GSON.fromJson(response, MojangProfile.class);
-					profiles.add(result);
-					CACHE.addAll(Arrays.asList(result));
+
+					if (result != null) {
+						profiles.add(result);
+						CACHE.add(result);
+					}
 				}
 			} catch (Exception ex) {
 				NiftyBukkit.getPlugin().getLog().console(ex);
@@ -245,7 +248,7 @@ public class MojangRepository {
 				}
 			} else {
 				for (Player player : NiftyBukkit.getPlugin().getServer().getOnlinePlayers()) {
-					MojangProfile profile = this.searchByExactPlayer(player);
+					MojangProfile profile = this.searchByPlayer(player);
 
 					if (profile.getUniqueId().equals(uuid)) {
 						found = profile;
