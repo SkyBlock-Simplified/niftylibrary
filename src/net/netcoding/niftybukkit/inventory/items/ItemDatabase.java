@@ -63,7 +63,7 @@ public class ItemDatabase extends BukkitHelper {
 		else
 			itemname = itemname.toLowerCase(Locale.ENGLISH);
 
-		if (itemid < 1) {
+		if (itemid < 0) {
 			if (this.items.containsKey(itemname)) {
 				itemid = this.items.get(itemname);
 
@@ -75,7 +75,7 @@ public class ItemDatabase extends BukkitHelper {
 				throw new RuntimeException("Unknown item name: " + itemname);
 		}
 
-		if (itemid < 1) throw new RuntimeException("Unknown item name: " + itemname);
+		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemname);
 		final Material mat = Material.getMaterial(itemid);
 		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
 		final ItemStack retval = new ItemStack(mat);
@@ -116,7 +116,7 @@ public class ItemDatabase extends BukkitHelper {
 		} else
 			is.add(get(args[0]));
 
-		if (is.isEmpty() || is.get(0).getType() == Material.AIR)
+		if (is.isEmpty()/* || is.get(0).getType().equals(Material.AIR)*/)
 			throw new RuntimeException("No item found!");
 
 		return is;
