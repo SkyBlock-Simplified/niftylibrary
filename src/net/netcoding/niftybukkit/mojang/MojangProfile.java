@@ -49,7 +49,7 @@ public class MojangProfile {
 			return this.name = player.getName();
 	}
 
-	public OfflinePlayer getPlayer() {
+	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
 	}
 
