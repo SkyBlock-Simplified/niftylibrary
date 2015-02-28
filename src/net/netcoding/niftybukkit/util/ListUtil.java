@@ -10,21 +10,23 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
+	 * @param <T>
 	 * 
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
-	public static boolean isEmpty(String[] value) {
+	public static <T> boolean isEmpty(T[] value) {
 		return value == null || value.length == 0;
 	}
 
 	/**
 	 * Gets if the {@code value} is empty or null.
+	 * @param <T>
 	 * 
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
-	public static boolean isEmpty(List<String> value) {
+	public static <T> boolean isEmpty(List<T> value) {
 		return value == null || value.size() == 0;
 	}
 
@@ -34,7 +36,7 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
-	public static boolean notEmpty(String[] value) {
+	public static <T> boolean notEmpty(T[] value) {
 		return !isEmpty(value);
 	}
 
@@ -44,7 +46,7 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
-	public static boolean notEmpty(List<String> value) {
+	public static <T> boolean notEmpty(List<T> value) {
 		return !isEmpty(value);
 	}
 
