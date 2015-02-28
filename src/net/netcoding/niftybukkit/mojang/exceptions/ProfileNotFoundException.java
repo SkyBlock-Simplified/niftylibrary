@@ -1,31 +1,47 @@
 package net.netcoding.niftybukkit.mojang.exceptions;
 
-import java.util.List;
-import java.util.UUID;
-
 import net.netcoding.niftybukkit.util.StringUtil;
+
+import org.bukkit.OfflinePlayer;
 
 @SuppressWarnings("serial")
 public class ProfileNotFoundException extends RuntimeException {
 
-	ProfileNotFoundException(String message) {
-		super(message);
+	public ProfileNotFoundException(TYPE type, Object obj) {
+		super(getCustomMessage(type, obj));
 	}
 
-	public static ProfileNotFoundException InvalidPlayer() {
-		return new ProfileNotFoundException(String.format("The mojang profile data for the passed player could not be found!"));
+	public enum TYPE {
+		OFFLINE_PLAYERS,
+		OFFLINE_PLAYER,
+		UNIQUE_ID,
+		USERNAMES,
+		USERNAME,
+		NULL
 	}
 
-	public static ProfileNotFoundException InvalidUUID(UUID uuid) {
-		return new ProfileNotFoundException(String.format("The mojang profile data for uuid [%s] could not be found!", uuid.toString()));
-	}
+	private static String getCustomMessage(TYPE type, Object obj) {
+		switch (type) {
+		case OFFLINE_PLAYERS:
+			String players = "";
+			OfflinePlayer[] oplayers = (OfflinePlayer[])obj;
 
-	public static ProfileNotFoundException InvalidUsername(String name) {
-		return new ProfileNotFoundException(String.format("The mojang profile data for user [%s] could not be found!", name));
-	}
+			for (OfflinePlayer oplayer : oplayers)
+				players += StringUtil.format("'{'{0},{1}'}'", oplayer.getUniqueId(), oplayer.getName());
 
-	public static ProfileNotFoundException InvalidUsernames(List<String> names) {
-		return new ProfileNotFoundException(String.format("The mojang profile data for users [%s] could not be found!", StringUtil.implode(", ", names)));
+			return StringUtil.format("The profile data for offline players '{'{0}'}' could not be found!", players);
+		case OFFLINE_PLAYER:
+			OfflinePlayer oplayer = (OfflinePlayer)obj;
+			return StringUtil.format("The profile data for offline player '{'{0},{1}'}' could not be found!", oplayer.getUniqueId(), oplayer.getName());
+		case UNIQUE_ID:
+			return StringUtil.format("The profile data for uuid {0} could not be found!", obj);
+		case USERNAMES:
+			return StringUtil.format("The profile data for users '{'{0}'}' could not be found!", StringUtil.implode(", ", (String[])obj));
+		case USERNAME:
+			return StringUtil.format("The profile data for user {0} could not be found!", obj);
+		default:
+			return StringUtil.format("The profile data for {0} could not be found!", obj);
+		}
 	}
 
 }
