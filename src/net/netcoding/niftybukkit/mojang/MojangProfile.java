@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class MojangProfile {
@@ -17,6 +18,13 @@ public class MojangProfile {
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
 	private MojangProfile() { }
+
+	public boolean belongsTo(OfflinePlayer player) {
+		if (player == null) return false;
+		if (!player.getUniqueId().equals(this.getUniqueId())) return false;
+		if (!player.getName().equals(this.getName())) return false;
+		return true;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -30,13 +38,6 @@ public class MojangProfile {
 		return true;
 	}
 
-	public UUID getUniqueId() {
-		if (this.uuid == null)
-			this.uuid = UUID.fromString(UUID_FIX.matcher(this.id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
-
-		return this.uuid;
-	}
-
 	// TODO: Send update across BungeeCord to update players name
 	// if change is detected.
 	public String getName() {
@@ -46,6 +47,17 @@ public class MojangProfile {
 			return this.name;
 		else
 			return this.name = player.getName();
+	}
+
+	public OfflinePlayer getPlayer() {
+		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
+	}
+
+	public UUID getUniqueId() {
+		if (this.uuid == null)
+			this.uuid = UUID.fromString(UUID_FIX.matcher(this.id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
+
+		return this.uuid;
 	}
 
 	public boolean hasExpired() {
