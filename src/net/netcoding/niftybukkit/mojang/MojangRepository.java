@@ -90,7 +90,7 @@ public class MojangRepository {
 		}
 
 		if (profiles.size() == 0)
-			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYERS, players);
+			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYERS, ListUtil.toArray(players, OfflinePlayer.class));
 		else
 			return ListUtil.toArray(profiles, MojangProfile.class);
 	}
