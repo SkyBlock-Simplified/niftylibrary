@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.UUID;
@@ -78,6 +79,22 @@ public abstract class SQLFactory {
 	}
 
 	/**
+	 * Create a table if it does not exist.
+	 * 
+	 * @param name  Name of the table.
+	 * @param sql Fields and constrains of the table
+	 * @return True if the table was created, otherwise false.
+	 * @throws SQLException
+	 */
+	public boolean createTable(String name, String sql) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (Statement statement = connection.createStatement()) {
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}` ({1}) ENGINE=InnoDB;", name, sql)) > 0;
+			}
+		}
+	}
+
+	/**
 	 * Returns a connection to the database.
 	 * 
 	 * @return Connection to the database.
@@ -97,7 +114,8 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the schema for this DBMS.
-	 * @return The database name currently being used by connections.
+	 * 
+	 * @return Database name currently being used by connections.
 	 */
 	public String getSchema() {
 		return this.schema;
@@ -125,6 +143,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Retrieves the url for this DBMS.
+	 * 
 	 * @return url for this DBMS.
 	 */
 	public String getUrl() {
@@ -146,9 +165,10 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run SELECT query against the DBMS.
-	 * @param sql      The query to run.
-	 * @param callback The callback for processing the query results.
-	 * @param args     The arguments to pass to the query.
+	 * 
+	 * @param sql      Query to run.
+	 * @param callback Callback t process results with.
+	 * @param args     Arguments to pass to the query.
 	 * @return Whatever you decide to return in the callback.
 	 * @throws SQLException
 	 */
@@ -184,8 +204,9 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run INSERT, UPDATE or DELETE query against this DBMS.
-	 * @param sql  The query to run.
-	 * @param args The arguments to pass to the query.
+	 * 
+	 * @param sql  Query to run.
+	 * @param args Arguments to pass to the query.
 	 * @return True if query was successful, otherwise false.
 	 * @throws SQLException
 	 */
