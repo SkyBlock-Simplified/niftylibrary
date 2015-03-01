@@ -19,10 +19,10 @@ public class MojangProfile {
 
 	private MojangProfile() { }
 
-	public boolean belongsTo(OfflinePlayer player) {
-		if (player == null) return false;
-		if (!player.getUniqueId().equals(this.getUniqueId())) return false;
-		if (!player.getName().equals(this.getName())) return false;
+	public boolean belongsTo(OfflinePlayer oplayer) {
+		if (oplayer == null) return false;
+		if (!oplayer.getUniqueId().equals(this.getUniqueId())) return false;
+		if (!oplayer.getName().equals(this.getName())) return false;
 		return true;
 	}
 
@@ -43,7 +43,7 @@ public class MojangProfile {
 	public String getName() {
 		Player player = NiftyBukkit.getPlugin().getServer().getPlayer(this.getUniqueId());
 
-		if (player == null || this.name.equals(player.getName()))
+		if (player.equals(null) || player.getName().equals(this.name))
 			return this.name;
 		else
 			return this.name = player.getName();
