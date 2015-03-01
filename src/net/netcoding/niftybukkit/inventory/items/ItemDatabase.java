@@ -46,7 +46,8 @@ public class ItemDatabase extends BukkitHelper {
 
 	@SuppressWarnings("deprecation")
 	public ItemStack get(final String id) throws RuntimeException {
-		int itemid = 0;
+		if (StringUtil.isEmpty(id)) throw new NullPointerException("The value for id cannot be null!");
+		int itemid = -1;
 		String itemname = id;
 		short metaData = 0;
 		Matcher parts = splitPattern.matcher(id);
@@ -69,7 +70,7 @@ public class ItemDatabase extends BukkitHelper {
 
 				if (this.durabilities.containsKey(itemname) && metaData == 0)
 					metaData = this.durabilities.get(itemname);
-			} else if (Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)) != null)
+			} else if (!Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)).equals(null))
 				itemid = Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)).getId();
 			else
 				throw new RuntimeException("Unknown item name: " + itemname);
@@ -77,7 +78,7 @@ public class ItemDatabase extends BukkitHelper {
 
 		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemname);
 		final Material mat = Material.getMaterial(itemid);
-		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
+		if (mat.equals(null)) throw new RuntimeException("Unknown item id: " + itemid);
 		final ItemStack retval = new ItemStack(mat);
 		retval.setAmount(mat.getMaxStackSize());
 		retval.setDurability(metaData);
@@ -116,7 +117,7 @@ public class ItemDatabase extends BukkitHelper {
 		} else
 			is.add(get(args[0]));
 
-		if (is.isEmpty()/* || is.get(0).getType().equals(Material.AIR)*/)
+		if (is.isEmpty() || is.get(0).getType().equals(Material.AIR))
 			throw new RuntimeException("No item found!");
 
 		return is;
