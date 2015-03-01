@@ -89,7 +89,7 @@ public abstract class SQLFactory {
 	public boolean createTable(String name, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}` ({1}) ENGINE=InnoDB;", name, sql)) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}) ENGINE=InnoDB;", this.getSchema(), name, sql)) > 0;
 			}
 		}
 	}
