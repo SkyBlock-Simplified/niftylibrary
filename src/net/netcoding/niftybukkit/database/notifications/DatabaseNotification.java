@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.database;
+package net.netcoding.niftybukkit.database.notifications;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -8,23 +8,27 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.database.MySQL;
+import net.netcoding.niftybukkit.database.factory.SQLFactory;
+import net.netcoding.niftybukkit.database.factory.ResultCallback;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 public class DatabaseNotification extends BukkitHelper {
 
 	public static final String ACTIVITY_TABLE = "niftybukkit_activity";
-	private final transient TriggerEvent event;
+	public static final int DEFAULT_DELAY = 20;
+	private final TriggerEvent event;
 	private transient int recent;
 	private transient boolean stopped;
-	private final transient String name;
-	private final transient MySQL mysql;
+	private final String name;
+	private final transient SQLFactory mysql;
 	private final transient DatabaseListener listener;
 	private final transient List<String> primaryColumnNames = new ArrayList<String>();
 	private final transient String table;
 
 	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener) throws SQLException {
-		this(mysql, table, event, listener, MySQL.DEFAULT_DELAY, false);
+		this(mysql, table, event, listener, DEFAULT_DELAY, false);
 	}
 
 	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay) throws SQLException {
@@ -32,18 +36,19 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, boolean overwrite) throws SQLException {
-		this(mysql, table, event, listener, MySQL.DEFAULT_DELAY, overwrite);
+		this(mysql, table, event, listener, DEFAULT_DELAY, overwrite);
 	}
 
 	public DatabaseNotification(MySQL mysql, String table, TriggerEvent event, DatabaseListener listener, long delay, boolean overwrite) throws SQLException {
 		super(NiftyBukkit.getPlugin());
-		createLogTable(mysql);
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
+		createLogTable(mysql);
+		createPurgeEvent(mysql);
 		this.mysql = mysql;
 		this.table = table;
 		this.event = event;
 		this.name = StringUtil.format("on{0}{1}", this.table, this.event.toUppercase());
-		this.query();
+		this.pulse();
 		this.listener = listener;
 		this.loadPrimaryKeys();
 
@@ -59,7 +64,6 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private void loadPrimaryKeys() throws SQLException {
 		this.primaryColumnNames.clear();
-
 		this.primaryColumnNames.addAll(this.mysql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<List<String>>() {
 			@Override
 			public List<String> handle(ResultSet result) throws SQLException {
@@ -72,6 +76,10 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private static void createLogTable(MySQL mysql) throws SQLException {
 		mysql.createTable(ACTIVITY_TABLE, "`id` INT AUTO_INCREMENT PRIMARY KEY, `schema` VARCHAR(255) NOT NULL, `table` VARCHAR(255) NOT NULL, `action` ENUM('insert', 'delete', 'update') NOT NULL, `time` INT NOT NULL, `keys` VARCHAR(255), `old` VARCHAR(255), `new` VARCHAR(255)");
+	}
+
+	private static void createPurgeEvent(MySQL mysql) throws SQLException {
+		mysql.update("CREATE EVENT IF NOT EXISTS `purgeNiftyNotifications` ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM `niftybukkit_activity` WHERE `time` < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));");
 	}
 
 	private void createTrigger() throws SQLException {
@@ -107,7 +115,7 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	public HashMap<String, Object> getDeletedData() throws SQLException {
-		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Unable to retrieve deleted information from new rows!");
+		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Cannot retrieve an inserted record!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
 		this.mysql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
@@ -139,7 +147,7 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
-		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
+		if (this.getEvent().equals(TriggerEvent.DELETE)) throw new SQLException("Cannot retrieve a deleted record!");
 
 		this.mysql.query(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `time` = ?;", ACTIVITY_TABLE), new ResultCallback<Void>() {
 			@Override
@@ -160,7 +168,7 @@ public class DatabaseNotification extends BukkitHelper {
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.recent);
 	}
 
-	boolean query() {
+	boolean pulse() {
 		if (this.isStopped()) return false;
 
 		try {

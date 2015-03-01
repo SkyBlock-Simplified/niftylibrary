@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.database;
+package net.netcoding.niftybukkit.database.notifications;
 
 public enum TriggerEvent {
 

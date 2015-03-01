@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.database.pooling;
+package net.netcoding.niftybukkit.database.factory;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -10,10 +10,9 @@ import java.sql.Types;
 import java.util.Properties;
 import java.util.UUID;
 
-import net.netcoding.niftybukkit.database.ResultCallback;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-public abstract class ConnectionFactory {
+public abstract class SQLFactory {
 
 	private final String url;
 	private final Properties properties;
@@ -24,7 +23,7 @@ public abstract class ConnectionFactory {
 	 * @param user Username for the database connection.
 	 * @param pass Password for the database connection.
 	 */
-	public ConnectionFactory(String url, String user, String pass) throws SQLException {
+	public SQLFactory(String url, String user, String pass) throws SQLException {
 		Properties properties = new Properties();
 		properties.put("user", user);
 		properties.put("password", pass);
@@ -41,7 +40,7 @@ public abstract class ConnectionFactory {
 	 * @param url        Database URL
 	 * @param properties Properties of the connection to establish.
 	 */
-	public ConnectionFactory(String url, Properties properties) throws SQLException {
+	public SQLFactory(String url, Properties properties) throws SQLException {
 		this.url = url;
 		this.properties = properties;
 

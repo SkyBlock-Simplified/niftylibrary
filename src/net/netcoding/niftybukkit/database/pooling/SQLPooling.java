@@ -6,13 +6,14 @@ import java.util.Properties;
 import java.util.Vector;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.database.factory.SQLFactory;
 
 import org.bukkit.Bukkit;
 
 /**
  * Offers unified way to handle database connections with connection pooling functionality.
  */
-public abstract class ConnectionPool extends ConnectionFactory implements Runnable {
+public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	private transient Vector<Connection> availableConnections = new Vector<>();
 	private boolean firstConnection = true;
@@ -25,7 +26,7 @@ public abstract class ConnectionPool extends ConnectionFactory implements Runnab
 	 * @param user Username for the database connection.
 	 * @param pass Password for the database connection.
 	 */
-	public ConnectionPool(String url, String user, String pass) throws SQLException {
+	public SQLPooling(String url, String user, String pass) throws SQLException {
 		super(url, user, pass);
 		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
 	}
@@ -34,7 +35,7 @@ public abstract class ConnectionPool extends ConnectionFactory implements Runnab
 	 * @param url        Database URL
 	 * @param properties Properties of the connection to establish.
 	 */
-	public ConnectionPool(String url, Properties properties) throws SQLException {
+	public SQLPooling(String url, Properties properties) throws SQLException {
 		super(url, properties);
 		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
 	}
@@ -77,7 +78,7 @@ public abstract class ConnectionPool extends ConnectionFactory implements Runnab
 		this.initializeConnections();
 		Connection connection;
 
-		synchronized (ConnectionPool.class) {
+		synchronized (SQLPooling.class) {
 			if (this.availableConnections.size() == 0) {
 				if (this.usedConnections.size() < this.getMaximumConnections())
 					this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
@@ -153,7 +154,7 @@ public abstract class ConnectionPool extends ConnectionFactory implements Runnab
 
 	@Override
 	public void run() {
-		synchronized (ConnectionPool.class) {
+		synchronized (SQLPooling.class) {
 			while (this.availableConnections.size() > this.getMinimumConnections()) {
 				Connection connection = this.availableConnections.lastElement();
 				this.availableConnections.removeElement(connection);

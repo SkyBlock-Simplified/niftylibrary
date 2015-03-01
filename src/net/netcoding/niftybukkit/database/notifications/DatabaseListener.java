@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.database;
+package net.netcoding.niftybukkit.database.notifications;
 
 import java.sql.SQLException;
 
