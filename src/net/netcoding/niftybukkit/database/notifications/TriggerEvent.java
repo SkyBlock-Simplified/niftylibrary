@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.database.notifications;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 public enum TriggerEvent {
 
 	INSERT("Insert"),
@@ -10,6 +12,15 @@ public enum TriggerEvent {
 
 	private TriggerEvent(String paramString) {
 		this.id = paramString;
+	}
+
+	public static TriggerEvent fromString(String value) {
+		for (TriggerEvent event : TriggerEvent.values()) {
+			if (event.toString().equalsIgnoreCase(value))
+				return event;
+		}
+
+		throw new IllegalArgumentException(StringUtil.format("No constant with text {0} found!", value));
 	}
 
 	public String toLowercase() {
