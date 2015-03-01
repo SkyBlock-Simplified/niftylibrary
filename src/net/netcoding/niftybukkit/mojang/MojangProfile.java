@@ -43,7 +43,7 @@ public class MojangProfile {
 	public String getName() {
 		Player player = NiftyBukkit.getPlugin().getServer().getPlayer(this.getUniqueId());
 
-		if (player.equals(null) || player.getName().equals(this.name))
+		if (player == null || player.getName().equals(this.name))
 			return this.name;
 		else
 			return this.name = player.getName();
