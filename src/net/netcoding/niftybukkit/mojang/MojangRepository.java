@@ -54,7 +54,7 @@ public class MojangRepository {
 	public MojangProfile searchByPlayer(OfflinePlayer player) throws ProfileNotFoundException {
 		try {
 			return searchByPlayer(Arrays.asList(player))[0];
-		} catch (ProfileNotFoundException pnfe) {
+		} catch (ProfileNotFoundException ex) {
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYER, player);
 		}
 	}
@@ -77,7 +77,6 @@ public class MojangRepository {
 						break;
 					}
 				}
-
 			}
 		} else {
 			for (OfflinePlayer oplayer : oplayers) {
@@ -103,7 +102,7 @@ public class MojangRepository {
 	public MojangProfile searchByUsername(String username) throws ProfileNotFoundException {
 		try {
 			return searchByUsername(Arrays.asList(username))[0];
-		} catch (ProfileNotFoundException pnfe) {
+		} catch (Exception ex) {
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.USERNAME, username);
 		}
 	}
@@ -312,9 +311,9 @@ public class MojangRepository {
 	private static class UUIDSearchResult {
 
 		private String name;
-		private int changedToAt;
+		private long changedToAt;
 
-		public int getChangedToAt() {
+		public long getChangedToAt() {
 			return this.changedToAt;
 		}
 
