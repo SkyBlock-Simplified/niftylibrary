@@ -6,35 +6,35 @@ import java.util.Properties;
 import java.util.Vector;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 
 /**
- * Offers unified way to handle database connections. Provides connection pooling functionality.
+ * Offers unified way to handle database connections with connection pooling functionality.
  */
-public class ConnectionPool extends ConnectionFactory implements Runnable {
+public abstract class ConnectionPool extends ConnectionFactory implements Runnable {
 
-	private boolean firstConnection = true;
-	private int minimumConnections = 3;
-	private int maximumConnections = 10;
-	private transient Vector<Connection> usedConnections = new Vector<>();
 	private transient Vector<Connection> availableConnections = new Vector<>();
+	private boolean firstConnection = true;
+	private int maximumConnections = 10;
+	private int minimumConnections = 3;
+	private transient Vector<Connection> usedConnections = new Vector<>();
 
 	/**
 	 * @param url  Database URL.
 	 * @param user Username for the database connection.
 	 * @param pass Password for the database connection.
 	 */
-	public ConnectionPool(String url, String user, String pass) {
+	public ConnectionPool(String url, String user, String pass) throws SQLException {
 		super(url, user, pass);
+		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
 	}
 
 	/**
 	 * @param url        Database URL
 	 * @param properties Properties of the connection to establish.
 	 */
-	public ConnectionPool(String url, Properties properties) {
+	public ConnectionPool(String url, Properties properties) throws SQLException {
 		super(url, properties);
 		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
 	}
@@ -43,26 +43,20 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 	 * Creates the pool of available connections according to currently set number of pool size.
 	 * Note that connection pool must be initialized to it's full capacity, or it is emptied and objects
 	 * are free to be garbage collected.
-	 *
+	 * 
 	 * @throws SQLException If case of not finishing creating connection pool, this exception is thrown.
 	 */
 	private synchronized void initializeConnections() throws SQLException {
 		if (!this.firstConnection) return;
 		this.firstConnection = false;
 
-		try {
-			for (int i = 0; i < this.getMinimumConnections(); i++)
-				this.availableConnections.add(new RecoverableConnection(super.getConnection(), this));
-		} catch (SQLException ex) {
-			this.availableConnections.removeAll(this.availableConnections);
-			this.availableConnections = new Vector<>();
-			throw new SQLException(StringUtil.format("Could not establish connection: {0}", ex.getMessage()), ex);
-		}
+		for (int i = 0; i < this.getMinimumConnections(); i++)
+			this.availableConnections.add(new RecoverableConnection(super.getConnection(), this));
 	}
 
 	/**
 	 * Returns a connection from connection pool.
-	 *
+	 * 
 	 * @param waitTime Time to wait for a connection.
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available within given wait time.
@@ -74,7 +68,7 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 
 	/**
 	 * Returns a connection from connection pool.
-	 *
+	 * 
 	 * @param waitTime Time to wait for a connection.
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available within given wait time.
@@ -82,9 +76,6 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 	public Connection getConnection(WaitTime waitTime) throws SQLException {
 		this.initializeConnections();
 		Connection connection;
-
-		//System.out.println("used connections: " + this.usedConnections.size());
-		//System.out.println("available connections: " + this.availableConnections.size());
 
 		synchronized (ConnectionPool.class) {
 			if (this.availableConnections.size() == 0) {
@@ -97,12 +88,12 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 						try {
 							Thread.sleep(waitTime.getWaitTime());
 						} catch (InterruptedException ex) { }
-	
+
 						connection = this.getConnection();
 					}
 				}
 			} else {
-				connection = this.availableConnections.lastElement();
+				connection = this.availableConnections.firstElement();
 				this.availableConnections.removeElement(connection);
 				this.usedConnections.addElement(connection);
 	
@@ -113,7 +104,7 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 		}
 
 		if (connection.isClosed()) {
-			System.out.println("reboot connection");
+			System.out.println("CLOSED, REBOOT CONNECTION");
 			connection = new RecoverableConnection(super.getConnection(), this);
 		}
 
@@ -144,7 +135,7 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 
 	/**
 	 * Sets the maximum number of concurrent connections.
-	 *
+	 * 
 	 * @param count Maximum number of connections to have available.
 	 */
 	public void setMaximumConnections(int count) {
@@ -153,7 +144,7 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 
 	/**
 	 * Sets the minimum number of concurrent connections.
-	 *
+	 * 
 	 * @param count Minimum number of connections to have available.
 	 */
 	public void setMinimumConnections(int count) {
@@ -162,11 +153,15 @@ public class ConnectionPool extends ConnectionFactory implements Runnable {
 
 	@Override
 	public void run() {
-		synchronized (this) {
+		synchronized (ConnectionPool.class) {
 			while (this.availableConnections.size() > this.getMinimumConnections()) {
 				Connection connection = this.availableConnections.lastElement();
 				this.availableConnections.removeElement(connection);
-				//((RecoverableConnection)connection).closeOnly();
+
+				try {
+					if (!connection.isClosed())
+						((RecoverableConnection)connection).closeOnly();
+				} catch (SQLException e) { }
 			}
 		}
 	}
