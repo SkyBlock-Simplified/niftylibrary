@@ -10,6 +10,7 @@ import java.sql.Types;
 import java.util.Properties;
 import java.util.UUID;
 
+import net.netcoding.niftybukkit.database.ResultCallback;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 public abstract class ConnectionFactory {
@@ -50,7 +51,7 @@ public abstract class ConnectionFactory {
 		this._getSchema();
 	}
 
-	protected static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
+	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
 		for (int i = 0; i < args.length; i++) {
 			int index = i + 1;
 
@@ -81,7 +82,7 @@ public abstract class ConnectionFactory {
 	 * Returns a connection to the database.
 	 * 
 	 * @return Connection to the database.
-	 * @throws SQLException When connection is not available.
+	 * @throws SQLException
 	 */
 	protected Connection getConnection() throws SQLException {
 		return this._getConnection();
@@ -95,6 +96,10 @@ public abstract class ConnectionFactory {
 		return this.properties;
 	}
 
+	/**
+	 * Gets the schema for this DBMS.
+	 * @return The database name currently being used by connections.
+	 */
 	public String getSchema() {
 		return this.schema;
 	}
@@ -119,20 +124,46 @@ public abstract class ConnectionFactory {
 		}
 	}
 
+	/**
+	 * Retrieves the url for this DBMS.
+	 * @return url for this DBMS.
+	 */
 	public String getUrl() {
 		return StringUtil.format("{0}?autoReconnect=true", this.url);
 	}
 
 	/**
-	 *  Checks if the connection details are valid.
-	 *  
-	 * @return True if valid connection details, otherwise false.
+	 * Checks if the connection details are valid.
+	 * 
+	 * @return True if valid details, otherwise false.
 	 */
 	public boolean isValidConnection() {
 		try (Connection connection = this._getConnection()) {
 			return true;
 		} catch (SQLException ex) {
 			return false;
+		}
+	}
+
+	/**
+	 * Run SELECT query against the DBMS.
+	 * @param sql      The query to run.
+	 * @param callback The callback for processing the query results.
+	 * @param args     The arguments to pass to the query.
+	 * @return Whatever you decide to return in the callback.
+	 * @throws SQLException
+	 */
+	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assignArgs(statement, args);
+				statement.executeQuery();
+
+				if (callback != null)
+					return callback.handle(statement.getResultSet());
+				else
+					return null;
+			}
 		}
 	}
 
@@ -147,6 +178,22 @@ public abstract class ConnectionFactory {
 		try (Connection connection = this._getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement("USE ?;")) {
 				assignArgs(statement, schema);
+				return statement.executeUpdate() > 0;
+			}
+		}
+	}
+
+	/**
+	 * Run INSERT, UPDATE or DELETE query against this DBMS.
+	 * @param sql  The query to run.
+	 * @param args The arguments to pass to the query.
+	 * @return True if query was successful, otherwise false.
+	 * @throws SQLException
+	 */
+	public boolean update(String sql, Object... args) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assignArgs(statement, args);
 				return statement.executeUpdate() > 0;
 			}
 		}
