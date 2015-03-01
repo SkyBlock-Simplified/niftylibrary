@@ -1,14 +1,12 @@
 package net.netcoding.niftybukkit.database.notifications;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.database.pooling.SQLPooling;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -17,7 +15,7 @@ public class SQLNotifications extends SQLPooling {
 
 	static final String ACTIVITY_TABLE = "niftybukkit_activity";
 	private static final int DEFAULT_DELAY = 10;
-	private final transient List<DatabaseNotification> listeners = Collections.synchronizedList(new ArrayList<DatabaseNotification>());
+	private final transient ConcurrentList<DatabaseNotification> listeners = new ConcurrentList<>();
 	private transient BukkitTask task;
 
 	public SQLNotifications(String url, String user, String pass) throws SQLException {

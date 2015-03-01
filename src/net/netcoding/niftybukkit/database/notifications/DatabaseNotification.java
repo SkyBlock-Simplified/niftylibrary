@@ -15,7 +15,6 @@ import net.netcoding.niftybukkit.util.StringUtil;
 public class DatabaseNotification extends BukkitHelper {
 
 	private TriggerEvent event;
-	private final String name;
 	private final transient DatabaseListener listener;
 	private final List<String> primaryColumnNames = new ArrayList<String>();
 	private int previousId = 0;
@@ -28,23 +27,24 @@ public class DatabaseNotification extends BukkitHelper {
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
 		this.sql = sql;
 		this.table = table;
-		this.name = StringUtil.format("on{0}{1}", this.table, this.event.toUppercase());
 		this.pulse();
 		this.listener = listener;
 		this.loadPrimaryKeys();
 
-		if (!this.triggerExists() || overwrite) {
-			this.dropTrigger();
-			this.createTrigger();
+		if (!this.triggersExist() || overwrite) {
+			for (TriggerEvent event : TriggerEvent.values()) {
+				this.dropTrigger(event);
+				this.createTrigger(event);
+			}
 		}
 	}
 
-	private void createTrigger() throws SQLException {
+	private void createTrigger(TriggerEvent event) throws SQLException {
 		try {
 			if (this.primaryColumnNames.size() > 0) {
 				String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
 				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES (''{0}'', ''{3}'', ''{2}'', UNIX_TIMESTAMP(), ''{5}'', ",
-						this.getSchema(), this.getName(), this.getEvent().toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE, primaryKeys);
+						this.getSchema(), this.getName(event), event.toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE, primaryKeys);
 				String _old = null;
 				String _new = null;
 				if (this.getEvent() != TriggerEvent.INSERT) _old = StringUtil.format("CONCAT(OLD.`{0}`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
@@ -57,9 +57,9 @@ public class DatabaseNotification extends BukkitHelper {
 		}
 	}
 
-	private void dropTrigger() {
+	private void dropTrigger(TriggerEvent event) {
 		try {
-			this.sql.update(StringUtil.format("DROP TRIGGER IF EXISTS `{0}`;", this.getName()));
+			this.sql.update(StringUtil.format("DROP TRIGGER IF EXISTS `{0}`;", this.getName(event)));
 		} catch (Exception ex) { }
 	}
 
@@ -87,8 +87,8 @@ public class DatabaseNotification extends BukkitHelper {
 		return this.event;
 	}
 
-	private String getName() {
-		return this.name;
+	private String getName(TriggerEvent event) {
+		return StringUtil.format("on{0}{1}", this.getTable(), event.toUppercase());
 	}
 
 	public String getSchema() {
@@ -141,9 +141,7 @@ public class DatabaseNotification extends BukkitHelper {
 		if (this.isStopped()) return false;
 
 		try {
-			// SELECT * FROM `niftybukkit_activity` WHERE `table` = 'niftyranks_users' AND `action` IN ('INSERT', 'UPDATE', 'DELETE') AND `id` > 0 ORDER BY `id` ASC LIMIT 1;
-
-			return this.sql.query(StringUtil.format("SELECT `id`, `action` FROM `niftybukkit_activity` WHERE `table` = 'niftyranks_users' AND `action` IN ('INSERT', 'UPDATE', 'DELETE') AND `id` > ? ORDER BY `id` {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), new ResultCallback<Boolean>() {
+			return this.sql.query(StringUtil.format("SELECT `id`, `action` FROM `{0}` WHERE `table` = ? AND `action` IN (''INSERT'', ''UPDATE'', ''DELETE'') AND `id` > ? ORDER BY `id` {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
 					if (result.next()) {
@@ -158,7 +156,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 					return false;
 				}
-			}, this.getTable(), this.getEvent().toUppercase(), this.previousId);
+			}, this.getTable(), this.previousId);
 		} catch (SQLException ex) {
 			this.getLog().console(ex);
 			this.stop();
@@ -179,19 +177,25 @@ public class DatabaseNotification extends BukkitHelper {
 		this.stop(false);
 	}
 
-	public void stop(boolean dropTrigger) {
+	public void stop(boolean dropTriggers) {
 		this.stopped = true;
-		if (dropTrigger) this.dropTrigger();
+
+		if (dropTriggers) {
+			for (TriggerEvent event : TriggerEvent.values())
+				this.dropTrigger(event);
+		}
 	}
 
-	private boolean triggerExists() {
+	private boolean triggersExist() {
 		try {
-			return this.sql.query("SELECT `TRIGGER_NAME` FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA` = ? AND `TRIGGER_NAME` = ?;", new ResultCallback<Boolean>() {
+			return this.sql.query("SELECT `TRIGGER_NAME` FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA` = ? AND `TRIGGER_NAME` IN (?, ?, ?);", new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
-					return result.next();
+					int count = 0;
+					while (result.next()) count++;
+					return count == 3;
 				}
-			}, this.getSchema(), this.getName());
+			}, this.getSchema(), this.getName(TriggerEvent.DELETE), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE));
 		} catch (Exception ex) {
 			this.getLog().console(ex);
 		}
