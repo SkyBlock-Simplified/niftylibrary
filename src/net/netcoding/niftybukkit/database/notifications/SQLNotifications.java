@@ -9,7 +9,6 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Adds support for notifications through an sql server instance.
@@ -19,7 +18,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	static final String ACTIVITY_TABLE = "niftybukkit_activity";
 	private static final int DEFAULT_DELAY = 10;
 	private final transient ConcurrentSet<DatabaseNotification> listeners = new ConcurrentSet<>();
-	private transient BukkitTask task;
+	private int taskId = -1;
 
 	/**
 	 * Create a new notification instance.
@@ -92,7 +91,9 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		this.listeners.add(new DatabaseNotification(this, table, notifier, delay, overwrite));
 		this.createLogTable();
 		this.createPurgeEvent();
-		if (this.task == null) this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay);
+
+		if (this.taskId == -1) this.taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay).getTaskId();
+		//if (this.task == null) this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay);
 	}
 
 	private void createLogTable() throws SQLException {
@@ -101,6 +102,10 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	private void createPurgeEvent() throws SQLException {
 		update(StringUtil.format("CREATE EVENT IF NOT EXISTS `purgeNiftyNotifications` ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM `{0}`.`niftybukkit_activity` WHERE `time` < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema()));
+	}
+
+	public boolean isRunning() {
+		return this.taskId != -1;
 	}
 
 	/**
@@ -141,17 +146,15 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		}
 
 		if (this.listeners.size() == 0) {
-			if (this.task != null) {
-				this.task.cancel();
-				this.task = null;
+			if (this.taskId != -1) {
+				Bukkit.getServer().getScheduler().cancelTask(this.taskId);
+				this.taskId = -1;
 			}
 		}
 	}
 
 	@Override
 	public void run() {
-		if (this.task == null) return;
-
 		for (DatabaseNotification notification : this.listeners) {
 			if (notification.isStopped()) {
 				this.listeners.remove(notification);
