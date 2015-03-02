@@ -1,6 +1,6 @@
 name: NiftyBukkit
-version: 3.3.1
-website: http://netcoding.net/
+version: 3.3.2
+website: https://netcoding.net/
 author: Brian Graham (CraftedFury)
 
 main: net.netcoding.niftybukkit.NiftyBukkit
