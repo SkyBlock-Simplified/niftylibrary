@@ -12,6 +12,9 @@ import net.netcoding.niftybukkit.database.factory.SQLFactory;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+/**
+ * An sql listener used to check for updates to its associated table and notify plugins.
+ */
 public class DatabaseNotification extends BukkitHelper {
 
 	private TriggerEvent event;
@@ -63,6 +66,12 @@ public class DatabaseNotification extends BukkitHelper {
 		} catch (Exception ex) { }
 	}
 
+	/**
+	 * Gets the primary keys and associated deleted data of the current notification.
+	 * 
+	 * @return Map of primary keys and associated deleted data.
+	 * @throws SQLException If you attempt to retrieve deleted data when inserting a record.
+	 */
 	public HashMap<String, Object> getDeletedData() throws SQLException {
 		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Cannot retrieve an inserted record!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
@@ -83,6 +92,11 @@ public class DatabaseNotification extends BukkitHelper {
 		return deleted;
 	}
 
+	/**
+	 * Gets the event of the current notification.
+	 * 
+	 * @return Event type of the current notification.
+	 */
 	public TriggerEvent getEvent() {
 		return this.event;
 	}
@@ -91,14 +105,30 @@ public class DatabaseNotification extends BukkitHelper {
 		return StringUtil.format("on{0}{1}", this.getTable(), event.toUppercase());
 	}
 
+	/**
+	 * Gets the schema of the current notification.
+	 * 
+	 * @return Database name of the current notification.
+	 */
 	public String getSchema() {
 		return this.sql.getSchema();
 	}
 
+	/**
+	 * Gets the table of the current notification.
+	 * 
+	 * @return Table name of the current notification.
+	 */
 	public String getTable() {
 		return this.table;
 	}
 
+	/**
+	 * Gets the updated data of the current notification.
+	 * 
+	 * @param resultCallback Callback class to handle retrieved data.
+	 * @throws SQLException If you attempt to retrieve updated data when deleting a record.
+	 */
 	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
 		if (this.getEvent().equals(TriggerEvent.DELETE)) throw new SQLException("Cannot retrieve a deleted record!");
 
@@ -121,6 +151,11 @@ public class DatabaseNotification extends BukkitHelper {
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
 	}
 
+	/**
+	 * Gets if the current notification has stopped.
+	 * 
+	 * @return True if has stopped, otherwise false.
+	 */
 	public boolean isStopped() {
 		return this.stopped;
 	}
@@ -173,10 +208,18 @@ public class DatabaseNotification extends BukkitHelper {
 		}
 	}
 
+	/**
+	 * Stops this class from listening for further notifications.
+	 */
 	public void stop() {
 		this.stop(false);
 	}
 
+	/**
+	 * Stops this class from listening for further notifications, and optionally delete the trigger from the database.
+	 * 
+	 * @param dropTriggers True to delete the triggers, otherwise false.
+	 */
 	public void stop(boolean dropTriggers) {
 		this.stopped = true;
 

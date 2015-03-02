@@ -13,6 +13,9 @@ import java.util.UUID;
 
 import net.netcoding.niftybukkit.util.StringUtil;
 
+/**
+ * Factory sql classes to be inherited from when creating a wrapper.
+ */
 public abstract class SQLFactory {
 
 	private final String url;
@@ -20,9 +23,12 @@ public abstract class SQLFactory {
 	private String schema;
 
 	/**
-	 * @param url  Database URL.
-	 * @param user Username for the database connection.
-	 * @param pass Password for the database connection.
+	 * Create a new factory instance.
+	 * 
+	 * @param url  Database connection url.
+	 * @param user Username of the database connection.
+	 * @param pass Password of the database connection.
+	 * @throws SQLException
 	 */
 	public SQLFactory(String url, String user, String pass) throws SQLException {
 		Properties properties = new Properties();
@@ -38,8 +44,11 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * @param url        Database URL
-	 * @param properties Properties of the connection to establish.
+	 * Create a new factory instance.
+	 * 
+	 * @param url        Database connection url.
+	 * @param properties Properties of the database connection.
+	 * @throws SQLException
 	 */
 	public SQLFactory(String url, Properties properties) throws SQLException {
 		this.url = url;
@@ -95,7 +104,7 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * Returns a connection to the database.
+	 * Gets a connection to the database.
 	 * 
 	 * @return Connection to the database.
 	 * @throws SQLException
@@ -142,9 +151,9 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * Retrieves the url for this DBMS.
+	 * Gets the url for this DBMS.
 	 * 
-	 * @return url for this DBMS.
+	 * @return Url for this DBMS.
 	 */
 	public String getUrl() {
 		return StringUtil.format("{0}?autoReconnect=true", this.url);

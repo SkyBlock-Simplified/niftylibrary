@@ -11,7 +11,7 @@ import net.netcoding.niftybukkit.database.factory.SQLFactory;
 import org.bukkit.Bukkit;
 
 /**
- * Offers unified way to handle database connections with connection pooling functionality.
+ * Handles database connections with connection pooling functionality.
  */
 public abstract class SQLPooling extends SQLFactory implements Runnable {
 
@@ -22,9 +22,12 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	private transient Vector<Connection> usedConnections = new Vector<>();
 
 	/**
-	 * @param url  Database URL.
-	 * @param user Username for the database connection.
-	 * @param pass Password for the database connection.
+	 * Create a new pooling instance.
+	 * 
+	 * @param url  Database connection url.
+	 * @param user Username of the database connection.
+	 * @param pass Password of the database connection.
+	 * @throws SQLException
 	 */
 	public SQLPooling(String url, String user, String pass) throws SQLException {
 		super(url, user, pass);
@@ -32,8 +35,11 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
-	 * @param url        Database URL
-	 * @param properties Properties of the connection to establish.
+	 * Create a new pooling instance.
+	 * 
+	 * @param url        Database connection url.
+	 * @param properties Properties of the database connection.
+	 * @throws SQLException
 	 */
 	public SQLPooling(String url, Properties properties) throws SQLException {
 		super(url, properties);
@@ -45,7 +51,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * Note that connection pool must be initialized to it's full capacity, or it is emptied and objects
 	 * are free to be garbage collected.
 	 * 
-	 * @throws SQLException If case of not finishing creating connection pool, this exception is thrown.
+	 * @throws SQLException
 	 */
 	private synchronized void initializeConnections() throws SQLException {
 		if (!this.firstConnection) return;
@@ -56,11 +62,10 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
-	 * Returns a connection from connection pool.
+	 * Gets a connection from connection pool.
 	 * 
-	 * @param waitTime Time to wait for a connection.
 	 * @return Connection to the database.
-	 * @throws SQLException When connection is not available within given wait time.
+	 * @throws SQLException When connection is not available immediately.
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
@@ -68,7 +73,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
-	 * Returns a connection from connection pool.
+	 * Gets a connection from connection pool, waiting if necessary.
 	 * 
 	 * @param waitTime Time to wait for a connection.
 	 * @return Connection to the database.
@@ -113,23 +118,20 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
-	 * Returns the maximum number of concurrent connections.
+	 * Gets the maximum number of concurrent connections.
 	 */
 	public int getMaximumConnections() {
 		return this.maximumConnections;
 	}
 
 	/**
-	 * Returns the minimum number of concurrent connections.
+	 * Gets the minimum number of concurrent connections.
 	 */
 	public int getMinimumConnections() {
 		return this.minimumConnections;
 	}
 
-	/**
-	 * Returns a connection to the connection pool, making it available for use.
-	 */
-	public void recycle(Connection connection) {
+	void recycle(Connection connection) {
 		this.usedConnections.removeElement(connection);
 		this.availableConnections.addElement(connection);
 	}

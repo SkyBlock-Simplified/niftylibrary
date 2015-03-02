@@ -46,7 +46,7 @@ public class RecoverableConnection implements Connection {
 	}
 
 	/**
-	 * Return this.connection to the connection pool.
+	 * Return connection to the connection pool.
 	 */
 	@Override
 	public void close() throws SQLException {
