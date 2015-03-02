@@ -7,7 +7,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class PostgreSQL extends SQLNotifications {
 
-	private final static boolean JDBC_DRIVER_LOADED;
+	private final static boolean POSTGRESQL_DRIVER_LOADED;
 
 	static {
 		boolean loaded = false;
@@ -17,11 +17,11 @@ public class PostgreSQL extends SQLNotifications {
 			loaded = true;
 		} catch (ClassNotFoundException ex) { }
 
-		JDBC_DRIVER_LOADED = loaded;
+		POSTGRESQL_DRIVER_LOADED = loaded;
 	}
 
 	public PostgreSQL(String host, String user, String pass, String schema) throws SQLException {
-		this(host, 3306, user, pass, schema);
+		this(host, 5432, user, pass, schema);
 	}
 
 	public PostgreSQL(String host, int port, String user, String pass, String schema) throws SQLException {
@@ -29,12 +29,12 @@ public class PostgreSQL extends SQLNotifications {
 	}
 
 	/**
-	 * Checks if the MySQL JDBC driver is available.
+	 * Checks if the PostgreSQL JDBC driver is available.
 	 * 
 	 * @return True if available, otherwise false.
 	 */
 	public boolean isDriverAvailable() {
-		return JDBC_DRIVER_LOADED;
+		return POSTGRESQL_DRIVER_LOADED;
 	}
 
 }
