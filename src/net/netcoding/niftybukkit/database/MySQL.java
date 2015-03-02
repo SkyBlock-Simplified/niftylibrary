@@ -7,7 +7,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class MySQL extends SQLNotifications {
 
-	private final static boolean JDBC_DRIVER_LOADED;
+	private final static boolean MYSQL_DRIVER_LOADED;
 
 	static {
 		boolean loaded = false;
@@ -17,7 +17,7 @@ public class MySQL extends SQLNotifications {
 			loaded = true;
 		} catch (ClassNotFoundException ex) { }
 
-		JDBC_DRIVER_LOADED = loaded;
+		MYSQL_DRIVER_LOADED = loaded;
 	}
 
 	public MySQL(String host, String user, String pass, String schema) throws SQLException {
@@ -34,7 +34,7 @@ public class MySQL extends SQLNotifications {
 	 * @return True if available, otherwise false.
 	 */
 	public boolean isDriverAvailable() {
-		return JDBC_DRIVER_LOADED;
+		return MYSQL_DRIVER_LOADED;
 	}
 
 }
