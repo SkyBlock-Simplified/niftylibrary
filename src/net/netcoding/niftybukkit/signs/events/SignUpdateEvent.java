@@ -7,6 +7,9 @@ import net.netcoding.niftybukkit.signs.SignInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
+/**
+ * Class for sign specific update events.
+ */
 public class SignUpdateEvent extends SignEvent {
 
 	public SignUpdateEvent(Player player, SignInfo signInfo, String key) {
@@ -18,6 +21,11 @@ public class SignUpdateEvent extends SignEvent {
 		super.setLine(index, value);
 	}
 
+	/**
+	 * Change the value from {@link #getKey()} to the given value.
+	 * 
+	 * @param value Text to change key to.
+	 */
 	public void updateLine(String value) {
 		for (int i = 0; i < 4; i++) {
 			if (this.getLine(i).toLowerCase().contains(this.key.toLowerCase()))
