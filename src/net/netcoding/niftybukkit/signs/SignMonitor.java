@@ -14,6 +14,7 @@ import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Location;
@@ -41,6 +42,9 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 
+/**
+ * Monitor and update signs by tracking sign update packets.
+ */
 public class SignMonitor extends BukkitListener {
 
 	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
@@ -78,13 +82,24 @@ public class SignMonitor extends BukkitListener {
 		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
 	);
 
+	/**
+	 * Create new sign monitor instance.
+	 * 
+	 * @param plugin Java plugin to run it for.
+	 */
 	public SignMonitor(JavaPlugin plugin) {
 		super(plugin);
 	}
 
+	/**
+	 * Add listener for the given keys.
+	 * 
+	 * @param listener Listener to send events to.
+	 * @param keys     Keys to check when receiving sign update packets.
+	 */
 	public void addListener(SignListener listener, String... keys) {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
-		if (keys == null || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
+		if (ListUtil.isEmpty(keys) || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
 
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].length() > 15)
@@ -92,7 +107,9 @@ public class SignMonitor extends BukkitListener {
 		}
 
 		List<String> newKeys = new ArrayList<>();
-		if (this.listeners.get(listener) != null) newKeys.addAll(this.listeners.get(listener));
+		if (ListUtil.notEmpty(this.listeners.get(listener)))
+			newKeys.addAll(this.listeners.get(listener));
+
 		for (int i = 0; i < keys.length; i++) {
 			if (!newKeys.contains(keys[i]))
 				newKeys.add(String.format("[%s]", keys[i]));
@@ -101,6 +118,12 @@ public class SignMonitor extends BukkitListener {
 		this.listeners.put(listener, newKeys);
 	}
 
+	/**
+	 * Gets a list of signs that would fall if the given block were to break.
+	 * 
+	 * @param block Block that is going to break.
+	 * @return List of signs locations that will break if the block is broken.
+	 */
 	public static Set<Location> getSignsThatWouldFall(Block block) {
 		Set<Location> locations = new HashSet<>();
 		if (SIGN_ITEMS.contains(block.getType())) locations.add(block.getLocation());
@@ -127,6 +150,13 @@ public class SignMonitor extends BukkitListener {
 		return locations;
 	}
 
+	/**
+	 * Gets if the passed block is attached to the other passed block.
+	 * 
+	 * @param isThisAttached Block to check if attached to toThisBlock.
+	 * @param toThisBlock    Block to check if isThisAttached is attached to.
+	 * @return True if attached, otherwise false.
+	 */
 	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
 		switch (isThisAttached.getType()) {
 		case LADDER:
@@ -155,6 +185,11 @@ public class SignMonitor extends BukkitListener {
 		}
 	}
 
+	/**
+	 * Gets if the monitor is currently listening for sign update packets.
+	 * 
+	 * @return True if listening, otherwise false.
+	 */
 	public boolean isListening() {
 		return this.listening;
 	}
@@ -275,20 +310,40 @@ public class SignMonitor extends BukkitListener {
 		}
 	}
 
+	/**
+	 * Remove listener from monitor.
+	 * 
+	 * @param listener Listener to no longer send packet updates to.
+	 */
 	public void removeListener(SignListener listener) {
-		if (listener != null) this.listeners.remove(listener);
+		if (listener != null)
+			this.listeners.remove(listener);
 	}
 
+	/**
+	 * Send an update to any signs we are listening to in the vicinity of all players.
+	 */
 	@SuppressWarnings("deprecation")
 	public void sendSignUpdate() {
 		for (Player player : this.getPlugin().getServer().getOnlinePlayers())
 			this.sendSignUpdate(player, "");
 	}
 
+	/**
+	 * Send an update to any signs we are listening to in the vicinity of the given player.
+	 * 
+	 * @param player Player to send updates to.
+	 */
 	public void sendSignUpdate(Player player) {
 		this.sendSignUpdate(player, "");
 	}
 
+	/**
+	 * Send an update to signs with the given key in the vicinity of the given player.
+	 * 
+	 * @param player Player to send updates to.
+	 * @param key    Only signs with this key.
+	 */
 	public void sendSignUpdate(Player player, String key) {
 		if (player == null || !player.isOnline()) return;
 
@@ -324,6 +379,9 @@ public class SignMonitor extends BukkitListener {
 		}
 	}
 
+	/**
+	 * Start listening for sign update packets.
+	 */
 	public void start() {
 		if (!this.isListening()) {
 			this.listening = true;
@@ -370,6 +428,9 @@ public class SignMonitor extends BukkitListener {
 		}
 	}
 
+	/**
+	 * Stop listening for sign update packets.
+	 */
 	public void stop() {
 		if (this.isListening()) {
 			this.listening = false;
