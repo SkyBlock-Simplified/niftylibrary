@@ -30,6 +30,7 @@ public class MySQL extends SQLNotifications {
 
 	/**
 	 * Checks if the MySQL JDBC driver is available.
+	 * 
 	 * @return True if available, otherwise false.
 	 */
 	public boolean isDriverAvailable() {
