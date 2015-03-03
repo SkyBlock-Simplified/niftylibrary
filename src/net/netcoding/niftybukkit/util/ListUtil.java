@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.util;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Array and List Checking/Converting
@@ -10,7 +11,6 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
-	 * @param <T>
 	 * 
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
@@ -21,12 +21,21 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
-	 * @param <T>
 	 * 
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
 	public static <T> boolean isEmpty(List<T> value) {
+		return value == null || value.size() == 0;
+	}
+
+	/**
+	 * Gets if the {@code value} is empty or null.
+	 * 
+	 * @param value to check
+	 * @return true if empty or null, otherwise false
+	 */
+	public static <T> boolean isEmpty(Set<T> value) {
 		return value == null || value.size() == 0;
 	}
 
@@ -47,6 +56,16 @@ public class ListUtil {
 	 * @return true if not empty or null, otherwise false
 	 */
 	public static <T> boolean notEmpty(List<T> value) {
+		return !isEmpty(value);
+	}
+
+	/**
+	 * Gets if the {@code value} is not empty.
+	 * 
+	 * @param value to check
+	 * @return true if not empty or null, otherwise false
+	 */
+	public static <T> boolean notEmpty(Set<T> value) {
 		return !isEmpty(value);
 	}
 
