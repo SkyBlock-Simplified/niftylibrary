@@ -21,10 +21,17 @@ public class ConcurrentList<T> implements List<T> {
 
 	private final AtomicReference<List<T>> ref;
 
+	/**
+	 * Create a new concurrent list.
+	 */
 	public ConcurrentList() {
 		this.ref = new AtomicReference<List<T>>(new ArrayList<T>());
 	}
 
+	/**
+	 * Create a new concurrent list and fill it with the given collection.
+	 * @param collection
+	 */
 	public ConcurrentList(Collection<? extends T> collection) {
 		this.ref = new AtomicReference<List<T>>(new ArrayList<T>(collection));
 	}

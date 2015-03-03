@@ -20,10 +20,16 @@ public class ConcurrentSet<T> implements Set<T> {
 
 	private final AtomicReference<Set<T>> ref;
 
+	/**
+	 * Create a new concurrent set.
+	 */
 	public ConcurrentSet() {
 		this.ref = new AtomicReference<Set<T>>(new HashSet<T>());
 	}
 
+	/**
+	 * Create a new concurrent set and fill it with the given collection.
+	 */
 	public ConcurrentSet(Collection<? extends T> collection) {
 		this.ref = new AtomicReference<Set<T>>(new HashSet<T>(collection));
 	}
