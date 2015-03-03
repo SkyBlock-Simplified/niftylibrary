@@ -4,9 +4,18 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.OfflinePlayer;
 
+/**
+ * Custom exception for use by the MojangRepository
+ */
 @SuppressWarnings("serial")
 public class ProfileNotFoundException extends RuntimeException {
 
+	/**
+	 * Create a new exception instance.
+	 * 
+	 * @param type Mojang request type.
+	 * @param obj  Object to be used in the exception message.
+	 */
 	public ProfileNotFoundException(TYPE type, Object obj) {
 		super(getCustomMessage(type, obj));
 	}

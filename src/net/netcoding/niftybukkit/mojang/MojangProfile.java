@@ -9,6 +9,9 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+/**
+ * Container for a players uuid and name.
+ */
 public class MojangProfile {
 
 	private String id;
@@ -19,6 +22,12 @@ public class MojangProfile {
 
 	private MojangProfile() { }
 
+	/**
+	 * Checks if the player is associated to this profile.
+	 * 
+	 * @param oplayer Offline player to check.
+	 * @return True if associated, otherwise false.
+	 */
 	public boolean belongsTo(OfflinePlayer oplayer) {
 		if (oplayer == null) return false;
 		if (!oplayer.getUniqueId().equals(this.getUniqueId())) return false;
@@ -38,6 +47,11 @@ public class MojangProfile {
 		return true;
 	}
 
+	/**
+	 * Gets the players name associated to this UUID.
+	 * 
+	 * @return Current player name.
+	 */
 	// TODO: Send update across BungeeCord to update players name
 	// if change is detected.
 	public String getName() {
@@ -49,10 +63,20 @@ public class MojangProfile {
 			return this.name = player.getName();
 	}
 
+	/**
+	 * Gets the players offline player object associated to this UUID.
+	 * 
+	 * @return Offline player object.
+	 */
 	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
 	}
 
+	/**
+	 * Gets the players UUID.
+	 * 
+	 * @return Player UUID.
+	 */
 	public UUID getUniqueId() {
 		if (this.uuid == null)
 			this.uuid = UUID.fromString(UUID_FIX.matcher(this.id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
@@ -60,6 +84,13 @@ public class MojangProfile {
 		return this.uuid;
 	}
 
+	/**
+	 * Checks if this players profile is expired.
+	 * <p>
+	 * This is only used for cache and can currently be ignored.
+	 * 
+	 * @return True if expired, otherwise false.
+	 */
 	public boolean hasExpired() {
 		return System.currentTimeMillis() / 1000 - this.updated >= 600;
 	}

@@ -25,6 +25,9 @@ import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 
+/**
+ * A collection of methods to locate player UUID and Name throughout Bungee or offline.
+ */
 public class MojangRepository {
 
 	// API: http://wiki.vg/Mojang_API
@@ -51,45 +54,66 @@ public class MojangRepository {
 		return searchByPlayer(player);
 	}
 
-	public MojangProfile searchByPlayer(OfflinePlayer player) throws ProfileNotFoundException {
+	/**
+	 * Locates the profile for this server associated with the given offline player.
+	 * 
+	 * @param oplayer Offline player to search with.
+	 * @return Profile associated with the given player.
+	 * @throws ProfileNotFoundException If unable to locate the players profile.
+	 */
+	public MojangProfile searchByPlayer(OfflinePlayer oplayer) throws ProfileNotFoundException {
 		try {
-			return searchByPlayer(Arrays.asList(player))[0];
+			return searchByPlayer(Arrays.asList(oplayer))[0];
 		} catch (ProfileNotFoundException ex) {
-			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYER, player);
+			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYER, oplayer);
 		}
 	}
 
-	public MojangProfile[] searchByPlayer(OfflinePlayer... players) throws ProfileNotFoundException {
-		return searchByPlayer(Arrays.asList(players));
+	/**
+	 * Locates the profiles for this server associated with the given offline players.
+	 * 
+	 * @param oplayers Offline players to search with.
+	 * @return Profiles associated with the list of players.
+	 * @throws ProfileNotFoundException If unable to locate any players profile.
+	 */
+	public MojangProfile[] searchByPlayer(OfflinePlayer... oplayers) throws ProfileNotFoundException {
+		return searchByPlayer(Arrays.asList(oplayers));
 	}
 
-	public MojangProfile[] searchByPlayer(List<OfflinePlayer> players) throws ProfileNotFoundException {
-		if (ListUtil.isEmpty(players)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, players);
+	/**
+	 * Locates the profiles for this server associated with the given offline players.
+	 * 
+	 * @param oplayers Offline players to search with.
+	 * @return Profiles associated with the list of players.
+	 * @throws ProfileNotFoundException If unable to locate any players profile.
+	 */
+	public MojangProfile[] searchByPlayer(List<OfflinePlayer> oplayers) throws ProfileNotFoundException {
+		if (ListUtil.isEmpty(oplayers)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, oplayers);
 		List<MojangProfile> profiles = new ArrayList<>();
-		ConcurrentList<OfflinePlayer> oplayers = new ConcurrentList<>(players);
+		ConcurrentList<OfflinePlayer> foplayers = new ConcurrentList<>(oplayers);
 
 		if (NiftyBukkit.getBungeeHelper().isOnline()) {
-			for (OfflinePlayer oplayer : oplayers) {
+			for (OfflinePlayer oplayer : foplayers) {
 				for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getServer().getPlayerList()) {
 					if (profile.belongsTo(oplayer)) {
 						profiles.add(profile);
-						oplayers.remove(oplayer);
+						foplayers.remove(oplayer);
 						break;
 					}
 				}
 			}
 		} else {
-			for (OfflinePlayer oplayer : oplayers) {
+			for (OfflinePlayer oplayer : foplayers) {
 				try {
 					MojangProfile profile = this.searchByExactUUID(oplayer.getUniqueId());
 					profiles.add(profile);
-					oplayers.remove(oplayer);
+					foplayers.remove(oplayer);
 				} catch (ProfileNotFoundException pnfe) { }
 			}
 		}
 
 		if (profiles.size() == 0)
-			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYERS, ListUtil.toArray(players, OfflinePlayer.class));
+			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYERS, ListUtil.toArray(oplayers, OfflinePlayer.class));
 		else
 			return ListUtil.toArray(profiles, MojangProfile.class);
 	}
@@ -99,6 +123,13 @@ public class MojangRepository {
 		return searchByUsername(username);
 	}
 
+	/**
+	 * Locates the profile associated with the given username.
+	 * 
+	 * @param username Username to search with.
+	 * @return Profile associated with the given username.
+	 * @throws ProfileNotFoundException If unable to locate users profile.
+	 */
 	public MojangProfile searchByUsername(String username) throws ProfileNotFoundException {
 		try {
 			return searchByUsername(Arrays.asList(username))[0];
@@ -107,10 +138,24 @@ public class MojangRepository {
 		}
 	}
 
+	/**
+	 * Locates the profiles associated with the given usernames.
+	 * 
+	 * @param usernames Usernames to search with.
+	 * @return Profiles associated with the given usernames.
+	 * @throws ProfileNotFoundException If unable to locate any users profile.
+	 */
 	public MojangProfile[] searchByUsername(String... usernames) throws ProfileNotFoundException {
 		return searchByUsername(Arrays.asList(usernames));
 	}
 
+	/**
+	 * Locates the profiles associated with the given usernames.
+	 * 
+	 * @param usernames Usernames to search with.
+	 * @return Profiles associated with the given usernames.
+	 * @throws ProfileNotFoundException If unable to locate any users profile.
+	 */
 	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
 		if (ListUtil.isEmpty(usernames)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, usernames);
 		List<MojangProfile> profiles = new ArrayList<>();
@@ -237,6 +282,13 @@ public class MojangRepository {
 			return ListUtil.toArray(profiles, MojangProfile.class);
 	}
 
+	/**
+	 * Locates the profile associated with the given UUID.
+	 * 
+	 * @param uuid UUID to search with.
+	 * @return Profile associated with the given UUID.
+	 * @throws ProfileNotFoundException If unable to locate users profile.
+	 */
 	public MojangProfile searchByExactUUID(final UUID uuid) throws ProfileNotFoundException {
 		if (uuid == null) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, uuid);
 		MojangProfile found = null;
