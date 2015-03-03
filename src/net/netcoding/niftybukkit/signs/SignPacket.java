@@ -1,9 +1,18 @@
 package net.netcoding.niftybukkit.signs;
 
+import java.util.List;
+import java.util.Map;
+
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.util.Vector;
+
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.reflect.StructureModifier;
+import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 class SignPacket {
 
@@ -13,51 +22,48 @@ class SignPacket {
 		this.updateSignPacket = updateSignPacket;
 	}
 
-	private Integer getCoord(int index) {
-		return this.updateSignPacket.getIntegers().read(index);
+	private StructureModifier<BlockPosition> getBlockModifier() {
+		return this.updateSignPacket.getBlockPositionModifier();
 	}
 
-	public int getX() {
-		return this.getCoord(0);
+	public Vector getPosition() {
+		BlockPosition position = this.getBlockModifier().read(0);
+		return new Vector(position.getX(), position.getY(), position.getZ());
 	}
 
-	public short getY() {
-		return this.getCoord(1).shortValue();
+	void setPosition(Vector position) {
+		this.getBlockModifier().write(0, new BlockPosition(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
 	}
 
-	public int getZ() {
-		return this.getCoord(2);
-	}
-
-	private void setCoord(int index, int value) {
-		this.updateSignPacket.getIntegers().write(index, value);
-	}
-
-	void setX(int value) {
-		this.setCoord(0, value);
-	}
-
-	void setY(short value) {
-		this.setCoord(1, value);
-	}
-
-	void setZ(int value) {
-		this.setCoord(2, value);
+	private String getLine(int index) {
+		String json = this.updateSignPacket.getChatComponentArrays().read(0)[index].getJson();
+		if (StringUtil.isEmpty(json) || json.equals("\"\"")) return "";
+		Map<?, ?> jsonMap = new Gson().fromJson(json, Map.class);
+		return (String)((List<?>)jsonMap.get("extra")).get(0);
 	}
 
 	public String[] getLines() {
-		return updateSignPacket.getStringArrays().read(0);
+		String[] lines = new String[4];
+
+		for (int i = 0; i < lines.length; i++)
+			lines[i] = this.getLine(i);
+
+		return lines;
 	}
 
 	void setLines(String[] lines) {
-		if (ListUtil.isEmpty(lines)) throw new IllegalArgumentException("The lines array cannot be null!.");
-		if (lines.length < 1 || lines.length > 4) throw new IllegalArgumentException("You must provide 1-4 lines.");
-		String[] push = new String[4];
-		for (int i = 0; i < 4; i++) push[i] = (StringUtil.notEmpty(lines[i]) ? lines[i] : "");
-		this.updateSignPacket.getStringArrays().write(0, lines);
+		if (ListUtil.isEmpty(lines)) throw new IllegalArgumentException("The passed lines cannot be null!");
+		if (lines.length < 1 || lines.length > 4) throw new IllegalArgumentException("You must provide between 1 and 4 lines!");
+		WrappedChatComponent[] chat = this.updateSignPacket.getChatComponentArrays().read(0);
+		if (chat.length == 0) chat = new WrappedChatComponent[4];
+
+		for (int i = 0; i < 4; i++)
+			chat[i] = WrappedChatComponent.fromText(StringUtil.notEmpty(lines[i]) ? lines[i] : "");
+
+		this.updateSignPacket.getChatComponentArrays().write(0, chat);
 	}
 
-	public PacketContainer getPacket() {
+	PacketContainer getPacket() {
 		return updateSignPacket;
 	}
 

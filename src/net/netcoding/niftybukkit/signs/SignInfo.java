@@ -95,33 +95,6 @@ public class SignInfo {
 	}
 
 	/**
-	 * Gets the X value for the location of the sign.
-	 * 
-	 * @return X coordinate of the sign.
-	 */
-	public int getX() {
-		return this.getLocation().getBlockX();
-	}
-
-	/**
-	 * Gets the Y value for the location of the sign.
-	 * 
-	 * @return Y coordinate of the sign.
-	 */
-	public int getY() {
-		return this.getLocation().getBlockY();
-	}
-
-	/**
-	 * Gets the Z value for the location of the sign.
-	 * 
-	 * @return Z coordinate of the sign.
-	 */
-	public int getZ() {
-		return this.getLocation().getBlockZ();
-	}
-
-	/**
 	 * Gets if the sign has been modified.
 	 * 
 	 * @return True if modified, otherwise false.

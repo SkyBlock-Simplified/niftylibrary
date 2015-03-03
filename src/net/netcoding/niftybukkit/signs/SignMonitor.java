@@ -29,12 +29,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.material.Button;
-import org.bukkit.material.Ladder;
-import org.bukkit.material.Lever;
-import org.bukkit.material.Torch;
-import org.bukkit.material.TrapDoor;
+import org.bukkit.material.Attachable;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -52,22 +49,14 @@ public class SignMonitor extends BukkitListener {
 	private transient PacketAdapter adapter;
 	private boolean listening = false;
 
-	private static final transient List<Material> ATTACHABLE_ITEMS = new ArrayList<>(
-		Arrays.asList(
-			Material.LADDER, Material.LEVER, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
-			Material.STONE_BUTTON, Material.TORCH, Material.TRAP_DOOR, Material.WALL_SIGN,
-			Material.WOOD_BUTTON
-		)
-	);
-
 	private static final transient List<Material> GRAVITY_ITEMS = new ArrayList<>(
 		Arrays.asList(
 			Material.ANVIL, Material.CARPET, Material.DIODE, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
-			Material.DRAGON_EGG, Material.GRAVEL, Material.GOLD_PLATE, Material.IRON_PLATE, Material.LEVER,
+			Material.DRAGON_EGG, Material.GRAVEL, Material.GOLD_PLATE, Material.IRON_DOOR, Material.IRON_PLATE, Material.LEVER,
 			Material.LADDER, Material.REDSTONE, Material.REDSTONE_COMPARATOR, Material.REDSTONE_COMPARATOR_OFF,
 			Material.REDSTONE_COMPARATOR_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
-			Material.REDSTONE_WIRE, Material.SAND, Material.SIGN_POST, Material.STRING, Material.TORCH,
-			Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.WOOD_PLATE
+			Material.REDSTONE_WIRE, Material.SAND, Material.SIGN_POST, Material.STONE_BUTTON, Material.STRING, Material.TORCH,
+			Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.WOOD_BUTTON, Material.WOOD_DOOR, Material.WOOD_PLATE
 		)
 	);
 
@@ -112,7 +101,7 @@ public class SignMonitor extends BukkitListener {
 
 		for (int i = 0; i < keys.length; i++) {
 			if (!newKeys.contains(keys[i]))
-				newKeys.add(String.format("[%s]", keys[i]));
+				newKeys.add(StringUtil.format("[{0}]", keys[i]));
 		}
 
 		this.listeners.put(listener, newKeys);
@@ -132,7 +121,7 @@ public class SignMonitor extends BukkitListener {
 			Block sideBlock = block.getRelative(direction);
 			Material sideMaterial = sideBlock.getType();
 
-			if (ATTACHABLE_ITEMS.contains(sideMaterial)) {
+			if (isAttachable(sideBlock)) {
 				if (isAttachedTo(sideBlock, block)) {
 					if (SIGN_ITEMS.contains(sideMaterial)) locations.add(sideBlock.getLocation());
 					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
@@ -151,6 +140,16 @@ public class SignMonitor extends BukkitListener {
 	}
 
 	/**
+	 * Gets if the passed block is an attachable block.
+	 * 
+	 * @param block Block to check if it can be attached to other blocks.
+	 * @return True if attachable, otherwise false.
+	 */
+	public static boolean isAttachable(Block block) {
+		return block.getState().getData() instanceof Attachable;
+	}
+
+	/**
 	 * Gets if the passed block is attached to the other passed block.
 	 * 
 	 * @param isThisAttached Block to check if attached to toThisBlock.
@@ -158,31 +157,8 @@ public class SignMonitor extends BukkitListener {
 	 * @return True if attached, otherwise false.
 	 */
 	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
-		switch (isThisAttached.getType()) {
-		case LADDER:
-			Ladder ladder = (Ladder)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(ladder.getAttachedFace()).equals(toThisBlock);
-		case LEVER:
-			Lever lever = (Lever)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(lever.getAttachedFace()).equals(toThisBlock);
-		case REDSTONE_TORCH_OFF:
-		case REDSTONE_TORCH_ON:
-		case TORCH:
-			Torch torch = (Torch)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(torch.getAttachedFace()).equals(toThisBlock);
-		case TRAP_DOOR:
-			TrapDoor trap = (TrapDoor)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(trap.getAttachedFace()).equals(toThisBlock);
-		case WALL_SIGN:
-			org.bukkit.material.Sign sign = (org.bukkit.material.Sign)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(sign.getAttachedFace()).equals(toThisBlock);
-		case STONE_BUTTON:
-		case WOOD_BUTTON:
-			Button button = (Button)isThisAttached.getState().getData();
-			return isThisAttached.getRelative(button.getAttachedFace()).equals(toThisBlock);
-		default:
-			return false;
-		}
+		Attachable attachable = (Attachable)isThisAttached.getState().getData();
+		return isThisAttached.getRelative(attachable.getAttachedFace()).equals(toThisBlock);
 	}
 
 	/**
@@ -358,13 +334,13 @@ public class SignMonitor extends BukkitListener {
 
 						for (String line : signInfo.getLines()) {
 							if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
-								PacketContainer result = NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN);
-								Integer[] coords = new Integer[] { sign.getX(), sign.getY(), sign.getZ() };
+								SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
+								Vector position = new Vector(sign.getX(), sign.getY(), sign.getZ());
+								outgoing.setPosition(position);
 
 								try {
-									for (int i = 0; i < 3; i++) result.getSpecificModifier(int.class).write(i, coords[i]);
-									result.getStringArrays().write(0, signInfo.getLines());
-									NiftyBukkit.getProtocolManager().sendServerPacket(player, result);
+									outgoing.setLines(signInfo.getLines());
+									NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
 								} catch (Exception ex) {
 									ex.printStackTrace();
 								}
@@ -392,7 +368,7 @@ public class SignMonitor extends BukkitListener {
 					PacketContainer signUpdatePacket = event.getPacket();
 					SignPacket incoming = new SignPacket(signUpdatePacket);
 					Player player = event.getPlayer();
-					Location location = new Location(player.getWorld(), incoming.getX(), incoming.getY(), incoming.getZ());
+					Location location = new Location(player.getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
 					Block block = location.getBlock();
 
 					if (SIGN_ITEMS.contains(block.getType())) {

@@ -120,33 +120,6 @@ abstract class SignEvent implements Cancellable {
 	}
 
 	/**
-	 * Gets the X value for the location of the sign.
-	 * 
-	 * @return X coordinate of the sign.
-	 */
-	public int getX() {
-		return this.signInfo.getX();
-	}
-
-	/**
-	 * Gets the Y value for the location of the sign.
-	 * 
-	 * @return Y coordinate of the sign.
-	 */
-	public int getY() {
-		return this.signInfo.getY();
-	}
-
-	/**
-	 * Gets the Z value for the location of the sign.
-	 * 
-	 * @return Z coordinate of the sign.
-	 */
-	public int getZ() {
-		return this.signInfo.getZ();
-	}
-
-	/**
 	 * Gets if the event is cancelled.
 	 * 
 	 * @return True if cancelled, otherwise false.
