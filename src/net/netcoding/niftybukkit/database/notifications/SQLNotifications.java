@@ -93,7 +93,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		this.createPurgeEvent();
 
 		if (this.taskId == -1) this.taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay).getTaskId();
-		//if (this.task == null) this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay);
 	}
 
 	private void createLogTable() throws SQLException {
