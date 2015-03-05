@@ -384,12 +384,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 								int count = input.readInt();
 								server.playerList.clear();
 
-								for (int i = 0; i < count; i += 2) {
+								for (int i = 0; i < count; i++) {
 									JsonObject json = new JsonObject();
-									json.addProperty("id", input.readUTF());
-									json.addProperty("name", input.readUTF());
-									json.addProperty("ip", input.readUTF());
-									json.addProperty("port", input.readInt());
+									String[] parts = input.readUTF().split(",");
+									json.addProperty("id", parts[0]);
+									json.addProperty("name", parts[1]);
+									json.addProperty("ip", parts[2]);
+									json.addProperty("port", Integer.valueOf(parts[3]));
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
 							}
@@ -411,14 +412,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							}
 						}
 					} else if (subChannel.startsWith("Player")) {
-						UUID uniqueId = UUID.fromString(input.readUTF());
+						String[] parts = input.readUTF().split(",");
+						UUID uniqueId = UUID.fromString(parts[0]);
 
 						if (subChannel.endsWith("Join")) {
 							JsonObject json = new JsonObject();
-							json.addProperty("id", input.readUTF());
-							json.addProperty("name", input.readUTF());
-							json.addProperty("ip", input.readUTF());
-							json.addProperty("port", input.readInt());
+							json.addProperty("id", parts[0]);
+							json.addProperty("name", parts[1]);
+							json.addProperty("ip", parts[2]);
+							json.addProperty("port", Integer.valueOf(parts[3]));
 							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
