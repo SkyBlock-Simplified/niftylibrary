@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
-
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
@@ -20,6 +17,8 @@ import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -57,12 +56,12 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this(plugin, BUNGEE_CHANNEL, null);
 	}
 
-	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener) {
-		this(plugin, BUNGEE_CHANNEL, listener, false);
-	}
-
 	public BungeeHelper(JavaPlugin plugin, String channel, boolean register) {
 		this(plugin, channel, null, register);
+	}
+
+	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener) {
+		this(plugin, BUNGEE_CHANNEL, listener, false);
 	}
 
 	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener, boolean register) {
@@ -82,19 +81,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (register) this.register();
 	}
 
-	@Deprecated
-	public void connect(Player player, String targetServer) {
-		this.write(player, BUNGEE_CHANNEL, "Connect", targetServer);
-	}
-
-	@Deprecated
-	public void connect(String targetPlayer, String targetServer) {
-		this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "ConnectOther", targetPlayer, targetServer);
-	}
-
 	public void connect(MojangProfile profile, String targetServer) {
-		if (profile.getOfflinePlayer().isOnline())
-			this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "ConnectOther", profile.getName(), targetServer);
+		this.write(this.getFirstProfile(), BUNGEE_CHANNEL, "ConnectOther", profile.getName(), targetServer);
 	}
 
 	public void forward(String subChannel, Object... data) {
@@ -102,30 +90,32 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void forward(String targetServer, String subChannel, Object... data) {
-		this.forward(this.getFirstPlayer(), targetServer, subChannel, data);
+		this.forward(this.getFirstProfile(), targetServer, subChannel, data);
 	}
 
-	public void forward(Player player, String subChannel, Object... data) {
-		this.forward(player, "ALL", subChannel, data);
+	public void forward(MojangProfile profile, String subChannel, Object... data) {
+		this.forward(profile, "ALL", subChannel, data);
 	}
 
-	public void forward(Player player, String targetServer, String subChannel, Object... data) {
+	public void forward(MojangProfile profile, String targetServer, String subChannel, Object... data) {
 		if (!this.isOnline()) throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
-		if (player == null) throw new IllegalArgumentException("Player cannot be null!");
-		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException("You cannot forward to NiftyBungee channels!");
-		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?$")) throw new IllegalArgumentException(StringUtil.format("The GetServer, GetServers, PlayerCount and PlayerList {0} channels are handled automatically; manual forwarding disabled!", BUNGEE_CHANNEL));
+		if (StringUtil.isEmpty(targetServer)) throw new IllegalArgumentException("Target server cannot be null!");
+		if (StringUtil.isEmpty(subChannel)) throw new IllegalArgumentException("Sub channel cannot be null!");
+		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException(StringUtil.format("You cannot forward to {0} channels!", NIFTY_CHANNEL));
+		if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?|(?:Server)?IP$")) throw new IllegalArgumentException(StringUtil.format("The {{0}} {1} channels are handled automatically; manual forwarding disabled!", subChannel, BUNGEE_CHANNEL));
 		byte[] forward = ByteUtil.toByteArray(data);
 		byte[] output = ByteUtil.toByteArray("Forward", targetServer, subChannel, (short)forward.length, forward);
-		player.sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
+
+		if (profile.getOfflinePlayer().isOnline())
+			profile.getOfflinePlayer().getPlayer().sendPluginMessage(this.getPlugin(), BUNGEE_CHANNEL, output);
 	}
 
 	public String getChannel() {
 		return this.channel;
 	}
 
-	@SuppressWarnings("deprecation")
-	private Player getFirstPlayer() {
-		return this.getPlugin().getServer().getOnlinePlayers().length > 0 ? this.getPlugin().getServer().getOnlinePlayers()[0] : null;
+	private MojangProfile getFirstProfile() {
+		return this.getServer().getPlayerCount() > 0 ? this.getServer().getPlayerList().iterator().next() : null;
 	}
 
 	public int getMaxPlayers() {
@@ -181,18 +171,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	public BungeeServer getPlayerServer(MojangProfile profile) {
-		if (this.isOnline()) {
-			for (BungeeServer server : this.getServers()) {
-				if (server.getPlayerList().contains(profile))
-					return server;
-			}
-
-			throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile));
-		} else
-			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
-	}
-
 	public Set<MojangProfile> getPlayerList() {
 		if (this.isOnline())
 			return this.getPlayerList(this.getServerName());
@@ -214,6 +192,18 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				else
 					throw new RuntimeException(StringUtil.format("The server name {0} does not exist!", serverName));
 			}
+		} else
+			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
+	}
+
+	public BungeeServer getPlayerServer(MojangProfile profile) {
+		if (this.isOnline()) {
+			for (BungeeServer server : this.getServers()) {
+				if (server.getPlayerList().contains(profile))
+					return server;
+			}
+
+			throw new RuntimeException(StringUtil.format("Unable to locate the server of {0}!", profile));
 		} else
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
@@ -266,14 +256,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	public boolean isRegistered() {
-		return this.isRegistered(this.getChannel());
-	}
-
-	private boolean isRegistered(String channel) {
-		return this.getPlugin().getServer().getMessenger().isIncomingChannelRegistered(this.getPlugin(), channel) && this.getPlugin().getServer().getMessenger().isOutgoingChannelRegistered(this.getPlugin(), channel);
-	}
-
 	public boolean isOnline() {
 		return BUNGEE_ONLINE;
 	}
@@ -287,61 +269,20 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return false;
 	}
 
-	public void message(MojangProfile toProfile, String message) {
-		this.message(this.getFirstPlayer(), toProfile, message);
+	public boolean isRegistered() {
+		return this.isRegistered(this.getChannel());
 	}
 
-	@Deprecated
-	public void message(Player fromPlayer, MojangProfile profile, String message) {
-		this.write(fromPlayer, BUNGEE_CHANNEL, "Message", profile.getName(), message);
+	private boolean isRegistered(String channel) {
+		return this.getPlugin().getServer().getMessenger().isIncomingChannelRegistered(this.getPlugin(), channel) && this.getPlugin().getServer().getMessenger().isOutgoingChannelRegistered(this.getPlugin(), channel);
+	}
+
+	public void message(MojangProfile toProfile, String message) {
+		this.message(this.getFirstProfile(), toProfile, message);
 	}
 
 	public void message(MojangProfile fromProfile, MojangProfile profile, String message) {
-		if (fromProfile.getOfflinePlayer().isOnline())
-			this.write(fromProfile.getOfflinePlayer().getPlayer(), BUNGEE_CHANNEL, "Message", profile.getName(), message);
-	}
-
-	public void register() {
-		if (this.isRegistered()) return;
-		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
-		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), this.getChannel());
-
-		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
-			if (!this.isRegistered(BUNGEE_CHANNEL)) {
-				this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-				this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
-				LOADED_LISTENERS.put(this.getPlugin().getClass(), 1);
-			} else
-				LOADED_LISTENERS.put(this.getPlugin().getClass(), LOADED_LISTENERS.get(this.getPlugin().getClass()) + 1);
-		}
-	}
-
-	public void unregister() {
-		if (!this.isRegistered()) return;
-		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
-		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), this.getChannel());
-
-		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
-			int current = LOADED_LISTENERS.get(this.getPlugin().getClass());
-			LOADED_LISTENERS.put(this.getPlugin().getClass(), current - 1);
-
-			if (current == 0) {
-				this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-				this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
-			}
-		}
-	}
-
-	public void write(Player player, String subChannel, Object... data) {
-		this.write(player, this.getChannel(), subChannel, data);
-	}
-
-	private void write(Player player, String channel, String subChannel, Object... data) {
-		if (!this.isOnline()) return;
-		if (channel.equals("Forward")) return;
-		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
-		dataList.add(0, subChannel);
-		player.sendPluginMessage(this.getPlugin(), channel, ByteUtil.toByteArray(dataList));
+		this.write(fromProfile, BUNGEE_CHANNEL, "Message", profile.getName(), message);
 	}
 
 	@Override
@@ -440,7 +381,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			}
 		} else {
 			if (channel.equals(BUNGEE_CHANNEL)) {
-				if (subChannel.matches("^Player(?:Count|List)|GetServers?|UUID(?:Other)?$"))
+				if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?|(?:Server)?IP$"))
 					return;
 			}
 
@@ -454,6 +395,52 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				}
 			}
 		}
+	}
+
+	public void register() {
+		if (this.isRegistered()) return;
+		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
+		this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), this.getChannel());
+
+		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
+			if (!this.isRegistered(BUNGEE_CHANNEL)) {
+				this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+				this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+				LOADED_LISTENERS.put(this.getPlugin().getClass(), 1);
+			} else
+				LOADED_LISTENERS.put(this.getPlugin().getClass(), LOADED_LISTENERS.get(this.getPlugin().getClass()) + 1);
+		}
+	}
+
+	public void unregister() {
+		if (!this.isRegistered()) return;
+		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
+		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), this.getChannel());
+
+		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
+			int current = LOADED_LISTENERS.get(this.getPlugin().getClass());
+			LOADED_LISTENERS.put(this.getPlugin().getClass(), current - 1);
+
+			if (current == 0) {
+				this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+				this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+			}
+		}
+	}
+
+	public void write(MojangProfile profile, String subChannel, Object... data) {
+		this.write(profile, this.getChannel(), subChannel, data);
+	}
+
+	private void write(MojangProfile profile, String channel, String subChannel, Object... data) {
+		if (!this.isOnline()) return;
+		if (StringUtil.isEmpty(subChannel)) throw new IllegalArgumentException("Sub channel cannot be null!");
+		if (channel.equals("Forward")) return;
+		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
+		dataList.add(0, subChannel);
+
+		if (profile.getOfflinePlayer().isOnline())
+			profile.getOfflinePlayer().getPlayer().sendPluginMessage(this.getPlugin(), channel, ByteUtil.toByteArray(dataList));
 	}
 
 }
