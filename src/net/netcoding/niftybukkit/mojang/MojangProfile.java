@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.mojang;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -17,6 +18,9 @@ public class MojangProfile {
 	private String id;
 	private UUID uuid;
 	private String name;
+	private String ip;
+	private int port;
+	private InetSocketAddress ipAddress;
 	private int updated = (int)(System.currentTimeMillis() / 1000);
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
@@ -45,6 +49,20 @@ public class MojangProfile {
 		if (!this.getName().equals(profile.getName())) return false;
 		if (this.updated > profile.updated) return false; 
 		return true;
+	}
+
+	/**
+	 * Gets the ip address of the player if they are online.
+	 * 
+	 * @return Socket address of the player if online, otherwise null.
+	 */
+	public InetSocketAddress getIpAddress() {
+		if (this.getOfflinePlayer().isOnline()) {
+			if (StringUtil.notEmpty(this.ip) && this.ipAddress == null)
+				this.ipAddress = InetSocketAddress.createUnresolved(this.ip, this.port);
+		}
+
+		return this.ipAddress;
 	}
 
 	/**
