@@ -56,7 +56,7 @@ public class MojangProfile {
 	 * 
 	 * @return Socket address of the player if online, otherwise null.
 	 */
-	public InetSocketAddress getIpAddress() {
+	public InetSocketAddress getAddress() {
 		if (this.getOfflinePlayer().isOnline()) {
 			if (StringUtil.notEmpty(this.ip) && this.ipAddress == null)
 				this.ipAddress = InetSocketAddress.createUnresolved(this.ip, this.port);
