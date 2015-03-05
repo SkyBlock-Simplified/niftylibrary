@@ -16,9 +16,11 @@ public class Location extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		java.util.Map<String, Object> locationMap = (java.util.Map<String, Object>)((ConfigSection)obj).getRawMap();
-		return new org.bukkit.Location(Bukkit.getWorld((String)locationMap.get("world")), (Double)locationMap.get("x"), (Double)locationMap.get("y"), (Double)locationMap.get("z"));
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+		java.util.Map<String, Object> map = (section instanceof Map) ? (java.util.Map<String, Object>)section : (java.util.Map<String, Object>)((ConfigSection)section).getRawMap();
+		float yaw = (map.get("yaw") instanceof Double) ? ((Double)map.get("yaw")).floatValue() : (Float)map.get("yaw");
+		float pitch = (map.get("pitch") instanceof Double) ? ((Double)map.get("pitch")).floatValue() : (Float)map.get("pitch");
+		return new org.bukkit.Location(Bukkit.getWorld((String)map.get("world")), (Double)map.get("x"), (Double)map.get("y"), (Double)map.get("z"), yaw, pitch);
 	}
 
 	@Override
@@ -29,6 +31,8 @@ public class Location extends Converter {
 		saveMap.put("x", location.getX());
 		saveMap.put("y", location.getY());
 		saveMap.put("z", location.getZ());
+		saveMap.put("yaw", location.getYaw());
+		saveMap.put("pitch", location.getPitch());
 
 		return saveMap;
 	}
