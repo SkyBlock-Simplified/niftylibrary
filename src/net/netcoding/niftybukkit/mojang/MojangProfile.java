@@ -103,6 +103,15 @@ public class MojangProfile {
 	}
 
 	/**
+	 * Checks if this profile has an assigned ip address.
+	 * 
+	 * @return True if address exists, otherwise false.
+	 */
+	public boolean hasAddress() {
+		return this.getAddress() != null;
+	}
+
+	/**
 	 * Checks if this players profile is expired.
 	 * <p>
 	 * This is only used for cache and can currently be ignored.
