@@ -335,14 +335,13 @@ public class SignMonitor extends BukkitListener {
 						for (String line : signInfo.getLines()) {
 							if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
 								SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
-								Vector position = new Vector(sign.getX(), sign.getY(), sign.getZ());
-								outgoing.setPosition(position);
+								outgoing.setPosition(new Vector(sign.getX(), sign.getY(), sign.getZ()));
 
 								try {
 									outgoing.setLines(signInfo.getLines());
 									NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
 								} catch (Exception ex) {
-									ex.printStackTrace();
+									this.getLog().console("Unable to send sign update packet!", ex);
 								}
 
 								break;
@@ -361,7 +360,6 @@ public class SignMonitor extends BukkitListener {
 	public void start() {
 		if (!this.isListening()) {
 			this.listening = true;
-
 			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
 				@Override
 				public void onPacketSending(PacketEvent event) {
@@ -375,22 +373,17 @@ public class SignMonitor extends BukkitListener {
 						Sign sign = (Sign)block.getState();
 
 						for (SignListener listener : listeners.keySet()) {
-							List<String> keys = listeners.get(listener);
-
 							for (int i = 0; i < 4; i++) {
-								String line = sign.getLine(i);
-
-								for (String key : keys) {
-									if (line.toLowerCase().contains(key.toLowerCase())) {
+								for (String key : listeners.get(listener)) {
+									if (sign.getLine(i).toLowerCase().contains(key.toLowerCase())) {
 										SignInfo signInfo = signLocations.get(location);
 										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
 										SignUpdateEvent updateEvent = new SignUpdateEvent(player, signInfo, key);
 										listener.onSignUpdate(updateEvent);
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
-											String[] changed = updateEvent.getModifiedLines();
 											SignPacket outgoing = new SignPacket(signUpdatePacket.shallowClone());
-											outgoing.setLines(changed);
+											outgoing.setLines(updateEvent.getModifiedLines());
 											event.setPacket(outgoing.getPacket());
 										}
 									}
