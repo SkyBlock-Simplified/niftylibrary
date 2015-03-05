@@ -12,8 +12,12 @@ public abstract class Converter {
 		this.converter = converter;
 	}
 
-	public Converter getConverter(Class<?> type) {
+	protected Converter getConverter(Class<?> type) {
 		return this.converter.getConverter(type);
+	}
+
+	protected java.util.List<Class<? extends Converter>> getCustomConverters() {
+		return this.converter.getCustomConverters();
 	}
 
 	/**

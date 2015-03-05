@@ -13,15 +13,28 @@ public class Config extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		net.netcoding.niftybukkit.yaml.Config obj1 = (net.netcoding.niftybukkit.yaml.Config) type.newInstance();
-		obj1.loadFromMap((obj instanceof Map) ? (Map<?, ?>)obj : ((ConfigSection) obj).getRawMap());
-		return obj;
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+		net.netcoding.niftybukkit.yaml.Config obj = (net.netcoding.niftybukkit.yaml.Config)newInstance(type);
+
+		for (Class<? extends Converter> clazz : this.getCustomConverters())
+			obj.addCustomConverter(clazz);
+
+		obj.loadFromMap((section instanceof Map) ? (Map<?, ?>)section : ((ConfigSection)section).getRawMap(), type);
+		return section;
 	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		return (obj instanceof Map) ? obj : ((net.netcoding.niftybukkit.yaml.Config)obj).saveToMap();
+		return (obj instanceof Map) ? obj : ((net.netcoding.niftybukkit.yaml.Config)obj).saveToMap(obj.getClass());
+	}
+
+	public Object newInstance(Class<?> type) throws Exception {
+		Class<?> enclosingClass = type.getEnclosingClass();
+
+		if (enclosingClass != null)
+			return type.getConstructor(enclosingClass).newInstance(newInstance(enclosingClass));
+		else
+			return type.newInstance();
 	}
 
 	@Override

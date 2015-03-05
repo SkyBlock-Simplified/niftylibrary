@@ -15,18 +15,25 @@ public class Set extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		java.util.List<Object> values = (java.util.List<Object>)obj;
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
+		java.util.List<Object> values = (java.util.List<Object>)section;
 		java.util.Set<Object> newList = new HashSet<Object>();
 
 		try {
 			newList = (java.util.Set<Object>)type.newInstance();
 		} catch (Exception e) { }
 
-		for (Object value : values) {
-			Converter converter = this.getConverter(value.getClass());
-			newList.add(converter != null ? converter.toConfig(value.getClass(), value, null) : value);
-		}
+        if (genericType != null && genericType.getActualTypeArguments()[0] instanceof Class) {
+            Converter converter = this.getConverter((Class<? extends InternalConverter>)genericType.getActualTypeArguments()[0]);
+
+            if (converter != null) {
+                for ( int i = 0; i < values.size(); i++ )
+                    newList.add(converter.fromConfig((Class<? extends InternalConverter>)genericType.getActualTypeArguments()[0], values.get(i), null));
+            } else
+                newList.addAll(values);
+        } else
+            newList.addAll( values );
+
 		return newList;
 	}
 

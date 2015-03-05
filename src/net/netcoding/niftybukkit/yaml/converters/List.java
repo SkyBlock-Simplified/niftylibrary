@@ -13,9 +13,9 @@ public class List extends Converter {
 	}
 
 	@Override
-	public Object fromConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
+	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		java.util.List<Object> newList = new ArrayList<>();
-		java.util.List<Object> values = (java.util.List<Object>)obj;
+		java.util.List<Object> values = (java.util.List<Object>)section;
 
 		try {
 			newList = (java.util.List<Object>)type.newInstance();

@@ -23,21 +23,21 @@ public class Config extends ConfigMapper {
 		super(plugin);
 	}
 
-	public Config(JavaPlugin plugin, String fileName, String... header) {
-		this(plugin, fileName, false, header);
-	}
-
 	public Config(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) {
 		super(plugin, fileName, header);
 		if (CONFIG_FILE == null) throw new IllegalArgumentException("Filename cannot be null!");
 	}
 
-	public boolean exists() {
-		return CONFIG_FILE.exists();
+	public Config(JavaPlugin plugin, String fileName, String... header) {
+		this(plugin, fileName, false, header);
 	}
 
 	public boolean delete() {
 		return CONFIG_FILE.delete();
+	}
+
+	public boolean exists() {
+		return CONFIG_FILE.exists();
 	}
 
 	public void init() throws InvalidConfigurationException {

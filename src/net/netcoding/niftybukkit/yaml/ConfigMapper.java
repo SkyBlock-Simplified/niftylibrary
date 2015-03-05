@@ -1,13 +1,17 @@
 package net.netcoding.niftybukkit.yaml;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
@@ -29,7 +33,7 @@ import org.yaml.snakeyaml.representer.Representer;
 public class ConfigMapper extends BukkitHelper {
 
 	private final transient Yaml yaml;
-	private final transient HashMap<String, ArrayList<String>> comments = new HashMap<>();
+	private final transient Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
 	private final transient NullRepresenter representer = new NullRepresenter();
 	protected final transient InternalConverter converter = new InternalConverter();
 	protected transient File CONFIG_FILE;
@@ -47,23 +51,23 @@ public class ConfigMapper extends BukkitHelper {
 		DumperOptions options = new DumperOptions();
 		options.setIndent(2);
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), representer, options);
+		this.representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		this.yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), representer, options);
 	}
 
 	public void addComment(String key, String value) {
-		if (!comments.containsKey(key))
-			comments.put(key, new ArrayList<String>());
+		if (!this.comments.containsKey(key))
+			this.comments.put(key, new ArrayList<String>());
 
-		comments.get(key).add(value);
+		this.comments.get(key).add(value);
 	}
 
-	public void addConverter(Class<? extends Converter> converter) {
-		this.converter.addConverter(converter);
+	public void addCustomConverter(Class<? extends Converter> converter) {
+		this.converter.addCustomConverter(converter);
 	}
 
 	public void clearComments() {
-		comments.clear();
+		this.comments.clear();
 	}
 
 	public static ConfigSection convertFromMap(Map<?, ?> config) {
@@ -90,7 +94,10 @@ public class ConfigMapper extends BukkitHelper {
 		return Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers());
 	}
 
-	public void loadFromMap(Map<?, ?> section) throws Exception {
+	public void loadFromMap(Map<?, ?> section, Class<?> clazz) throws Exception {
+		if (!clazz.getSuperclass().equals(Config.class))
+			loadFromMap(section, clazz.getSuperclass());
+
 		for (Field field : this.getClass().getDeclaredFields()) {
 			if (doSkip(field)) continue;
 			String path = field.getName().replace(".", "_");
@@ -108,18 +115,24 @@ public class ConfigMapper extends BukkitHelper {
 	protected void loadFromYaml() throws InvalidConfigurationException {
 		root = new ConfigSection();
 
-		try (FileReader fileReader = new FileReader(CONFIG_FILE)) {
+		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(CONFIG_FILE), Charset.forName("UTF-8"))) {
 			Object object = yaml.load(fileReader);
-
-			if (object != null)
-				convertMapsToSections((Map<?, ?>) object, root);
-		} catch (IOException | ClassCastException | YAMLException e) {
-			throw new InvalidConfigurationException("Could not load YML", e);
+			if (object != null) convertMapsToSections((Map<?, ?>)object, root);
+		} catch (IOException | ClassCastException | YAMLException ex) {
+			throw new InvalidConfigurationException("Could not load YML", ex);
 		}
 	}
 
-	public Map<?, ?> saveToMap() throws Exception {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> saveToMap(Class<?> clazz) throws Exception {
 		Map<String, Object> returnMap = new HashMap<>();
+
+		if (!clazz.getSuperclass().equals(Config.class) && !clazz.getSuperclass().equals(Object.class)) {
+			Map<String, Object> map = saveToMap(clazz.getSuperclass());
+
+			for (Map.Entry<String, Object> entry : map.entrySet())
+				returnMap.put(entry.getKey(), entry.getValue());
+		}
 
 		for (Field field : this.getClass().getDeclaredFields()) {
 			if (doSkip(field)) continue;
@@ -128,7 +141,7 @@ public class ConfigMapper extends BukkitHelper {
 			if (field.isAnnotationPresent(Path.class))
 				path = field.getAnnotation(Path.class).value();
 
-			if(Modifier.isPrivate(field.getModifiers()))
+			if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
 
 			try {
@@ -137,11 +150,11 @@ public class ConfigMapper extends BukkitHelper {
 		}
 
 		Converter converter = this.converter.getConverter(Map.class);
-		return (Map<?, ?>)converter.toConfig(HashMap.class, returnMap, null);
+		return (Map<String, Object>)converter.toConfig(HashMap.class, returnMap, null);
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {
-		try (FileWriter fileWriter = new FileWriter(CONFIG_FILE)) {
+		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(CONFIG_FILE), Charset.forName("UTF-8"))) {
 			if (CONFIG_HEADER != null && CONFIG_HEADER.length > 0) {
 				for (String line : CONFIG_HEADER) fileWriter.write("# " + line + "\n");
 				fileWriter.write("\n");
