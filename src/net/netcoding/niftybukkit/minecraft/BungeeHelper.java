@@ -82,12 +82,19 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (register) this.register();
 	}
 
+	@Deprecated
 	public void connect(Player player, String targetServer) {
 		this.write(player, BUNGEE_CHANNEL, "Connect", targetServer);
 	}
 
+	@Deprecated
 	public void connect(String targetPlayer, String targetServer) {
 		this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "ConnectOther", targetPlayer, targetServer);
+	}
+
+	public void connect(MojangProfile profile, String targetServer) {
+		if (profile.getOfflinePlayer().isOnline())
+			this.write(this.getFirstPlayer(), BUNGEE_CHANNEL, "ConnectOther", profile.getName(), targetServer);
 	}
 
 	public void forward(String subChannel, Object... data) {
@@ -172,10 +179,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			}
 		} else
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
-	}
-
-	public void getPlayerIP(Player player) {
-		this.write(player, BUNGEE_CHANNEL, "IP");
 	}
 
 	public BungeeServer getPlayerServer(MojangProfile profile) {
@@ -276,8 +279,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public boolean isPlayerOnline(MojangProfile profile) {
-		if (profile == null) return false;
-
 		for (BungeeServer server : this.getServers()) {
 			if (server.getPlayerList().contains(profile))
 				return true;
@@ -286,12 +287,18 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		return false;
 	}
 
-	public void message(MojangProfile profile, String message) {
-		this.message(this.getFirstPlayer(), profile, message);
+	public void message(MojangProfile toProfile, String message) {
+		this.message(this.getFirstPlayer(), toProfile, message);
 	}
 
-	public void message(Player player, MojangProfile profile, String message) {
-		this.write(player, BUNGEE_CHANNEL, "Message", profile.getName(), message);
+	@Deprecated
+	public void message(Player fromPlayer, MojangProfile profile, String message) {
+		this.write(fromPlayer, BUNGEE_CHANNEL, "Message", profile.getName(), message);
+	}
+
+	public void message(MojangProfile fromProfile, MojangProfile profile, String message) {
+		if (fromProfile.getOfflinePlayer().isOnline())
+			this.write(fromProfile.getOfflinePlayer().getPlayer(), BUNGEE_CHANNEL, "Message", profile.getName(), message);
 	}
 
 	public void register() {
@@ -381,6 +388,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 									JsonObject json = new JsonObject();
 									json.addProperty("id", input.readUTF());
 									json.addProperty("name", input.readUTF());
+									json.addProperty("ip", input.readUTF());
+									json.addProperty("port", input.readInt());
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
 							}
@@ -406,8 +415,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 						if (subChannel.endsWith("Join")) {
 							JsonObject json = new JsonObject();
-							json.addProperty("id", uniqueId.toString());
+							json.addProperty("id", input.readUTF());
 							json.addProperty("name", input.readUTF());
+							json.addProperty("ip", input.readUTF());
+							json.addProperty("port", input.readInt());
 							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
