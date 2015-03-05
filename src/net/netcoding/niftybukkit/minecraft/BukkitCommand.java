@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.command.Command;
@@ -24,6 +25,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private boolean consoleOnly = false;
 	private boolean playerOnly = false;
 	private boolean checkPerms = true;
+	private boolean bungeeOnly = false;
 	private int minimumArgsLength = 1;
 	private int maximumArgsLength = -1;
 	private Map<Integer, Map<String, String>> usages = new HashMap<>();
@@ -71,7 +73,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	/**
 	 * Gets the command created for your plugin.
 	 * 
-	 * @return the command associated to this class
+	 * @return Command associated to this class
 	 */
 	public PluginCommand getCommand() {
 		return this.command;
@@ -98,9 +100,18 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
+	 * Gets if the command can only be run when BungeeCord is detected.
+	 * 
+	 * @return True if bungee detected, otherwise false.
+	 */
+	public boolean isBungeeOnly() {
+		return this.bungeeOnly;
+	}
+
+	/**
 	 * Gets if the users permissions will be checked immediately upon running the command.
 	 * 
-	 * @return true if checking, otherwise false
+	 * @return True if checking, otherwise false.
 	 */
 	public boolean isCheckingPerms() {
 		return this.checkPerms;
@@ -109,7 +120,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	/**
 	 * Gets if this command can only be ran as console.
 	 * 
-	 * @return true if console only, otherwise false
+	 * @return True if console only, otherwise false.
 	 */
 	public boolean isConsoleOnly() {
 		return this.consoleOnly;
@@ -118,7 +129,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	/**
 	 * Gets if this command can only be ran as a player.
 	 * 
-	 * @return true if player only, otherwise false
+	 * @return True if player only, otherwise false.
 	 */
 	public boolean isPlayerOnly() {
 		return this.playerOnly;
@@ -133,12 +144,12 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		this.processCommand(sender, command, label, args);
+		this.processCommand(sender, label, args);
 		this.removeArgs(sender, args);
 		return true;
 	}
 
-	private void processCommand(CommandSender sender, Command command, String label, String[] args) {
+	private void processCommand(CommandSender sender, String label, String[] args) {
 		if (this.isConsoleOnly() && isPlayer(sender)) {
 			this.getLog().error(sender, "The command {{0}} is only possible from console!", this.getCommand().getName());
 			return;
@@ -146,6 +157,11 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 		if (this.isPlayerOnly() && isConsole(sender)) {
 			this.getLog().error(sender, "The command {0} is not possible from console!", this.getCommand().getName());
+			return;
+		}
+
+		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isOnline()) {
+			this.getLog().error(sender, "The command {{0}} requires BungeeCord!");
 			return;
 		}
 
@@ -189,16 +205,30 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
-	 * Sets command to check if user has permission to run this command.
-	 * <p>
-	 * Defaults to true
+	 * Sets command to run only if BungeeCord is detected.
+	 */
+	public void setBungeeOnly() {
+		this.setBungeeOnly(true);
+	}
+
+	/**
+	 * Sets command to run only if BungeeCord is detected.
+	 * 
+	 * @param value True to run only when detected, otherwise false.
+	 */
+	public void setBungeeOnly(boolean value) {
+		this.bungeeOnly = value;
+	}
+
+	/**
+	 * Sets command to check if user has permission to run.
 	 */
 	public void setCheckPerms() {
 		this.setCheckPerms(true);
 	}
 
 	/**
-	 * Sets command to check if user has permission to run this command.
+	 * Sets command to check if user has permission to run.
 	 * 
 	 * @param value true to check permissions (default), otherwise false
 	 */
@@ -208,8 +238,6 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 
 	/**
 	 * Sets command to only allow console execution. This command sets {@link #setPlayerOnly() setPlayerOnly} to false.
-	 * <p>
-	 * Defaults to true
 	 */
 	public void setConsoleOnly() {
 		this.setConsoleOnly(true);
@@ -225,18 +253,26 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.consoleOnly = value;
 	}
 
+	/**
+	 * Sets the maximum arguments that can be passed to this command.
+	 * 
+	 * @param value Maximum number of arguments allowed.
+	 */
 	public void setMaximumArgsLength(int value) {
 		this.maximumArgsLength = value;
 	}
 
+	/**
+	 * Sets the minimum arguments that need to be passed to this command.
+	 * 
+	 * @param value Minimum number of arguments allowed.
+	 */
 	public void setMinimumArgsLength(int value) {
 		this.minimumArgsLength = value;
 	}
 
 	/**
 	 * Sets command to only allow player execution. This command sets {@link #setConsoleOnly() setConsoleOnly} to false.
-	 * <p>
-	 * Defaults to true
 	 */
 	public void setPlayerOnly() {
 		this.setPlayerOnly(true);
