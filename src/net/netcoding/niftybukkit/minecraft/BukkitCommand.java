@@ -26,6 +26,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	private boolean playerOnly = false;
 	private boolean checkPerms = true;
 	private boolean bungeeOnly = false;
+	private boolean helpCheck = true;
 	private int minimumArgsLength = 1;
 	private int maximumArgsLength = -1;
 	private Map<Integer, Map<String, String>> usages = new HashMap<>();
@@ -42,7 +43,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		super(plugin);
 		if (StringUtil.isEmpty(command)) throw new IllegalArgumentException("Command cannot be null!");
 		this.command = this.getPlugin().getCommand(command);
-		if (this.getCommand() == null) throw new RuntimeException(StringUtil.format("Command ''{0}'' not found in plugin {1}!", command, this.getPluginDescription().getName()));
+		if (this.getCommand() == null) throw new RuntimeException(StringUtil.format("Command ''{0}'' not defined in plugin {1}!", command, this.getPluginDescription().getName()));
 		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
 		this.getCommand().setPermissionMessage("");
 
@@ -100,7 +101,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
-	 * Gets if the command can only be run when BungeeCord is detected.
+	 * Checks if this command can only be run when BungeeCord is detected.
 	 * 
 	 * @return True if bungee detected, otherwise false.
 	 */
@@ -109,7 +110,16 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
-	 * Gets if the users permissions will be checked immediately upon running the command.
+	 * Checks if the arguments are being looked at for help.
+	 * 
+	 * @return True if checking, otherwise false.
+	 */
+	public boolean isCheckingHelp() {
+		return this.helpCheck;
+	}
+
+	/**
+	 * Checks if the users permissions will be checked immediately upon running the command.
 	 * 
 	 * @return True if checking, otherwise false.
 	 */
@@ -118,7 +128,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
-	 * Gets if this command can only be ran as console.
+	 * Checks if this command can only be ran as console.
 	 * 
 	 * @return True if console only, otherwise false.
 	 */
@@ -127,7 +137,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	}
 
 	/**
-	 * Gets if this command can only be ran as a player.
+	 * Checks if this command can only be ran as a player.
 	 * 
 	 * @return True if player only, otherwise false.
 	 */
@@ -135,7 +145,13 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return this.playerOnly;
 	}
 
-	private boolean isHelp(String... args) {
+	/**
+	 * Checks if the arguments are looking for help.
+	 * 
+	 * @param args Arguments to check if are looking for help.
+	 * @return True if looking for help, otherwise false.
+	 */
+	protected boolean isHelp(String... args) {
 		if (args.length > 0 && args[args.length - 1].matches("^[\\?]{1,}|help$"))
 			return true;
 		else
@@ -187,7 +203,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 			return;
 		}
 
-		if (this.isHelp(args)) {
+		if (this.isCheckingHelp() && this.isHelp(args)) {
 			this.showUsage(sender, label);
 			return;
 		}
@@ -251,6 +267,22 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	public void setConsoleOnly(boolean value) {
 		this.playerOnly = false;
 		this.consoleOnly = value;
+	}
+
+	/**
+	 * Sets command to check for help.
+	 */
+	public void setHelpCheck() {
+		this.setHelpCheck(true);
+	}
+
+	/**
+	 * Sets command to check for help.
+	 * 
+	 * @param value true to only allow console, otherwise false
+	 */
+	public void setHelpCheck(boolean value) {
+		this.helpCheck = value;
 	}
 
 	/**

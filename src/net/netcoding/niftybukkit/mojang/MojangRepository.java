@@ -383,8 +383,8 @@ public class MojangRepository {
 
 		@EventHandler
 		public void onPlayerPostLogin(final PlayerPostLoginEvent event) {
-			UUID uuid = event.getPlayer().getUniqueId();
-			String name = event.getPlayer().getName();
+			UUID uuid = event.getProfile().getUniqueId();
+			String name = event.getProfile().getName();
 
 			if (NiftyBukkit.getBungeeHelper().isOnline()) {
 				for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
