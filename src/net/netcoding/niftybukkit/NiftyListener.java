@@ -17,11 +17,10 @@ class NiftyListener extends BukkitListener {
 
 	@EventHandler
 	public void onPlayerJoin(final PlayerJoinEvent event) {
-		final MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-
 		this.getPlugin().getServer().getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
+				final MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 				Bukkit.getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(profile));
 			}
 		}, 10L);
