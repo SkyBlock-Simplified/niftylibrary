@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
@@ -119,7 +120,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public int getMaxPlayers() {
-		return this.getMaxPlayers(this.getServerName());
+		return this.isOnline() ? this.getMaxPlayers(this.getServerName()) : this.getPlugin().getServer().getMaxPlayers();
 	}
 
 	public int getMaxPlayers(String serverName) {
@@ -143,11 +144,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getPlayerCount() {
-		if (this.isOnline())
-			return this.getPlayerCount(this.getServerName());
-		else
-			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
+		return this.isOnline() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().length;
 	}
 
 	public int getPlayerCount(String serverName) {
@@ -171,11 +170,12 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
+	@SuppressWarnings("deprecation")
 	public Set<MojangProfile> getPlayerList() {
 		if (this.isOnline())
 			return this.getPlayerList(this.getServerName());
 		else
-			throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
+			return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByPlayer(this.getPlugin().getServer().getOnlinePlayers()))));
 	}
 
 	public Set<MojangProfile> getPlayerList(String serverName) {
@@ -261,9 +261,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public boolean isPlayerOnline(MojangProfile profile) {
-		for (BungeeServer server : this.getServers()) {
-			if (server.getPlayerList().contains(profile))
-				return true;
+		if (profile.getOfflinePlayer().isOnline())
+			return true;
+		else if (this.isOnline()) {
+			for (BungeeServer server : this.getServers()) {
+				if (server.getPlayerList().contains(profile))
+					return true;
+			}
 		}
 
 		return false;
