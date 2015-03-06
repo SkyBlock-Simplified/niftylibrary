@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
@@ -249,7 +250,7 @@ public class SignMonitor extends BukkitListener {
 
 	@EventHandler
 	public void onPlayerPostLogin(PlayerPostLoginEvent event) {
-		this.sendSignUpdate(event.getPlayer());
+		this.sendSignUpdate(event.getProfile());
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
@@ -299,10 +300,9 @@ public class SignMonitor extends BukkitListener {
 	/**
 	 * Send an update to any signs we are listening to in the vicinity of all players.
 	 */
-	@SuppressWarnings("deprecation")
 	public void sendSignUpdate() {
-		for (Player player : this.getPlugin().getServer().getOnlinePlayers())
-			this.sendSignUpdate(player, "");
+		for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
+			this.sendSignUpdate(profile);
 	}
 
 	/**
@@ -310,8 +310,8 @@ public class SignMonitor extends BukkitListener {
 	 * 
 	 * @param player Player to send updates to.
 	 */
-	public void sendSignUpdate(Player player) {
-		this.sendSignUpdate(player, "");
+	public void sendSignUpdate(MojangProfile profile) {
+		this.sendSignUpdate(profile, "");
 	}
 
 	/**
@@ -320,8 +320,9 @@ public class SignMonitor extends BukkitListener {
 	 * @param player Player to send updates to.
 	 * @param key    Only signs with this key.
 	 */
-	public void sendSignUpdate(Player player, String key) {
-		if (player == null || !player.isOnline()) return;
+	public void sendSignUpdate(MojangProfile profile, String key) {
+		if (!profile.getOfflinePlayer().isOnline()) return;
+		Player player = profile.getOfflinePlayer().getPlayer();
 
 		if (this.isListening()) {
 			for (Location location : this.signLocations.keySet()) {
