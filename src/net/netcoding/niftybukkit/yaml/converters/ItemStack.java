@@ -38,8 +38,8 @@ public class ItemStack extends Converter {
 		saveMap.put("amount", itemStack.getAmount());
 		Converter listConverter = this.getConverter(java.util.List.class);
 		java.util.Map<String, Object> meta = new HashMap<>();
-		meta.put("name", itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : null);
-		meta.put("lore", itemStack.getItemMeta().hasLore() ? listConverter.toConfig(java.util.List.class, itemStack.getItemMeta().getLore(), null) : null);
+		meta.put("name", itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : null);
+		meta.put("lore", itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore() ? listConverter.toConfig(java.util.List.class, itemStack.getItemMeta().getLore(), null) : null);
 		saveMap.put("meta", meta);
 
 		return saveMap;
