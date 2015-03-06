@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
@@ -17,6 +18,18 @@ public class BukkitPlugin extends JavaPlugin {
 
 	public Log getLog() {
 		return this.log;
+	}
+
+	public boolean hasPermissions(MojangProfile profile, String... permissions) {
+		return this.hasPermissions(profile, false, permissions);
+	}
+
+	public boolean hasPermissions(MojangProfile profile, boolean defaultError, String... permissions) {
+		return profile.getOfflinePlayer().isOnline() ? this.hasPermissions(profile.getOfflinePlayer().getPlayer(), defaultError, permissions) : false;
+	}
+
+	public boolean hasPermissions(CommandSender sender, String... permissions) {
+		return this.hasPermissions(sender, false, permissions);
 	}
 
 	public boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
