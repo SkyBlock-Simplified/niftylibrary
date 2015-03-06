@@ -173,7 +173,7 @@ public class SignMonitor extends BukkitListener {
 
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onBlockBreak(BlockBreakEvent event) {
-		Player player = event.getPlayer();
+		MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 		Block block = event.getBlock();
 		Set<Location> fallingSigns = getSignsThatWouldFall(block);
 		Set<Location> removeSigns = new HashSet<>();
@@ -189,7 +189,7 @@ public class SignMonitor extends BukkitListener {
 						for (String line : signInfo.getLines()) {
 							for (String key : keys) {
 								if (line.toLowerCase().contains(key.toLowerCase())) {
-									SignBreakEvent breakEvent = new SignBreakEvent(player, signInfo, key);
+									SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
 									listener.onSignBreak(breakEvent);
 									Sign sign = (Sign)location.getBlock().getState();
 									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
@@ -228,7 +228,8 @@ public class SignMonitor extends BukkitListener {
 							for (String line : signInfo.getLines()) {
 								for (String key : keys) {
 									if (line.toLowerCase().contains(key.toLowerCase())) {
-										SignInteractEvent interactEvent = new SignInteractEvent(event.getPlayer(), signInfo, event.getAction(), key);
+										MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+										SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
 										Sign sign = (Sign)block.getState();
 										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
@@ -269,7 +270,8 @@ public class SignMonitor extends BukkitListener {
 					for (String line : signInfo.getLines()) {
 						for (String key : keys) {
 							if (line.toLowerCase().contains(key.toLowerCase())) {
-								SignCreateEvent createEvent = new SignCreateEvent(event.getPlayer(), signInfo, key);
+								MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
 								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
 
@@ -366,8 +368,8 @@ public class SignMonitor extends BukkitListener {
 				public void onPacketSending(PacketEvent event) {
 					PacketContainer signUpdatePacket = event.getPacket();
 					SignPacket incoming = new SignPacket(signUpdatePacket);
-					Player player = event.getPlayer();
-					Location location = new Location(player.getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
+					MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+					Location location = new Location(profile.getOfflinePlayer().getPlayer().getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
 					Block block = location.getBlock();
 
 					if (SIGN_ITEMS.contains(block.getType())) {
@@ -379,7 +381,7 @@ public class SignMonitor extends BukkitListener {
 									if (sign.getLine(i).toLowerCase().contains(key.toLowerCase())) {
 										SignInfo signInfo = signLocations.get(location);
 										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
-										SignUpdateEvent updateEvent = new SignUpdateEvent(player, signInfo, key);
+										SignUpdateEvent updateEvent = new SignUpdateEvent(profile, signInfo, key);
 										listener.onSignUpdate(updateEvent);
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {

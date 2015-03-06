@@ -1,8 +1,8 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
 /**
@@ -10,8 +10,8 @@ import org.bukkit.event.block.Action;
  */
 public class SignCreateEvent extends SignEvent {
 
-	public SignCreateEvent(Player player, SignInfo signInfo, String key) {
-		super(player, signInfo, Action.LEFT_CLICK_AIR, key);
+	public SignCreateEvent(MojangProfile profile, SignInfo signInfo, String key) {
+		super(profile, signInfo, Action.LEFT_CLICK_AIR, key);
 	}
 
 }

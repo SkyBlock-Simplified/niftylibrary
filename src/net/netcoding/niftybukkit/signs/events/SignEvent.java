@@ -1,11 +1,11 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.block.Action;
 
@@ -14,14 +14,14 @@ import org.bukkit.event.block.Action;
  */
 abstract class SignEvent implements Cancellable {
 
-	private final transient Player player;
+	private final transient MojangProfile profile;
 	private final transient SignInfo signInfo;
 	private final transient Action action;
 	protected final String key;
 	private boolean cancelled = false;
 
-	SignEvent(Player player, SignInfo signInfo, Action action, String key) {
-		this.player = player;
+	SignEvent(MojangProfile profile, SignInfo signInfo, Action action, String key) {
+		this.profile = profile;
 		this.signInfo = signInfo;
 		this.action = action;
 		this.key = key;
@@ -102,12 +102,12 @@ abstract class SignEvent implements Cancellable {
 	}
 
 	/**
-	 * Gets the player associated with the action.
+	 * Gets the profile associated with the event.
 	 * 
-	 * @return Player who performed the action.
+	 * @return Profile of who performed the event.
 	 */
-	public Player getPlayer() {
-		return this.player;
+	public MojangProfile getProfile() {
+		return this.profile;
 	}
 
 	/**

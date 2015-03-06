@@ -2,9 +2,9 @@ package net.netcoding.niftybukkit.signs.events;
 
 import java.util.regex.Pattern;
 
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
 /**
@@ -12,8 +12,8 @@ import org.bukkit.event.block.Action;
  */
 public class SignUpdateEvent extends SignEvent {
 
-	public SignUpdateEvent(Player player, SignInfo signInfo, String key) {
-		super(player, signInfo, Action.PHYSICAL, key);
+	public SignUpdateEvent(MojangProfile profile, SignInfo signInfo, String key) {
+		super(profile, signInfo, Action.PHYSICAL, key);
 	}
 
 	@Override
