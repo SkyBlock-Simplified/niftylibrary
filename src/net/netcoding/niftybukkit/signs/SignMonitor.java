@@ -192,7 +192,7 @@ public class SignMonitor extends BukkitListener {
 									SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
 									listener.onSignBreak(breakEvent);
 									Sign sign = (Sign)location.getBlock().getState();
-									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
+									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
 
 									if (breakEvent.isCancelled()) {
 										event.setCancelled(true);
@@ -232,7 +232,7 @@ public class SignMonitor extends BukkitListener {
 										SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
 										Sign sign = (Sign)block.getState();
-										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
+										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
 
 										if (interactEvent.isCancelled()) {
 											event.setCancelled(true);
@@ -273,7 +273,7 @@ public class SignMonitor extends BukkitListener {
 								MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
-								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getModifiedLine(j));
+								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
 
 								if (createEvent.isCancelled()) {
 									event.setCancelled(true);
