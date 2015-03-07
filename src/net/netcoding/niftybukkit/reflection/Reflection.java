@@ -15,7 +15,7 @@ public class Reflection {
 	private static final transient ConcurrentHashMap<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
 	private final String className;
 	private final String subPackage;
-	private final MinecraftPackage minecraftPackage;
+	private final String packagePath;
 
 	static {
 		CORRESPONDING_TYPES.put(Byte.class, byte.class);
@@ -33,9 +33,17 @@ public class Reflection {
 	}
 
 	public Reflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
+		this(className, subPackage, minecraftPackage.toString());
+	}
+
+	public Reflection(String className, String packagePath) {
+		this(className, "", packagePath);
+	}
+
+	public Reflection(String className, String subPackage, String packagePath) {
 		this.className = className;
 		this.subPackage = StringUtil.stripNull(subPackage).replaceAll("\\.$", "").replaceAll("^\\.", "");
-		this.minecraftPackage = minecraftPackage;
+		this.packagePath = packagePath;
 	}
 
 	public String getClassName() {
@@ -68,7 +76,7 @@ public class Reflection {
 	}
 
 	public String getClassPath() {
-		return this.getMinecraftPackage() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
+		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
@@ -85,8 +93,8 @@ public class Reflection {
 		return null;
 	}
 
-	public MinecraftPackage getMinecraftPackage() {
-		return this.minecraftPackage;
+	public String getPackagePath() {
+		return this.packagePath;
 	}
 
 	public String getSubPackage() {
