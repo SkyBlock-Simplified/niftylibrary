@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -138,27 +139,8 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 
 		if (this.getItemOpener() != null) {
 			if (firstClickItem.isSimilar(this.getItemOpener()) || placeClickItem.isSimilar(this.getItemOpener())) {
-				event.setCursor(new ItemStack(Material.AIR));
-				firstClickItem.setAmount(0);
+				event.setResult(Result.DENY);
 				profile.getOfflinePlayer().getPlayer().updateInventory();
-
-				this.getPlugin().getServer().getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
-					@Override
-					public void run() {
-						for (ItemStack item : event.getInventory().getContents()) {
-							if (item != null && item.isSimilar(getItemOpener()))
-								event.getInventory().removeItem(item);
-						}
-
-						for (ItemStack item : profile.getOfflinePlayer().getPlayer().getInventory().getContents()) {
-							if (item != null && item.isSimilar(getItemOpener()))
-								profile.getOfflinePlayer().getPlayer().getInventory().removeItem(item);
-						}
-
-						giveItemOpener(profile);
-					}
-				}, 2L);
-
 				event.setCancelled(true);
 				return;
 			}
