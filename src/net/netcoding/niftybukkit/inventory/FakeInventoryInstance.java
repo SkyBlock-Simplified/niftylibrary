@@ -1,41 +1,34 @@
 package net.netcoding.niftybukkit.inventory;
 
-import org.bukkit.entity.Player;
+import net.netcoding.niftybukkit.mojang.MojangProfile;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
 
 	private final transient FakeInventory inventory;
-	private final transient String playerName;
+	private final transient MojangProfile profile;
 
-	FakeInventoryInstance(JavaPlugin plugin, FakeInventory inventory, String playerName) {
-		this(plugin, inventory, playerName, false);
-	}
-
-	FakeInventoryInstance(JavaPlugin plugin, FakeInventory inventory, String playerName, boolean autoCancel) {
-		super(plugin, autoCancel);
+	FakeInventoryInstance(JavaPlugin plugin, FakeInventory inventory, MojangProfile profile) {
+		super(plugin);
 		this.inventory = inventory;
-		this.playerName = playerName;
+		this.profile = profile;
 	}
 
 	public void close() {
-		this.inventory.close(this.getPlayerName());
+		this.inventory.close(this.getProfile());
 	}
 
-	public Player getPlayer() {
-		return findPlayer(playerName);
-	}
-
-	public String getPlayerName() {
-		return this.playerName;
+	public MojangProfile getProfile() {
+		return this.profile;
 	}
 
 	public boolean isOpen() {
-		return this.inventory.isOpen(this.getPlayerName());
+		return this.inventory.isOpen(this.getProfile());
 	}
 
 	public void open() {
-		this.inventory.open(this.getPlayer(), this.getItemsArray());
+		this.inventory.open(this.getProfile(), this);
 	}
 
 }
