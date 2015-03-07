@@ -23,6 +23,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -185,6 +186,18 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 			if (this.isOpen(profile)) {
 				OPENED.get(this.getUniqueId()).remove(profile);
 				this.listener.onInventoryClose(new InventoryCloseEvent(profile, event));
+			}
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onInventoryCreative(InventoryCreativeEvent event) {
+		ItemStack clickItem = event.getCursor();
+
+		if (this.getItemOpener() != null) {
+			if (clickItem.isSimilar(this.getItemOpener())) {
+				event.setCursor(new ItemStack(Material.AIR));
+				event.setCancelled(true);
 			}
 		}
 	}
