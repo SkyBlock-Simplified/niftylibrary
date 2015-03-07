@@ -60,11 +60,11 @@ public class NiftyBukkit extends BukkitPlugin {
 		} catch (NoClassDefFoundError ex) { return null; }
 	}
 
-	public static boolean protocolManagerExists() {
+	public static boolean hasProtocolManager() {
 		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 	}
 
-	public static boolean vaultExists() {
+	public static boolean hasPermissions() {
 		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("Vault") != null;
 	}
 
