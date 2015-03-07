@@ -178,7 +178,6 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	@EventHandler
 	public void onInventoryClose(org.bukkit.event.inventory.InventoryCloseEvent event) {
 		HumanEntity entity = event.getPlayer();
-		System.out.println("Close: " + event.getInventory().getType());
 
 		if (entity instanceof Player) {
 			MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
@@ -205,7 +204,6 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
 	public void onInventoryOpen(org.bukkit.event.inventory.InventoryOpenEvent event) {
 		HumanEntity entity = event.getPlayer();
-		System.out.println("Open: " + event.getInventory().getType());
 
 		if (entity instanceof Player) {
 			MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
