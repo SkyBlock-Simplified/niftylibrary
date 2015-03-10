@@ -22,7 +22,7 @@ public class DatabaseNotification extends BukkitHelper {
 	private final List<String> primaryColumnNames = new ArrayList<String>();
 	private int previousId = 0;
 	private final transient SQLFactory sql;
-	private transient boolean stopped = false;
+	private volatile boolean stopped = false;
 	private final String table;
 
 	DatabaseNotification(SQLFactory sql, String table, DatabaseListener listener, long delay, boolean overwrite) throws SQLException {
@@ -156,7 +156,7 @@ public class DatabaseNotification extends BukkitHelper {
 	 * 
 	 * @return True if has stopped, otherwise false.
 	 */
-	public boolean isStopped() {
+	public synchronized boolean isStopped() {
 		return this.stopped;
 	}
 
@@ -211,7 +211,7 @@ public class DatabaseNotification extends BukkitHelper {
 	/**
 	 * Stops this class from listening for further notifications.
 	 */
-	public void stop() {
+	public synchronized void stop() {
 		this.stop(false);
 	}
 
@@ -220,7 +220,7 @@ public class DatabaseNotification extends BukkitHelper {
 	 * 
 	 * @param dropTriggers True to delete the triggers, otherwise false.
 	 */
-	public void stop(boolean dropTriggers) {
+	public synchronized void stop(boolean dropTriggers) {
 		this.stopped = true;
 
 		if (dropTriggers) {
