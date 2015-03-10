@@ -37,9 +37,7 @@ public abstract class SQLFactory {
 		this.properties = properties;
 		this.url = url;
 
-		if (!this.isValidConnection())
-			throw new SQLException("Unable to connect to database!");
-
+		try (Connection connection = this._getConnection()) { }
 		this._getSchema();
 	}
 
@@ -54,9 +52,7 @@ public abstract class SQLFactory {
 		this.url = url;
 		this.properties = properties;
 
-		if (!this.isValidConnection())
-			throw new SQLException("Invalid connection information!");
-
+		try (Connection connection = this._getConnection()) { }
 		this._getSchema();
 	}
 
@@ -157,19 +153,6 @@ public abstract class SQLFactory {
 	 */
 	public String getUrl() {
 		return StringUtil.format("{0}?autoReconnect=true", this.url);
-	}
-
-	/**
-	 * Checks if the connection details are valid.
-	 * 
-	 * @return True if valid details, otherwise false.
-	 */
-	public boolean isValidConnection() {
-		try (Connection connection = this._getConnection()) {
-			return true;
-		} catch (SQLException ex) {
-			return false;
-		}
 	}
 
 	/**
