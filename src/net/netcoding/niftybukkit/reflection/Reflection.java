@@ -130,31 +130,6 @@ public class Reflection {
 			this.setValue(obj, entry);
 	}
 
-	/*
-	// TODO
-	public Field getField(String name, Class<?> clazz) throws Exception {
-		return clazz.getDeclaredField(name);
-	}
-
-	public Object getValue(String name, Object obj) throws Exception {
-		Field f = getField(name, obj.getClass());
-		f.setAccessible(true);
-		return f.get(obj);
-	}
-
-	public void setValue(Object obj, FieldEntry entry) throws Exception {
-		Field f = getField(entry.getKey(), obj.getClass());
-		f.setAccessible(true);
-		f.set(obj, entry.getValue());
-	}
-
-	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
-		for (FieldEntry f : entrys)
-			setValue(obj, f);
-	}
-	// TODO
-	*/
-
 	private static Class<?> getPrimitiveType(Class<?> clazz) {
 		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
 	}
