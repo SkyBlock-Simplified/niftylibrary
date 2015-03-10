@@ -12,19 +12,37 @@ import java.util.List;
 
 public class HttpClient {
 
+	private final int DEFAULT_TIMEOUT = 3000;
+
 	public String get(URL url, HttpHeader... headers) throws IOException {
-		return get(url, Arrays.asList(headers));
+		return get(url, DEFAULT_TIMEOUT, Arrays.asList(headers));
+	}
+
+	public String get(URL url, int timeout, HttpHeader... headers) throws IOException {
+		return get(url, timeout, Arrays.asList(headers));
 	}
 
 	public String get(URL url, Proxy proxy, HttpHeader... headers) throws IOException {
-		return get(url, proxy, Arrays.asList(headers));
+		return get(url, DEFAULT_TIMEOUT, proxy, Arrays.asList(headers));
+	}
+
+	public String get(URL url, int timeout, Proxy proxy, HttpHeader... headers) throws IOException {
+		return get(url, timeout, proxy, Arrays.asList(headers));
 	}
 
 	public String get(URL url, List<HttpHeader> headers) throws IOException {
 		return get(url, null, headers);
 	}
 
+	public String get(URL url, int timeout, List<HttpHeader> headers) throws IOException {
+		return get(url, timeout, null, headers);
+	}
+
 	public String get(URL url, Proxy proxy, List<HttpHeader> headers) throws IOException {
+		return get(url, DEFAULT_TIMEOUT, proxy, headers);
+	}
+
+	public String get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws IOException {
 		if (proxy == null) proxy = Proxy.NO_PROXY;
 		String line;
 		StringBuffer response = new StringBuffer();
@@ -34,43 +52,74 @@ public class HttpClient {
 		for (HttpHeader header : headers)
 			connection.setRequestProperty(header.getName(), header.getValue());
 
-		connection.setUseCaches(false);
+		connection.setConnectTimeout(timeout);
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
+		connection.setUseCaches(false);
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-			while ((line = reader.readLine()) != null) {
-				response.append(line);
-				response.append('\r');
-			}
-
-			reader.close();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		while ((line = reader.readLine()) != null) {
+			response.append(line);
+			response.append('\r');
 		}
+		reader.close();
 
 		return response.toString();
 	}
 
 	public String post(URL url, HttpHeader... headers) throws IOException {
-		return post(url, null, null, headers);
+		return post(url, DEFAULT_TIMEOUT, headers);
+	}
+
+	public String post(URL url, int timeout, HttpHeader... headers) throws IOException {
+		return post(url, null, null, timeout, headers);
 	}
 
 	public String post(URL url, HttpBody body, HttpHeader... headers) throws IOException {
-		return post(url, null, body, headers);
+		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, Proxy proxy, HttpBody body, HttpHeader... headers) throws IOException {
-		return post(url, proxy, body, Arrays.asList(headers));
+	public String post(URL url, Proxy proxy, HttpHeader... headers) throws IOException {
+		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
+	}
+
+	public String post(URL url, HttpBody body, int timeout, HttpHeader... headers) throws IOException {
+		return post(url, null, body, timeout, headers);
+	}
+
+	public String post(URL url, Proxy proxy, int timeout, HttpHeader... headers) throws IOException {
+		return post(url, proxy, null, timeout, headers);
+	}
+
+	public String post(URL url, Proxy proxy, HttpBody body, int timeout, HttpHeader... headers) throws IOException {
+		return post(url, proxy, body, timeout, Arrays.asList(headers));
 	}
 
 	public String post(URL url, List<HttpHeader> headers) throws IOException {
-		return post(url, null, null, headers);
+		return post(url, null, null, DEFAULT_TIMEOUT, headers);
+	}
+
+	public String post(URL url, int timeout, List<HttpHeader> headers) throws IOException {
+		return post(url, null, null, timeout, headers);
+	}
+
+	public String post(URL url, Proxy proxy, List<HttpHeader> headers) throws IOException {
+		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
 	}
 
 	public String post(URL url, HttpBody body, List<HttpHeader> headers) throws IOException {
-		return post(url, null, body, headers);
+		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, Proxy proxy, HttpBody body, List<HttpHeader> headers) throws IOException {
+	public String post(URL url, Proxy proxy, int timeout, List<HttpHeader> headers) throws IOException {
+		return post(url, proxy, null, timeout, headers);
+	}
+
+	public String post(URL url, HttpBody body, int timeout, List<HttpHeader> headers) throws IOException {
+		return post(url, null, body, timeout, headers);
+	}
+
+	public String post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws IOException {
 		if (proxy == null) proxy = Proxy.NO_PROXY;
 		String line;
 		StringBuffer response = new StringBuffer();
@@ -80,24 +129,22 @@ public class HttpClient {
 		for (HttpHeader header : headers)
 			connection.setRequestProperty(header.getName(), header.getValue());
 
-		connection.setUseCaches(false);
+		connection.setConnectTimeout(timeout);
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
+		connection.setUseCaches(false);
 
 		if (body != null) {
-			try (DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
-				writer.write(body.getBytes());
-			}
+			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+			writer.write(body.getBytes());
 		}
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-			while ((line = reader.readLine()) != null) {
-				response.append(line);
-				response.append('\r');
-			}
-
-			reader.close();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		while ((line = reader.readLine()) != null) {
+			response.append(line);
+			response.append('\r');
 		}
+		reader.close();
 
 		return response.toString();
 	}
