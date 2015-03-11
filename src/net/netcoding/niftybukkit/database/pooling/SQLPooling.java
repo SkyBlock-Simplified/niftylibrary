@@ -15,11 +15,11 @@ import org.bukkit.Bukkit;
  */
 public abstract class SQLPooling extends SQLFactory implements Runnable {
 
-	private transient Vector<Connection> availableConnections = new Vector<>();
-	private boolean firstConnection = true;
+	private volatile transient Vector<Connection> availableConnections = new Vector<>();
 	private int maximumConnections = 10;
-	private int minimumConnections = 3;
-	private transient Vector<Connection> usedConnections = new Vector<>();
+	private boolean testOnBorrow = true;
+	private String validationQuery = "SELECT 1;";
+	private volatile transient Vector<Connection> usedConnections = new Vector<>();
 
 	/**
 	 * Create a new pooling instance.
@@ -29,9 +29,9 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * @param pass Password of the database connection.
 	 * @throws SQLException
 	 */
-	public SQLPooling(String url, String user, String pass) throws SQLException {
-		super(url, user, pass);
-		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
+	public SQLPooling(String driver, String url, String user, String pass) throws SQLException {
+		super(driver, url, user, pass);
+		this.initializeTimer();
 	}
 
 	/**
@@ -41,24 +41,13 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
 	 */
-	public SQLPooling(String url, Properties properties) throws SQLException {
-		super(url, properties);
-		Bukkit.getScheduler().runTaskTimer(NiftyBukkit.getPlugin(), this, 0, 300);
+	public SQLPooling(String driver, String url, Properties properties) throws SQLException {
+		super(driver, url, properties);
+		this.initializeTimer();
 	}
 
-	/**
-	 * Creates the pool of available connections according to currently set number of pool size.
-	 * Note that connection pool must be initialized to it's full capacity, or it is emptied and objects
-	 * are free to be garbage collected.
-	 * 
-	 * @throws SQLException
-	 */
-	private synchronized void initializeConnections() throws SQLException {
-		if (!this.firstConnection) return;
-		this.firstConnection = false;
-
-		for (int i = 0; i < this.getMinimumConnections(); i++)
-			this.availableConnections.add(new RecoverableConnection(super.getConnection(), this));
+	private void initializeTimer() {
+		Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, 200);
 	}
 
 	/**
@@ -68,67 +57,90 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * @throws SQLException When connection is not available immediately.
 	 */
 	@Override
-	public Connection getConnection() throws SQLException {
+	protected Connection getConnection() throws SQLException {
 		return this.getConnection(WaitTime.IMMEDIATELY);
 	}
 
 	/**
 	 * Gets a connection from connection pool, waiting if necessary.
 	 * 
-	 * @param waitTime Time to wait for a connection.
+	 * @param waitTime     Time to wait for a connection.
+	 * @param testOnBorrow Test the connection before returning it.
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available within given wait time.
 	 */
-	public Connection getConnection(WaitTime waitTime) throws SQLException {
-		this.initializeConnections();
+	protected Connection getConnection(WaitTime waitTime) throws SQLException {
 		Connection connection;
 
-		synchronized (SQLPooling.class) {
-			if (this.availableConnections.size() == 0) {
-				if (this.usedConnections.size() < this.getMaximumConnections())
-					this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
-				else {
-					if (waitTime.equals(WaitTime.IMMEDIATELY))
-						throw new SQLException("No connection available at the moment.");
-					else {
-						try {
-							Thread.sleep(waitTime.getWaitTime());
-						} catch (InterruptedException ex) { }
+		if (this.availableConnections != null) {
+			synchronized (SQLPooling.class) {
+				if (this.availableConnections.size() == 0) {
+					if (this.usedConnections.size() < this.getMaximumConnections()) {
+						this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
+						System.out.println("New Recyclable Connection: #" + this.usedConnections.size());
+					} else {
+						if (waitTime.equals(WaitTime.IMMEDIATELY))
+							throw new SQLException("Failed to borrow connection from the available pool!");
+						else {
+							try {
+								Thread.sleep(waitTime.getWaitTime());
+							} catch (InterruptedException ex) { }
 
-						connection = this.getConnection();
+							connection = this.getConnection();
+						}
 					}
-				}
-			} else {
-				connection = this.availableConnections.firstElement();
-				this.availableConnections.removeElement(connection);
-				this.usedConnections.addElement(connection);
-	
-				if (connection.isClosed()) {
-					System.out.println("CLOSED, EXPECT ERROR");
+				} else {
+					connection = this.availableConnections.firstElement();
+					this.availableConnections.removeElement(connection);
+					this.usedConnections.addElement(connection);
 				}
 			}
-		}
 
-		if (connection.isClosed()) {
-			System.out.println("CLOSED, REBOOT CONNECTION");
-			connection = new RecoverableConnection(super.getConnection(), this);
-		}
+			if (connection.isClosed())
+				connection = new RecoverableConnection(super.getConnection(), this);
+			else {
+				if (this.isTestingOnBorrow()) {
+					try {
+						this.query(connection, this.getValidationQuery(), null);
+					} catch (SQLException sqlex) {
+						this.usedConnections.remove(connection);
+						connection = this.getConnection(WaitTime.IMMEDIATELY);
+					}
+				}
+			}
+		} else
+			connection = super.getConnection();
 
 		return connection;
 	}
 
 	/**
 	 * Gets the maximum number of concurrent connections.
+	 * 
+	 * @return Maximum number of connections to be stored in the pool.
 	 */
 	public int getMaximumConnections() {
 		return this.maximumConnections;
 	}
 
 	/**
-	 * Gets the minimum number of concurrent connections.
+	 * Gets the query used to test for valid connections
+	 * before returning them from the pool.
+	 * 
+	 * @return Query to run the test with.
 	 */
-	public int getMinimumConnections() {
-		return this.minimumConnections;
+	protected String getValidationQuery() {
+		return this.validationQuery;
+	}
+
+	/**
+	 * Gets if the connection is being tested before
+	 * being returned from the pool.
+	 * 
+	 * @return True if tested, otherwise false.
+	 */
+	protected boolean isTestingOnBorrow() {
+		return this.testOnBorrow;
 	}
 
 	void recycle(Connection connection) {
@@ -146,26 +158,35 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
-	 * Sets the minimum number of concurrent connections.
+	 * Sets whether or not to test the connection when it
+	 * is requested from the pool.
 	 * 
-	 * @param count Minimum number of connections to have available.
+	 * @param value True to test, otherwise false.
 	 */
-	public void setMinimumConnections(int count) {
-		this.minimumConnections = count;
+	protected void setTestOnBorrow(boolean value) {
+		this.testOnBorrow = value;
+	}
+
+	/**
+	 * Sets the query to be used to test for valid connections
+	 * before returning them from the pool.
+	 * 
+	 * @param query Query to run the test with.
+	 */
+	protected void setValidationQuery(String query) {
+		this.validationQuery = query;
 	}
 
 	@Override
 	public void run() {
-		synchronized (SQLPooling.class) {
-			while (this.availableConnections.size() > this.getMinimumConnections()) {
-				Connection connection = this.availableConnections.lastElement();
-				this.availableConnections.removeElement(connection);
+		while (this.availableConnections.size() > 0) {
+			Connection connection = this.availableConnections.lastElement();
+			this.availableConnections.removeElement(connection);
 
-				try {
-					if (!connection.isClosed())
-						((RecoverableConnection)connection).closeOnly();
-				} catch (SQLException e) { }
-			}
+			try {
+				if (!connection.isClosed())
+					((RecoverableConnection)connection).closeOnly();
+			} catch (SQLException e) { }
 		}
 	}
 
