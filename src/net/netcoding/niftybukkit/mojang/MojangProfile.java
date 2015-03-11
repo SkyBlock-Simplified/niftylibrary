@@ -34,9 +34,7 @@ public class MojangProfile {
 	 */
 	public boolean belongsTo(OfflinePlayer oplayer) {
 		if (oplayer == null) return false;
-		if (!oplayer.getUniqueId().equals(this.getUniqueId())) return false;
-		if (!oplayer.getName().equals(this.getName())) return false;
-		return true;
+		return oplayer.getUniqueId().equals(this.getUniqueId());
 	}
 
 	@Override
