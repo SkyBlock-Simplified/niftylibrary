@@ -75,10 +75,9 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 		if (this.availableConnections != null) {
 			synchronized (SQLPooling.class) {
 				if (this.availableConnections.size() == 0) {
-					if (this.usedConnections.size() < this.getMaximumConnections()) {
+					if (this.usedConnections.size() < this.getMaximumConnections())
 						this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
-						System.out.println("New Recyclable Connection: #" + this.usedConnections.size());
-					} else {
+					else {
 						if (waitTime.equals(WaitTime.IMMEDIATELY))
 							throw new SQLException("Failed to borrow connection from the available pool!");
 						else {
@@ -186,7 +185,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 			try {
 				if (!connection.isClosed())
 					((RecoverableConnection)connection).closeOnly();
-			} catch (SQLException e) { }
+			} catch (SQLException sqlex) { }
 		}
 	}
 
