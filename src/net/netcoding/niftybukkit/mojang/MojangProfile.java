@@ -41,14 +41,11 @@ public class MojangProfile {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
 		if (obj == null) return false;
-		if (this.getClass() != obj.getClass()) return false;
+		if (!(obj instanceof MojangProfile)) return false;
+		if (this == obj) return true;
 		MojangProfile profile = (MojangProfile)obj;
-		if (!this.getUniqueId().equals(profile.getUniqueId())) return false;
-		if (!this.getName().equals(profile.getName())) return false;
-		if (this.updated > profile.updated) return false; 
-		return true;
+		return this.getUniqueId().equals(profile.getUniqueId());
 	}
 
 	/**
