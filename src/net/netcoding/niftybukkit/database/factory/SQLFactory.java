@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -18,6 +20,9 @@ import net.netcoding.niftybukkit.util.StringUtil;
  */
 public abstract class SQLFactory {
 
+	private static final List<String> INVALID_SCHEMAS = Arrays.asList("test", "information_schema");
+	private final String driver;
+	private final boolean driverAvailable;
 	private final String url;
 	private final Properties properties;
 	private String schema;
@@ -30,15 +35,9 @@ public abstract class SQLFactory {
 	 * @param pass Password of the database connection.
 	 * @throws SQLException
 	 */
-	public SQLFactory(String url, String user, String pass) throws SQLException {
-		Properties properties = new Properties();
-		properties.put("user", user);
-		properties.put("password", pass);
-		this.properties = properties;
-		this.url = url;
-
-		try (Connection connection = this._getConnection()) { }
-		this._getSchema();
+	@SuppressWarnings("serial")
+	public SQLFactory(String driver, String url, final String user, final String pass) throws SQLException {
+		this(driver, url, new Properties() {{ setProperty("user", user); setProperty("password", pass); }});
 	}
 
 	/**
@@ -48,12 +47,19 @@ public abstract class SQLFactory {
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
 	 */
-	public SQLFactory(String url, Properties properties) throws SQLException {
+	public SQLFactory(String driver, String url, Properties properties) throws SQLException {
+		try {
+			Class.forName(driver);
+			this.driverAvailable = true;
+			this.driver = driver;
+		} catch (ClassNotFoundException ex) {
+			throw new SQLException(StringUtil.format("The specific driver {0} is not available!", driver));
+		}
+
 		this.url = url;
 		this.properties = properties;
-
-		try (Connection connection = this._getConnection()) { }
-		this._getSchema();
+		try (Connection connection = this.getConnection()) { }
+		this.loadSchema();
 	}
 
 	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
@@ -106,13 +112,24 @@ public abstract class SQLFactory {
 	 * @throws SQLException
 	 */
 	protected Connection getConnection() throws SQLException {
-		return this._getConnection();
-	}
-
-	private Connection _getConnection() throws SQLException {
+		if (!this.isDriverAvailable()) throw new SQLException("The driver for this sql instance is unavailable!");
 		return DriverManager.getConnection(this.getUrl(), this.getProperties());
 	}
 
+	/**
+	 * Gets the registered driver class for this DBMS.
+	 * 
+	 * @return Registered driver class.
+	 */
+	public final String getDriver() {
+		return this.driver;
+	}
+
+	/**
+	 * Gets the properties used to create a connection for this DBMS.
+	 * 
+	 * @return Connection property details.
+	 */
 	protected Properties getProperties() {
 		return this.properties;
 	}
@@ -122,28 +139,8 @@ public abstract class SQLFactory {
 	 * 
 	 * @return Database name currently being used by connections.
 	 */
-	public String getSchema() {
+	public final String getSchema() {
 		return this.schema;
-	}
-
-	private void _getSchema() throws SQLException {
-		try (Connection connection = this._getConnection()) {
-			try (ResultSet result = connection.getMetaData().getCatalogs()) {
-				while (result.next()) {
-					String dbName = result.getString(1);
-					if ("mysql".equalsIgnoreCase(dbName)) continue;
-					if ("information_schema".equalsIgnoreCase(dbName)) continue;
-
-					if (this.url.endsWith(dbName)) {
-						this.schema = dbName;
-						break;
-					}
-				}
-			}
-
-			if (StringUtil.isEmpty(this.schema))
-				throw new SQLException("Unable to determine schema!");
-		}
 	}
 
 	/**
@@ -152,7 +149,35 @@ public abstract class SQLFactory {
 	 * @return Url for this DBMS.
 	 */
 	public String getUrl() {
-		return StringUtil.format("{0}?autoReconnect=true", this.url);
+		return StringUtil.format("{0}?autoReconnectForPools=true", this.url);
+	}
+
+	/**
+	 * Gets if the given jdbc driver is available.
+	 * 
+	 * @return True if driver available, otherwise false.
+	 */
+	public boolean isDriverAvailable() {
+		return this.driverAvailable;
+	}
+
+	private void loadSchema() throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (ResultSet result = connection.getMetaData().getCatalogs()) {
+				while (result.next()) {
+					String schema = result.getString(1);
+					if (INVALID_SCHEMAS.contains(schema)) continue;
+
+					if (this.url.endsWith(schema)) {
+						this.schema = schema;
+						break;
+					}
+				}
+			}
+
+			if (StringUtil.isEmpty(this.schema))
+				throw new SQLException("Unable to determine schema!");
+		}
 	}
 
 	/**
@@ -166,15 +191,21 @@ public abstract class SQLFactory {
 	 */
 	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
-			try (PreparedStatement statement = connection.prepareStatement(sql)) {
-				assignArgs(statement, args);
-				statement.executeQuery();
+			return this.query(connection, sql, callback, args);
+		}
+	}
 
-				if (callback != null)
-					return callback.handle(statement.getResultSet());
-				else
-					return null;
-			}
+	protected final <T> T query(Connection connection, String sql, ResultCallback<T> callback, Object... args) throws SQLException {
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			assignArgs(statement, args);
+			statement.executeQuery();
+
+			if (callback != null) {
+				try (ResultSet result = statement.getResultSet()) {
+					return callback.handle(result);
+				}
+			} else
+				return null;
 		}
 	}
 
@@ -186,7 +217,7 @@ public abstract class SQLFactory {
 	 * @throws SQLException
 	 */
 	public boolean setSchema(String schema) throws SQLException {
-		try (Connection connection = this._getConnection()) {
+		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement("USE ?;")) {
 				assignArgs(statement, schema);
 				return statement.executeUpdate() > 0;
