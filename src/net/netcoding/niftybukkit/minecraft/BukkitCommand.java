@@ -42,16 +42,11 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	public BukkitCommand(JavaPlugin plugin, String command) {
 		super(plugin);
 		if (StringUtil.isEmpty(command)) throw new IllegalArgumentException("Command cannot be null!");
+		if (this.getPlugin().getCommand(command) == null) throw new RuntimeException(StringUtil.format("Command ''{0}'' not defined in plugin {1}!", command, this.getPluginDescription().getName()));
 		this.command = this.getPlugin().getCommand(command);
-		if (this.getCommand() == null) throw new RuntimeException(StringUtil.format("Command ''{0}'' not defined in plugin {1}!", command, this.getPluginDescription().getName()));
-		this.permission = String.format("%s.%s", this.getPluginDescription().getName().toLowerCase(), command);
+		this.permission = StringUtil.notEmpty(this.getCommand().getPermission()) ? this.getCommand().getPermission() : StringUtil.format("{0}.{1}", this.getPluginDescription().getName().toLowerCase(), command);
+		this.getCommand().setPermission("");
 		this.getCommand().setPermissionMessage("");
-
-		if (StringUtil.notEmpty(this.getCommand().getPermission())) {
-			this.permission = this.getCommand().getPermission();
-			this.getCommand().setPermission("");
-		}
-
 		this.getCommand().setExecutor(this);
 	}
 
@@ -177,7 +172,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		}
 
 		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isOnline()) {
-			this.getLog().error(sender, "The command {{0}} requires BungeeCord!");
+			this.getLog().error(sender, "The command {{0}} requires BungeeCord!", this.getCommand().getName());
 			return;
 		}
 
