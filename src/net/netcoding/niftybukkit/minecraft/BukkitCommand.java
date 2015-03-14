@@ -267,8 +267,8 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	/**
 	 * Sets command to check for help.
 	 */
-	public void setHelpCheck() {
-		this.setHelpCheck(true);
+	public void setCheckHelp() {
+		this.setCheckHelp(true);
 	}
 
 	/**
@@ -276,7 +276,7 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	 * 
 	 * @param value true to only allow console, otherwise false
 	 */
-	public void setHelpCheck(boolean value) {
+	public void setCheckHelp(boolean value) {
 		this.helpCheck = value;
 	}
 
