@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 import net.netcoding.niftybukkit.yaml.converters.Converter;
@@ -33,11 +34,11 @@ import org.yaml.snakeyaml.representer.Representer;
 public class ConfigMapper extends BukkitHelper {
 
 	private final transient Yaml yaml;
-	private final transient Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
+	private final Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
 	private final transient NullRepresenter representer = new NullRepresenter();
 	protected final transient InternalConverter converter = new InternalConverter();
-	protected transient File CONFIG_FILE;
-	protected transient String[] CONFIG_HEADER;
+	protected File configFile;
+	protected String[] header;
 	protected transient ConfigSection root;
 
 	protected ConfigMapper(JavaPlugin plugin) {
@@ -46,13 +47,13 @@ public class ConfigMapper extends BukkitHelper {
 
 	protected ConfigMapper(JavaPlugin plugin, String fileName, String... header) {
 		super(plugin);
-		if (fileName != null) CONFIG_FILE = new File(this.getPlugin().getDataFolder(), fileName + (fileName.endsWith(".yml") ? "" : ".yml"));
-		CONFIG_HEADER = header;
+		if (fileName != null) this.configFile = new File(this.getPlugin().getDataFolder(), fileName + (fileName.endsWith(".yml") ? "" : ".yml"));
+		this.header = header;
 		DumperOptions options = new DumperOptions();
 		options.setIndent(2);
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		this.representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		this.yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), representer, options);
+		this.yaml = new Yaml(new CustomClassLoaderConstructor(ConfigMapper.class.getClassLoader()), this.representer, options);
 	}
 
 	public void addComment(String key, String value) {
@@ -113,11 +114,11 @@ public class ConfigMapper extends BukkitHelper {
 	}
 
 	protected void loadFromYaml() throws InvalidConfigurationException {
-		root = new ConfigSection();
+		this.root = new ConfigSection();
 
-		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(CONFIG_FILE), Charset.forName("UTF-8"))) {
-			Object object = yaml.load(fileReader);
-			if (object != null) convertMapsToSections((Map<?, ?>)object, root);
+		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(this.configFile), Charset.forName("UTF-8"))) {
+			Object object = this.yaml.load(fileReader);
+			if (object != null) convertMapsToSections((Map<?, ?>)object, this.root);
 		} catch (IOException | ClassCastException | YAMLException ex) {
 			throw new InvalidConfigurationException("Could not load YML", ex);
 		}
@@ -154,15 +155,15 @@ public class ConfigMapper extends BukkitHelper {
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {
-		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(CONFIG_FILE), Charset.forName("UTF-8"))) {
-			if (CONFIG_HEADER != null && CONFIG_HEADER.length > 0) {
-				for (String line : CONFIG_HEADER) fileWriter.write("# " + line + "\n");
+		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(this.configFile), Charset.forName("UTF-8"))) {
+			if (ListUtil.notEmpty(this.header)) {
+				for (String line : this.header) fileWriter.write("# " + line + "\n");
 				fileWriter.write("\n");
 			}
 
 			Integer depth = 0;
 			ArrayList<String> keyChain = new ArrayList<>();
-			String yamlString = yaml.dump(root.getValues(true));
+			String yamlString = this.yaml.dump(root.getValues(true));
 			StringBuilder writeLines = new StringBuilder();
 			String[] yamlSplit = yamlString.split("\n");
 
@@ -204,7 +205,7 @@ public class ConfigMapper extends BukkitHelper {
 				}
 
 				String search = (keyChain.size() > 0 ? StringUtil.implode(".", keyChain) : "");
-				if (comments.containsKey(search)) {
+				if (this.comments.containsKey(search)) {
 					for (String comment : comments.get(search)) {
 						writeLines.append(new String(new char[depth - 2]).replace("\0", " "));
 						writeLines.append("# ");
