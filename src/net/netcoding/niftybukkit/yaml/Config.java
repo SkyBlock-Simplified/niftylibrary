@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.FileSystems;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,38 +20,43 @@ import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Config extends ConfigMapper {
+public class Config extends ConfigMapper implements Runnable {
 
-	private transient boolean skipFailedConversion = false;
+	private boolean skipFailedConversion = false;
+	private int taskId = -1;
+	private WatchService watchService;
+	private WatchKey watchKey;
+	private boolean reloadProcessing = false;
 
 	public Config(JavaPlugin plugin) {
-		super(plugin);
-	}
-
-	public Config(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) {
-		super(plugin, fileName, header);
-		if (CONFIG_FILE == null) throw new IllegalArgumentException("Filename cannot be null!");
+		this(plugin, null);
 	}
 
 	public Config(JavaPlugin plugin, String fileName, String... header) {
 		this(plugin, fileName, false, header);
 	}
 
+	public Config(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) {
+		super(plugin, fileName, header);
+		if (this.configFile == null) throw new IllegalArgumentException("Filename cannot be null!");
+		this.setSuppressFailedConversions(skipFailedConversion);
+	}
+
 	public boolean delete() {
-		return CONFIG_FILE.delete();
+		return this.configFile.delete();
 	}
 
 	public boolean exists() {
-		return CONFIG_FILE.exists();
+		return this.configFile.exists();
 	}
 
 	public void init() throws InvalidConfigurationException {
 		if (!this.exists()) {
-			if (CONFIG_FILE.getParentFile() != null)
-				CONFIG_FILE.getParentFile().mkdirs();
+			if (this.configFile.getParentFile() != null)
+				this.configFile.getParentFile().mkdirs();
 
 			try {
-				CONFIG_FILE.createNewFile();
+				this.configFile.createNewFile();
 				this.save();
 			} catch (IOException ex) {
 				throw new InvalidConfigurationException("Could not create new empty config!", ex);
@@ -57,7 +67,7 @@ public class Config extends ConfigMapper {
 
 	public void init(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File cannot be null!");
-		CONFIG_FILE = file;
+		this.configFile = file;
 		this.init();
 	}
 
@@ -139,15 +149,24 @@ public class Config extends ConfigMapper {
 	}
 
 	public void load() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) throw new IllegalArgumentException("Cannot load config without file!");
+		if (this.configFile == null) throw new IllegalArgumentException("Cannot load config without file!");
 		this.loadFromYaml();
-		this.update(root);
+		this.onUpdate(this.root);
 		this.internalLoad(this.getClass());
 	}
 
+	/**
+	 * Called after the file is loaded but before the converter gets it.
+	 * <p>
+	 * Used to manually edit the passed root node when you updated the config.
+	 * 
+	 * @param configSection The root ConfigSection with all sub-nodes.
+	 */
+	public void onUpdate(ConfigSection configSection) { }
+
 	public void load(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File cannot be null!");
-		CONFIG_FILE = file;
+		this.configFile = file;
 		this.load();
 	}
 
@@ -157,7 +176,7 @@ public class Config extends ConfigMapper {
 	}
 
 	public void save() throws InvalidConfigurationException {
-		if (CONFIG_FILE == null) throw new IllegalArgumentException("Saving a config without given File");
+		if (this.configFile == null) throw new IllegalArgumentException("Cannot save a config without given File");
 		if (root == null) root = new ConfigSection();
 		this.clearComments();
 		this.internalSave(this.getClass());
@@ -166,23 +185,65 @@ public class Config extends ConfigMapper {
 
 	public void save(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File argument can not be null");
-		CONFIG_FILE = file;
+		this.configFile = file;
 		this.save();
 	}
 
-	public void setSuppressFailures() {
-		this.setSuppressFailures(true);
+	public void setSuppressFailedConversions() {
+		this.setSuppressFailedConversions(true);
 	}
 
-	public void setSuppressFailures(boolean suppress) {
+	public void setSuppressFailedConversions(boolean suppress) {
 		this.skipFailedConversion = suppress;
 	}
 
-	/**
-	 * This function gets called after the File has been loaded and before the Converter gets it.
-	 * This is used to manually edit the configSection when you updated the config or something
-	 * @param configSection The root ConfigSection with all Subnodes loaded into
-	 */
-	public void update(ConfigSection configSection) { }
+	public void startWatcher() {
+		if (this.taskId == -1) {
+			try {
+				this.watchService = FileSystems.getDefault().newWatchService();
+				this.watchKey = this.configFile.toPath().getParent().register(this.watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+				this.taskId = this.getPlugin().getServer().getScheduler().runTaskTimerAsynchronously(this.getPlugin(), this, 0L, 5L).getTaskId();
+			} catch (Exception ex) {
+				this.getLog().console("Unable to start watch service!", ex);
+			}
+		}
+	}
+
+	public void stopWatcher() {
+		if (this.taskId != -1) {
+			this.getPlugin().getServer().getScheduler().cancelTask(this.taskId);
+			this.taskId = -1;
+			this.watchKey.cancel();
+
+			try {
+				this.watchService.close();
+			} catch (IOException ioex) { }
+		}
+	}
+
+	@Override
+	public void run() {
+		WatchKey key = this.watchService.poll();
+		if (key == null) return;
+
+		for (WatchEvent<?> event : key.pollEvents()) {
+			if (StandardWatchEventKinds.OVERFLOW.equals(event.kind()))
+				continue;
+			else {
+				java.nio.file.Path context = (java.nio.file.Path)event.context();
+				String path = ((java.nio.file.Path)this.watchKey.watchable()).resolve(context).toString();
+
+				if (path.equals(this.configFile.toString())) {
+					if (!this.reloadProcessing) {
+						this.reloadProcessing = true;
+						this.reload();
+						this.reloadProcessing = false;
+					}
+				}
+			}
+
+			if (!key.reset()) break;
+		}
+	}
 
 }
