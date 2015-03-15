@@ -193,7 +193,16 @@ public class Config extends ConfigMapper implements Runnable {
 				if (path.equals(this.configFile.toString())) {
 					if (!this.reloadProcessing) {
 						this.reloadProcessing = true;
-						this.reload();
+						while (true) {
+							try {
+								this.reload();
+								break;
+							} catch (Exception ex) {
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException e) { }
+							}
+						}
 						this.reloadProcessing = false;
 					}
 				}
