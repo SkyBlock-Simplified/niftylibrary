@@ -185,6 +185,7 @@ public class ConfigMapper extends BukkitHelper {
 								break;
 						}
 
+						if (spaces == 0) writeLines.append("\n");
 						depth = spaces;
 						if (spaces == 0) {
 							keyChain = new ArrayList<>();
