@@ -175,6 +175,34 @@ public class Config extends ConfigMapper implements Runnable {
 		this.internalLoad(this.getClass());
 	}
 
+	@Override
+	public void run() {
+		WatchKey key = this.watchService.poll();
+		if (key == null) return;
+
+		for (WatchEvent<?> event : key.pollEvents()) {
+			if (StandardWatchEventKinds.OVERFLOW.equals(event.kind()))
+				continue;
+			else if (StandardWatchEventKinds.ENTRY_DELETE.equals(event.kind())) {
+				this.stopWatcher();
+				break;
+			} else if (StandardWatchEventKinds.ENTRY_MODIFY.equals(event.kind())) {
+				java.nio.file.Path context = (java.nio.file.Path)event.context();
+				String path = ((java.nio.file.Path)this.watchKey.watchable()).resolve(context).toString();
+
+				if (path.equals(this.configFile.toString())) {
+					if (!this.reloadProcessing) {
+						this.reloadProcessing = true;
+						this.reload();
+						this.reloadProcessing = false;
+					}
+				}
+			}
+
+			if (!key.reset()) break;
+		}
+	}
+
 	public void save() throws InvalidConfigurationException {
 		if (this.configFile == null) throw new IllegalArgumentException("Cannot save a config without given File");
 		if (root == null) root = new ConfigSection();
@@ -201,7 +229,7 @@ public class Config extends ConfigMapper implements Runnable {
 		if (this.taskId == -1) {
 			try {
 				this.watchService = FileSystems.getDefault().newWatchService();
-				this.watchKey = this.configFile.toPath().getParent().register(this.watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+				this.watchKey = this.configFile.toPath().getParent().register(this.watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 				this.taskId = this.getPlugin().getServer().getScheduler().runTaskTimerAsynchronously(this.getPlugin(), this, 0L, 5L).getTaskId();
 			} catch (Exception ex) {
 				this.getLog().console("Unable to start watch service!", ex);
@@ -218,31 +246,6 @@ public class Config extends ConfigMapper implements Runnable {
 			try {
 				this.watchService.close();
 			} catch (IOException ioex) { }
-		}
-	}
-
-	@Override
-	public void run() {
-		WatchKey key = this.watchService.poll();
-		if (key == null) return;
-
-		for (WatchEvent<?> event : key.pollEvents()) {
-			if (StandardWatchEventKinds.OVERFLOW.equals(event.kind()))
-				continue;
-			else {
-				java.nio.file.Path context = (java.nio.file.Path)event.context();
-				String path = ((java.nio.file.Path)this.watchKey.watchable()).resolve(context).toString();
-
-				if (path.equals(this.configFile.toString())) {
-					if (!this.reloadProcessing) {
-						this.reloadProcessing = true;
-						this.reload();
-						this.reloadProcessing = false;
-					}
-				}
-			}
-
-			if (!key.reset()) break;
 		}
 	}
 
