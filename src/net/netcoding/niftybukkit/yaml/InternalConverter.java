@@ -60,13 +60,13 @@ public class InternalConverter {
 			if (converter != null) {
 				field.set(config, converter.fromConfig(obj.getClass(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
-			} else {
-				converter = this.getConverter(field.getType());
+			}
 
-				if (converter != null) {
-					field.set(config, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
-					return;
-				}
+			converter = this.getConverter(field.getType());
+
+			if (converter != null) {
+				field.set(config, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				return;
 			}
 		} else {
 			converter = this.getConverter(field.getType());
@@ -104,13 +104,13 @@ public class InternalConverter {
 			if (converter != null) {
 				root.set(path, converter.toConfig(obj.getClass(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
-			} else {
-				converter = this.getConverter(field.getType());
+			}
 
-				if (converter != null) {
-					root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
-					return;
-				}
+			converter = this.getConverter(field.getType());
+
+			if (converter != null) {
+				root.set(path, converter.toConfig(field.getType(), obj, (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				return;
 			}
 		}
 

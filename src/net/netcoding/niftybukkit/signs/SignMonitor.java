@@ -197,10 +197,10 @@ public class SignMonitor extends BukkitListener {
 									if (breakEvent.isCancelled()) {
 										event.setCancelled(true);
 										return;
-									} else {
-										removeSigns.add(location);
-										break;
 									}
+
+									removeSigns.add(location);
+									break;
 								}
 							}
 						}

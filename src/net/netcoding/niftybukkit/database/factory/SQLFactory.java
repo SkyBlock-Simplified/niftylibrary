@@ -35,7 +35,6 @@ public abstract class SQLFactory {
 	 * @param pass Password of the database connection.
 	 * @throws SQLException
 	 */
-	@SuppressWarnings("serial")
 	public SQLFactory(String driver, String url, final String user, final String pass) throws SQLException {
 		this(driver, url, new Properties() {{ setProperty("user", user); setProperty("password", pass); }});
 	}
@@ -204,9 +203,10 @@ public abstract class SQLFactory {
 				try (ResultSet result = statement.getResultSet()) {
 					return callback.handle(result);
 				}
-			} else
-				return null;
+			}
 		}
+
+		return null;
 	}
 
 	/**

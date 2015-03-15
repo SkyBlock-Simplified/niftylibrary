@@ -28,8 +28,8 @@ public abstract class BukkitTabCommand extends BukkitCommand implements TabExecu
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		if (StringUtil.isEmpty(this.getCommand().getPermission()) || this.hasPermissions(sender, this.getCommand().getPermission()))
 			return this.onTabComplete(sender, label, args);
-		else
-			return Collections.emptyList();
+
+		return Collections.emptyList();
 	}
 
 	protected static <T> List<T> iterableToList(Iterator<T> list) {

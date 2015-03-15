@@ -33,8 +33,8 @@ public class Config extends Converter {
 
 		if (enclosingClass != null)
 			return type.getConstructor(enclosingClass).newInstance(newInstance(enclosingClass));
-		else
-			return type.newInstance();
+
+		return type.newInstance();
 	}
 
 	@Override

@@ -80,13 +80,12 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 					else {
 						if (waitTime.equals(WaitTime.IMMEDIATELY))
 							throw new SQLException("Failed to borrow connection from the available pool!");
-						else {
-							try {
-								Thread.sleep(waitTime.getWaitTime());
-							} catch (InterruptedException ex) { }
 
-							connection = this.getConnection();
-						}
+						try {
+							Thread.sleep(waitTime.getWaitTime());
+						} catch (InterruptedException ex) { }
+
+						connection = this.getConnection();
 					}
 				} else {
 					connection = this.availableConnections.firstElement();

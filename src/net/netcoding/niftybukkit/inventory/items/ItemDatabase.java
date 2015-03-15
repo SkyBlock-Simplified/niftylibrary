@@ -209,7 +209,8 @@ public class ItemDatabase extends BukkitHelper {
 
 				do {
 					final String line = reader.readLine();
-					if (line == null) break; else lines.add(line);
+					if (line == null) break;
+					lines.add(line);
 				} while (true);
 
 				return Collections.unmodifiableList(lines);

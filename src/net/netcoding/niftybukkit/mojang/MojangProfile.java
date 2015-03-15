@@ -72,8 +72,8 @@ public class MojangProfile {
 
 		if (player == null || player.getName().equals(this.name))
 			return this.name;
-		else
-			return this.name = player.getName();
+
+		return this.name = player.getName();
 	}
 
 	/**

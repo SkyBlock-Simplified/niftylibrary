@@ -149,8 +149,8 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 	protected boolean isHelp(String... args) {
 		if (args.length > 0 && args[args.length - 1].matches("^[\\?]{1,}|help$"))
 			return true;
-		else
-			return false;
+
+		return false;
 	}
 
 	@Override

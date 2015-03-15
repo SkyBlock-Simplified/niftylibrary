@@ -13,7 +13,7 @@ public class Array extends Converter {
 
 	private static <T> T[] getArray(Class<T> type, java.util.List<Object> list) {
 		T[] array = (T[])java.lang.reflect.Array.newInstance(type, list.size());
-		return (T[]) list.toArray(array);
+		return list.toArray(array);
 	}
 
 	@Override

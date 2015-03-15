@@ -61,8 +61,9 @@ public class Map extends Converter {
 			}
 
 			return map;
-		} else
-			return section;
+		}
+
+		return section;
 	}
 
 	@Override

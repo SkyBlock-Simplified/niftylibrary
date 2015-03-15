@@ -60,14 +60,13 @@ public class Reflection {
 
 		if (CONSTRUCTOR_CACHE.get(t) != null)
 			return CONSTRUCTOR_CACHE.get(t);
-		else {
-			for (Constructor<?> c : this.getClazz().getConstructors()) {
-				Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
 
-				if (equalsTypeArray(types, t)) {
-					CONSTRUCTOR_CACHE.put(types, c);
-					return c;
-				}
+		for (Constructor<?> c : this.getClazz().getConstructors()) {
+			Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
+
+			if (equalsTypeArray(types, t)) {
+				CONSTRUCTOR_CACHE.put(types, c);
+				return c;
 			}
 		}
 

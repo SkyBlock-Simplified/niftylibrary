@@ -79,25 +79,22 @@ public class InventoryWorkaround {
 				lastPartial.put(item.getType(), (nextPartial == -1 ? 0 : nextPartial));
 
 				if (nextPartial == -1) {
-					// Find empty slot
-					int firstFree = inventory.firstEmpty();
+					int firstFree = inventory.firstEmpty(); // Find empty slot
 
 					if (firstFree == -1) {
-						// No free space
-						leftover.put(i, item);
+						leftover.put(i, item); // No free space
 						break;
+					}
+
+					if (item.getAmount() > maxAmount) {
+						// More than a single stack!
+						ItemStack stack = item.clone();
+						stack.setAmount(maxAmount);
+						inventory.setItem(firstFree, stack);
+						item.setAmount(item.getAmount() - maxAmount);
 					} else {
-						if (item.getAmount() > maxAmount) {
-							// More than a single stack!
-							ItemStack stack = item.clone();
-							stack.setAmount(maxAmount);
-							inventory.setItem(firstFree, stack);
-							item.setAmount(item.getAmount() - maxAmount);
-						} else {
-							// Just store it
-							inventory.setItem(firstFree, item);
-							break;
-						}
+						inventory.setItem(firstFree, item); // Just store it
+						break;
 					}
 				} else {
 					ItemStack partialItem = inventory.getItem(nextPartial);
