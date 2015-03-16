@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class NiftyCommand extends BukkitCommand {
+final class NiftyCommand extends BukkitCommand {
 
 	public NiftyCommand(JavaPlugin plugin) {
 		super(plugin, "nifty");

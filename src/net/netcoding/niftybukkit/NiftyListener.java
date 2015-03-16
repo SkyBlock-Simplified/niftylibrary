@@ -9,7 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-class NiftyListener extends BukkitListener {
+final class NiftyListener extends BukkitListener {
 
 	NiftyListener(JavaPlugin plugin) {
 		super(plugin);

@@ -17,7 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class NiftyBukkit extends BukkitPlugin {
+public final class NiftyBukkit extends BukkitPlugin {
 
 	private final static transient ConcurrentHashMap<String, List<String>> PLUGINS = new ConcurrentHashMap<>();
 	private static transient BukkitPlugin plugin;
