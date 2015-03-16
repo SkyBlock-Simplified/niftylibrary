@@ -15,6 +15,7 @@ import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerUnloadedEvent;
+import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
@@ -388,8 +389,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
-							for (MojangProfile profile : server.playerList) {
+							for (final MojangProfile profile : server.playerList) {
 								if (profile.getUniqueId().equals(uniqueId)) {
+									if (server.isCurrentServer()) server.playersLeft.add(profile);
 									server.playerList.remove(profile);
 									manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
 									break;
@@ -473,14 +475,28 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			super(NiftyBukkit.getPlugin());
 		}
 
-		@EventHandler
-		public void onPlayerKick(PlayerKickEvent event) {
-			System.out.println("quit: " + event.getPlayer().getName());
+		@SuppressWarnings("deprecation")
+		private void handleDisconnect(Player player, boolean kicked) {
+			MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
+
+			if (NiftyBukkit.getBungeeHelper().isDetected()) {
+				profile.getServer().playersLeft.remove(profile);
+
+				if (this.getPlugin().getServer().getOnlinePlayers().length == 1)
+					profile.getServer().reset();
+			}
+
+			this.getPlugin().getServer().getPluginManager().callEvent(new PlayerDisconnectEvent(profile, kicked));
 		}
 
 		@EventHandler
-		public void onPlayerLeave(PlayerQuitEvent event) {
-			System.out.println("quit: " + event.getPlayer().getName());
+		public void onPlayerKick(PlayerKickEvent event) {
+			this.handleDisconnect(event.getPlayer(), true);
+		}
+
+		@EventHandler
+		public void onPlayerQuit(PlayerQuitEvent event) {
+			this.handleDisconnect(event.getPlayer(), true);
 		}
 		
 	}
