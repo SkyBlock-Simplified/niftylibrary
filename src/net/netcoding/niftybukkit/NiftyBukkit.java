@@ -77,7 +77,7 @@ public class NiftyBukkit extends BukkitPlugin {
 			RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 			return (permissionProvider != null ? permissionProvider.getProvider() : null);
 		} catch (NoClassDefFoundError ex) { }
-	
+
 		return null;
 	}
 
@@ -108,28 +108,28 @@ public class NiftyBukkit extends BukkitPlugin {
 		}
 
 		@Override
-		public void publish(LogRecord record) {
-			record.setMessage("");
+		public void close() throws SecurityException { }
 
+		@Override
+		public void flush() { }
+
+		@Override
+		public void publish(LogRecord record) {
 			if (record.getThrown() != null) {
 				String pluginName = this.plugin != null ? this.plugin.getName() : null;
 
 				if (StringUtil.isEmpty(pluginName)) {
-					String[] parts = record.getLoggerName().split(".");
-					Plugin plugin = NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(parts[parts.length - 1]);
-					if (plugin != null) pluginName = parts[parts.length - 1];
+					try {
+						String[] parts = record.getLoggerName().split("\\.");
+						Plugin plugin = NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(parts[parts.length - 1]);
+						if (plugin != null) pluginName = parts[parts.length - 1];
+					} catch (Exception ex) { }
 				}
 
 				PLUGINS.get(StringUtil.isEmpty(pluginName) ? "Bukkit" : pluginName).add(record.getThrown().getMessage());
 			}
 		}
 
-		@Override
-		public void flush() { }
-
-		@Override
-		public void close() throws SecurityException { }
-		
 	}
 
 }
