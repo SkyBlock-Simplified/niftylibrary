@@ -21,6 +21,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
@@ -54,11 +55,6 @@ public class MojangRepository {
 
 	private static URL getNamesUrl(UUID uniqueId) throws MalformedURLException {
 		return new URL(StringUtil.format("https://api.mojang.com/user/profiles/{0}/names", uniqueId.toString().replace("-", "")));
-	}
-
-	@Deprecated
-	public MojangProfile searchByExactPlayer(OfflinePlayer player) throws ProfileNotFoundException {
-		return searchByPlayer(player);
 	}
 
 	/**
@@ -99,7 +95,7 @@ public class MojangRepository {
 		List<MojangProfile> profiles = new ArrayList<>();
 		ConcurrentList<OfflinePlayer> foplayers = new ConcurrentList<>(oplayers);
 
-		if (NiftyBukkit.getBungeeHelper().isOnline()) {
+		if (NiftyBukkit.getBungeeHelper().isDetected()) {
 			for (OfflinePlayer oplayer : foplayers) {
 				for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getServer().getPlayerList()) {
 					if (profile.belongsTo(oplayer)) {
@@ -121,13 +117,8 @@ public class MojangRepository {
 
 		if (profiles.size() == 0)
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.OFFLINE_PLAYERS, ListUtil.toArray(oplayers, OfflinePlayer.class));
-		else
-			return ListUtil.toArray(profiles, MojangProfile.class);
-	}
 
-	@Deprecated
-	public MojangProfile searchByExactUsername(String username) throws ProfileNotFoundException {
-		return searchByUsername(username);
+		return ListUtil.toArray(profiles, MojangProfile.class);
 	}
 
 	/**
@@ -182,6 +173,9 @@ public class MojangRepository {
 		List<MojangProfile> profiles = new ArrayList<>();
 		ConcurrentList<String> userList = new ConcurrentList<>(usernames);
 
+		if (!Bukkit.getServer().getOnlineMode() && !NiftyBukkit.getBungeeHelper().isOnlineMode())
+			useApi = false;
+
 		if (CACHE.size() > 0) {
 			for (String name : userList) {
 				for (MojangProfile profile : CACHE) {
@@ -209,32 +203,30 @@ public class MojangRepository {
 			}
 		}
 
-		if (userList.size() > 0) {
-			if (NiftyBukkit.getBungeeHelper().isOnline()) {
-				for (String name : userList) {
-					String criteriaName = name.toLowerCase();
+		if (NiftyBukkit.getBungeeHelper().isDetected()) {
+			for (String name : userList) {
+				String criteriaName = name.toLowerCase();
 
-					for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
-						if (server.isOnline()) {
-							MojangProfile found = null;
+				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
+					if (server.isOnline()) {
+						MojangProfile found = null;
 
+						for (MojangProfile profile : server.getPlayerList()) {
+							if (profile.getName().equalsIgnoreCase(criteriaName)) found = profile;
+							if (found != null) break;
+						}
+
+						if (found == null) {
 							for (MojangProfile profile : server.getPlayerList()) {
-								if (profile.getName().equalsIgnoreCase(criteriaName)) found = profile;
+								if (profile.getName().toLowerCase().startsWith(criteriaName)) found = profile;
 								if (found != null) break;
 							}
+						}
 
-							if (found == null) {
-								for (MojangProfile profile : server.getPlayerList()) {
-									if (profile.getName().toLowerCase().startsWith(criteriaName)) found = profile;
-									if (found != null) break;
-								}
-							}
-
-							if (found != null) {
-								profiles.add(found);
-								userList.remove(name);
-								break;
-							}
+						if (found != null) {
+							profiles.add(found);
+							userList.remove(name);
+							break;
 						}
 					}
 				}
@@ -243,12 +235,15 @@ public class MojangRepository {
 
 		for (String name : userList) {
 			@SuppressWarnings("deprecation")
-			OfflinePlayer offlinePlayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
+			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
+			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
+			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
 
-			if (!useApi && offlinePlayer != null) {
+			if (oplayer != null && useOfflineId) {
 				JsonObject json = new JsonObject();
-				json.addProperty("id", offlinePlayer.getUniqueId().toString());
-				json.addProperty("name", offlinePlayer.getName());
+				json.addProperty("id", oplayer.getUniqueId().toString());
+				json.addProperty("name", oplayer.getName());
 				profiles.add(GSON.fromJson(json.toString(), MojangProfile.class));
 				userList.remove(name);
 			}
@@ -323,13 +318,8 @@ public class MojangRepository {
 
 		if (profiles.size() == 0)
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.USERNAMES, ListUtil.toArray(usernames, String.class));
-		else
-			return ListUtil.toArray(profiles, MojangProfile.class);
-	}
 
-	@Deprecated
-	public MojangProfile searchByExactUUID(final UUID uniqueId) throws ProfileNotFoundException {
-		return this.searchByUniqueId(uniqueId);
+		return ListUtil.toArray(profiles, MojangProfile.class);
 	}
 
 	/**
@@ -354,8 +344,9 @@ public class MojangRepository {
 	public MojangProfile searchByUniqueId(final UUID uniqueId, boolean useApi) throws ProfileNotFoundException {
 		if (uniqueId == null) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, uniqueId);
 		MojangProfile found = null;
-		OfflinePlayer offlinePlayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
-		UUID offlineUniqueId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", offlinePlayer.getName()).getBytes(Charsets.UTF_8));
+
+		if (!Bukkit.getServer().getOnlineMode() && !NiftyBukkit.getBungeeHelper().isOnlineMode())
+			useApi = false;
 
 		if (CACHE.size() > 0) {
 			for (MojangProfile profile : CACHE) {
@@ -372,7 +363,7 @@ public class MojangRepository {
 		}
 
 		if (found == null) {
-			if (NiftyBukkit.getBungeeHelper().isOnline()) {
+			if (NiftyBukkit.getBungeeHelper().isDetected()) {
 				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
 					if (server.isOnline()) {
 						for (MojangProfile profile : server.getPlayerList()) {
@@ -389,15 +380,21 @@ public class MojangRepository {
 		}
 
 		if (found == null) {
-			if (!useApi && offlinePlayer != null) {
+			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
+			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
+			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
+
+			if (oplayer != null && useOfflineId) {
 				JsonObject json = new JsonObject();
-				json.addProperty("id", offlinePlayer.getUniqueId().toString());
-				json.addProperty("name", offlinePlayer.getName());
+				json.addProperty("id", oplayer.getUniqueId().toString());
+				json.addProperty("name", oplayer.getName());
 				found = GSON.fromJson(json.toString(), MojangProfile.class);
 			}
 		}
 
-		if (useApi && found == null && (offlinePlayer == null || !offlinePlayer.getUniqueId().equals(offlineUniqueId))) {
+
+		if (useApi && found == null) {
 			try {
 				long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 				if (wait > 0) Thread.sleep(wait);
@@ -425,8 +422,8 @@ public class MojangRepository {
 
 		if (found == null)
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.UNIQUE_ID, uniqueId);
-		else
-			return found;
+
+		return found;
 	}
 
 	@SuppressWarnings("unused")
@@ -453,10 +450,10 @@ public class MojangRepository {
 
 		@EventHandler
 		public void onPlayerPostLogin(final PlayerPostLoginEvent event) {
-			UUID uuid = event.getProfile().getUniqueId();
-			String name = event.getProfile().getName();
+			if (NiftyBukkit.getBungeeHelper().isDetected()) {
+				UUID uuid = event.getProfile().getUniqueId();
+				String name = event.getProfile().getName();
 
-			if (NiftyBukkit.getBungeeHelper().isOnline()) {
 				for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
 					if (profile.getUniqueId().equals(uuid) || profile.getName().equalsIgnoreCase(name)) {
 						for (MojangProfile cache : CACHE) {
