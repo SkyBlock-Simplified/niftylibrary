@@ -12,14 +12,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class BukkitHelper {
 
 	private final transient JavaPlugin javaPlugin;
-	private final transient Log logger;
+	private final transient BukkitLogger logger;
 
 	public BukkitHelper(JavaPlugin plugin) {
 		this.javaPlugin = plugin;
-		this.logger = new Log(plugin);
+		this.logger = new BukkitLogger(plugin);
 	}
 
-	public Log getLog() {
+	public BukkitLogger getLog() {
 		return this.logger;
 	}
 

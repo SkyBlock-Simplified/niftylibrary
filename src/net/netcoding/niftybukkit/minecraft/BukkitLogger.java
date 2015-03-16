@@ -10,11 +10,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Log {
+public class BukkitLogger {
 
 	private final transient Logger logger;
 
-	public Log(JavaPlugin plugin) {
+	public BukkitLogger(JavaPlugin plugin) {
 		this.logger = plugin.getLogger();
 	}
 

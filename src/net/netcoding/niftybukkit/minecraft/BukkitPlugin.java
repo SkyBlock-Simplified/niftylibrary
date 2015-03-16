@@ -10,13 +10,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitPlugin extends JavaPlugin {
 
-	private final transient Log log;
+	private final transient BukkitLogger log;
 
 	public BukkitPlugin() {
-		this.log = new Log(this);
+		this.log = new BukkitLogger(this);
 	}
 
-	public Log getLog() {
+	public BukkitLogger getLog() {
 		return this.log;
 	}
 
