@@ -6,7 +6,6 @@ import java.util.Iterator;
 import net.netcoding.niftybukkit.minecraft.BukkitCommand;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.BukkitLogger;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.NumberUtil;
@@ -105,7 +104,7 @@ public class NiftyCommand extends BukkitCommand {
 		}
 
 		public int getErrorCount() {
-			return BukkitLogger.getPluginCache(this.getPlugin().getName()).size();
+			return NiftyBukkit.getPluginCache(this.getPlugin().getName()).size();
 		}
 
 		public String getErrors() {
