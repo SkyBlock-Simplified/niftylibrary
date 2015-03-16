@@ -1,16 +1,20 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -19,7 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * bukkits default permission errors. Also has a simple method to show custom usage
  * messages to {@link CommandSender}.
  */
-public abstract class BukkitCommand extends BukkitHelper implements CommandExecutor {
+public abstract class BukkitCommand extends BukkitHelper {
 
 	private PluginCommand command = null;
 	private boolean consoleOnly = false;
@@ -47,10 +51,9 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		this.permission = StringUtil.notEmpty(this.getCommand().getPermission()) ? this.getCommand().getPermission() : StringUtil.format("{0}.{1}", this.getPluginDescription().getName().toLowerCase(), command);
 		this.getCommand().setPermission("");
 		this.getCommand().setPermissionMessage("");
-		this.getCommand().setExecutor(this);
+		this.getCommand().setExecutor(new BukkitCommandExecutor(this));
+		this.getCommand().setTabCompleter(new BukkitTabCompleter(this));
 	}
-
-	public abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
 
 	/**
 	 * Sets a custom usage based on label or argument.
@@ -153,11 +156,10 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		return false;
 	}
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		this.processCommand(sender, label, args);
-		this.removeArgs(sender, args);
-		return true;
+	protected abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
+
+	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) {
+		return Collections.<String>emptyList();
 	}
 
 	private void processCommand(CommandSender sender, String label, String[] args) {
@@ -360,6 +362,48 @@ public abstract class BukkitCommand extends BukkitHelper implements CommandExecu
 		}
 
 		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
+	}
+
+	private class BukkitCommandExecutor implements CommandExecutor {
+
+		private final BukkitCommand command;
+
+		public BukkitCommandExecutor(BukkitCommand command) {
+			this.command = command;
+		}
+
+		public BukkitCommand getCommand() {
+			return this.command;
+		}
+
+		@Override
+		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+			this.getCommand().processCommand(sender, label, args);
+			this.getCommand().removeArgs(sender, args);
+			return true;
+		}
+
+	}
+
+	private class BukkitTabCompleter implements TabCompleter {
+
+		private final BukkitCommand command;
+
+		public BukkitTabCompleter(BukkitCommand command) {
+			this.command = command;
+		}
+
+		public BukkitCommand getCommand() {
+			return this.command;
+		}
+
+		@Override
+		public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+			List<String> complete = new ArrayList<>();
+			if (sender.hasPermission(this.getCommand().permission)) complete = this.getCommand().onTabComplete(sender, label, args);
+			return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
+		}
+
 	}
 
 }
