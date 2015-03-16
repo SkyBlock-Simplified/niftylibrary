@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit.minecraft;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.Set;
 
 import net.netcoding.niftybukkit.mojang.MojangProfile;
@@ -16,17 +15,16 @@ public class BungeeServer extends MinecraftServer {
 		this.serverName = serverName;
 	}
 
-	@Override
-	public Set<MojangProfile> getPlayerList() {
-		ConcurrentSet<MojangProfile> totalList = new ConcurrentSet<>();
-		totalList.addAll(this.playerList);
-		if (this.isCurrentServer()) totalList.addAll(this.playersLeft);
-		return Collections.unmodifiableSet(totalList);
+	Set<MojangProfile> getTotalPlayerList() {
+		ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>(super.getPlayerList());
+		playerList.addAll(this.playersLeft);
+		return playerList;
 	}
 
 	@Override
 	public void reset() {
 		super.reset();
+		this.playersLeft.clear();
 		this.loadedOnce = false;
 	}
 

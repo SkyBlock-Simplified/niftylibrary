@@ -475,16 +475,24 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			super(NiftyBukkit.getPlugin());
 		}
 
-		@SuppressWarnings("deprecation")
 		private void handleDisconnect(Player player, boolean kicked) {
-			MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
+			MojangProfile profile = null;
 
 			if (NiftyBukkit.getBungeeHelper().isDetected()) {
+				for (MojangProfile left : NiftyBukkit.getBungeeHelper().getServer().getTotalPlayerList()) {
+					if (left.belongsTo(player)) {
+						profile = left;
+						break;
+					}
+				}
+
+				profile.getServer().playerList.remove(profile);
 				profile.getServer().playersLeft.remove(profile);
 
-				if (this.getPlugin().getServer().getOnlinePlayers().length == 1)
+				if (profile.getServer().getPlayerCount() == 0)
 					profile.getServer().reset();
-			}
+			} else
+				profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
 
 			this.getPlugin().getServer().getPluginManager().callEvent(new PlayerDisconnectEvent(profile, kicked));
 		}
