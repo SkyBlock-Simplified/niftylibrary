@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.OfflinePlayer;
@@ -77,12 +78,21 @@ public class MojangProfile {
 	}
 
 	/**
-	 * Gets the players offline player object associated to this UUID.
+	 * Gets the players offline player object associated to this profile.
 	 * 
-	 * @return Offline player object.
+	 * @return Offline Offline player object.
 	 */
 	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
+	}
+
+	/**
+	 * Gets the server this profile belongs to.
+	 * 
+	 * @return BungeeServer Server object.
+	 */
+	public BungeeServer getServer() {
+		return NiftyBukkit.getBungeeHelper().getPlayerServer(this);
 	}
 
 	/**
@@ -132,7 +142,7 @@ public class MojangProfile {
 	 * 
 	 * @return True if online, otherwise false.
 	 */
-	public boolean isOnline() {
+	public boolean isOnlineAnywhere() {
 		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
 	}
 
