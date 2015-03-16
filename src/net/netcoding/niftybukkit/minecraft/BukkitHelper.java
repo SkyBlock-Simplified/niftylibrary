@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class BukkitHelper {
+public abstract class BukkitHelper {
 
 	private final transient JavaPlugin javaPlugin;
 	private final transient Log logger;

@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class BukkitPlugin extends JavaPlugin {
+public abstract class BukkitPlugin extends JavaPlugin {
 
 	private final transient Log log;
 
