@@ -5,3 +5,15 @@ author: Brian Graham (CraftedFury)
 
 main: net.netcoding.niftybukkit.NiftyBukkit
 softdepend: [Vault, ProtocolLib]
+
+commands:
+  nifty:
+    description: Show status of plugins using NiftyBukkit
+    usage: /<command> [page|plugin]
+
+permissions:
+  niftybukkit.*:
+    description: Gives access to all plugin commands
+    children:
+      niftybukkit.nifty:
+        description: Show status of plugins using NiftyBukkit

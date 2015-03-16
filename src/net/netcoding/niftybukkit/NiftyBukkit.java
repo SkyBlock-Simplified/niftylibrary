@@ -10,17 +10,24 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class NiftyBukkit extends BukkitPlugin {
 
-	private static transient BukkitPlugin plugin;
+	//private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
 	private static transient MojangRepository repository;
 	private static transient BungeeHelper bungeeHelper;
 
 	@Override
 	public void onEnable() {
-		plugin = this;
+		//plugin = this;
+
+		this.getLog().console("Registering Commands");
+		new NiftyCommand(this);
+
+		this.getLog().console("Registering Listeners");
+		new NiftyListener(this);
+
+		this.getLog().console("Registering Helpers");
 		repository = new MojangRepository();
 		(itemDatabase = new ItemDatabase(this)).reload();
-		new NiftyListener(this);
 		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 	}
 
@@ -42,7 +49,7 @@ public class NiftyBukkit extends BukkitPlugin {
 	}
 
 	public static BukkitPlugin getPlugin() {
-		return plugin;
+		return getPlugin(NiftyBukkit.class);
 	}
 
 	public static net.milkbowl.vault.permission.Permission getPermissions() {

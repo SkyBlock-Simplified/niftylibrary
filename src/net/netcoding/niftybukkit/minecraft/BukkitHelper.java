@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -11,43 +12,49 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitHelper {
 
+	private final static transient ConcurrentList<String> PLUGINS = new ConcurrentList<>();
 	private final transient JavaPlugin javaPlugin;
 	private final transient BukkitLogger logger;
 
 	public BukkitHelper(JavaPlugin plugin) {
 		this.javaPlugin = plugin;
 		this.logger = new BukkitLogger(plugin);
+		PLUGINS.add(this.getPluginDescription().getName());
 	}
 
-	public BukkitLogger getLog() {
+	public final BukkitLogger getLog() {
 		return this.logger;
 	}
 
-	public JavaPlugin getPlugin() {
+	public final JavaPlugin getPlugin() {
 		return this.javaPlugin;
 	}
 
-	public <T extends JavaPlugin> T getPlugin(Class<T> plugin) {
+	public final <T extends JavaPlugin> T getPlugin(Class<T> plugin) {
 		return plugin.cast(this.getPlugin());
 	}
 
-	public PluginDescriptionFile getPluginDescription() {
+	public final static ConcurrentList<String> getPluginCache() {
+		return PLUGINS;
+	}
+
+	public final PluginDescriptionFile getPluginDescription() {
 		return this.getPlugin().getDescription();
 	}
 
-	public boolean hasPermissions(MojangProfile profile, String... permissions) {
+	public final boolean hasPermissions(MojangProfile profile, String... permissions) {
 		return this.hasPermissions(profile, false, permissions);
 	}
 
-	public boolean hasPermissions(MojangProfile profile, boolean defaultError, String... permissions) {
+	public final boolean hasPermissions(MojangProfile profile, boolean defaultError, String... permissions) {
 		return profile.getOfflinePlayer().isOnline() ? this.hasPermissions(profile.getOfflinePlayer().getPlayer(), defaultError, permissions) : false;
 	}
 
-	public boolean hasPermissions(CommandSender sender, String... permissions) {
+	public final boolean hasPermissions(CommandSender sender, String... permissions) {
 		return this.hasPermissions(sender, false, permissions);
 	}
 
-	public boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
+	public final boolean hasPermissions(CommandSender sender, boolean defaultError, String... permissions) {
 		if (isConsole(sender)) return true;
 		String permission = StringUtil.format("{0}.{1}", this.getPlugin().getDescription().getName().toLowerCase(), StringUtil.implode(".", permissions));
 		boolean hasPerms = sender.hasPermission(permission);

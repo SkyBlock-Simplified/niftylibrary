@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.util.ListUtil;
@@ -25,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public abstract class BukkitCommand extends BukkitHelper {
 
+	private final static transient ConcurrentHashMap<String, Integer> PLUGINS = new ConcurrentHashMap<>();
 	private PluginCommand command = null;
 	private boolean consoleOnly = false;
 	private boolean playerOnly = false;
@@ -53,6 +55,11 @@ public abstract class BukkitCommand extends BukkitHelper {
 		this.getCommand().setPermissionMessage("");
 		this.getCommand().setExecutor(new BukkitCommandExecutor(this));
 		this.getCommand().setTabCompleter(new BukkitTabCompleter(this));
+
+		if (!PLUGINS.keySet().contains(this.getPlugin().getName()))
+			PLUGINS.put(this.getPlugin().getName(), 1);
+		else
+			PLUGINS.put(this.getPlugin().getName(), PLUGINS.get(this.getPlugin().getName()) + 1);
 	}
 
 	/**
@@ -82,6 +89,10 @@ public abstract class BukkitCommand extends BukkitHelper {
 		List<String> properArgs = this.getProperArgs(args);
 		int size = properArgs.size();
 		return (size > 0 ? properArgs.get(size - 1) : "");
+	}
+
+	public final static int getPluginCache(String pluginName) {
+		return PLUGINS.keySet().contains(pluginName) ? PLUGINS.get(pluginName) : 0;
 	}
 
 	private List<String> getProperArgs(String... args) {

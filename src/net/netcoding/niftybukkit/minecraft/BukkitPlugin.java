@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -10,14 +11,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class BukkitPlugin extends JavaPlugin {
 
+	private final static transient ConcurrentList<String> PLUGINS = new ConcurrentList<>();
 	private final transient BukkitLogger log;
 
 	public BukkitPlugin() {
 		this.log = new BukkitLogger(this);
+		PLUGINS.add(this.getDescription().getName());
 	}
 
 	public BukkitLogger getLog() {
 		return this.log;
+	}
+
+	public final static ConcurrentList<String> getPluginCache() {
+		return PLUGINS;
 	}
 
 	public boolean hasPermissions(MojangProfile profile, String... permissions) {
