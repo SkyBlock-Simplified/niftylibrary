@@ -25,6 +25,7 @@ public abstract class SQLFactory {
 	private final boolean driverAvailable;
 	private final String url;
 	private final Properties properties;
+	private String product;
 	private String schema;
 
 	/**
@@ -58,6 +59,7 @@ public abstract class SQLFactory {
 		this.url = url;
 		this.properties = properties;
 		try (Connection connection = this.getConnection()) { }
+		this.loadProduct();
 		this.loadSchema();
 	}
 
@@ -99,7 +101,7 @@ public abstract class SQLFactory {
 	public boolean createTable(String name, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}) ENGINE=InnoDB;", this.getSchema(), name, sql)) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", this.getSchema(), name, sql, (this.getProduct().equals("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
 			}
 		}
 	}
@@ -122,6 +124,10 @@ public abstract class SQLFactory {
 	 */
 	public final String getDriver() {
 		return this.driver;
+	}
+
+	public final String getProduct() {
+		return this.product;
 	}
 
 	/**
@@ -158,6 +164,15 @@ public abstract class SQLFactory {
 	 */
 	public boolean isDriverAvailable() {
 		return this.driverAvailable;
+	}
+
+	private void loadProduct() throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			this.product = connection.getMetaData().getDatabaseProductName();
+		}
+
+		if (StringUtil.isEmpty(this.product))
+			throw new SQLException("Unable to determine product name!");
 	}
 
 	private void loadSchema() throws SQLException {
