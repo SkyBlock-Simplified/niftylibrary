@@ -11,6 +11,7 @@ import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.MojangRepository;
+import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -32,6 +33,8 @@ public class NiftyBukkit extends BukkitPlugin {
 		(itemDatabase = new ItemDatabase(this)).reload();
 		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 
+		PLUGINS.put("Bukkit", new ArrayList<String>());
+		Bukkit.getLogger().addHandler(new LogHandler());
 		for (Plugin plugin : NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugins()) {
 			PLUGINS.put(plugin.getName(), new ArrayList<String>());
 			plugin.getLogger().addHandler(new LogHandler(plugin));
@@ -96,14 +99,29 @@ public class NiftyBukkit extends BukkitPlugin {
 
 		private final transient Plugin plugin;
 
+		public LogHandler() {
+			this(null);
+		}
+
 		public LogHandler(Plugin plugin) {
 			this.plugin = plugin;
 		}
 
 		@Override
 		public void publish(LogRecord record) {
-			if (record.getThrown() != null)
-				PLUGINS.get(this.plugin.getName()).add(record.getThrown().getMessage());
+			record.setMessage("");
+
+			if (record.getThrown() != null) {
+				String pluginName = this.plugin != null ? this.plugin.getName() : null;
+
+				if (StringUtil.isEmpty(pluginName)) {
+					String[] parts = record.getLoggerName().split(".");
+					Plugin plugin = NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(parts[parts.length - 1]);
+					if (plugin != null) pluginName = parts[parts.length - 1];
+				}
+
+				PLUGINS.get(StringUtil.isEmpty(pluginName) ? "Bukkit" : pluginName).add(record.getThrown().getMessage());
+			}
 		}
 
 		@Override
