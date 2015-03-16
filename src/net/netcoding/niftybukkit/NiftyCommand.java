@@ -12,7 +12,9 @@ import net.netcoding.niftybukkit.util.NumberUtil;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.HandlerList;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 final class NiftyCommand extends BukkitCommand {
@@ -92,7 +94,7 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public String getBukkitCommands() {
-			return ChatColor.GREEN.toString() + this.getBukkitCommandCount();
+			return (this.getBukkitCommandCount() == this.getTotalCommandCount() ? ChatColor.GREEN.toString() : "") + this.getBukkitCommandCount();
 		}
 
 		public int getBukkitListenerCount() {
@@ -100,7 +102,7 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public String getBukkitListeners() {
-			return ChatColor.GREEN.toString() + this.getBukkitListenerCount();
+			return (this.getBukkitListenerCount() == this.getTotalListenerCount() ? ChatColor.GREEN.toString() : "") + this.getBukkitListenerCount();
 		}
 
 		public int getErrorCount() {
@@ -120,16 +122,16 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public int getTotalCommandCount() {
-			int totalCmds = 0;
+			int totalCommands = 0;
 
 			for (HelpTopic topic : this.getPlugin().getServer().getHelpMap().getHelpTopics()) {
 				if (topic.getName().equals(this.getPlugin().getName())) {
-					totalCmds = topic.getFullText(this.getPlugin().getServer().getConsoleSender()).split("\n").length - 1;
+					totalCommands = topic.getFullText(this.getPlugin().getServer().getConsoleSender()).split("\n").length - 1;
 					break;
 				}
 			}
 
-			return totalCmds;
+			return totalCommands;
 		}
 
 		public String getTotalCommands() {
@@ -137,11 +139,25 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public int getTotalListenerCount() {
-			return -1;
+			int totalListeners = 0;
+			HashSet<String> used = new HashSet<>();
+
+			for (RegisteredListener listener : HandlerList.getRegisteredListeners(this.getPlugin())) {
+				Class<?> clazz = listener.getListener().getClass();
+
+				if (!used.contains(clazz.getName())) {
+					if (BukkitListener.class.isAssignableFrom(clazz)) {
+						used.add(clazz.getName());
+						totalListeners++;
+					}
+				}
+			}
+
+			return totalListeners;
 		}
 
 		public String getTotalListeners() {
-			return (this.getBukkitListenerCount() == this.getTotalListenerCount() ? ChatColor.GREEN.toString() : "") + "??";
+			return (this.getBukkitListenerCount() == this.getTotalListenerCount() ? ChatColor.GREEN.toString() : "") + this.getTotalListenerCount();
 		}
 
 		public String getUsingBukkitPlugin() {

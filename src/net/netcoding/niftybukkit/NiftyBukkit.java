@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +11,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.MojangRepository;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -19,7 +19,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public final class NiftyBukkit extends BukkitPlugin {
 
-	private final static transient ConcurrentHashMap<String, List<String>> PLUGINS = new ConcurrentHashMap<>();
+	private final static transient ConcurrentHashMap<String, ConcurrentList<String>> PLUGINS = new ConcurrentHashMap<>();
 	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
 	private static transient MojangRepository repository;
@@ -33,10 +33,10 @@ public final class NiftyBukkit extends BukkitPlugin {
 		(itemDatabase = new ItemDatabase(this)).reload();
 		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 
-		PLUGINS.put("Bukkit", new ArrayList<String>());
+		PLUGINS.put("Bukkit", new ConcurrentList<String>());
 		Bukkit.getLogger().addHandler(new LogHandler());
 		for (Plugin plugin : NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugins()) {
-			PLUGINS.put(plugin.getName(), new ArrayList<String>());
+			PLUGINS.put(plugin.getName(), new ConcurrentList<String>());
 			plugin.getLogger().addHandler(new LogHandler(plugin));
 		}
 
