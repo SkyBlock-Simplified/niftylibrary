@@ -14,6 +14,7 @@ import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
+import net.netcoding.niftybukkit.minecraft.events.BungeeServerUnloadedEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
@@ -21,6 +22,9 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -34,12 +38,17 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	public static final String NIFTY_CHANNEL = "NiftyBungee";
 	private static final ConcurrentHashMap<Class<?>, Integer> LOADED_LISTENERS = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, BungeeServer> SERVERS = new ConcurrentHashMap<>();
-	private static boolean BUNGEE_ONLINE = false;
-	private static boolean BUNGEE_LOADED = false;
+	private static boolean BUNGEE_DETECTED = false;
+	private static boolean BUNGEE_ONLINEMODE = false;
 	private static boolean LOADED_ONCE = false;
+	private static boolean LOADED_EVENTONCE = false;
 	private static final transient Gson GSON = new Gson();
 	private final transient BungeeListener listener;
 	private final String channel;
+
+	static {
+		new LogoutListener();
+	}
 
 	public BungeeHelper(JavaPlugin plugin) {
 		this(plugin, BUNGEE_CHANNEL, null);
@@ -70,7 +79,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (StringUtil.isEmpty(channel)) throw new IllegalArgumentException("A channel name must be passed when instantiating an instance of BungeeHelper!");
 
 		if (LOADED_ONCE) {
-			if (!this.isOnline())
+			if (!this.isDetected())
 				throw new UnsupportedOperationException(StringUtil.format("You cannot instantiate an instance of this class until {0} has been found!", BUNGEE_CHANNEL));
 			else if (channel.equals(NIFTY_CHANNEL))
 				throw new UnsupportedOperationException(StringUtil.format("You cannot instantiate an instance of this class using the {0} channel!", NIFTY_CHANNEL));
@@ -99,7 +108,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public void forward(MojangProfile profile, String targetServer, String subChannel, Object... data) {
-		if (!this.isOnline()) throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
+		if (!this.isDetected()) throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 		if (StringUtil.isEmpty(targetServer)) throw new IllegalArgumentException("Target server cannot be null!");
 		if (StringUtil.isEmpty(subChannel)) throw new IllegalArgumentException("Sub channel cannot be null!");
 		if (subChannel.equalsIgnoreCase(NIFTY_CHANNEL)) throw new IllegalArgumentException(StringUtil.format("You cannot forward to {0} channels!", NIFTY_CHANNEL));
@@ -120,11 +129,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public int getMaxPlayers() {
-		return this.isOnline() ? this.getMaxPlayers(this.getServerName()) : this.getPlugin().getServer().getMaxPlayers();
+		return this.isDetected() ? this.getMaxPlayers(this.getServerName()) : this.getPlugin().getServer().getMaxPlayers();
 	}
 
 	public int getMaxPlayers(String serverName) {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			if (serverName.equalsIgnoreCase("ALL")) {
 				int maxCount = 0;
 
@@ -144,11 +153,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	@SuppressWarnings("deprecation")
 	public int getPlayerCount() {
-		return this.isOnline() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().length;
+		return this.isDetected() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().length;
 	}
 
 	public int getPlayerCount(String serverName) {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			if (serverName.equalsIgnoreCase("ALL")) {
 				int playerCount = 0;
 
@@ -169,14 +178,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	@SuppressWarnings("deprecation")
 	public Set<MojangProfile> getPlayerList() {
-		if (this.isOnline())
+		if (this.isDetected())
 			return this.getPlayerList(this.getServerName());
 
 		return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByPlayer(this.getPlugin().getServer().getOnlinePlayers()))));
 	}
 
 	public Set<MojangProfile> getPlayerList(String serverName) {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			if (serverName.equalsIgnoreCase("ALL")) {
 				Set<MojangProfile> playerNames = new HashSet<>();
 				for (BungeeServer server : SERVERS.values()) playerNames.addAll(server.getPlayerList());
@@ -192,7 +201,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeServer getPlayerServer(MojangProfile profile) {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			for (BungeeServer server : this.getServers()) {
 				if (server.getPlayerList().contains(profile))
 					return server;
@@ -205,7 +214,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeServer getServer() {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			BungeeServer currentServer = null;
 
 			for (BungeeServer server : SERVERS.values()) {
@@ -222,7 +231,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public BungeeServer getServer(String serverName) {
-		if (this.isOnline())
+		if (this.isDetected())
 			return SERVERS.get(serverName);
 
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
@@ -238,7 +247,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public Set<String> getServerNames() {
-		if (this.isOnline()) {
+		if (this.isDetected()) {
 			Set<String> serverNames = new HashSet<>();
 			for (BungeeServer server : SERVERS.values()) serverNames.add(server.getName());
 			return Collections.unmodifiableSet(serverNames);
@@ -248,20 +257,24 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public Set<BungeeServer> getServers() {
-		if (this.isOnline())
+		if (this.isDetected())
 			return Collections.unmodifiableSet(new HashSet<>(SERVERS.values()));
 
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	public boolean isOnline() {
-		return BUNGEE_ONLINE;
+	public final boolean isDetected() {
+		return BUNGEE_DETECTED;
+	}
+
+	public final boolean isOnlineMode() {
+		return BUNGEE_ONLINEMODE;
 	}
 
 	public boolean isPlayerOnline(MojangProfile profile) {
 		if (profile.getOfflinePlayer().isOnline())
 			return true;
-		else if (this.isOnline()) {
+		else if (this.isDetected()) {
 			for (BungeeServer server : this.getServers()) {
 				if (server.getPlayerList().contains(profile))
 					return true;
@@ -297,7 +310,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			try {
 				PluginManager manager = this.getPlugin().getServer().getPluginManager();
 
-				if (subChannel.equals("GetServers")) {
+				if (subChannel.equals("BungeeInfo"))
+					BUNGEE_ONLINEMODE = input.readBoolean();
+				else if (subChannel.equals("GetServers")) {
+					BUNGEE_DETECTED = false;
 					SERVERS.clear();
 					int count = input.readInt();
 
@@ -308,9 +324,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						manager.callEvent(new BungeeServerLoadedEvent(server));
 					}
 
-					BUNGEE_ONLINE = true;
+					BUNGEE_DETECTED = true;
 				} else {
-					if (!this.isOnline()) return;
+					if (!this.isDetected()) return;
 					final BungeeServer server = this.getServer(input.readUTF());
 
 					if (subChannel.equals("ServerInfo")) {
@@ -322,10 +338,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.setProtocolVersion(input.readInt());
 							server.setMaxPlayers(input.readInt());
 							boolean updatePlayers = input.readBoolean();
+							server.playerList.clear();
 
 							if (updatePlayers) {
 								int count = input.readInt();
-								server.playerList.clear();
 
 								for (int i = 0; i < count; i++) {
 									JsonObject json = new JsonObject();
@@ -337,20 +353,24 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
 							}
-						} else
+
+							if (!server.loadedOnce) {
+								server.loadedOnce = true;
+								manager.callEvent(new BungeeServerLoadedEvent(server));
+							}
+						} else {
 							server.reset();
+							manager.callEvent(new BungeeServerUnloadedEvent(server));
+						}
 
-						server.loadedOnce = true;
-						manager.callEvent(new BungeeServerLoadedEvent(server));
-
-						if (!BUNGEE_LOADED) {
+						if (!LOADED_EVENTONCE) {
 							int loaded = 0;
 
 							for (BungeeServer serv : SERVERS.values())
 								loaded += serv.loadedOnce ? 1 : 0;
 
 							if (loaded == SERVERS.size()) {
-								BUNGEE_LOADED = true;
+								LOADED_EVENTONCE = true;
 								manager.callEvent(new BungeeLoadedEvent(SERVERS.values()));
 							}
 						}
@@ -378,7 +398,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						}
 					}
 				}
-			} catch (IllegalStateException ise) { } catch (Exception ex) {
+			} catch (IllegalStateException isex) {
+			} catch (Exception ex) {
 				this.getLog().console(ex);
 			}
 		} else {
@@ -391,7 +412,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				if (this.listener != null) {
 					try {
 						this.listener.onMessageReceived(channel, player, message);
-					} catch (IllegalStateException eof) { } catch (Exception ex) {
+					} catch (IllegalStateException isex) {
+					} catch (Exception ex) {
 						this.getLog().console(ex);
 					}
 				}
@@ -435,7 +457,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	private void write(MojangProfile profile, String channel, String subChannel, Object... data) {
-		if (!this.isOnline()) return;
+		if (!this.isDetected()) return;
 		if (StringUtil.isEmpty(subChannel)) throw new IllegalArgumentException("Sub channel cannot be null!");
 		if (channel.equals("Forward")) return;
 		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
@@ -443,6 +465,24 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 		if (profile.getOfflinePlayer().isOnline())
 			profile.getOfflinePlayer().getPlayer().sendPluginMessage(this.getPlugin(), channel, ByteUtil.toByteArray(dataList));
+	}
+
+	private static class LogoutListener extends BukkitListener {
+
+		public LogoutListener() {
+			super(NiftyBukkit.getPlugin());
+		}
+
+		@EventHandler
+		public void onPlayerKick(PlayerKickEvent event) {
+			System.out.println("quit: " + event.getPlayer().getName());
+		}
+
+		@EventHandler
+		public void onPlayerLeave(PlayerQuitEvent event) {
+			System.out.println("quit: " + event.getPlayer().getName());
+		}
+		
 	}
 
 }

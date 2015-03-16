@@ -173,7 +173,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 			return;
 		}
 
-		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isOnline()) {
+		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected()) {
 			this.getLog().error(sender, "The command {{0}} requires BungeeCord!", this.getCommand().getName());
 			return;
 		}
