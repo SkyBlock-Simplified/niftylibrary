@@ -6,25 +6,16 @@ import java.util.logging.Logger;
 import net.netcoding.niftybukkit.util.RegexUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Log {
 
-	private Logger logger;
-
-	public Log() {
-		this(Bukkit.getLogger());
-	}
+	private final transient Logger logger;
 
 	public Log(JavaPlugin plugin) {
-		this(plugin.getLogger());
-	}
-
-	public Log(Logger logger) {
-		this.logger = logger;
+		this.logger = plugin.getLogger();
 	}
 
 	public String getPrefix(String text) {

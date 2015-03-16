@@ -16,7 +16,7 @@ public class BukkitHelper {
 
 	public BukkitHelper(JavaPlugin plugin) {
 		this.javaPlugin = plugin;
-		this.logger = new Log(plugin.getLogger());
+		this.logger = new Log(plugin);
 	}
 
 	public Log getLog() {
