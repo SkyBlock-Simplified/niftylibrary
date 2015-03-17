@@ -504,7 +504,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 		@EventHandler
 		public void onPlayerQuit(PlayerQuitEvent event) {
-			this.handleDisconnect(event.getPlayer(), true);
+			this.handleDisconnect(event.getPlayer(), false);
 		}
 		
 	}
