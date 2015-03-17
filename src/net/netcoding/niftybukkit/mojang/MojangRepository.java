@@ -240,7 +240,7 @@ public class MojangRepository {
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
 
-			if (oplayer != null && useOfflineId) {
+			if (useOfflineId) {
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
@@ -385,7 +385,7 @@ public class MojangRepository {
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
 
-			if (oplayer != null && useOfflineId) {
+			if (useOfflineId) {
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
