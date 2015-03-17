@@ -138,7 +138,7 @@ public class MojangProfile {
 	 * @return True if online, otherwise false.
 	 */
 	public boolean isOnlineAnywhere() {
-		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
+		return NiftyBukkit.getBungeeHelper().isDetected() ? NiftyBukkit.getBungeeHelper().isPlayerOnline(this) : false;
 	}
 
 	@Override
