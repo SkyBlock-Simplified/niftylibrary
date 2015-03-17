@@ -129,12 +129,7 @@ public class MojangProfile {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (StringUtil.isEmpty(this.getName()) ? 0 : this.getName().hashCode());
-		result = prime * result + (StringUtil.isEmpty(this.id) ? 0 : this.getUniqueId().hashCode());
-		result = prime * result + this.updated;
-		return result;
+		return this.getUniqueId().hashCode();
 	}
 
 	/**
