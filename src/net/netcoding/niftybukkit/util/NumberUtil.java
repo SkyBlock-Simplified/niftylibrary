@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.Random;
 
 /**
  * A collection of number utilities to assist in number checking,
@@ -12,6 +13,8 @@ import java.text.ParsePosition;
  * and {@link #writeVarInt(DataOutputStream, int) writeVarInt} used in bukkits network protocols.
  */
 public class NumberUtil {
+
+	private static final Random RANDOM = new Random();
 
 	/**
 	 * Gets if {@code value} is a valid number.
@@ -44,7 +47,7 @@ public class NumberUtil {
 	 * @return a random integer between the specified boundaries
 	 */
 	public static int rand(int minimum, int maximum) {
-		return minimum + (int)(Math.random() * ((maximum - minimum) + 1));
+		return RANDOM.nextInt((maximum - minimum) + 1) + minimum;
 	}
 
 	public static int readVarInt(DataInputStream in) throws IOException {
