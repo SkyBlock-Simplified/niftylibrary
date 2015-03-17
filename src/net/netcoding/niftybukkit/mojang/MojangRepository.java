@@ -381,15 +381,18 @@ public class MojangRepository {
 
 		if (found == null) {
 			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
-			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
-			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
-			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
 
-			if (useOfflineId) {
-				JsonObject json = new JsonObject();
-				json.addProperty("id", oplayer.getUniqueId().toString());
-				json.addProperty("name", oplayer.getName());
-				found = GSON.fromJson(json.toString(), MojangProfile.class);
+			if (StringUtil.notEmpty(oplayer.getName())) {
+				UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+				boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
+				boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
+
+				if (useOfflineId) {
+					JsonObject json = new JsonObject();
+					json.addProperty("id", oplayer.getUniqueId().toString());
+					json.addProperty("name", oplayer.getName());
+					found = GSON.fromJson(json.toString(), MojangProfile.class);
+				}
 			}
 		}
 
