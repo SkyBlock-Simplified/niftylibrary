@@ -169,7 +169,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	protected abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
 
-	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) {
+	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) throws Exception {
 		return Collections.<String>emptyList();
 	}
 
@@ -411,7 +411,19 @@ public abstract class BukkitCommand extends BukkitHelper {
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 			List<String> complete = new ArrayList<>();
-			if (sender.hasPermission(this.getCommand().permission)) complete = this.getCommand().onTabComplete(sender, label, args);
+
+			if (isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected())
+				return Collections.emptyList();
+
+			if (isCheckingPerms() && !sender.hasPermission(this.getCommand().permission))
+				return Collections.emptyList();
+
+			try {
+				complete = this.getCommand().onTabComplete(sender, label, args);
+			} catch (Exception ex) {
+				getLog().console(ex);
+			}
+
 			return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
 		}
 
