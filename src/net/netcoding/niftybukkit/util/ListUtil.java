@@ -1,8 +1,7 @@
 package net.netcoding.niftybukkit.util;
 
 import java.lang.reflect.Array;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Array and List Checking/Converting
@@ -15,8 +14,8 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
-	public static <T> boolean isEmpty(T[] value) {
-		return value == null || value.length == 0;
+	public static <T> boolean isEmpty(T[] array) {
+		return array == null || array.length == 0;
 	}
 
 	/**
@@ -25,18 +24,8 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
-	public static <T> boolean isEmpty(List<T> value) {
-		return value == null || value.size() == 0;
-	}
-
-	/**
-	 * Gets if the {@code value} is empty or null.
-	 * 
-	 * @param value to check
-	 * @return true if empty or null, otherwise false
-	 */
-	public static <T> boolean isEmpty(Set<T> value) {
-		return value == null || value.size() == 0;
+	public static <T> boolean isEmpty(Collection<T> collection) {
+		return collection == null || collection.size() == 0;
 	}
 
 	/**
@@ -45,8 +34,8 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
-	public static <T> boolean notEmpty(T[] value) {
-		return !isEmpty(value);
+	public static <T> boolean notEmpty(T[] array) {
+		return !isEmpty(array);
 	}
 
 	/**
@@ -55,18 +44,8 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
-	public static <T> boolean notEmpty(List<T> value) {
-		return !isEmpty(value);
-	}
-
-	/**
-	 * Gets if the {@code value} is not empty.
-	 * 
-	 * @param value to check
-	 * @return true if not empty or null, otherwise false
-	 */
-	public static <T> boolean notEmpty(Set<T> value) {
-		return !isEmpty(value);
+	public static <T> boolean notEmpty(Collection<T> collection) {
+		return !isEmpty(collection);
 	}
 
 	/**
@@ -77,9 +56,9 @@ public class ListUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(List<T> list, Class<T> type) {
+	public static <T> T[] toArray(Collection<T> collection, Class<T> type) {
 		try {
-			return list.toArray((T[])Array.newInstance(type, list.size()));
+			return collection.toArray((T[])Array.newInstance(type, collection.size()));
 		} catch (NullPointerException npe) {
 			return (T[])new Object[] { };
 		}

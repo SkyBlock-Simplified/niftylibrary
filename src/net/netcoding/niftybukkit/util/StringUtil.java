@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.util;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class StringUtil {
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
 	 */
-	public static String implode(List<String> pieces) {
+	public static String implode(Collection<String> pieces) {
 		return implode("", pieces);
 	}
 
@@ -83,7 +84,7 @@ public class StringUtil {
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
 	 */
-	public static String implode(String glue, List<String> pieces) {
+	public static String implode(String glue, Collection<String> pieces) {
 		return implode(glue, pieces, 0);
 	}
 
@@ -107,7 +108,7 @@ public class StringUtil {
 	 * @param start index to start concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(List<String> pieces, int start) {
+	public static String implode(Collection<String> pieces, int start) {
 		return implode("", pieces, start);
 	}
 
@@ -133,7 +134,7 @@ public class StringUtil {
 	 * @param start index to start concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(String glue, List<String> pieces, int start) {
+	public static String implode(String glue, Collection<String> pieces, int start) {
 		return implode(glue, pieces, start, -1);
 	}
 
@@ -159,7 +160,7 @@ public class StringUtil {
 	 * @param end index to stop concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(List<String> pieces, int start, int end) {
+	public static String implode(Collection<String> pieces, int start, int end) {
 		return implode("", pieces, start, end);
 	}
 
@@ -187,13 +188,14 @@ public class StringUtil {
 	 * @param end index to stop concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(String glue, List<String> pieces, int start, int end) {
+	public static String implode(String glue, Collection<String> collection, int start, int end) {
 		if (isEmpty(glue)) glue = "";
-		if (ListUtil.isEmpty(pieces)) throw new IllegalArgumentException("Pieces cannot be empty!");
+		if (ListUtil.isEmpty(collection)) throw new IllegalArgumentException("Pieces cannot be empty!");
 		if (start < 0) start = 0;;
-		if (start > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", start, pieces.size()));
-		if (end < 0) end = pieces.size();
-		if (end > pieces.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", end, pieces.size()));
+		if (start > collection.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", start, collection.size()));
+		if (end < 0) end = collection.size();
+		if (end > collection.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", end, collection.size()));
+		List<String> pieces = new ArrayList<>(collection);
 		List<String> newPieces = new ArrayList<>();
 
 		for (int i = start; i < end; i++)
