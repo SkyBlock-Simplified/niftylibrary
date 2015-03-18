@@ -50,7 +50,11 @@ public class MojangRepository {
 	}
 
 	private static URL getProfilesUrl(String username) throws MalformedURLException {
-		return new URL(StringUtil.format("https://api.mojang.com/users/profiles/minecraft/{0}?at=0", username));
+		return getProfilesUrl(username, true);
+	}
+
+	private static URL getProfilesUrl(String username, boolean useAt) throws MalformedURLException {
+		return new URL(StringUtil.format("https://api.mojang.com/users/profiles/minecraft/{0}{1}", username, (useAt ? "?at=0" : "")));
 	}
 
 	private static URL getNamesUrl(UUID uniqueId) throws MalformedURLException {
@@ -273,7 +277,6 @@ public class MojangRepository {
 						// Ignore for now, later use fallback api
 					} else
 						NiftyBukkit.getPlugin().getLog().console(ioex);
-
 					break;
 				} catch (Exception ex) {
 					NiftyBukkit.getPlugin().getLog().console(ex);
@@ -305,7 +308,35 @@ public class MojangRepository {
 						// Ignore for now, later use fallback api
 					} else
 						NiftyBukkit.getPlugin().getLog().console(ioex);
+					break;
+				} catch (Exception ex) {
+					NiftyBukkit.getPlugin().getLog().console(ex);
+					break;
+				} finally {
+					LAST_HTTP_REQUEST = System.currentTimeMillis();
+				}
+			}
 
+			for (MojangProfile profile : profiles)
+				userList.remove(profile.getName());
+
+			for (String user : userList) {
+				long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
+
+				try {
+					if (wait > 0) Thread.sleep(wait);
+					String response = HTTP.get(getProfilesUrl(user, false));
+					MojangProfile result = GSON.fromJson(response, MojangProfile.class);
+
+					if (result != null) {
+						profiles.add(result);
+						CACHE.add(result);
+					}
+				} catch (IOException ioex) {
+					if (ioex.getMessage().startsWith("Server returned HTTP response code: 429")) {
+						// Ignore for now, later use fallback api
+					} else
+						NiftyBukkit.getPlugin().getLog().console(ioex);
 					break;
 				} catch (Exception ex) {
 					NiftyBukkit.getPlugin().getLog().console(ex);
