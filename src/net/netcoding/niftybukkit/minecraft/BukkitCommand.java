@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
@@ -16,6 +17,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -33,6 +35,8 @@ public abstract class BukkitCommand extends BukkitHelper {
 	private boolean checkPerms = true;
 	private boolean bungeeOnly = false;
 	private boolean helpCheck = true;
+	private boolean playerTabComplete = false;
+	private int playerTabCompleteIndex = 0;
 	private int minimumArgsLength = 1;
 	private int maximumArgsLength = -1;
 	private Map<Integer, Map<String, String>> usages = new HashMap<>();
@@ -155,6 +159,15 @@ public abstract class BukkitCommand extends BukkitHelper {
 	}
 
 	/**
+	 * Checks if this command will tab complete for player names.
+	 * 
+	 * @return True if auto tab completing, otherwise false.
+	 */
+	public boolean isPlayerTabComplete() {
+		return this.playerTabComplete;
+	}
+
+	/**
 	 * Checks if the arguments are looking for help.
 	 * 
 	 * @param args Arguments to check if are looking for help.
@@ -221,6 +234,49 @@ public abstract class BukkitCommand extends BukkitHelper {
 		} catch (Exception ex) {
 			this.getLog().console(ex);
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private List<String> processTabComplete(CommandSender sender, String label, String[] args) {
+		List<String> complete = new ArrayList<>();
+
+		if (isConsole(sender))
+			return Collections.emptyList();
+
+		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected())
+			return Collections.emptyList();
+
+		if (this.isCheckingPerms() && !sender.hasPermission(this.permission))
+			return Collections.emptyList();
+
+		if (this.isPlayerTabComplete() && ListUtil.notEmpty(args) && this.playerTabCompleteIndex == args.length - 1) {
+			final String arg = args[this.playerTabCompleteIndex].toLowerCase();
+			List<String> names = new ArrayList<>();
+
+			if (NiftyBukkit.getBungeeHelper().isDetected()) {
+				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
+					for (MojangProfile profile : server.getPlayerList()) {
+						if (profile.getName().toLowerCase().startsWith(arg) || profile.getName().toLowerCase().contains(arg))
+							names.add(profile.getName());
+					}
+				}
+			} else {
+				for (Player player : this.getPlugin().getServer().getOnlinePlayers()) {
+					if (player.getName().toLowerCase().startsWith(arg) || player.getName().toLowerCase().contains(arg))
+						names.add(player.getName());
+				}
+			}
+
+			return names;
+		}
+
+		try {
+			complete = this.onTabComplete(sender, label, args);
+		} catch (Exception ex) {
+			this.getLog().console(ex);
+		}
+
+		return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
 	}
 
 	private void removeArgs(CommandSender sender, String... args) {
@@ -328,6 +384,31 @@ public abstract class BukkitCommand extends BukkitHelper {
 		this.playerOnly = value;
 	}
 
+	/**
+	 * Sets this command to automatically tab complete player names.
+	 */
+	public void setPlayerTabComplete() {
+		this.setPlayerTabComplete(true);
+	}
+
+	/**
+	 * Sets this command to automatically tab complete player names.
+	 * 
+	 * @param value True to enable player tab complete, otherwise false.
+	 */
+	public void setPlayerTabComplete(boolean value) {
+		this.playerTabComplete = value;
+	}
+
+	/**
+	 * Sets this index to use when automatically tab completing player names.
+	 * 
+	 * @param value Index to tab complete player names.
+	 */
+	public void setPlayerTabCompleteIndex(int value) {
+		this.playerTabCompleteIndex = value;
+	}
+
 	private boolean storeArgs(CommandSender sender, String... args) {
 		if (!this.argCache.containsKey(sender.getName())) {
 			this.argCache.put(sender.getName(), args);
@@ -410,21 +491,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-			List<String> complete = new ArrayList<>();
-
-			if (isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected())
-				return Collections.emptyList();
-
-			if (isCheckingPerms() && !sender.hasPermission(this.getCommand().permission))
-				return Collections.emptyList();
-
-			try {
-				complete = this.getCommand().onTabComplete(sender, label, args);
-			} catch (Exception ex) {
-				getLog().console(ex);
-			}
-
-			return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
+			return this.getCommand().processTabComplete(sender, label, args);
 		}
 
 	}
