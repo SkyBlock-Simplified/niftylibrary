@@ -268,8 +268,7 @@ public class MojangRepository {
 
 				try {
 					if (wait > 0) Thread.sleep(wait);
-					String response = HTTP.post(getProfilesUrl(), body, headers);
-					MojangProfile[] result = GSON.fromJson(response, MojangProfile[].class);
+					MojangProfile[] result = GSON.fromJson(HTTP.post(getProfilesUrl(), body, headers), MojangProfile[].class);
 					profiles.addAll(Arrays.asList(result));
 					CACHE.addAll(Arrays.asList(result));
 				} catch (IOException ioex) {
@@ -296,8 +295,7 @@ public class MojangRepository {
 
 				try {
 					if (wait > 0) Thread.sleep(wait);
-					String response = HTTP.get(getProfilesUrl(user));
-					MojangProfile result = GSON.fromJson(response, MojangProfile.class);
+					MojangProfile result = GSON.fromJson(HTTP.get(getProfilesUrl(user)), MojangProfile.class);
 
 					if (result != null) {
 						profiles.add(result);
@@ -325,8 +323,7 @@ public class MojangRepository {
 
 				try {
 					if (wait > 0) Thread.sleep(wait);
-					String response = HTTP.get(getProfilesUrl(user, false));
-					MojangProfile result = GSON.fromJson(response, MojangProfile.class);
+					MojangProfile result = GSON.fromJson(HTTP.get(getProfilesUrl(user, false)), MojangProfile.class);
 
 					if (result != null) {
 						profiles.add(result);
