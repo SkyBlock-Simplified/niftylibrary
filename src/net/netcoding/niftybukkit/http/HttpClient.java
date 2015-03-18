@@ -56,14 +56,14 @@ public class HttpClient {
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setUseCaches(false);
-
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
 		while ((line = reader.readLine()) != null) {
 			response.append(line);
 			response.append('\r');
 		}
-		reader.close();
 
+		reader.close();
 		return response.toString();
 	}
 
@@ -140,12 +140,13 @@ public class HttpClient {
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
 		while ((line = reader.readLine()) != null) {
 			response.append(line);
 			response.append('\r');
 		}
-		reader.close();
 
+		reader.close();
 		return response.toString();
 	}
 
