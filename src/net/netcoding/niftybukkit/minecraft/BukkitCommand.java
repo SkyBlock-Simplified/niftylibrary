@@ -406,7 +406,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 * @param value Index to tab complete player names.
 	 */
 	public void setPlayerTabCompleteIndex(int value) {
-		this.playerTabCompleteIndex = value;
+		this.playerTabCompleteIndex = value >= 0 ? value : 0;
 	}
 
 	private boolean storeArgs(CommandSender sender, String... args) {
