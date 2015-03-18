@@ -267,11 +267,11 @@ public abstract class BukkitCommand extends BukkitHelper {
 				}
 			}
 
-			return names;
+			complete.addAll(names);
 		}
 
 		try {
-			complete = this.onTabComplete(sender, label, args);
+			complete.addAll(this.onTabComplete(sender, label, args));
 		} catch (Exception ex) {
 			this.getLog().console(ex);
 		}
