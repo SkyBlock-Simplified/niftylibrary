@@ -24,9 +24,9 @@ abstract class MinecraftServer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
 		if (obj == null) return false;
-		if (this.getClass() != obj.getClass()) return false;
+		if (this == obj) return true;
+		if (!(obj instanceof MinecraftServer)) return false;
 		MinecraftServer server = (MinecraftServer)obj;
 		if (!this.getAddress().equals(server.getAddress())) return false;
 		return true;
@@ -66,7 +66,7 @@ abstract class MinecraftServer {
 
 	@Override
 	public int hashCode() {
-		return 31 + (address == null ? 0 : address.hashCode());
+		return 31 * (address == null ? 0 : address.hashCode());
 	}
 
 	public final boolean isCurrentServer() {
