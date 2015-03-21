@@ -154,7 +154,7 @@ public abstract class SQLFactory {
 	 * @return Url for this DBMS.
 	 */
 	public String getUrl() {
-		return StringUtil.format("{0}?autoReconnectForPools=true", this.url);
+		return StringUtil.format("{0}?characterEncoding=UTF-8&autoReconnectForPools=true", this.url);
 	}
 
 	/**
