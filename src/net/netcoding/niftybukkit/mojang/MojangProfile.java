@@ -133,12 +133,12 @@ public class MojangProfile {
 	}
 
 	/**
-	 * Checks if this profile is found anywhere on BungeeCord.
+	 * Checks if this profile is found anywhere on BungeeCord or local server.
 	 * 
 	 * @return True if online, otherwise false.
 	 */
-	public boolean isOnlineAnywhere() {
-		return NiftyBukkit.getBungeeHelper().isDetected() ? NiftyBukkit.getBungeeHelper().isPlayerOnline(this) : false;
+	public boolean isOnline() {
+		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
 	}
 
 	@Override
