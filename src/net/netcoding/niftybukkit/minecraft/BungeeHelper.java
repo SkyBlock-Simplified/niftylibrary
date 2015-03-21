@@ -354,14 +354,14 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
 							}
-
-							if (!server.loadedOnce) {
-								server.loadedOnce = true;
-								manager.callEvent(new BungeeServerLoadedEvent(server));
-							}
 						} else {
 							server.reset();
 							manager.callEvent(new BungeeServerUnloadedEvent(server));
+						}
+
+						if (!server.loadedOnce) {
+							server.loadedOnce = true;
+							manager.callEvent(new BungeeServerLoadedEvent(server));
 						}
 
 						if (!LOADED_EVENTONCE) {
