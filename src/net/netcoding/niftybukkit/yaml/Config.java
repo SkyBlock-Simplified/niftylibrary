@@ -163,7 +163,7 @@ public class Config extends ConfigMapper implements Runnable {
 	 * 
 	 * @param configSection The root ConfigSection with all sub-nodes.
 	 */
-	public void onUpdate(ConfigSection configSection) { }
+	public void onUpdate(ConfigSection section) { }
 
 	public void load(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File cannot be null!");
