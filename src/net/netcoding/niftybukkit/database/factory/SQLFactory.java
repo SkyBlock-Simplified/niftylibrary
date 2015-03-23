@@ -58,9 +58,7 @@ public abstract class SQLFactory {
 
 		this.url = url;
 		this.properties = properties;
-		try (Connection connection = this.getConnection()) { }
-		this.loadProduct();
-		this.loadSchema();
+		this.load();
 	}
 
 	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
@@ -166,17 +164,10 @@ public abstract class SQLFactory {
 		return this.driverAvailable;
 	}
 
-	private void loadProduct() throws SQLException {
+	private void load() throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			this.product = connection.getMetaData().getDatabaseProductName();
-		}
 
-		if (StringUtil.isEmpty(this.product))
-			throw new SQLException("Unable to determine product name!");
-	}
-
-	private void loadSchema() throws SQLException {
-		try (Connection connection = this.getConnection()) {
 			try (ResultSet result = connection.getMetaData().getCatalogs()) {
 				while (result.next()) {
 					String schema = result.getString(1);
@@ -188,10 +179,13 @@ public abstract class SQLFactory {
 					}
 				}
 			}
-
-			if (StringUtil.isEmpty(this.schema))
-				throw new SQLException("Unable to determine schema!");
 		}
+
+		if (StringUtil.isEmpty(this.product))
+			throw new SQLException("Unable to determine product name!");
+
+		if (StringUtil.isEmpty(this.schema))
+			throw new SQLException("Unable to determine schema!");
 	}
 
 	/**
