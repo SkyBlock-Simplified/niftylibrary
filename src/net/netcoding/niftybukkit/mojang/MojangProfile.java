@@ -22,7 +22,7 @@ public class MojangProfile {
 	private String ip;
 	private int port;
 	private InetSocketAddress ipAddress;
-	private int updated = (int)(System.currentTimeMillis() / 1000);
+	private long updated = System.currentTimeMillis();
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
 	private MojangProfile() { }
@@ -124,7 +124,7 @@ public class MojangProfile {
 	 * @return True if expired, otherwise false.
 	 */
 	public boolean hasExpired() {
-		return System.currentTimeMillis() / 1000 - this.updated >= 600;
+		return System.currentTimeMillis() - this.updated >= 1800000;
 	}
 
 	@Override
