@@ -39,26 +39,19 @@ public class TitleManager {
 		this.timeFadeOut = fadeOutTime;
 	}
 
-	public void broadcast() throws Exception {
+	public void broadcastClear() throws Exception {
 		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
-			this.send(profile);
+			this.sendClear(profile);
 	}
 
-	public void clearTitle(MojangProfile profile) throws Exception {
-		if (!profile.getOfflinePlayer().isOnline()) return;
-		Player player = profile.getOfflinePlayer().getPlayer();
+	public void broadcastReset() throws Exception {
+		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+			this.sendReset(profile);
+	}
 
-		Reflection playerObj = new Reflection("Player", Player.class.toString());
-		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection packetTitleObj = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleActionObj = new Reflection("PacketPlayOutTitle$EnumTitleAction", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection chatBaseObj = new Reflection("IChatBaseComponent", MinecraftPackage.MINECRAFT_SERVER);
-		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerHandle = playerObj.invokeMethod("getHandle", player, playerObj.getClazz());
-		Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
-
-		Object packetTitle = packetTitleObj.getConstructor(titleActionObj.getClazz(), chatBaseObj.getClazz()).newInstance(titleActionEnums[3], null);
-		playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
+	public void broadcastTitle() throws Exception {
+		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+			this.sendTitle(profile);
 	}
 
 	public String getSubtitle() {
@@ -89,7 +82,24 @@ public class TitleManager {
 		return this.titleColor;
 	}
 
-	public void resetTitle(MojangProfile profile) throws Exception {
+	public void sendClear(MojangProfile profile) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
+		Player player = profile.getOfflinePlayer().getPlayer();
+
+		Reflection playerObj = new Reflection("Player", Player.class.toString());
+		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection packetTitleObj = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection titleActionObj = new Reflection("PacketPlayOutTitle$EnumTitleAction", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection chatBaseObj = new Reflection("IChatBaseComponent", MinecraftPackage.MINECRAFT_SERVER);
+		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
+		Object playerHandle = playerObj.invokeMethod("getHandle", player, playerObj.getClazz());
+		Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
+
+		Object packetTitle = packetTitleObj.getConstructor(titleActionObj.getClazz(), chatBaseObj.getClazz()).newInstance(titleActionEnums[3], null);
+		playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
+	}
+
+	public void sendReset(MojangProfile profile) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Player player = profile.getOfflinePlayer().getPlayer();
 
@@ -106,7 +116,7 @@ public class TitleManager {
 		playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
 	}
 
-	public void send(MojangProfile profile) throws Exception {
+	public void sendTitle(MojangProfile profile) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Player player = profile.getOfflinePlayer().getPlayer();
 
