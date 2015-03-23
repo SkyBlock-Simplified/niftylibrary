@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 /**
@@ -102,6 +103,28 @@ public abstract class SQLFactory {
 				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", this.getSchema(), name, sql, (this.getProduct().equals("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
 			}
 		}
+	}
+
+	/**
+	 * Create a table if it does not exist asynchronously.
+	 * 
+	 * @param name  Name of the table.
+	 * @param sql Fields and constrains of the table
+	 * @throws SQLException
+	 */
+	public void createTableAsync(final String name, final String sql) throws SQLException {
+		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+			@Override
+			public void run() {
+				try (Connection connection = getConnection()) {
+					try (Statement statement = connection.createStatement()) {
+						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", getSchema(), name, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
+					}
+				} catch (SQLException sqlex) {
+					sqlex.printStackTrace();
+				}
+			}
+		});
 	}
 
 	/**
@@ -203,6 +226,36 @@ public abstract class SQLFactory {
 		}
 	}
 
+	/**
+	 * Run SELECT query against the DBMS asynchronously.
+	 * 
+	 * @param sql      Query to run.
+	 * @param callback Callback t process results with.
+	 * @param args     Arguments to pass to the query.
+	 * @throws SQLException
+	 */
+	public void queryAsync(final String sql, final AsyncResultCallback callback, final Object... args) throws SQLException {
+		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+			@Override
+			public void run() {
+				try (Connection connection = getConnection()) {
+					try (PreparedStatement statement = connection.prepareStatement(sql)) {
+						assignArgs(statement, args);
+						statement.executeQuery();
+
+						if (callback != null) {
+							try (ResultSet result = statement.getResultSet()) {
+								callback.handle(result);
+							}
+						}
+					}
+				} catch (SQLException sqlex) {
+					sqlex.printStackTrace();
+				}
+			}
+		});
+	}
+
 	protected final <T> T query(Connection connection, String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (PreparedStatement statement = connection.prepareStatement(sql)) {
 			assignArgs(statement, args);
@@ -249,6 +302,29 @@ public abstract class SQLFactory {
 				return statement.executeUpdate() > 0;
 			}
 		}
+	}
+
+	/**
+	 * Run INSERT, UPDATE or DELETE query against this DBMS asynchronously.
+	 * 
+	 * @param sql  Query to run.
+	 * @param args Arguments to pass to the query.
+	 * @throws SQLException
+	 */
+	public void updateAsync(final String sql, final Object... args) throws SQLException {
+		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+			@Override
+			public void run() {
+				try (Connection connection = getConnection()) {
+					try (PreparedStatement statement = connection.prepareStatement(sql)) {
+						assignArgs(statement, args);
+						statement.executeUpdate();
+					}
+				} catch (SQLException sqlex) {
+					sqlex.printStackTrace();
+				}
+			}
+		});
 	}
 
 }
