@@ -15,11 +15,10 @@ public abstract class BukkitPlugin extends JavaPlugin {
 
 	private final static transient ConcurrentList<String> PLUGINS = new ConcurrentList<>();
 	private final transient BukkitLogger log;
-	private final long load;
+	private long enable = System.currentTimeMillis();
 
 	public BukkitPlugin() {
 		this.log = new BukkitLogger(this);
-		this.load = System.currentTimeMillis();
 		PLUGINS.add(this.getDescription().getName());
 	}
 
@@ -87,12 +86,16 @@ public abstract class BukkitPlugin extends JavaPlugin {
 		this.getLog().error(sender, "You do not have the permission {{0}}!", permission);
 	}
 
-	public final void logRunningTime() {
-		this.logRunningTime(TimeUnit.MILLISECONDS);
+	public final void startLoggingTime() {
+		this.enable = System.currentTimeMillis();
 	}
 
-	public final void logRunningTime(TimeUnit time) {
-		this.getLog().console("Running time: {0} {1}", time.convert((System.currentTimeMillis() - this.load), TimeUnit.MILLISECONDS), time.name().toLowerCase());
+	public final void showRunningTime() {
+		this.showRunningTime(TimeUnit.MILLISECONDS);
+	}
+
+	public final void showRunningTime(TimeUnit time) {
+		this.getLog().console("Running time: {0} {1}", time.convert((System.currentTimeMillis() - this.enable), TimeUnit.MILLISECONDS), time.name().toLowerCase());
 	}
 
 }
