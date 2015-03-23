@@ -7,8 +7,10 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class SQLServer extends SQLNotifications {
 
+	public static final int DEFAULT_PORT = 1433;
+
 	public SQLServer(String host, String user, String pass, String schema) throws SQLException {
-		this(host, 1433, user, pass, schema);
+		this(host, DEFAULT_PORT, user, pass, schema);
 	}
 
 	public SQLServer(String host, int port, String user, String pass, String schema) throws SQLException {

@@ -7,8 +7,10 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class MySQL extends SQLNotifications {
 
+	public static final int DEFAULT_PORT = 3306;
+
 	public MySQL(String host, String user, String pass, String schema) throws SQLException {
-		this(host, 3306, user, pass, schema);
+		this(host, DEFAULT_PORT, user, pass, schema);
 	}
 
 	public MySQL(String host, int port, String user, String pass, String schema) throws SQLException {

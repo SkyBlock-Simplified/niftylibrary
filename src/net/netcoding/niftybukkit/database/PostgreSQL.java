@@ -7,8 +7,10 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 public class PostgreSQL extends SQLNotifications {
 
+	public static final int DEFAULT_PORT = 5432;
+
 	public PostgreSQL(String host, String user, String pass, String schema) throws SQLException {
-		this(host, 5432, user, pass, schema);
+		this(host, DEFAULT_PORT, user, pass, schema);
 	}
 
 	public PostgreSQL(String host, int port, String user, String pass, String schema) throws SQLException {
