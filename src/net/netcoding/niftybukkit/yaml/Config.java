@@ -40,7 +40,6 @@ public class Config extends ConfigMapper implements Runnable {
 		super(plugin, fileName, header);
 		if (this.configFile == null) throw new IllegalArgumentException("Filename cannot be null!");
 		this.setSuppressFailedConversions(skipFailedConversion);
-		if (this.configFile != null) this.init();
 	}
 
 	public boolean delete() {
@@ -152,18 +151,9 @@ public class Config extends ConfigMapper implements Runnable {
 	public void load() throws InvalidConfigurationException {
 		if (this.configFile == null) throw new IllegalArgumentException("Cannot load config without file!");
 		this.loadFromYaml();
-		this.onUpdate(this.root);
+		this.update(this.root);
 		this.internalLoad(this.getClass(), true);
 	}
-
-	/**
-	 * Called after the file is loaded but before the converter gets it.
-	 * <p>
-	 * Used to manually edit the passed root node when you updated the config.
-	 * 
-	 * @param configSection The root ConfigSection with all sub-nodes.
-	 */
-	public void onUpdate(ConfigSection section) { }
 
 	public void load(File file) throws InvalidConfigurationException {
 		if (file == null) throw new IllegalArgumentException("File cannot be null!");
@@ -262,5 +252,14 @@ public class Config extends ConfigMapper implements Runnable {
 			} catch (IOException ioex) { }
 		}
 	}
+
+	/**
+	 * Called after the file is loaded but before the converter gets it.
+	 * <p>
+	 * Used to manually edit the passed root node when you updated the config.
+	 * 
+	 * @param configSection The root ConfigSection with all sub-nodes.
+	 */
+	public void update(ConfigSection section) { }
 
 }
