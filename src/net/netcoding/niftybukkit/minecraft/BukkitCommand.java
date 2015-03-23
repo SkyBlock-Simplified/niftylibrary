@@ -12,6 +12,7 @@ import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -237,6 +238,26 @@ public abstract class BukkitCommand extends BukkitHelper {
 	}
 
 	@SuppressWarnings("deprecation")
+	public final static List<String> getMatchingPlayers(String lookup) {
+		List<String> names = new ArrayList<>();
+
+		if (NiftyBukkit.getBungeeHelper().isDetected()) {
+			for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
+				for (MojangProfile profile : server.getPlayerList()) {
+					if (profile.getName().toLowerCase().startsWith(lookup) || profile.getName().toLowerCase().contains(lookup))
+						names.add(profile.getName());
+				}
+			}
+		} else {
+			for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+				if (player.getName().toLowerCase().startsWith(lookup) || player.getName().toLowerCase().contains(lookup))
+					names.add(player.getName());
+			}
+		}
+
+		return names;
+	}
+
 	private List<String> processTabComplete(CommandSender sender, String label, String[] args) {
 		List<String> complete = new ArrayList<>();
 
@@ -249,26 +270,8 @@ public abstract class BukkitCommand extends BukkitHelper {
 		if (this.isCheckingPerms() && !sender.hasPermission(this.permission))
 			return Collections.emptyList();
 
-		if (this.isPlayerTabComplete() && ListUtil.notEmpty(args) && this.playerTabCompleteIndex == args.length - 1) {
-			final String arg = args[this.playerTabCompleteIndex].toLowerCase();
-			List<String> names = new ArrayList<>();
-
-			if (NiftyBukkit.getBungeeHelper().isDetected()) {
-				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
-					for (MojangProfile profile : server.getPlayerList()) {
-						if (profile.getName().toLowerCase().startsWith(arg) || profile.getName().toLowerCase().contains(arg))
-							names.add(profile.getName());
-					}
-				}
-			} else {
-				for (Player player : this.getPlugin().getServer().getOnlinePlayers()) {
-					if (player.getName().toLowerCase().startsWith(arg) || player.getName().toLowerCase().contains(arg))
-						names.add(player.getName());
-				}
-			}
-
-			complete.addAll(names);
-		}
+		if (this.isPlayerTabComplete() && ListUtil.notEmpty(args) && this.playerTabCompleteIndex == args.length - 1)
+			complete.addAll(getMatchingPlayers(args[this.playerTabCompleteIndex].toLowerCase()));
 
 		try {
 			complete.addAll(this.onTabComplete(sender, label, args));
