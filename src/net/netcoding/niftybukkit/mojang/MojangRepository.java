@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,11 +24,11 @@ import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 
 import com.google.common.base.Charsets;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
@@ -94,7 +95,7 @@ public class MojangRepository {
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
 	 */
-	public MojangProfile[] searchByPlayer(List<OfflinePlayer> oplayers) throws ProfileNotFoundException {
+	public MojangProfile[] searchByPlayer(Collection<? extends OfflinePlayer> oplayers) throws ProfileNotFoundException {
 		if (ListUtil.isEmpty(oplayers)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, oplayers);
 		List<MojangProfile> profiles = new ArrayList<>();
 		ConcurrentList<OfflinePlayer> foplayers = new ConcurrentList<>(oplayers);
@@ -160,7 +161,7 @@ public class MojangRepository {
 	 * @return Profiles associated with the given usernames.
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
 	 */
-	public MojangProfile[] searchByUsername(List<String> usernames) throws ProfileNotFoundException {
+	public MojangProfile[] searchByUsername(Collection<String> usernames) throws ProfileNotFoundException {
 		return this.searchByUsername(usernames, true);
 	}
 
@@ -172,7 +173,7 @@ public class MojangRepository {
 	 * @return Profiles associated with the given usernames.
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
 	 */
-	public MojangProfile[] searchByUsername(List<String> usernames, boolean useApi) throws ProfileNotFoundException {
+	public MojangProfile[] searchByUsername(Collection<String> usernames, boolean useApi) throws ProfileNotFoundException {
 		if (ListUtil.isEmpty(usernames)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, usernames);
 		List<MojangProfile> profiles = new ArrayList<>();
 		ConcurrentList<String> userList = new ConcurrentList<>(usernames);

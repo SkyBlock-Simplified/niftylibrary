@@ -237,7 +237,6 @@ public abstract class BukkitCommand extends BukkitHelper {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public final static List<String> getMatchingPlayers(String lookup) {
 		List<String> names = new ArrayList<>();
 

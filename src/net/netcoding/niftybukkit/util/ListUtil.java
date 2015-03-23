@@ -56,7 +56,7 @@ public class ListUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(Collection<T> collection, Class<T> type) {
+	public static <T> T[] toArray(Collection<? extends T> collection, Class<T> type) {
 		try {
 			return collection.toArray((T[])Array.newInstance(type, collection.size()));
 		} catch (NullPointerException npe) {

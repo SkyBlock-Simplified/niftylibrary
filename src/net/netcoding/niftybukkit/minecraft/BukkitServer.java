@@ -11,15 +11,14 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.NumberUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
+
+import com.google.gson.Gson;
 
 @SuppressWarnings("unused")
 public class BukkitServer extends MinecraftServer {

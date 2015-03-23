@@ -20,8 +20,6 @@ import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -32,6 +30,8 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class BungeeHelper extends BukkitHelper implements PluginMessageListener {
 
@@ -152,9 +152,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	@SuppressWarnings("deprecation")
 	public int getPlayerCount() {
-		return this.isDetected() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().length;
+		return this.isDetected() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().size();
 	}
 
 	public int getPlayerCount(String serverName) {
@@ -177,7 +176,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	@SuppressWarnings("deprecation")
 	public Set<MojangProfile> getPlayerList() {
 		if (this.isDetected())
 			return this.getPlayerList(this.getServerName());
