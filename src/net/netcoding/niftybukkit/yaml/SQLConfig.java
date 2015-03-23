@@ -105,7 +105,7 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 		}
 	}
 
-	private void initFactory() throws SQLException {
+	protected void initFactory() throws SQLException {
 		if (this.driver.equalsIgnoreCase("PostgreSQL"))
 			this.factory = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if (this.driver.equalsIgnoreCase("SQLServer"))

@@ -235,6 +235,8 @@ public class Config extends ConfigMapper implements Runnable {
 	 * 
 	 * @param configSection The root ConfigSection with all sub-nodes.
 	 */
-	public boolean update(ConfigSection section) { return false; }
+	public boolean update(ConfigSection section) throws InvalidConfigurationException {
+		return false;
+	}
 
 }
