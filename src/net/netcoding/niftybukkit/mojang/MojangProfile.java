@@ -64,6 +64,23 @@ public class MojangProfile {
 	}
 
 	/**
+	 * Gets the handle of this profiles client, if they are online.
+	 * 
+	 * @return Handle of the client.
+	 */
+	public Object getHandle() throws Exception {
+		Object playerHandle = null;
+
+		if (this.getOfflinePlayer().isOnline()) {
+			Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+			Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
+			playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
+		}
+
+		return playerHandle;
+	}
+
+	/**
 	 * Gets clients locale.
 	 * 
 	 * @return Clients locale.
@@ -73,11 +90,8 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-				Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
-				Object playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
-				locale = (String)entityPlayerObj.getValue("locale", playerHandle);
+				locale = (String)entityPlayerObj.getValue("locale", this.getHandle());
 			} catch (Exception ex) { }
 		}
 
@@ -118,11 +132,8 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-				Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
-				Object playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
-				ping = (int)entityPlayerObj.getValue("ping", playerHandle);
+				ping = (int)entityPlayerObj.getValue("ping", this.getHandle());
 			} catch (Exception ex) { }
 		}
 
