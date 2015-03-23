@@ -72,8 +72,8 @@ public class Config extends ConfigMapper implements Runnable {
 		this.init();
 	}
 
-	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) internalLoad(clazz.getSuperclass());
+	private void internalLoad(Class<?> clazz, boolean dontSave) throws InvalidConfigurationException {
+		if (!clazz.getSuperclass().equals(Config.class)) this.internalLoad(clazz.getSuperclass(), dontSave);
 		boolean save = false;
 
 		for (Field field : clazz.getDeclaredFields()) {
@@ -105,7 +105,7 @@ public class Config extends ConfigMapper implements Runnable {
 			}
 		}
 
-		if (save) this.saveToYaml();
+		if (save && !dontSave) this.saveToYaml();
 	}
 
 	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {
@@ -153,7 +153,7 @@ public class Config extends ConfigMapper implements Runnable {
 		if (this.configFile == null) throw new IllegalArgumentException("Cannot load config without file!");
 		this.loadFromYaml();
 		this.onUpdate(this.root);
-		this.internalLoad(this.getClass());
+		this.internalLoad(this.getClass(), true);
 	}
 
 	/**
@@ -172,8 +172,12 @@ public class Config extends ConfigMapper implements Runnable {
 	}
 
 	public void reload() throws InvalidConfigurationException {
+		this.reload(true);
+	}
+
+	private void reload(boolean dontSave) throws InvalidConfigurationException {
 		this.loadFromYaml();
-		this.internalLoad(this.getClass());
+		this.internalLoad(this.getClass(), dontSave);
 	}
 
 	@Override
@@ -196,7 +200,7 @@ public class Config extends ConfigMapper implements Runnable {
 						this.reloadProcessing = true;
 						while (true) {
 							try {
-								this.reload();
+								this.reload(true);
 								break;
 							} catch (Exception ex) {
 								try {
