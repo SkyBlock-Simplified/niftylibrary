@@ -114,7 +114,7 @@ public class MojangRepository {
 
 		for (OfflinePlayer oplayer : foplayers) {
 			try {
-				MojangProfile profile = this.searchByUniqueId(oplayer.getUniqueId(), false);
+				MojangProfile profile = this.searchByUniqueId(oplayer.getUniqueId());
 				profiles.add(profile);
 				foplayers.remove(oplayer);
 			} catch (ProfileNotFoundException pnfe) { }
@@ -134,20 +134,8 @@ public class MojangRepository {
 	 * @throws ProfileNotFoundException If unable to locate users profile.
 	 */
 	public MojangProfile searchByUsername(String username) throws ProfileNotFoundException {
-		return this.searchByUsername(username, true);
-	}
-
-	/**
-	 * Locates the profile associated with the given username.
-	 * 
-	 * @param username Username to search with.
-	 * @param useApi    Use the Mojang API in the search.
-	 * @return Profile associated with the given username.
-	 * @throws ProfileNotFoundException If unable to locate users profile.
-	 */
-	public MojangProfile searchByUsername(String username, boolean useApi) throws ProfileNotFoundException {
 		try {
-			return searchByUsername(Arrays.asList(username), true)[0];
+			return searchByUsername(Arrays.asList(username))[0];
 		} catch (Exception ex) {
 			throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.USERNAME, username);
 		}
@@ -162,24 +150,9 @@ public class MojangRepository {
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
 	 */
 	public MojangProfile[] searchByUsername(Collection<String> usernames) throws ProfileNotFoundException {
-		return this.searchByUsername(usernames, true);
-	}
-
-	/**
-	 * Locates the profiles associated with the given usernames.
-	 * 
-	 * @param usernames Usernames to search with.
-	 * @param useApi    Use the Mojang API in the search.
-	 * @return Profiles associated with the given usernames.
-	 * @throws ProfileNotFoundException If unable to locate any users profile.
-	 */
-	public MojangProfile[] searchByUsername(Collection<String> usernames, boolean useApi) throws ProfileNotFoundException {
 		if (ListUtil.isEmpty(usernames)) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, usernames);
 		List<MojangProfile> profiles = new ArrayList<>();
 		ConcurrentList<String> userList = new ConcurrentList<>(usernames);
-
-		if (!Bukkit.getServer().getOnlineMode() && !NiftyBukkit.getBungeeHelper().isOnlineMode())
-			useApi = false;
 
 		if (CACHE.size() > 0) {
 			for (String name : userList) {
@@ -243,9 +216,12 @@ public class MojangRepository {
 			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
 			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
-			boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
+			boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
+			boolean useOfflineId = (isOnline && !isOfflineId) || (!isOnline && isOfflineId);
 
-			if (useOfflineId) {
+			if (!useOfflineId && isOfflineId)
+				userList.remove(name);
+			else if (useOfflineId) {
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
@@ -254,7 +230,7 @@ public class MojangRepository {
 			}
 		}
 
-		if (useApi && userList.size() > 0) {
+		if (userList.size() > 0) {
 			List<HttpHeader> headers = new ArrayList<HttpHeader>(Arrays.asList(new HttpHeader("Content-Type", "application/json")));
 			String[] userArray = ListUtil.toArray(userList, String.class);
 			int start = 0;
@@ -359,23 +335,8 @@ public class MojangRepository {
 	 * @throws ProfileNotFoundException If unable to locate users profile.
 	 */
 	public MojangProfile searchByUniqueId(final UUID uniqueId) throws ProfileNotFoundException {
-		return this.searchByUniqueId(uniqueId, true);
-	}
-
-	/**
-	 * Locates the profile associated with the given Unique ID.
-	 * 
-	 * @param uniqueId Unique ID to search with.
-	 * @param useApi   Use the Mojang API in the search.
-	 * @return Profile associated with the given Unique ID.
-	 * @throws ProfileNotFoundException If unable to locate users profile.
-	 */
-	public MojangProfile searchByUniqueId(final UUID uniqueId, boolean useApi) throws ProfileNotFoundException {
 		if (uniqueId == null) throw new ProfileNotFoundException(ProfileNotFoundException.TYPE.NULL, uniqueId);
 		MojangProfile found = null;
-
-		if (!Bukkit.getServer().getOnlineMode() && !NiftyBukkit.getBungeeHelper().isOnlineMode())
-			useApi = false;
 
 		if (CACHE.size() > 0) {
 			for (MojangProfile profile : CACHE) {
@@ -408,25 +369,21 @@ public class MojangRepository {
 			}
 		}
 
-		if (found == null) {
-			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
+		OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
+		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+		boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
+		boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
+		boolean useOfflineId = (isOnline && !isOfflineId) || (!isOnline && oplayer.getUniqueId().equals(isOfflineId));
 
-			if (StringUtil.notEmpty(oplayer.getName())) {
-				UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
-				boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
-				boolean useOfflineId = (isOnline && !oplayer.getUniqueId().equals(offlineId)) || (!isOnline && oplayer.getUniqueId().equals(offlineId));
-
-				if (useOfflineId) {
-					JsonObject json = new JsonObject();
-					json.addProperty("id", oplayer.getUniqueId().toString());
-					json.addProperty("name", oplayer.getName());
-					found = GSON.fromJson(json.toString(), MojangProfile.class);
-				}
-			}
+		if (found == null && StringUtil.notEmpty(oplayer.getName()) && useOfflineId) {
+			JsonObject json = new JsonObject();
+			json.addProperty("id", oplayer.getUniqueId().toString());
+			json.addProperty("name", oplayer.getName());
+			found = GSON.fromJson(json.toString(), MojangProfile.class);
 		}
 
 
-		if (useApi && found == null) {
+		if (found == null && !isOfflineId) {
 			try {
 				long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 				if (wait > 0) Thread.sleep(wait);
