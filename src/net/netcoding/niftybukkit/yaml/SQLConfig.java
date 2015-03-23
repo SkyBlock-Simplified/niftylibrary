@@ -17,7 +17,7 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 
 	@Comment("Database Driver (mysql, postgresql or mssql)")
 	@Path("sql.driver")
-	protected String driver = "mysql";
+	protected String driver = "sql";
 
 	@Comment("Database Host")
 	@Path("sql.host")
