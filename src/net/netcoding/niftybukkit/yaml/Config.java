@@ -40,6 +40,7 @@ public class Config extends ConfigMapper implements Runnable {
 		super(plugin, fileName, header);
 		if (this.configFile == null) throw new IllegalArgumentException("Filename cannot be null!");
 		this.setSuppressFailedConversions(skipFailedConversion);
+		if (this.configFile != null) this.init();
 	}
 
 	public boolean delete() {
