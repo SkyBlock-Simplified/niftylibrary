@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.yaml;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -27,10 +26,6 @@ public class Config extends ConfigMapper implements Runnable {
 	private WatchService watchService;
 	private WatchKey watchKey;
 	private boolean reloadProcessing = false;
-
-	public Config(JavaPlugin plugin) {
-		this(plugin, null);
-	}
 
 	public Config(JavaPlugin plugin, String fileName, String... header) {
 		this(plugin, fileName, false, header);
@@ -63,12 +58,6 @@ public class Config extends ConfigMapper implements Runnable {
 			}
 		} else
 			this.load();
-	}
-
-	public void init(File file) throws InvalidConfigurationException {
-		if (file == null) throw new IllegalArgumentException("File cannot be null!");
-		this.configFile = file;
-		this.init();
 	}
 
 	private void internalLoad(Class<?> clazz, boolean dontSave) throws InvalidConfigurationException {
@@ -155,12 +144,6 @@ public class Config extends ConfigMapper implements Runnable {
 		this.internalLoad(this.getClass(), true);
 	}
 
-	public void load(File file) throws InvalidConfigurationException {
-		if (file == null) throw new IllegalArgumentException("File cannot be null!");
-		this.configFile = file;
-		this.load();
-	}
-
 	public void reload() throws InvalidConfigurationException {
 		this.reload(true);
 	}
@@ -213,12 +196,6 @@ public class Config extends ConfigMapper implements Runnable {
 		this.clearComments();
 		this.internalSave(this.getClass());
 		this.saveToYaml();
-	}
-
-	public void save(File file) throws InvalidConfigurationException {
-		if (file == null) throw new IllegalArgumentException("File argument can not be null");
-		this.configFile = file;
-		this.save();
 	}
 
 	public void setSuppressFailedConversions() {
