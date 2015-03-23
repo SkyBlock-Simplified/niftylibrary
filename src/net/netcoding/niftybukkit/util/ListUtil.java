@@ -25,7 +25,7 @@ public class ListUtil {
 	 * @return true if empty or null, otherwise false
 	 */
 	public static <T> boolean isEmpty(Collection<? extends T> collection) {
-		return collection == null || collection.size() == 0;
+		return collection == null || collection.isEmpty();
 	}
 
 	/**
