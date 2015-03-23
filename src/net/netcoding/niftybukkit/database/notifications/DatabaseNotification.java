@@ -52,7 +52,7 @@ public class DatabaseNotification extends BukkitHelper {
 				String _new = null;
 				if (!TriggerEvent.INSERT.equals(event)) _old = StringUtil.format("CONCAT(OLD.`{0}`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
 				if (!TriggerEvent.DELETE.equals(event)) _new = StringUtil.format("CONCAT(NEW.`{0}`)", StringUtil.implode("`, ',', NEW.`", this.primaryColumnNames));
-				this.sql.update(String.format(trigger + "%s, %s);", _old, _new));
+				this.sql.updateAsync(String.format(trigger + "%s, %s);", _old, _new));
 			} else
 				throw new Exception(StringUtil.format("The table `{0}`.`{1}` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 		} catch (Exception ex) {

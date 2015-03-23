@@ -109,10 +109,9 @@ public abstract class SQLFactory {
 	 * Create a table if it does not exist asynchronously.
 	 * 
 	 * @param name  Name of the table.
-	 * @param sql Fields and constrains of the table
-	 * @throws SQLException
+	 * @param sql Table fields and constraints.
 	 */
-	public void createTableAsync(final String name, final String sql) throws SQLException {
+	public void createTableAsync(final String name, final String sql) {
 		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
@@ -120,9 +119,7 @@ public abstract class SQLFactory {
 					try (Statement statement = connection.createStatement()) {
 						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", getSchema(), name, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
 					}
-				} catch (SQLException sqlex) {
-					sqlex.printStackTrace();
-				}
+				} catch (SQLException sqlex) { }
 			}
 		});
 	}
@@ -232,9 +229,8 @@ public abstract class SQLFactory {
 	 * @param sql      Query to run.
 	 * @param callback Callback t process results with.
 	 * @param args     Arguments to pass to the query.
-	 * @throws SQLException
 	 */
-	public void queryAsync(final String sql, final AsyncResultCallback callback, final Object... args) throws SQLException {
+	public void queryAsync(final String sql, final AsyncResultCallback callback, final Object... args) {
 		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
@@ -249,9 +245,7 @@ public abstract class SQLFactory {
 							}
 						}
 					}
-				} catch (SQLException sqlex) {
-					sqlex.printStackTrace();
-				}
+				} catch (SQLException sqlex) { }
 			}
 		});
 	}
@@ -309,9 +303,8 @@ public abstract class SQLFactory {
 	 * 
 	 * @param sql  Query to run.
 	 * @param args Arguments to pass to the query.
-	 * @throws SQLException
 	 */
-	public void updateAsync(final String sql, final Object... args) throws SQLException {
+	public void updateAsync(final String sql, final Object... args) {
 		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
@@ -320,9 +313,7 @@ public abstract class SQLFactory {
 						assignArgs(statement, args);
 						statement.executeUpdate();
 					}
-				} catch (SQLException sqlex) {
-					sqlex.printStackTrace();
-				}
+				} catch (SQLException sqlex) { }
 			}
 		});
 	}
