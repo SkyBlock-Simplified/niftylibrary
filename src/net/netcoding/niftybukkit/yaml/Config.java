@@ -151,7 +151,7 @@ public class Config extends ConfigMapper implements Runnable {
 	public void load() throws InvalidConfigurationException {
 		if (this.configFile == null) throw new IllegalArgumentException("Cannot load config without file!");
 		this.loadFromYaml();
-		this.update(this.root);
+		if (this.update(this.root)) this.save();
 		this.internalLoad(this.getClass(), true);
 	}
 
@@ -260,6 +260,6 @@ public class Config extends ConfigMapper implements Runnable {
 	 * 
 	 * @param configSection The root ConfigSection with all sub-nodes.
 	 */
-	public void update(ConfigSection section) { }
+	public boolean update(ConfigSection section) { return false; }
 
 }
