@@ -6,16 +6,19 @@ import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BungeeServer;
+import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 /**
- * Container for a players uuid and name.
+ * Container for a players unique id and name.
  */
 public class MojangProfile {
 
+	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 	private String id;
 	private UUID uuid;
 	private String name;
@@ -23,7 +26,6 @@ public class MojangProfile {
 	private int port;
 	private InetSocketAddress ipAddress;
 	private long updated = System.currentTimeMillis();
-	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
 	private MojangProfile() { }
 
@@ -62,18 +64,38 @@ public class MojangProfile {
 	}
 
 	/**
+	 * Gets clients locale.
+	 * 
+	 * @return Clients locale.
+	 */
+	public String getLocale() {
+		String locale = "en_EN";
+
+		if (this.getOfflinePlayer().isOnline()) {
+			try {
+				Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
+				Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
+				Object playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
+				locale = (String)entityPlayerObj.getValue("locale", playerHandle);
+			} catch (Exception ex) { }
+		}
+
+		return locale;
+	}
+
+	/**
 	 * Gets the players name associated to this UUID.
 	 * 
 	 * @return Current player name.
 	 */
-	// TODO: Send update across BungeeCord to update players name
-	// if change is detected.
 	public String getName() {
 		Player player = NiftyBukkit.getPlugin().getServer().getPlayer(this.getUniqueId());
 
 		if (player == null || player.getName().equals(this.name))
 			return this.name;
 
+		// TODO: Send update across BungeeCord to update players name if change is detected.
 		return this.name = player.getName();
 	}
 
@@ -84,6 +106,50 @@ public class MojangProfile {
 	 */
 	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
+	}
+
+	/**
+	 * Get clients ping.
+	 * 
+	 * @return Client latency with the server.
+	 */
+	public int getPing() {
+		int ping = 0;
+
+		if (this.getOfflinePlayer().isOnline()) {
+			try {
+				Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
+				Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
+				Object playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
+				ping = (int)entityPlayerObj.getValue("ping", playerHandle);
+			} catch (Exception ex) { }
+		}
+
+		return ping;
+	}
+
+	/**
+	 * Get clients protocol version.
+	 * 
+	 * @return Client protocol version.
+	 */
+	public int getProtocolVersion() {
+		int version = 0;
+
+		if (this.getOfflinePlayer().isOnline()) {
+			try {
+				Reflection playerObj = new Reflection("Player", Player.class.toString());
+				Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
+				Reflection networkManagerObj = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
+				Object playerHandle = playerObj.invokeMethod("getHandle", this.getOfflinePlayer().getPlayer());
+				Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
+				Object networkManager = playerConnObj.getValue("networkManager", playerConnection);
+				version = (int)networkManagerObj.invokeMethod("getVersion", networkManager);
+			} catch (Exception ex) { }
+		}
+
+		return version;
 	}
 
 	/**
