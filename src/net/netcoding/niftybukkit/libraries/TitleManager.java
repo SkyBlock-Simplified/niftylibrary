@@ -1,11 +1,13 @@
 package net.netcoding.niftybukkit.libraries;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.RegexUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -35,6 +37,11 @@ public class TitleManager {
 		this.timeFadeIn = fadeInTime;
 		this.timeStay = stayTime;
 		this.timeFadeOut = fadeOutTime;
+	}
+
+	public void broadcast() throws Exception {
+		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+			this.send(profile);
 	}
 
 	public void clearTitle(MojangProfile profile) throws Exception {
