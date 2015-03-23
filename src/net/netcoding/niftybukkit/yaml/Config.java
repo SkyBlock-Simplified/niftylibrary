@@ -74,17 +74,17 @@ public class Config extends ConfigMapper implements Runnable {
 			if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
 
-			if (root.has(path)) {
+			if (this.root.has(path)) {
 				try {
-					this.converter.fromConfig(this, field, root, path);
+					this.converter.fromConfig(this, field, this.root, path);
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
 						throw new InvalidConfigurationException(String.format("Could not set field %s!", field.getName()), ex);
 				}
 			} else {
 				try {
-					this.converter.toConfig(this, field, root, path);
-					this.converter.fromConfig(this,  field, root, path);
+					this.converter.toConfig(this, field, this.root, path);
+					this.converter.fromConfig(this,  field, this.root, path);
 					save = true;
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
@@ -138,7 +138,6 @@ public class Config extends ConfigMapper implements Runnable {
 	}
 
 	public void load() throws InvalidConfigurationException {
-		if (this.configFile == null) throw new IllegalArgumentException("Cannot load config without file!");
 		this.loadFromYaml();
 		if (this.update(this.root)) this.save();
 		this.internalLoad(this.getClass(), true);
@@ -191,8 +190,7 @@ public class Config extends ConfigMapper implements Runnable {
 	}
 
 	public void save() throws InvalidConfigurationException {
-		if (this.configFile == null) throw new IllegalArgumentException("Cannot save a config without given File");
-		if (root == null) root = new ConfigSection();
+		if (this.root == null) this.root = new ConfigSection();
 		this.clearComments();
 		this.internalSave(this.getClass());
 		this.saveToYaml();

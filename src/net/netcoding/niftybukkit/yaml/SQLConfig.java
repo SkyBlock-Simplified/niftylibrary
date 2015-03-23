@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.yaml;
 
+import java.lang.reflect.ParameterizedType;
 import java.sql.SQLException;
 
 import net.netcoding.niftybukkit.database.MySQL;
@@ -8,14 +9,15 @@ import net.netcoding.niftybukkit.database.SQLServer;
 import net.netcoding.niftybukkit.database.factory.SQLFactory;
 import net.netcoding.niftybukkit.yaml.annotations.Comment;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
+import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SQLConfig<T extends SQLFactory> extends Config {
 
-	private T sql;
+	private transient SQLFactory factory;
 
-	@Comment("Database Driver (mysql, postgresql or mssql)")
+	@Comment("Database Driver (mysql, postgresql or sqlserver)")
 	@Path("sql.driver")
 	protected String driver = "sql";
 
@@ -39,13 +41,12 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 	@Path("sql.schema")
 	protected String schema = "";
 
-	public SQLConfig(JavaPlugin plugin, String fileName, String... header) throws SQLException {
+	public SQLConfig(JavaPlugin plugin, String fileName, String... header) {
 		this(plugin, fileName, false, header);
 	}
 
-	public SQLConfig(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) throws SQLException {
+	public SQLConfig(JavaPlugin plugin, String fileName, boolean skipFailedConversion, String... header) {
 		super(plugin, fileName);
-		this.reloadSQL();
 	}
 
 	public final String getHost() {
@@ -69,32 +70,58 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 	}
 
 	public final T getSQL() {
-		return this.sql;
+		return this.getSuperClass().cast(this.factory);
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void reloadSQL() throws SQLException {
+	private Class<T> getSuperClass() {
+		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
+		return (Class<T>)superClass.getActualTypeArguments()[0];
+	}
+
+	@Override
+	public void init() throws InvalidConfigurationException {
+		super.init();
+		this.initSQL();
+	}
+
+	private void initSQL() throws InvalidConfigurationException {
+		Class<?> clazz = this.getSuperClass();
+
 		if (this.driver.equalsIgnoreCase("sql")) {
-			if (this.sql instanceof PostgreSQL) {
+			if (PostgreSQL.class.isAssignableFrom(clazz)) {
 				this.driver = "postgresql";
 				this.port = PostgreSQL.DEFAULT_PORT;
-			} else if (this.sql instanceof SQLServer) {
+			} else if (SQLServer.class.isAssignableFrom(clazz)) {
 				this.driver = "mssql";
 				this.port = SQLServer.DEFAULT_PORT;
-			} else if (this.sql instanceof MySQL) {
+			} else if (MySQL.class.isAssignableFrom(clazz)) {
 				this.driver = "mysql";
 				this.port = MySQL.DEFAULT_PORT;
 			}
 
 			if (!this.driver.equalsIgnoreCase("sql"))
 				this.save();
-		} else {
-			if (this.driver.equalsIgnoreCase("PostgreSQL"))
-				this.sql = (T)new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-			else if (this.driver.equalsIgnoreCase("MSSQL"))
-				this.sql = (T)new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-			else
-				this.sql = (T)new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		}
+	}
+
+	private void initFactory() throws SQLException {
+		if (this.driver.equalsIgnoreCase("PostgreSQL"))
+			this.factory = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else if (this.driver.equalsIgnoreCase("SQLServer"))
+			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else
+			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+	}
+
+	@Override
+	public void load() throws InvalidConfigurationException {
+		super.load();
+
+		try {
+			this.initFactory();
+		} catch (SQLException sqlex) {
+			throw new InvalidConfigurationException("Invalid SQL Configuration!", sqlex);
 		}
 	}
 
