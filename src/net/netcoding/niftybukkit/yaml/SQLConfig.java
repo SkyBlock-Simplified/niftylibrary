@@ -5,15 +5,15 @@ import java.sql.SQLException;
 import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.database.PostgreSQL;
 import net.netcoding.niftybukkit.database.SQLServer;
-import net.netcoding.niftybukkit.database.notifications.SQLNotifications;
+import net.netcoding.niftybukkit.database.factory.SQLFactory;
 import net.netcoding.niftybukkit.yaml.annotations.Comment;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class SQLConfig extends Config {
+public class SQLConfig<T extends SQLFactory> extends Config {
 
-	private SQLNotifications sql;
+	private T sql;
 
 	@Comment("Database Driver (mysql, postgresql or mssql)")
 	@Path("sql.driver")
@@ -64,17 +64,18 @@ public class SQLConfig extends Config {
 		return this.schema;
 	}
 
-	public final SQLNotifications getSQL() {
+	public final T getSQL() {
 		return this.sql;
 	}
 
+	@SuppressWarnings("unchecked")
 	public final void reloadSQL() throws SQLException {
-		if (this.driver.equalsIgnoreCase("MySQL"))
-			this.sql = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-		else if (this.driver.equalsIgnoreCase("PostgreSQL"))
-			this.sql = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		if (this.driver.equalsIgnoreCase("PostgreSQL"))
+			this.sql = (T)new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if (this.driver.equalsIgnoreCase("MSSQL"))
-			this.sql = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+			this.sql = (T)new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else
+			this.sql = (T)new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 	}
 
 }
