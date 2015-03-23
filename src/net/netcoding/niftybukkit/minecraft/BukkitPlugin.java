@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import java.util.concurrent.TimeUnit;
+
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
@@ -13,9 +15,11 @@ public abstract class BukkitPlugin extends JavaPlugin {
 
 	private final static transient ConcurrentList<String> PLUGINS = new ConcurrentList<>();
 	private final transient BukkitLogger log;
+	private final long load;
 
 	public BukkitPlugin() {
 		this.log = new BukkitLogger(this);
+		this.load = System.currentTimeMillis();
 		PLUGINS.add(this.getDescription().getName());
 	}
 
@@ -81,6 +85,14 @@ public abstract class BukkitPlugin extends JavaPlugin {
 
 	void noPerms(CommandSender sender, String permission) {
 		this.getLog().error(sender, "You do not have the permission {{0}}!", permission);
+	}
+
+	public final void logRunningTime() {
+		this.logRunningTime(TimeUnit.MILLISECONDS);
+	}
+
+	public final void logRunningTime(TimeUnit time) {
+		this.getLog().console("Running time: {0} {1}", time.convert((System.currentTimeMillis() - this.load), TimeUnit.MILLISECONDS), time.name().toLowerCase());
 	}
 
 }
