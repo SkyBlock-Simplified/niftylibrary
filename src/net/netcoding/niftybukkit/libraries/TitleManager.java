@@ -92,7 +92,7 @@ public class TitleManager {
 		Reflection titleActionObj = new Reflection("PacketPlayOutTitle$EnumTitleAction", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatBaseObj = new Reflection("IChatBaseComponent", MinecraftPackage.MINECRAFT_SERVER);
 		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerHandle = playerObj.invokeMethod("getHandle", player, playerObj.getClazz());
+		Object playerHandle = playerObj.invokeMethod("getHandle", player);
 		Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
 
 		Object packetTitle = packetTitleObj.getConstructor(titleActionObj.getClazz(), chatBaseObj.getClazz()).newInstance(titleActionEnums[3], null);
@@ -109,7 +109,7 @@ public class TitleManager {
 		Reflection titleActionObj = new Reflection("PacketPlayOutTitle$EnumTitleAction", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatBaseObj = new Reflection("IChatBaseComponent", MinecraftPackage.MINECRAFT_SERVER);
 		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerHandle = playerObj.invokeMethod("getHandle", player, playerObj.getClazz());
+		Object playerHandle = playerObj.invokeMethod("getHandle", player);
 		Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
 
 		Object packetTitle = packetTitleObj.getConstructor(titleActionObj.getClazz(), chatBaseObj.getClazz()).newInstance(titleActionEnums[4], null);
@@ -127,7 +127,7 @@ public class TitleManager {
 		Reflection chatBaseObj = new Reflection("IChatBaseComponent", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatSerializeObj = new Reflection("IChatBaseComponent$ChatSerializer", MinecraftPackage.MINECRAFT_SERVER);
 		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerHandle = playerObj.invokeMethod("getHandle", player, playerObj.getClazz());
+		Object playerHandle = playerObj.invokeMethod("getHandle", player);
 		Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
 
 		if (this.getTimeStay() > 0) {
