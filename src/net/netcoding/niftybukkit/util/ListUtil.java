@@ -24,7 +24,7 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
-	public static <T> boolean isEmpty(Collection<T> collection) {
+	public static <T> boolean isEmpty(Collection<? extends T> collection) {
 		return collection == null || collection.size() == 0;
 	}
 
@@ -44,7 +44,7 @@ public class ListUtil {
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
-	public static <T> boolean notEmpty(Collection<T> collection) {
+	public static <T> boolean notEmpty(Collection<? extends T> collection) {
 		return !isEmpty(collection);
 	}
 
