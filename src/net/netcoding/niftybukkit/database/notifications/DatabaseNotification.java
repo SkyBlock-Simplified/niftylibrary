@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.database.factory.AsyncResultCallback;
 import net.netcoding.niftybukkit.database.factory.ResultCallback;
 import net.netcoding.niftybukkit.database.factory.SQLFactory;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
@@ -126,15 +127,15 @@ public class DatabaseNotification extends BukkitHelper {
 	/**
 	 * Gets the updated data of the current notification.
 	 * 
-	 * @param resultCallback Callback class to handle retrieved data.
+	 * @param callback Callback class to handle retrieved data.
 	 * @throws SQLException If you attempt to retrieve updated data when deleting a record.
 	 */
-	public <T> void getUpdatedRow(final ResultCallback<T> resultCallback) throws SQLException {
+	public void getUpdatedRow(final AsyncResultCallback callback) throws SQLException {
 		if (this.getEvent().equals(TriggerEvent.DELETE)) throw new SQLException("Cannot retrieve a deleted record!");
 
-		this.sql.query(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new ResultCallback<Void>() {
+		this.sql.queryAsync(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new AsyncResultCallback() {
 			@Override
-			public Void handle(ResultSet result) throws SQLException {
+			public void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
 					List<String> whereClause = new ArrayList<String>();
 					int keyCount = primaryColumnNames.size();
@@ -142,11 +143,9 @@ public class DatabaseNotification extends BukkitHelper {
 
 					if (keyCount != 0) {
 						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, '','', {1}), '','', -1) = ?", primaryColumnNames.get(i), (i + 1)));
-						sql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), resultCallback, (Object[])_new);
+						sql.queryAsync(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 					}
 				}
-
-				return null;
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
 	}
