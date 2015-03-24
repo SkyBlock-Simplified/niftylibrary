@@ -14,6 +14,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.database.factory.callbacks.ResultCallback;
+import net.netcoding.niftybukkit.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 /**
@@ -212,7 +214,7 @@ public abstract class SQLFactory {
 	 * Run SELECT query against the DBMS.
 	 * 
 	 * @param sql      Query to run.
-	 * @param callback Callback t process results with.
+	 * @param callback Callback to process results with.
 	 * @param args     Arguments to pass to the query.
 	 * @return Whatever you decide to return in the callback.
 	 * @throws SQLException
@@ -224,27 +226,42 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * Run SELECT query against the DBMS asynchronously.
+	 * Run SELECT query against the DBMS.
 	 * 
 	 * @param sql      Query to run.
 	 * @param callback Callback t process results with.
 	 * @param args     Arguments to pass to the query.
+	 * @return Whatever you decide to return in the callback.
+	 * @throws SQLException
 	 */
-	public void queryAsync(final String sql, final AsyncResultCallback callback, final Object... args) {
+	public void query(String sql, VoidResultCallback callback, Object... args) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assignArgs(statement, args);
+				statement.executeQuery();
+
+				if (callback != null) {
+					try (ResultSet result = statement.getResultSet()) {
+						callback.handle(result);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Run SELECT query against the DBMS asynchronously.
+	 * 
+	 * @param sql      Query to run.
+	 * @param callback Callback to process results with.
+	 * @param args     Arguments to pass to the query.
+	 */
+	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
 		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
-				try (Connection connection = getConnection()) {
-					try (PreparedStatement statement = connection.prepareStatement(sql)) {
-						assignArgs(statement, args);
-						statement.executeQuery();
-
-						if (callback != null) {
-							try (ResultSet result = statement.getResultSet()) {
-								callback.handle(result);
-							}
-						}
-					}
+				try {
+					query(sql, callback, args);
 				} catch (SQLException sqlex) { }
 			}
 		});

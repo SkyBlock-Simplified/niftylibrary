@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.database.factory.AsyncResultCallback;
-import net.netcoding.niftybukkit.database.factory.ResultCallback;
 import net.netcoding.niftybukkit.database.factory.SQLFactory;
+import net.netcoding.niftybukkit.database.factory.callbacks.ResultCallback;
+import net.netcoding.niftybukkit.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 /**
  * An sql listener used to check for updates to its associated table and notify plugins.
@@ -20,7 +21,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private TriggerEvent event;
 	private final transient DatabaseListener listener;
-	private final List<String> primaryColumnNames = new ArrayList<String>();
+	private final ConcurrentList<String> primaryColumnNames = new ConcurrentList<>();
 	private int previousId = 0;
 	private final transient SQLFactory sql;
 	private volatile boolean stopped = false;
@@ -77,16 +78,14 @@ public class DatabaseNotification extends BukkitHelper {
 		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Cannot retrieve an inserted record!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
-		this.sql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new ResultCallback<Void>() {
+		this.sql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
 			@Override
-			public Void handle(ResultSet result) throws SQLException {
+			public void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
 					String[] _old = result.getString("old").split(",");
 					int keyCount = primaryColumnNames.size();
 					for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
 				}
-
-				return null;
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
 
@@ -130,10 +129,10 @@ public class DatabaseNotification extends BukkitHelper {
 	 * @param callback Callback class to handle retrieved data.
 	 * @throws SQLException If you attempt to retrieve updated data when deleting a record.
 	 */
-	public void getUpdatedRow(final AsyncResultCallback callback) throws SQLException {
+	public void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
 		if (this.getEvent().equals(TriggerEvent.DELETE)) throw new SQLException("Cannot retrieve a deleted record!");
 
-		this.sql.queryAsync(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new AsyncResultCallback() {
+		this.sql.query(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
 			@Override
 			public void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
@@ -143,7 +142,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 					if (keyCount != 0) {
 						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, '','', {1}), '','', -1) = ?", primaryColumnNames.get(i), (i + 1)));
-						sql.queryAsync(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
+						sql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 					}
 				}
 			}
@@ -161,12 +160,12 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private void loadPrimaryKeys() throws SQLException {
 		this.primaryColumnNames.clear();
-		this.primaryColumnNames.addAll(this.sql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<List<String>>() {
+		this.primaryColumnNames.addAll(this.sql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<ConcurrentList<String>>() {
 			@Override
-			public List<String> handle(ResultSet result) throws SQLException {
-				List<String> priKeyNames = new ArrayList<>();
-				while (result.next()) priKeyNames.add(result.getString("COLUMN_NAME"));
-				return priKeyNames;
+			public ConcurrentList<String> handle(ResultSet result) throws SQLException {
+				ConcurrentList<String> keyNames = new ConcurrentList<>();
+				while (result.next()) keyNames.add(result.getString("COLUMN_NAME"));
+				return keyNames;
 			}
 		}, this.getSchema(), this.getTable()));
 	}
