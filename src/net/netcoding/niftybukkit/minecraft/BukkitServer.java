@@ -18,8 +18,9 @@ import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.DataUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+
 import com.google.common.io.ByteArrayDataOutput;
-import com.google.gson.Gson;
 
 @SuppressWarnings("unused")
 public class BukkitServer extends MinecraftServer {
