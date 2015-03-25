@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,23 +8,24 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
-import net.netcoding.niftybukkit.util.NumberUtil;
+import net.netcoding.niftybukkit.util.DataUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unused")
 public class BukkitServer extends MinecraftServer {
 
-	private static final transient int PING_INTERVAL = 20;
-	private static final transient Gson gson = new Gson();
-	private transient int socketTimeout = 5000;
+	private static final transient Gson GSON = new Gson();
+	private transient int socketTimeout = 2000;
 	private final transient ServerPingListener listener;
 
 	public BukkitServer(String ip, ServerPingListener listener) {
@@ -56,38 +56,11 @@ public class BukkitServer extends MinecraftServer {
 						try (DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
 							try (InputStream inputStream = socket.getInputStream()) {
 								try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
-									try (ByteArrayOutputStream b = new ByteArrayOutputStream()) {
-										try (DataOutputStream handshake = new DataOutputStream(b)) {
-											handshake.writeByte(0);
-											NumberUtil.writeVarInt(handshake, 4);
-											NumberUtil.writeVarInt(handshake, getAddress().getHostString().length());
-											handshake.writeBytes(getAddress().getHostString());
-											handshake.writeShort(getAddress().getPort());
-											NumberUtil.writeVarInt(handshake, 1);
-										}
-
-										NumberUtil.writeVarInt(dataOutputStream, b.size());
-										dataOutputStream.write(b.toByteArray());
-									}
-
-									dataOutputStream.writeByte(1);
-									dataOutputStream.writeByte(0);
+									DataUtil.writeByteArray(dataOutputStream, prepareHandshake());
+									DataUtil.writeByteArray(dataOutputStream, preparePing());
 
 									try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-										int size = NumberUtil.readVarInt(dataInputStream);
-			
-										int id = NumberUtil.readVarInt(dataInputStream);
-										if (id == -1) throw new IOException("Premature end of stream.");
-										if (id != 0) throw new IOException("Invalid packetID.");
-			
-										int length = NumberUtil.readVarInt(dataInputStream);
-										if (length == -1) throw new IOException("Premature end of stream.");
-										if (length == 0) throw new IOException("Invalid string length.");
-			
-										byte[] in = new byte[length];
-										dataInputStream.readFully(in);
-										String json = new String(in);
-										StatusResponse response = gson.fromJson(json, StatusResponse.class);
+										StatusResponse response = processResponse(dataInputStream);
 			
 										setMotd(response.getMotd());
 										setGameVersion(response.getVersion().getName());
@@ -115,24 +88,24 @@ public class BukkitServer extends MinecraftServer {
 												playerList.addAll(profiles);
 											}
 										}
-
-										if (listener != null)
-											listener.onServerPing(that);
 									}
 								}
 							}
 						}
 					}
 				} catch (Exception ex) {
-					online = false;
+					setOnline(false);
 					reset();
+				} finally {
+					if (listener != null)
+						listener.onServerPing(that);
 				}
 			}
 		});
 	}
 
 	public void setAddress(String ip, int port) {
-		this.setAddress(new InetSocketAddress(ip, port));
+		this.setAddress(InetSocketAddress.createUnresolved(ip, port));
 	}
 
 	public void setAddress(InetSocketAddress address) {
@@ -146,6 +119,34 @@ public class BukkitServer extends MinecraftServer {
 	public void setSocketTimeout(int timeout) {
 		this.socketTimeout = timeout;
 	}
+
+    private byte[] preparePing() throws IOException {
+        return new byte[] { 0x00 };
+    }
+
+    private byte[] prepareHandshake() throws IOException {
+    	ByteArrayDataOutput handshake = DataUtil.newDataOutput();
+		handshake.writeByte(0x00);
+		DataUtil.writeVarInt(handshake, 4);
+		DataUtil.writeString(handshake, getAddress().getHostString());
+		handshake.writeShort(getAddress().getPort());
+		DataUtil.writeVarInt(handshake, 1);
+		return handshake.toByteArray();
+    }
+
+    private StatusResponse processResponse(DataInputStream input) throws IOException {
+		int size = DataUtil.readVarInt(input);
+
+		int id = DataUtil.readVarInt(input);
+		if (id != 0) throw new IOException("Invalid packetID.");
+
+		int length = DataUtil.readVarInt(input);
+		if (length < 1) throw new IOException("Invalid string length.");
+
+		byte[] data = new byte[length];
+		input.readFully(data);
+		return GSON.fromJson(new String(data, Charset.forName("UTF-8")), StatusResponse.class);
+    }
 
 	private class StatusResponse {
 
