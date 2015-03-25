@@ -69,15 +69,10 @@ public class MojangProfile {
 	 * @return Handle of the client.
 	 */
 	public Object getHandle() throws Exception {
-		Object playerHandle = null;
-
-		if (this.getOfflinePlayer().isOnline()) {
-			Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
-			Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
-			playerHandle = craftPlayerObj.invokeMethod("getHandle", craftPlayer);
-		}
-
-		return playerHandle;
+		if (!this.getOfflinePlayer().isOnline()) return null;
+		Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+		Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
+		return craftPlayerObj.invokeMethod("getHandle", craftPlayer);
 	}
 
 	/**
@@ -150,11 +145,10 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection playerObj = new Reflection("Player", Player.class.toString());
+				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 				Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 				Reflection networkManagerObj = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
-				Object playerHandle = playerObj.invokeMethod("getHandle", this.getOfflinePlayer().getPlayer());
-				Object playerConnection = playerConnObj.getValue("playerConnection", playerHandle);
+				Object playerConnection = entityPlayerObj.getValue("playerConnection", this.getHandle());
 				Object networkManager = playerConnObj.getValue("networkManager", playerConnection);
 				version = (int)networkManagerObj.invokeMethod("getVersion", networkManager);
 			} catch (Exception ex) { }
@@ -216,6 +210,23 @@ public class MojangProfile {
 	 */
 	public boolean isOnline() {
 		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
+	}
+
+	/**
+	 * Respawns the player if they are online.
+	 */
+	public void respawn() {
+		if (!this.getOfflinePlayer().isOnline()) return;
+
+		try {
+			Reflection clientCommandObj = new Reflection("PacketPlayInClientCommand", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection enumCommandsObj = new Reflection("PacketPlayInClientCommand$EnumClientCommand", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
+			Object playerConnection = entityPlayerObj.getValue("playerConnection", this.getHandle());
+			Object[] titleActionEnums = enumCommandsObj.getClazz().getEnumConstants();
+			playerConnObj.invokeMethod("a", playerConnection, clientCommandObj.newInstance(titleActionEnums[1]));
+		} catch (Exception ex) { }
 	}
 
 	@Override
