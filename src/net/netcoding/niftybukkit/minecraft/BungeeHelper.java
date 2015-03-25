@@ -468,8 +468,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				NiftyBukkit.getBungeeHelper().getServer().playerList.remove(profile);
 				NiftyBukkit.getBungeeHelper().getServer().playersLeft.remove(profile);
 
-				if (NiftyBukkit.getBungeeHelper().getServer().getPlayerCount() == 0)
-					NiftyBukkit.getBungeeHelper().getServer().reset();
+				if (NiftyBukkit.getBungeeHelper().getServer().getPlayerCount() == 0) {
+					for (BungeeServer server : SERVERS.values())
+						server.reset();
+				}
 			} else
 				profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
 
