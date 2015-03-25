@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
@@ -14,7 +13,6 @@ import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
-import net.netcoding.niftybukkit.minecraft.events.BungeeServerUnloadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
@@ -32,6 +30,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class BungeeHelper extends BukkitHelper implements PluginMessageListener {
 
@@ -314,13 +313,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 				else if (subChannel.equals("GetServers")) {
 					BUNGEE_DETECTED = false;
 					SERVERS.clear();
-					int count = input.readInt();
+					JsonParser parser = new JsonParser();
 
-					for (int i = 0; i < count; i++) {
-						final BungeeServer server = new BungeeServer(input.readUTF());
-						server.setAddress(input.readUTF(), input.readInt());
+					for (int i = 0; i < input.readInt(); i++) {
+						JsonObject json = parser.parse(input.readUTF()).getAsJsonObject();
+						final BungeeServer server = new BungeeServer(json.get("name").getAsString());
+						server.setAddress(json.get("ip").getAsString(), json.get("port").getAsInt());
 						SERVERS.put(server.getName(), server);
-						manager.callEvent(new BungeeServerLoadedEvent(server));
 					}
 
 					BUNGEE_DETECTED = true;
@@ -336,31 +335,21 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.setGameVersion(input.readUTF());
 							server.setProtocolVersion(input.readInt());
 							server.setMaxPlayers(input.readInt());
-							boolean updatePlayers = input.readBoolean();
 							server.playerList.clear();
 
-							if (updatePlayers) {
-								int count = input.readInt();
+							if (input.readBoolean()) {
+								JsonParser parser = new JsonParser();
 
-								for (int i = 0; i < count; i++) {
-									JsonObject json = new JsonObject();
-									String[] parts = input.readUTF().split(",");
-									json.addProperty("id", parts[0]);
-									json.addProperty("name", parts[1]);
-									json.addProperty("ip", parts[2]);
-									json.addProperty("port", Integer.valueOf(parts[3]));
+								for (int i = 0; i < input.readInt(); i++) {
+									JsonObject json = parser.parse(input.readUTF()).getAsJsonObject();
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
 							}
-						} else {
+						} else
 							server.reset();
-							manager.callEvent(new BungeeServerUnloadedEvent(server));
-						}
 
-						if (!server.loadedOnce) {
-							server.loadedOnce = true;
-							manager.callEvent(new BungeeServerLoadedEvent(server));
-						}
+						server.loadedOnce = true;
+						manager.callEvent(new BungeeServerLoadedEvent(server));
 
 						if (!LOADED_EVENTONCE) {
 							int loaded = 0;
@@ -374,27 +363,16 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							}
 						}
 					} else if (subChannel.startsWith("Player")) {
-						String[] parts = input.readUTF().split(",");
-						UUID uniqueId = UUID.fromString(parts[0]);
+						JsonObject json = new JsonParser().parse(input.readUTF()).getAsJsonObject();
+						MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 
 						if (subChannel.endsWith("Join")) {
-							JsonObject json = new JsonObject();
-							json.addProperty("id", parts[0]);
-							json.addProperty("name", parts[1]);
-							json.addProperty("ip", parts[2]);
-							json.addProperty("port", Integer.valueOf(parts[3]));
-							MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
 						} else if (subChannel.endsWith("Leave")) {
-							for (final MojangProfile profile : server.playerList) {
-								if (profile.getUniqueId().equals(uniqueId)) {
-									if (server.isCurrentServer()) server.playersLeft.add(profile);
-									server.playerList.remove(profile);
-									manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
-									break;
-								}
-							}
+							if (server.isCurrentServer()) server.playersLeft.add(profile);
+							server.playerList.remove(profile);
+							manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
 						}
 					}
 				}
