@@ -9,6 +9,26 @@ import java.util.Collection;
 public class ListUtil {
 
 	/**
+	 * Gets the number of elements in this array.
+	 * 
+	 * @param array Array to retrieve size of.
+	 * @return Number of elements in this array.
+	 */
+	public static <T> int sizeOf(T[] array) {
+		return array.length;
+	}
+
+	/**
+	 * Gets the number of elements in this collection.
+	 * 
+	 * @param collection Collection to retrieve size of.
+	 * @return Number of elements in this collection.
+	 */
+	public static <T> int sizeOf(Collection<? extends T> collection) {
+		return collection.size();
+	}
+
+	/**
 	 * Gets if the {@code value} is empty or null.
 	 * 
 	 * @param value to check
