@@ -78,7 +78,7 @@ public class ItemDatabase extends BukkitHelper {
 
 		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemname);
 		final Material mat = Material.getMaterial(itemid);
-		if (mat.equals(null)) throw new RuntimeException("Unknown item id: " + itemid);
+		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
 		final ItemStack retval = new ItemStack(mat);
 		retval.setAmount(mat.getMaxStackSize());
 		retval.setDurability(metaData);
