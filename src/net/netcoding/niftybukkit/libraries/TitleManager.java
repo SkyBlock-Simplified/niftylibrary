@@ -9,8 +9,7 @@ import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-
-import com.google.gson.JsonObject;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 
 public class TitleManager {
 

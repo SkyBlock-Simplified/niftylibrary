@@ -24,11 +24,11 @@ import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 
 import com.google.common.base.Charsets;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.

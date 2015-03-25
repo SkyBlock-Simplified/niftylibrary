@@ -19,6 +19,9 @@ import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonParser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -29,9 +32,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class BungeeHelper extends BukkitHelper implements PluginMessageListener {
 
@@ -315,8 +315,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					BUNGEE_DETECTED = false;
 					SERVERS.clear();
 					JsonParser parser = new JsonParser();
+					int count = input.readInt();
 
-					for (int i = 0; i < input.readInt(); i++) {
+					for (int i = 0; i < count; i++) {
 						JsonObject json = parser.parse(input.readUTF()).getAsJsonObject();
 						final BungeeServer server = new BungeeServer(json.get("name").getAsString());
 						server.setAddress(json.get("ip").getAsString(), json.get("port").getAsInt());
@@ -340,8 +341,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 							if (input.readBoolean()) {
 								JsonParser parser = new JsonParser();
+								int count = input.readInt();
 
-								for (int i = 0; i < input.readInt(); i++) {
+								for (int i = 0; i < count; i++) {
 									JsonObject json = parser.parse(input.readUTF()).getAsJsonObject();
 									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
 								}
