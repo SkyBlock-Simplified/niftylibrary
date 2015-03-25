@@ -127,10 +127,35 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * Gets a connection to the database.
+	 * Gets if the given column name exists in the given table for the current DBMS.
+	 * 
+	 * @param tableName Table name to use.
+	 * @param columnName Column name to check existence of.
+	 * @return True if column exists, otherwise false.
+	 */
+	public boolean getColumnExists(String tableName, String columnName) throws SQLException {
+		return this.query(StringUtil.format("SELECT * FROM `{0}`.`{1}` WHERE `table_schema` = ? AND `table_name` = ? AND (`column_name` = ? || \"\" = ?)", "INFORMATION_SCHEMA", "COLUMNS"), new ResultCallback<Boolean>() {
+			@Override
+			public Boolean handle(ResultSet result) throws SQLException {
+				return result.next();
+			}
+		}, this.getSchema(), tableName, columnName, columnName);
+	}
+
+	/**
+	 * Gets if the given table name exists for the current DBMS.
+	 * 
+	 * @param tableName Table name to check existence of.
+	 * @return True if table exists, otherwise false.
+	 */
+	public boolean getTableExists(String tableName) throws SQLException {
+		return this.getColumnExists(tableName, "");
+	}
+
+	/**
+	 * Gets a connection to this DBMS.
 	 * 
 	 * @return Connection to the database.
-	 * @throws SQLException
 	 */
 	protected Connection getConnection() throws SQLException {
 		if (!this.isDriverAvailable()) throw new SQLException("The driver for this sql instance is unavailable!");
