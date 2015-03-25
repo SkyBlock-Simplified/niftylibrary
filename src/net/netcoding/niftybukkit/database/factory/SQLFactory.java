@@ -67,74 +67,46 @@ public abstract class SQLFactory {
 	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
 		for (int i = 0; i < args.length; i++) {
 			int index = i + 1;
+			Object arg = args[i];
 
-			if (args[i] instanceof String)
-				statement.setString(index, (String)args[i]);
-			else if (args[i] instanceof UUID)
-				statement.setString(index, ((UUID)args[i]).toString());
-			else if (args[i] instanceof Short)
-				statement.setShort(index, (short)args[i]);
-			else if (args[i] instanceof Integer)
-				statement.setInt(index, (int)args[i]);
-			else if (args[i] instanceof Long)
-				statement.setLong(index, (long)args[i]);
-			else if (args[i] instanceof Float)
-				statement.setFloat(index, (float)args[i]);
-			else if (args[i] instanceof Double)
-				statement.setDouble(index, (double)args[i]);
-			else if (args[i] instanceof Blob)
-				statement.setBlob(index, (Blob)args[i]);
-			else if (args[i] == null)
+			if (arg instanceof byte[])
+				statement.setBytes(index, (byte[])arg);
+			else if (arg instanceof Byte)
+				statement.setByte(index, (byte)arg);
+			else if (arg instanceof Boolean)
+				statement.setBoolean(index, (boolean)arg);
+			else if (arg instanceof Short)
+				statement.setShort(index, (short)arg);
+			else if (arg instanceof Integer)
+				statement.setInt(index, (int)arg);
+			else if (arg instanceof Long)
+				statement.setLong(index, (long)arg);
+			else if (arg instanceof Double)
+				statement.setDouble(index, (double)arg);
+			else if (arg instanceof Float)
+				statement.setFloat(index, (float)arg);
+			else if (arg instanceof Blob)
+				statement.setBlob(index, (Blob)arg);
+			else if (arg instanceof String)
+				statement.setString(index, (String)arg);
+			else if (arg instanceof UUID)
+				statement.setString(index, ((UUID)arg).toString());
+			else if (arg == null)
 				statement.setNull(index, Types.NULL);
 			else
-				statement.setObject(index, args[i]);
+				statement.setObject(index, arg);
 		}
-	}
-
-	/**
-	 * Create a table if it does not exist.
-	 * 
-	 * @param name  Name of the table.
-	 * @param sql Fields and constrains of the table
-	 * @return True if the table was created, otherwise false.
-	 * @throws SQLException
-	 */
-	public boolean createTable(String name, String sql) throws SQLException {
-		try (Connection connection = this.getConnection()) {
-			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", this.getSchema(), name, sql, (this.getProduct().equals("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
-			}
-		}
-	}
-
-	/**
-	 * Create a table if it does not exist asynchronously.
-	 * 
-	 * @param name  Name of the table.
-	 * @param sql Table fields and constraints.
-	 */
-	public void createTableAsync(final String name, final String sql) {
-		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
-			@Override
-			public void run() {
-				try (Connection connection = getConnection()) {
-					try (Statement statement = connection.createStatement()) {
-						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", getSchema(), name, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
-					}
-				} catch (SQLException sqlex) { }
-			}
-		});
 	}
 
 	/**
 	 * Gets if the given column name exists in the given table for the current DBMS.
 	 * 
-	 * @param tableName Table name to use.
+	 * @param tableName  Table name to use.
 	 * @param columnName Column name to check existence of.
 	 * @return True if column exists, otherwise false.
 	 */
-	public boolean getColumnExists(String tableName, String columnName) throws SQLException {
-		return this.query(StringUtil.format("SELECT * FROM `{0}`.`{1}` WHERE `table_schema` = ? AND `table_name` = ? AND (`column_name` = ? || \"\" = ?)", "INFORMATION_SCHEMA", "COLUMNS"), new ResultCallback<Boolean>() {
+	public boolean checkColumnExists(String tableName, String columnName) throws SQLException {
+		return this.query(StringUtil.format("SELECT * FROM `{0}`.`{1}` WHERE `table_schema` = ? AND `table_name` = ? AND (`column_name` = ? || \"\" = ?);", "INFORMATION_SCHEMA", "COLUMNS"), new ResultCallback<Boolean>() {
 			@Override
 			public Boolean handle(ResultSet result) throws SQLException {
 				return result.next();
@@ -148,8 +120,52 @@ public abstract class SQLFactory {
 	 * @param tableName Table name to check existence of.
 	 * @return True if table exists, otherwise false.
 	 */
-	public boolean getTableExists(String tableName) throws SQLException {
-		return this.getColumnExists(tableName, "");
+	public boolean checkTableExists(String tableName) throws SQLException {
+		return this.checkColumnExists(tableName, "");
+	}
+
+	/**
+	 * Create a table if it does not exist.
+	 * 
+	 * @param tableName Name of the table.
+	 * @param sql       Fields and constrains of the table
+	 * @return True if the table was created, otherwise false.
+	 * @throws SQLException
+	 */
+	public boolean createTable(String tableName, String sql) throws SQLException {
+		try (Connection connection = this.getConnection()) {
+			try (Statement statement = connection.createStatement()) {
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", this.getSchema(), tableName, sql, (this.getProduct().equals("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
+			}
+		}
+	}
+
+	/**
+	 * Create a table if it does not exist asynchronously.
+	 * 
+	 * @param tableName Name of the table.
+	 * @param sql       Table fields and constraints.
+	 */
+	public void createTableAsync(final String tableName, final String sql) {
+		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
+			@Override
+			public void run() {
+				try (Connection connection = getConnection()) {
+					try (Statement statement = connection.createStatement()) {
+						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", getSchema(), tableName, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
+					}
+				} catch (SQLException sqlex) { }
+			}
+		});
+	}
+
+	/**
+	 * Drop a table if it exists.
+	 * 
+	 * @param tableName Name of the table.
+	 */
+	public void dropTable(String tableName) throws SQLException {
+		this.update(StringUtil.format("DROP TABLE IF EXISTS ?;"), tableName);
 	}
 
 	/**
