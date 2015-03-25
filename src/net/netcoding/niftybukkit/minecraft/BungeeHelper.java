@@ -16,6 +16,7 @@ import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.entity.Player;
@@ -152,7 +153,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	}
 
 	public int getPlayerCount() {
-		return this.isDetected() ? this.getPlayerCount(this.getServerName()) : this.getPlugin().getServer().getOnlinePlayers().size();
+		return this.isDetected() ? this.getPlayerCount(this.getServerName()) : ListUtil.sizeOf(this.getPlugin().getServer().getOnlinePlayers());
 	}
 
 	public int getPlayerCount(String serverName) {
