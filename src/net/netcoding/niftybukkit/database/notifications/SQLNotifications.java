@@ -15,7 +15,7 @@ import org.bukkit.Bukkit;
  */
 public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
-	static final String ACTIVITY_TABLE = "niftybukkit_activity";
+	static final String ACTIVITY_TABLE = "niftybukkit_notifications";
 	private static final int DEFAULT_DELAY = 10;
 	private final transient ConcurrentSet<DatabaseNotification> listeners = new ConcurrentSet<>();
 	private int taskId = -1;
@@ -96,11 +96,11 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	}
 
 	private void createLogTable() throws SQLException {
-		this.createTable(ACTIVITY_TABLE, "`id` INT AUTO_INCREMENT PRIMARY KEY, `schema` VARCHAR(255) NOT NULL, `table` VARCHAR(255) NOT NULL, `action` ENUM('insert', 'delete', 'update') NOT NULL, `time` INT NOT NULL, `keys` VARCHAR(255), `old` VARCHAR(255), `new` VARCHAR(255)");
+		this.createTable(ACTIVITY_TABLE, "id INT AUTO_INCREMENT PRIMARY KEY, schema_name VARCHAR(255) NOT NULL, table_name VARCHAR(255) NOT NULL, sql_action ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL, _submitted INT NOT NULL, primary_keys VARCHAR(255), old_data VARCHAR(255), new_data VARCHAR(255)");
 	}
 
 	private void createPurgeEvent() throws SQLException {
-		updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS `purgeNiftyNotifications` ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM `{0}`.`niftybukkit_activity` WHERE `time` < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema()));
+		updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS purgeNiftyNotifications ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM {0}.{1} WHERE time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema(), ACTIVITY_TABLE));
 	}
 
 	public boolean isRunning() {

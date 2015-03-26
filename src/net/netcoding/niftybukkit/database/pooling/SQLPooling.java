@@ -16,10 +16,10 @@ import org.bukkit.Bukkit;
 public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	private volatile transient Vector<Connection> availableConnections = new Vector<>();
+	private volatile transient Vector<Connection> usedConnections = new Vector<>();
+	private String validationQuery = "SELECT 1;";
 	private int maximumConnections = 10;
 	private boolean testOnBorrow = true;
-	private String validationQuery = "SELECT 1;";
-	private volatile transient Vector<Connection> usedConnections = new Vector<>();
 
 	/**
 	 * Create a new pooling instance.

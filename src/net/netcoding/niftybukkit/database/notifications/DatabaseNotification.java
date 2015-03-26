@@ -45,26 +45,23 @@ public class DatabaseNotification extends BukkitHelper {
 	}
 
 	private void createTrigger(TriggerEvent event) throws SQLException {
-		try {
-			if (this.primaryColumnNames.size() > 0) {
-				String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
-				String trigger = StringUtil.format("CREATE TRIGGER `{0}`.`{1}` AFTER {2} ON `{3}` FOR EACH ROW INSERT INTO `{0}`.`{4}` (`schema`, `table`, `action`, `time`, `keys`, `old`, `new`) VALUES (''{0}'', ''{3}'', ''{2}'', UNIX_TIMESTAMP(), ''{5}'', ",
-						this.getSchema(), this.getName(event), event.toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE, primaryKeys);
-				String _old = null;
-				String _new = null;
-				if (!TriggerEvent.INSERT.equals(event)) _old = StringUtil.format("CONCAT(OLD.`{0}`)", StringUtil.implode("`, ',', OLD.`", this.primaryColumnNames));
-				if (!TriggerEvent.DELETE.equals(event)) _new = StringUtil.format("CONCAT(NEW.`{0}`)", StringUtil.implode("`, ',', NEW.`", this.primaryColumnNames));
-				this.sql.updateAsync(String.format(trigger + "%s, %s);", _old, _new));
-			} else
-				throw new Exception(StringUtil.format("The table `{0}`.`{1}` has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
-		} catch (Exception ex) {
-			this.getLog().console(ex);
-		}
+		if (this.primaryColumnNames.size() > 0) {
+			String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
+			String quote = this.sql.getIdentifierQuoteString();
+			String trigger = StringUtil.format("CREATE TRIGGER {1}.{2} AFTER {3} ON {4} FOR EACH ROW INSERT INTO {1}.{5} (schema_name, table_name, sql_action, primary_keys, _submitted, old_data, new_data) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(), ",
+					quote, this.getSchema(), this.getName(event), event.toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE);
+			String _old = null;
+			String _new = null;
+			if (!TriggerEvent.INSERT.equals(event)) _old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.format("{0}{1}{0}", quote, StringUtil.implode(", ',', OLD.", this.primaryColumnNames)));
+			if (!TriggerEvent.DELETE.equals(event)) _new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.format("{0}{1}{0}", quote, StringUtil.implode(", ',', NEW.", this.primaryColumnNames)));
+			this.sql.updateAsync(String.format(trigger + "%s, %s);", _old, _new), this.getSchema(), this.getTable(), event.toUppercase(), primaryKeys);
+		} else
+			throw new SQLException(StringUtil.format("The table {0}.{1} has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 	}
 
 	private void dropTrigger(TriggerEvent event) {
 		try {
-			this.sql.update(StringUtil.format("DROP TRIGGER IF EXISTS `{0}`;", this.getName(event)));
+			this.sql.update(StringUtil.format("DROP TRIGGER IF EXISTS {0};", this.getName(event)));
 		} catch (Exception ex) { }
 	}
 
@@ -78,11 +75,11 @@ public class DatabaseNotification extends BukkitHelper {
 		if (this.getEvent().equals(TriggerEvent.INSERT)) throw new SQLException("Cannot retrieve an inserted record!");
 		final HashMap<String, Object> deleted = new HashMap<String, Object>();
 
-		this.sql.query(StringUtil.format("SELECT `old` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
+		this.sql.query(StringUtil.format("SELECT old_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
 			@Override
 			public void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
-					String[] _old = result.getString("old").split(",");
+					String[] _old = result.getString("old_data").split(",");
 					int keyCount = primaryColumnNames.size();
 					for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
 				}
@@ -132,17 +129,17 @@ public class DatabaseNotification extends BukkitHelper {
 	public void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
 		if (this.getEvent().equals(TriggerEvent.DELETE)) throw new SQLException("Cannot retrieve a deleted record!");
 
-		this.sql.query(StringUtil.format("SELECT `new` FROM `{0}` WHERE `schema` = ? AND `table` = ? AND `action` = ? AND `id` = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
+		this.sql.query(StringUtil.format("SELECT new_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
 			@Override
 			public void handle(ResultSet result) throws SQLException {
 				if (result.next()) {
 					List<String> whereClause = new ArrayList<String>();
 					int keyCount = primaryColumnNames.size();
-					String[] _new = result.getString("new").split(",");
+					String[] _new = result.getString("new_data").split(",");
 
 					if (keyCount != 0) {
-						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX(`{0}`, '','', {1}), '','', -1) = ?", primaryColumnNames.get(i), (i + 1)));
-						sql.query(StringUtil.format("SELECT * FROM `{0}` WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
+						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
+						sql.query(StringUtil.format("SELECT * FROM {0} WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 					}
 				}
 			}
@@ -160,21 +157,21 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private void loadPrimaryKeys() throws SQLException {
 		this.primaryColumnNames.clear();
-		this.primaryColumnNames.addAll(this.sql.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? AND `COLUMN_KEY` = 'PRI';", new ResultCallback<ConcurrentList<String>>() {
+		this.primaryColumnNames.addAll(this.sql.query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_KEY = ?;", new ResultCallback<ConcurrentList<String>>() {
 			@Override
 			public ConcurrentList<String> handle(ResultSet result) throws SQLException {
 				ConcurrentList<String> keyNames = new ConcurrentList<>();
 				while (result.next()) keyNames.add(result.getString("COLUMN_NAME"));
 				return keyNames;
 			}
-		}, this.getSchema(), this.getTable()));
+		}, this.getSchema(), this.getTable(), "PRI"));
 	}
 
 	boolean pulse() {
 		if (this.isStopped()) return false;
 
 		try {
-			return this.sql.query(StringUtil.format("SELECT `id`, `action` FROM `{0}` WHERE `table` = ? AND `action` IN (''INSERT'', ''UPDATE'', ''DELETE'') AND `id` > ? ORDER BY `id` {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), new ResultCallback<Boolean>() {
+			return this.sql.query(StringUtil.format("SELECT id, sql_action FROM {0} WHERE table_name = ? AND id > ? AND sql_action IN (?, ?, ?) ORDER BY id {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
 					if (result.next()) {
@@ -182,14 +179,14 @@ public class DatabaseNotification extends BukkitHelper {
 
 						if (last > previousId) {
 							previousId = last;
-							event = TriggerEvent.fromString(result.getString("action"));
+							event = TriggerEvent.fromString(result.getString("sql_action"));
 							return true;
 						}
 					}
 
 					return false;
 				}
-			}, this.getTable(), this.previousId);
+			}, this.getTable(), this.previousId, "INSERT", "UPDATE", "DELETE");
 		} catch (SQLException ex) {
 			this.getLog().console(ex);
 			this.stop();
@@ -229,14 +226,14 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private boolean triggersExist() {
 		try {
-			return this.sql.query("SELECT `TRIGGER_NAME` FROM `INFORMATION_SCHEMA`.`TRIGGERS` WHERE `TRIGGER_SCHEMA` = ? AND `TRIGGER_NAME` IN (?, ?, ?);", new ResultCallback<Boolean>() {
+			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
 					int count = 0;
 					while (result.next()) count++;
 					return count == 3;
 				}
-			}, this.getSchema(), this.getName(TriggerEvent.DELETE), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE));
+			}, this.getSchema(), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE), this.getName(TriggerEvent.DELETE));
 		} catch (Exception ex) {
 			this.getLog().console(ex);
 		}

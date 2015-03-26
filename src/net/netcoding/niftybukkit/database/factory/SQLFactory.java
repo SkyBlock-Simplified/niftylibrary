@@ -30,6 +30,7 @@ public abstract class SQLFactory {
 	private final Properties properties;
 	private String product;
 	private String schema;
+	private String quote = " ";
 
 	/**
 	 * Create a new factory instance.
@@ -106,7 +107,7 @@ public abstract class SQLFactory {
 	 * @return True if column exists, otherwise false.
 	 */
 	public boolean checkColumnExists(String tableName, String columnName) throws SQLException {
-		return this.query(StringUtil.format("SELECT * FROM `{0}`.`{1}` WHERE `table_schema` = ? AND `table_name` = ? AND (`column_name` = ? || \"\" = ?);", "INFORMATION_SCHEMA", "COLUMNS"), new ResultCallback<Boolean>() {
+		return this.query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND (COLUMN_NAME = ? || \"\" = ?);", new ResultCallback<Boolean>() {
 			@Override
 			public Boolean handle(ResultSet result) throws SQLException {
 				return result.next();
@@ -135,7 +136,7 @@ public abstract class SQLFactory {
 	public boolean createTable(String tableName, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", this.getSchema(), tableName, sql, (this.getProduct().equals("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", this.getIdentifierQuoteString(), this.getSchema(), tableName, sql, (this.getProduct().equalsIgnoreCase("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
 			}
 		}
 	}
@@ -152,7 +153,7 @@ public abstract class SQLFactory {
 			public void run() {
 				try (Connection connection = getConnection()) {
 					try (Statement statement = connection.createStatement()) {
-						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS `{0}`.`{1}` ({2}){3};", getSchema(), tableName, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
+						statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", getIdentifierQuoteString(), getSchema(), tableName, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
 					}
 				} catch (SQLException sqlex) { }
 			}
@@ -187,6 +188,20 @@ public abstract class SQLFactory {
 		return this.driver;
 	}
 
+	/**
+	 * Gets the string used to quote identifiers.
+	 * 
+	 * @return Identifier quote, a space " " if unsupported.
+	 */
+	public final String getIdentifierQuoteString() {
+		return this.quote;
+	}
+
+	/**
+	 * Gets the current DBMS product name.
+	 * 
+	 * @return Name of the product for the current DBMS.
+	 */
 	public final String getProduct() {
 		return this.product;
 	}
@@ -230,6 +245,7 @@ public abstract class SQLFactory {
 	private void load() throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			this.product = connection.getMetaData().getDatabaseProductName();
+			this.quote = connection.getMetaData().getIdentifierQuoteString();
 
 			try (ResultSet result = connection.getMetaData().getCatalogs()) {
 				while (result.next()) {
