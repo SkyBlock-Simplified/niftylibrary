@@ -26,6 +26,7 @@ public class MojangProfile {
 	private int port;
 	private InetSocketAddress ipAddress;
 	private long updated = System.currentTimeMillis();
+	// http://skins.minecraft.net/MinecraftSkins/<username>.png
 
 	private MojangProfile() { }
 
