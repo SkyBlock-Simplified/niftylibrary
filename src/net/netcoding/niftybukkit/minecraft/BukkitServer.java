@@ -17,8 +17,7 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.DataUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
-
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import net.netcoding.niftybukkit.util.gson.Gson;
 
 import com.google.common.io.ByteArrayDataOutput;
 

@@ -5,8 +5,8 @@ import java.util.Map;
 
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.gson.Gson;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.events.PacketContainer;
@@ -16,6 +16,7 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 class SignPacket {
 
+	private static final transient Gson GSON = new Gson();
 	private final transient PacketContainer updateSignPacket;
 
 	SignPacket(PacketContainer updateSignPacket) {
@@ -38,7 +39,7 @@ class SignPacket {
 	private String getLine(int index) {
 		String json = this.updateSignPacket.getChatComponentArrays().read(0)[index].getJson();
 		if (StringUtil.isEmpty(json) || json.equals("\"\"")) return "";
-		Map<?, ?> jsonMap = new Gson().fromJson(json, Map.class);
+		Map<?, ?> jsonMap = GSON.fromJson(json, Map.class);
 		return (String)((List<?>)jsonMap.get("extra")).get(0);
 	}
 

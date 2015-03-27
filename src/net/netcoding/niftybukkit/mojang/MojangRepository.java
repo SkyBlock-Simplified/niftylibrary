@@ -21,11 +21,11 @@ import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
+import net.netcoding.niftybukkit.util.gson.Gson;
+import net.netcoding.niftybukkit.util.gson.JsonObject;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 
 import com.google.common.base.Charsets;
