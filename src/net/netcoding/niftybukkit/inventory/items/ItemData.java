@@ -46,7 +46,7 @@ public class ItemData {
 			}
 
 
-			if (MinecraftPackage.MINECRAFT_VERSION.toString().startsWith("v1_7"))
+			if (MinecraftPackage.IS_PRE_1_8)
 				tagCompound.invokeMethod("set", tag, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
 			else {
 				if (!(boolean)tagCompound.invokeMethod("hasKey", tag, "HideFlags"))
