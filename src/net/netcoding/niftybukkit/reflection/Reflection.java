@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 public class Reflection {
@@ -56,22 +57,22 @@ public class Reflection {
 	}
 
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
-		Class<?>[] t = toPrimitiveTypeArray(paramTypes);
+		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
-		if (CONSTRUCTOR_CACHE.get(t) != null)
-			return CONSTRUCTOR_CACHE.get(t);
+		if (CONSTRUCTOR_CACHE.containsKey(types))
+			return CONSTRUCTOR_CACHE.get(types);
 
-		for (Constructor<?> c : this.getClazz().getConstructors()) {
-			Class<?>[] types = toPrimitiveTypeArray(c.getParameterTypes());
+		for (Constructor<?> constructor : this.getClazz().getConstructors()) {
+			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
 
-			if (equalsTypeArray(types, t)) {
-				CONSTRUCTOR_CACHE.put(types, c);
-				return c;
+			if (isEqualsTypeArray(constructorTypes, types)) {
+				CONSTRUCTOR_CACHE.put(constructorTypes, constructor);
+				return constructor;
 			}
 		}
 
-		System.out.println(StringUtil.format("The constructor {0} was not found!", Arrays.asList(t)));
-		return CONSTRUCTOR_CACHE.put(t, null);
+		System.out.println(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
+		return CONSTRUCTOR_CACHE.put(types, null);
 	}
 
 	public String getClassPath() {
@@ -79,21 +80,27 @@ public class Reflection {
 	}
 
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
-		Class<?>[] t = toPrimitiveTypeArray(paramTypes);
+		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
-		for (Method m : this.getClazz().getMethods()) {
-			Class<?>[] types = toPrimitiveTypeArray(m.getParameterTypes());
+		for (Method method : this.getClazz().getMethods()) {
+			Class<?>[] methodTypes = toPrimitiveTypeArray(method.getParameterTypes());
 
-			if (m.getName().equals(name) && equalsTypeArray(types, t))
-				return m;
+			if (method.getName().equals(name) && isEqualsTypeArray(methodTypes, types)) {
+				method.setAccessible(true);
+				return method;
+			}
 		}
 
-		System.out.println(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(t)));
+		System.out.println(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 		return null;
 	}
 
 	public String getPackagePath() {
 		return this.packagePath;
+	}
+
+	private static Class<?> getPrimitiveType(Class<?> clazz) {
+		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
 	}
 
 	public String getSubPackage() {
@@ -102,6 +109,17 @@ public class Reflection {
 
 	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
 		return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+	}
+
+	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
+		if (a.length != o.length) return false;
+
+		for (int i = 0; i < a.length; i++) {
+			if (!a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
+				return false;
+		}
+
+		return true;
 	}
 
 	public Object newInstance(Object... args) throws Exception {
@@ -129,31 +147,22 @@ public class Reflection {
 			this.setValue(obj, entry);
 	}
 
-	private static Class<?> getPrimitiveType(Class<?> clazz) {
-		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
+	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(classes[i]);
+
+		return types;
 	}
 
 	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		Class<?>[] types = new Class<?>[objects != null ? objects.length : 0];
-		for (int i = 0; i < types.length; i++) types[i] = getPrimitiveType(objects[i].getClass());
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(objects[i].getClass());
+
 		return types;
-	}
-
-	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		Class<?>[] types = new Class<?>[classes != null ? classes.length : 0];
-		for (int i = 0; i < types.length; i++) types[i] = getPrimitiveType(classes[i]);
-		return types;
-	}
-
-	private static boolean equalsTypeArray(Class<?>[] a, Class<?>[] o) {
-		if (a.length != o.length) return false;
-
-		for (int i = 0; i < a.length; i++) {
-			if (!a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
-				return false;
-		}
-
-		return true;
 	}
 
 }
