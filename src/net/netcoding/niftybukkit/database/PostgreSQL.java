@@ -2,10 +2,10 @@ package net.netcoding.niftybukkit.database;
 
 import java.sql.SQLException;
 
-import net.netcoding.niftybukkit.database.notifications.SQLNotifications;
+import net.netcoding.niftybukkit.database.factory.SQLWrapper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-public class PostgreSQL extends SQLNotifications {
+public class PostgreSQL extends SQLWrapper {
 
 	public static final int DEFAULT_PORT = 5432;
 

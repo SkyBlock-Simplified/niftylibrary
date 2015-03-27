@@ -2,10 +2,10 @@ package net.netcoding.niftybukkit.database;
 
 import java.sql.SQLException;
 
-import net.netcoding.niftybukkit.database.notifications.SQLNotifications;
+import net.netcoding.niftybukkit.database.factory.SQLWrapper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-public class MySQL extends SQLNotifications {
+public class MySQL extends SQLWrapper {
 
 	public static final int DEFAULT_PORT = 3306;
 
@@ -18,7 +18,7 @@ public class MySQL extends SQLNotifications {
 	}
 
 	/**
-	 * Checks if the MySQL JDBC driver is available.
+	 * Checks if the MySQL jdbc driver is available.
 	 * 
 	 * @return True if available, otherwise false.
 	 */

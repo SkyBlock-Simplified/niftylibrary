@@ -2,10 +2,10 @@ package net.netcoding.niftybukkit.database;
 
 import java.sql.SQLException;
 
-import net.netcoding.niftybukkit.database.notifications.SQLNotifications;
+import net.netcoding.niftybukkit.database.factory.SQLWrapper;
 import net.netcoding.niftybukkit.util.StringUtil;
 
-public class SQLServer extends SQLNotifications {
+public class SQLServer extends SQLWrapper {
 
 	public static final int DEFAULT_PORT = 1433;
 
