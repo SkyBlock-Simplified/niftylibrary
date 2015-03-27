@@ -74,8 +74,8 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 		return this.getSuperClass().cast(this.factory);
 	}
 
-	public final <U extends SQLWrapper> U getSQL(Class<U> wrapper) {
-		return wrapper.cast(this.factory);
+	public final T getCastedSQL() {
+		return this.getSuperClass().cast(this.factory);
 	}
 
 	@SuppressWarnings("unchecked")
