@@ -1,36 +1,17 @@
 package net.netcoding.niftybukkit.reflection;
 
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.VersionUtil;
 
 import org.bukkit.Bukkit;
 
-public enum MinecraftPackage {
+public class MinecraftPackage {
 
-	MINECRAFT_VERSION {
-
-		@Override
-		public String toString() {
-			return Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-		}
-
-	},
-
-	MINECRAFT_SERVER {
-
-		@Override
-		public String toString() {
-			return StringUtil.format("net.minecraft.server.{0}", MINECRAFT_VERSION);
-		}
-
-	},
-
-	CRAFTBUKKIT {
-
-		@Override
-		public String toString() {
-			return Bukkit.getServer().getClass().getPackage().getName();
-		}
-
-	};
+	public static final String CRAFTBUKKIT = Bukkit.getServer().getClass().getPackage().getName();
+	public static final String MINECRAFT_VERSION = CRAFTBUKKIT.split("\\.")[3];
+	public static final String MINECRAFT_SERVER = StringUtil.format("net.minecraft.server.{0}", MINECRAFT_VERSION);
+	private static final String MINECRAFT_VERSION_NUMBER = MINECRAFT_VERSION.replaceAll("^v", "").replaceAll("R", "").replace("_", ".");
+	public static final boolean IS_PRE_1_8 = new VersionUtil(MINECRAFT_VERSION_NUMBER).compareTo(new VersionUtil("1.8.0")) < 0;
+	public static final boolean IS_PRE_1_8_3 = new VersionUtil(MINECRAFT_VERSION_NUMBER).compareTo(new VersionUtil("1.8.2")) < 0;
 
 }
