@@ -25,7 +25,6 @@ public class BungeeServer extends MinecraftServer {
 	public void reset() {
 		super.reset();
 		this.playersLeft.clear();
-		this.loadedOnce = false;
 	}
 
 	void setAddress(String ip, int port) {
