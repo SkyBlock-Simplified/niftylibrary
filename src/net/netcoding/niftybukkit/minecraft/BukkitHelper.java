@@ -63,11 +63,11 @@ public abstract class BukkitHelper {
 	}
 
 	public static boolean isConsole(CommandSender sender) {
-		return !isPlayer(sender);
+		return isConsole(sender.getName());
 	}
 
 	public static boolean isConsole(String senderName) {
-		return !isPlayer(senderName);
+		return senderName.equalsIgnoreCase("console") || senderName.equals("@");
 	}
 
 	public static boolean isPlayer(CommandSender sender) {
@@ -75,7 +75,7 @@ public abstract class BukkitHelper {
 	}
 
 	public static boolean isPlayer(String senderName) {
-		return !senderName.equalsIgnoreCase("console");
+		return !isConsole(senderName);
 	}
 
 	@Deprecated
