@@ -100,7 +100,7 @@ public class Reflection {
 	}
 
 	private static Class<?> getPrimitiveType(Class<?> clazz) {
-		return CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz;
+		return clazz != null ? CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz : null;
 	}
 
 	public String getSubPackage() {
@@ -115,7 +115,7 @@ public class Reflection {
 		if (a.length != o.length) return false;
 
 		for (int i = 0; i < a.length; i++) {
-			if (!a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
+			if (o[i] != null && !a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
 				return false;
 		}
 
@@ -160,7 +160,7 @@ public class Reflection {
 		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
 
 		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(objects[i].getClass());
+			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
 
 		return types;
 	}
