@@ -1,21 +1,22 @@
 package net.netcoding.niftybukkit.yaml;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.sql.SQLException;
 
 import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.database.PostgreSQL;
 import net.netcoding.niftybukkit.database.SQLServer;
-import net.netcoding.niftybukkit.database.factory.SQLFactory;
+import net.netcoding.niftybukkit.database.factory.SQLWrapper;
 import net.netcoding.niftybukkit.yaml.annotations.Comment;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class SQLConfig<T extends SQLFactory> extends Config {
+public class SQLConfig<T extends SQLWrapper> extends Config {
 
-	private transient SQLFactory factory;
+	private transient SQLWrapper factory;
 
 	@Comment("Database Driver (mysql, postgresql or sqlserver)")
 	@Path("sql.driver")
@@ -69,8 +70,12 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 		return this.schema;
 	}
 
-	public final T getSQL() {
+	public final SQLWrapper getSQL() {
 		return this.getSuperClass().cast(this.factory);
+	}
+
+	public final <U extends SQLWrapper> U getSQL(Class<U> wrapper) {
+		return wrapper.cast(this.factory);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,16 +94,17 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 		Class<?> clazz = this.getSuperClass();
 
 		if (this.driver.equalsIgnoreCase("sql")) {
-			if (PostgreSQL.class.isAssignableFrom(clazz)) {
-				this.driver = "postgresql";
-				this.port = PostgreSQL.DEFAULT_PORT;
-			} else if (SQLServer.class.isAssignableFrom(clazz)) {
-				this.driver = "mssql";
-				this.port = SQLServer.DEFAULT_PORT;
-			} else if (MySQL.class.isAssignableFrom(clazz)) {
-				this.driver = "mysql";
-				this.port = MySQL.DEFAULT_PORT;
-			}
+			try {
+				Field field = clazz.getField("DEFAULT_PORT");
+				this.port = field.getInt(null);
+
+				if (PostgreSQL.class.isAssignableFrom(clazz))
+					this.driver = "postgresql";
+				else if (SQLServer.class.isAssignableFrom(clazz))
+					this.driver = "sqlserver";
+				else if (MySQL.class.isAssignableFrom(clazz))
+					this.driver = "mysql";
+			} catch (Exception ex) { }
 
 			if (!this.driver.equalsIgnoreCase("sql"))
 				this.save();
@@ -110,7 +116,7 @@ public class SQLConfig<T extends SQLFactory> extends Config {
 			this.factory = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if (this.driver.equalsIgnoreCase("SQLServer"))
 			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-		else
+		else if (this.driver.equalsIgnoreCase("MySQL"))
 			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 	}
 
