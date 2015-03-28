@@ -74,67 +74,36 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 		return this.getSuperClass().cast(this.factory);
 	}
 
-	public final T getCastedSQL() {
-		return this.getSuperClass().cast(this.factory);
-	}
-
 	@SuppressWarnings("unchecked")
 	private Class<T> getSuperClass() {
 		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
 		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? SQLWrapper.class : superClass.getActualTypeArguments()[0]);
 	}
 
-	private void handleForcedWrapper(boolean loading) {
-		if (!SQLWrapper.class.equals(this.getSuperClass())) {
-			if (this.root.has("sql")) {
-				ConfigSection sql = (ConfigSection)this.root.get("sql");
-				sql.remove("driver");
-			}
-
-			if (loading) {
-				if (this.driver.equalsIgnoreCase("sql")) {
-					Class<T> clazz = this.getSuperClass();
-					this.driver = clazz.getSimpleName().toLowerCase();
-
-					if (this.port == 0) {
-						try {
-							Field portField = clazz.getField("DEFAULT_PORT");
-							this.port = portField.getInt(null);
-						} catch (Exception ex) { }
-					}
-				}
-			}
-		}
-	}
-
 	@Override
 	public void init() throws InvalidConfigurationException {
 		super.init();
-		//this.initSQL();
+		this.initSQL();
 	}
 
-	/*private void initSQL() throws InvalidConfigurationException {
+	private void initSQL() throws InvalidConfigurationException {
 		Class<?> clazz = this.getSuperClass();
 
-		if (!SQLWrapper.class.equals(this.getSuperClass())) {
+		if (!SQLWrapper.class.equals(clazz)) {
 			if (this.driver.equalsIgnoreCase("sql")) {
-				try {
-					Field portField = clazz.getField("DEFAULT_PORT");
-					this.port = portField.getInt(null);
+				this.driver = clazz.getSimpleName().toLowerCase();
 
-					if (PostgreSQL.class.isAssignableFrom(clazz))
-						this.driver = "postgresql";
-					else if (SQLServer.class.isAssignableFrom(clazz))
-						this.driver = "sqlserver";
-					else if (MySQL.class.isAssignableFrom(clazz))
-						this.driver = "mysql";
-				} catch (Exception ex) { }
+				if (this.port == 0) {
+					try {
+						Field portField = clazz.getField("DEFAULT_PORT");
+						this.port = portField.getInt(null);
+					} catch (Exception ex) { }
+				}
 
-				if (!this.driver.equalsIgnoreCase("sql"))
-					this.save();
+				this.save();
 			}
 		}
-	}*/
+	}
 
 	protected void initFactory() throws SQLException {
 		if (this.driver.equalsIgnoreCase("PostgreSQL"))
@@ -154,18 +123,6 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 		} catch (SQLException sqlex) {
 			throw new InvalidConfigurationException("Invalid SQL Configuration!", sqlex);
 		}
-	}
-
-	@Override
-	protected void loadFromYaml() {
-		super.loadFromYaml();
-		this.handleForcedWrapper(true);
-	}
-
-	@Override
-	protected void saveToYaml() throws InvalidConfigurationException {
-		this.handleForcedWrapper(false);
-		super.saveToYaml();
 	}
 
 }
