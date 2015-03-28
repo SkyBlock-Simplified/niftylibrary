@@ -109,8 +109,14 @@ public class TitleManager {
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
-		Object packetTitleObj = packetTitle.newInstance(titleActionObj[3], null);
+		Object packetTitleObj = packetTitle.newInstance();
+		Object enumClear = titleAction.getValue("CLEAR", null);
+
+		if (MinecraftPackage.IS_PRE_1_8) 
+			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumClear));
+		else
+			packetTitleObj = packetTitle.newInstance(enumClear, null);
+
 		profile.sendPacket(packetTitleObj);
 	}
 
@@ -119,8 +125,14 @@ public class TitleManager {
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
-		Object packetTitleObj = packetTitle.newInstance(titleActionObj[4], null);
+		Object packetTitleObj = packetTitle.newInstance();
+		Object enumReset = titleAction.getValue("RESET", null);
+
+		if (MinecraftPackage.IS_PRE_1_8) 
+			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumReset));
+		else
+			packetTitleObj = packetTitle.newInstance(enumReset, null);
+
 		profile.sendPacket(packetTitleObj);
 	}
 
@@ -150,28 +162,54 @@ public class TitleManager {
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Reflection chatSerializer = Reflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
-		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
 
 		if (this.getTimeStay() > 0) {
+			Object enumTimes = titleAction.getValue("TIMES", null);
+			Object enumTitle = titleAction.getValue("TITLE", null);
+			Object enumSubtitle = titleAction.getValue("SUBTITLE", null);
+
 			// Timings
-			Object packetTimingsObj = packetTitle.newInstance(titleActionObj[2], null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
+			Object packetTimingsObj = packetTitle.newInstance();
+
+			if (MinecraftPackage.IS_PRE_1_8) {
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("a", enumTimes));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("c", this.getTimeFadeIn()));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("d", this.getTimeStay()));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("e", this.getTimeFadeOut()));
+			} else
+				packetTimingsObj = packetTitle.newInstance(enumTimes, null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
+
 			profile.sendPacket(packetTimingsObj);
 
 			// Title
 			JsonObject json = new JsonObject();
 			json.addProperty("text", RegexUtil.replaceColor(this.getTitle(), RegexUtil.REPLACE_ALL_PATTERN));
-			json.addProperty("color", RegexUtil.replaceColor(this.getTitleColor().name().toLowerCase(), RegexUtil.REPLACE_ALL_PATTERN));
+			json.addProperty("color", this.getTitleColor().name().toLowerCase());
 			Object title = chatSerializer.invokeMethod("a", null, json.toString());
-			Object packetTitleObj = packetTitle.newInstance(titleActionObj[0], title);
+			Object packetTitleObj = packetTitle.newInstance();
+
+			if (MinecraftPackage.IS_PRE_1_8) {
+				packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumTitle));
+				packetTitle.setValue(packetTitleObj, new FieldEntry("b", title));
+			} else
+				packetTitleObj = packetTitle.newInstance(enumTitle, title);
+
 			profile.sendPacket(packetTitleObj);
 
 			// Subtitle
 			if (StringUtil.notEmpty(this.getSubtitle())) {
 				json = new JsonObject();
 				json.addProperty("text", RegexUtil.replaceColor(this.getSubtitle(), RegexUtil.REPLACE_ALL_PATTERN));
-				json.addProperty("color", RegexUtil.replaceColor(this.getSubtitleColor().name().toLowerCase(), RegexUtil.REPLACE_ALL_PATTERN));
+				json.addProperty("color", this.getSubtitleColor().name().toLowerCase());
 				Object subtitle = chatSerializer.invokeMethod("a", null, json.toString());
-				Object packetSubtitleObj = packetTitle.newInstance(titleActionObj[1], subtitle);
+				Object packetSubtitleObj = packetTitle.newInstance();
+
+				if (MinecraftPackage.IS_PRE_1_8) {
+					packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumSubtitle));
+					packetTitle.setValue(packetTitleObj, new FieldEntry("b", subtitle));
+				} else
+					packetSubtitleObj = packetTitle.newInstance(enumSubtitle, title);
+
 				profile.sendPacket(packetSubtitleObj);
 			}
 		}
