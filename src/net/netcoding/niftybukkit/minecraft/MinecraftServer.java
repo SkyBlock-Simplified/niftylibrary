@@ -10,7 +10,7 @@ import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 
 abstract class MinecraftServer {
 
-	private static final InetSocketAddress serverAddress = InetSocketAddress.createUnresolved(NiftyBukkit.getPlugin().getServer().getIp(), NiftyBukkit.getPlugin().getServer().getPort());
+	private static final InetSocketAddress serverAddress = new InetSocketAddress(NiftyBukkit.getPlugin().getServer().getIp(), NiftyBukkit.getPlugin().getServer().getPort());
 	protected InetSocketAddress address;
 	private String gameVersion = "";
 	private int maxPlayers = 0;
@@ -28,7 +28,8 @@ abstract class MinecraftServer {
 		if (this == obj) return true;
 		if (!(obj instanceof MinecraftServer)) return false;
 		MinecraftServer server = (MinecraftServer)obj;
-		if (!this.getAddress().equals(server.getAddress())) return false;
+		if (!server.getAddress().getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress())) return false;
+		if (server.getAddress().getPort() != this.getAddress().getPort()) return false;
 		return true;
 	}
 
@@ -66,11 +67,11 @@ abstract class MinecraftServer {
 
 	@Override
 	public int hashCode() {
-		return 31 * (address == null ? 0 : address.hashCode());
+		return 31 * (address == null ? super.hashCode() : address.hashCode());
 	}
 
 	public final boolean isCurrentServer() {
-		return serverAddress.equals(this.getAddress());
+		return serverAddress.getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress()) && serverAddress.getPort() == this.getAddress().getPort();
 	}
 
 	public boolean isOnline() {
