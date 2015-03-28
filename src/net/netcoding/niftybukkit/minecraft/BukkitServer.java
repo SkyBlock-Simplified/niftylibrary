@@ -54,39 +54,37 @@ public class BukkitServer extends MinecraftServer {
 
 					try (OutputStream outputStream = socket.getOutputStream()) {
 						try (DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
+							DataUtil.writeByteArray(dataOutputStream, prepareHandshake());
+							DataUtil.writeByteArray(dataOutputStream, preparePing());
+
 							try (InputStream inputStream = socket.getInputStream()) {
-								try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
-									DataUtil.writeByteArray(dataOutputStream, prepareHandshake());
-									DataUtil.writeByteArray(dataOutputStream, preparePing());
+								try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
+									StatusResponse response = processResponse(dataInputStream);
+		
+									setMotd(response.getMotd());
+									setGameVersion(response.getVersion().getName());
+									setProtocolVersion(response.getVersion().getProtocol());
+									setMaxPlayers(response.getPlayers().getMax());
+									setOnline(true);
+									StatusResponse.Players players = response.getPlayers();
 
-									try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-										StatusResponse response = processResponse(dataInputStream);
-			
-										setMotd(response.getMotd());
-										setGameVersion(response.getVersion().getName());
-										setProtocolVersion(response.getVersion().getProtocol());
-										setMaxPlayers(response.getPlayers().getMax());
-										setOnline(true);
-										StatusResponse.Players players = response.getPlayers();
+									if (players != null) {
+										if (players.getSample() != null) {
+											List<String> current = new ArrayList<>();
 
-										if (players != null) {
-											if (players.getSample() != null) {
-												List<String> current = new ArrayList<>();
+											for (StatusResponse.Players.Player player : players.getSample())
+												current.add(player.getName());
 
-												for (StatusResponse.Players.Player player : players.getSample())
-													current.add(player.getName());
+											ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
 
-												ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
-
-												for (MojangProfile profile : playerList) {
-													if (profiles.contains(profile))
-														profiles.remove(profile);
-													else
-														playerList.remove(profile);
-												}
-
-												playerList.addAll(profiles);
+											for (MojangProfile profile : playerList) {
+												if (profiles.contains(profile))
+													profiles.remove(profile);
+												else
+													playerList.remove(profile);
 											}
+
+											playerList.addAll(profiles);
 										}
 									}
 								}
@@ -105,7 +103,7 @@ public class BukkitServer extends MinecraftServer {
 	}
 
 	public void setAddress(String ip, int port) {
-		this.setAddress(InetSocketAddress.createUnresolved(ip, port));
+		this.setAddress(new InetSocketAddress(ip, port));
 	}
 
 	public void setAddress(InetSocketAddress address) {

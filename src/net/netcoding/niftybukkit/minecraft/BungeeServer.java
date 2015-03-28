@@ -28,7 +28,7 @@ public class BungeeServer extends MinecraftServer {
 	}
 
 	void setAddress(String ip, int port) {
-		this.address = InetSocketAddress.createUnresolved(ip, port);
+		this.address = new InetSocketAddress(ip, port);
 	}
 
 }
