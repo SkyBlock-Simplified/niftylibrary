@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.libraries;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
+import net.netcoding.niftybukkit.reflection.FieldEntry;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.RegexUtil;
@@ -37,6 +38,11 @@ public class TitleManager {
 		this.setTimeFadeOut(fadeInTime);
 	}
 
+	public static void broadcastActionBar(String text) throws Exception {
+		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+			sendActionBar(profile, text);
+	}
+
 	public void broadcastClear() throws Exception {
 		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendClear(profile);
@@ -47,13 +53,14 @@ public class TitleManager {
 			this.sendReset(profile);
 	}
 
+	public static void broadcastTabList(String header, String footer) throws Exception {
+		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+			sendTabList(profile, header, footer);
+	}
+
 	public void broadcastTitle() throws Exception {
 		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendTitle(profile);
-	}
-
-	private Reflection getComatibleReflection(String className, String classEnum) {
-		return new Reflection(StringUtil.format("{0}{1}", (MinecraftPackage.IS_PRE_1_8_3 ? "" : StringUtil.format("{0}$", className)), classEnum), MinecraftPackage.MINECRAFT_SERVER);
 	}
 
 	public String getSubtitle() {
@@ -84,67 +91,88 @@ public class TitleManager {
 		return this.titleColor;
 	}
 
+	public static void sendActionBar(MojangProfile profile, String text) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
+
+		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection chatSerializer = Reflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+
+		// Text
+		JsonObject json = new JsonObject();
+		Object actionJson = chatSerializer.invokeMethod("a", null, json.toString());
+		Object packetChatObj = packetChat.newInstance(actionJson, (byte)2);
+		profile.sendPacket(packetChatObj);
+	}
+
 	public void sendClear(MojangProfile profile) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
-		Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection packetTitleObj = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleActionObj = this.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerConnection = entityPlayerObj.getValue("playerConnection", profile.getHandle());
-
-		Object packetTitle = packetTitleObj.newInstance(titleActionEnums[3], null);
-		playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
+		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
+		Object packetTitleObj = packetTitle.newInstance(titleActionObj[3], null);
+		profile.sendPacket(packetTitleObj);
 	}
 
 	public void sendReset(MojangProfile profile) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
-		Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection packetTitleObj = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleActionObj = this.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerConnection = entityPlayerObj.getValue("playerConnection", profile.getHandle());
+		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
+		Object packetTitleObj = packetTitle.newInstance(titleActionObj[4], null);
+		profile.sendPacket(packetTitleObj);
+	}
 
-		Object packetTitle = packetTitleObj.newInstance(titleActionEnums[4], null);
-		playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
+	public static void sendTabList(MojangProfile profile, String header, String footer) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
+		Reflection packetList = new Reflection("PacketPlayOutPlayerListHeaderFooter", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection chatSerializer = Reflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Object packetListObj = packetList.newInstance();
+
+		// Header
+		JsonObject json = new JsonObject();
+		json.addProperty("text", RegexUtil.replaceColor(header, RegexUtil.REPLACE_ALL_PATTERN));
+		Object headerJson = chatSerializer.invokeMethod("a", null, json.toString());
+		packetList.setValue(packetListObj, new FieldEntry("a", headerJson));
+
+		// Footer
+		json = new JsonObject();
+		json.addProperty("text", RegexUtil.replaceColor(footer, RegexUtil.REPLACE_ALL_PATTERN));
+		Object footerJson = chatSerializer.invokeMethod("a", null, json.toString());
+		packetList.setValue(packetListObj, new FieldEntry("b", footerJson));
+		profile.sendPacket(packetListObj);
 	}
 
 	public void sendTitle(MojangProfile profile) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
-		// v1_8_R1
-		Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection packetTitleObj = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleActionObj = this.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Reflection chatSerializeObj = this.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
-		Object[] titleActionEnums = titleActionObj.getClazz().getEnumConstants();
-		Object playerConnection = entityPlayerObj.getValue("playerConnection", profile.getHandle());
+		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection chatSerializer = Reflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Object[] titleActionObj = titleAction.getClazz().getEnumConstants();
 
 		if (this.getTimeStay() > 0) {
 			// Timings
-			Object packetTimings = packetTitleObj.newInstance(titleActionEnums[2], null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
-			playerConnObj.invokeMethod("sendPacket", playerConnection, packetTimings);
+			Object packetTimingsObj = packetTitle.newInstance(titleActionObj[2], null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
+			profile.sendPacket(packetTimingsObj);
 
 			// Title
 			JsonObject json = new JsonObject();
 			json.addProperty("text", RegexUtil.replaceColor(this.getTitle(), RegexUtil.REPLACE_ALL_PATTERN));
 			json.addProperty("color", RegexUtil.replaceColor(this.getTitleColor().name().toLowerCase(), RegexUtil.REPLACE_ALL_PATTERN));
-			Object title = chatSerializeObj.invokeMethod("a", null, json.toString());
-			Object packetTitle = packetTitleObj.newInstance(titleActionEnums[0], title);
-			playerConnObj.invokeMethod("sendPacket", playerConnection, packetTitle);
+			Object title = chatSerializer.invokeMethod("a", null, json.toString());
+			Object packetTitleObj = packetTitle.newInstance(titleActionObj[0], title);
+			profile.sendPacket(packetTitleObj);
 
 			// Subtitle
 			if (StringUtil.notEmpty(this.getSubtitle())) {
 				json = new JsonObject();
 				json.addProperty("text", RegexUtil.replaceColor(this.getSubtitle(), RegexUtil.REPLACE_ALL_PATTERN));
 				json.addProperty("color", RegexUtil.replaceColor(this.getSubtitleColor().name().toLowerCase(), RegexUtil.REPLACE_ALL_PATTERN));
-				Object subtitle = chatSerializeObj.invokeMethod("a", null, json.toString());
-				Object packetSubtitle = packetTitleObj.newInstance(titleActionEnums[1], subtitle);
-				playerConnObj.invokeMethod("sendPacket", playerConnection, packetSubtitle);
+				Object subtitle = chatSerializer.invokeMethod("a", null, json.toString());
+				Object packetSubtitleObj = packetTitle.newInstance(titleActionObj[1], subtitle);
+				profile.sendPacket(packetSubtitleObj);
 			}
 		}
 	}
