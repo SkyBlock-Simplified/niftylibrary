@@ -91,7 +91,14 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 
 		if (!SQLWrapper.class.equals(clazz)) {
 			if (this.driver.equalsIgnoreCase("sql")) {
-				this.driver = clazz.getSimpleName().toLowerCase();
+				if (PostgreSQL.class.isAssignableFrom(clazz))
+					this.driver = "postgresql";
+				else if (SQLServer.class.isAssignableFrom(clazz))
+					this.driver = "sqlserver";
+				else if (SQLServer.class.isAssignableFrom(clazz))
+					this.driver = "mysql";
+				else
+					this.driver = clazz.getSimpleName().toLowerCase();
 
 				if (this.port == 0) {
 					try {
