@@ -2,12 +2,12 @@ package net.netcoding.niftybukkit.yaml;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.sql.SQLException;
 
 import net.netcoding.niftybukkit.database.MySQL;
 import net.netcoding.niftybukkit.database.PostgreSQL;
 import net.netcoding.niftybukkit.database.SQLServer;
 import net.netcoding.niftybukkit.database.factory.SQLWrapper;
+import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.yaml.annotations.Comment;
 import net.netcoding.niftybukkit.yaml.annotations.Path;
 import net.netcoding.niftybukkit.yaml.exceptions.InvalidConfigurationException;
@@ -87,7 +87,7 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 	}
 
 	private void initSQL() throws InvalidConfigurationException {
-		Class<?> clazz = this.getSuperClass();
+		Class<T> clazz = this.getSuperClass();
 
 		if (!SQLWrapper.class.equals(clazz)) {
 			if (this.driver.equalsIgnoreCase("sql")) {
@@ -112,13 +112,18 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 		}
 	}
 
-	protected void initFactory() throws SQLException {
+	protected void initFactory() throws Exception {
 		if (this.driver.equalsIgnoreCase("PostgreSQL"))
 			this.factory = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if (this.driver.equalsIgnoreCase("SQLServer"))
 			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if (this.driver.equalsIgnoreCase("MySQL"))
 			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else {
+			Class<T> clazz = this.getSuperClass();
+			Reflection sqlReflect = new Reflection(clazz.getSimpleName(), clazz.getPackage().getName());
+			this.factory = (SQLWrapper)sqlReflect.newInstance(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		}
 	}
 
 	@Override
@@ -127,8 +132,8 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 
 		try {
 			this.initFactory();
-		} catch (SQLException sqlex) {
-			throw new InvalidConfigurationException("Invalid SQL Configuration!", sqlex);
+		} catch (Exception ex) {
+			throw new InvalidConfigurationException("Invalid SQL Configuration!", ex);
 		}
 	}
 
