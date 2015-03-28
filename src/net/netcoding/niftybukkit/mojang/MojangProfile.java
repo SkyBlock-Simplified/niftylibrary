@@ -13,6 +13,8 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.google.common.base.Charsets;
+
 /**
  * Container for a players unique id and name.
  */
@@ -116,6 +118,16 @@ public class MojangProfile {
 	 */
 	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
+	}
+
+	/**
+	 * Gets if the profile is of a premium user.
+	 * 
+	 * @return True if premium, otherwise false.
+	 */
+	public boolean isPremium() {
+		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", this.getName()).getBytes(Charsets.UTF_8));
+		return !this.getUniqueId().equals(offlineId);
 	}
 
 	/**
