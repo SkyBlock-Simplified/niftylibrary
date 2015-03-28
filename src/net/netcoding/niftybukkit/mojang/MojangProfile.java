@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit.mojang;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -19,7 +18,6 @@ import org.bukkit.entity.Player;
  */
 public class MojangProfile {
 
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 	private String id;
 	private UUID uuid;
@@ -67,6 +65,15 @@ public class MojangProfile {
 	}
 
 	/**
+	 * Gets the connection of this profiles client, if they are online.
+	 * 
+	 * @return Connection of the client.
+	 */
+	public Object getConnection() throws Exception {
+		return this.getOfflinePlayer().isOnline() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
+	}
+
+	/**
 	 * Gets the handle of this profiles client, if they are online.
 	 * 
 	 * @return Handle of the client.
@@ -88,8 +95,7 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-				locale = (String)entityPlayerObj.getValue("locale", this.getHandle());
+				locale = (String)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("locale", this.getHandle());
 			} catch (Exception ex) { }
 		}
 
@@ -130,8 +136,7 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-				ping = (int)entityPlayerObj.getValue("ping", this.getHandle());
+				ping = (int)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("ping", this.getHandle());
 			} catch (Exception ex) { }
 		}
 
@@ -148,12 +153,10 @@ public class MojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-				Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-				Reflection networkManagerObj = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
-				Object playerConnection = entityPlayerObj.getValue("playerConnection", this.getHandle());
-				Object networkManager = playerConnObj.getValue("networkManager", playerConnection);
-				version = (int)networkManagerObj.invokeMethod("getVersion", networkManager);
+				Reflection playerConnection = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
+				Reflection networkManager = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
+				Object networkManagerObj = playerConnection.getValue("networkManager", this.getConnection());
+				version = (int)networkManager.invokeMethod("getVersion", networkManagerObj);
 			} catch (Exception ex) { }
 		}
 
@@ -216,16 +219,6 @@ public class MojangProfile {
 	}
 
 	/**
-	 * Gets if the profile is of a premium user.
-	 * 
-	 * @return True if premium, otherwise false.
-	 */
-	public boolean isPremium() {
-		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", this.getName()).getBytes(UTF8));
-		return !this.getUniqueId().equals(offlineId);
-	}
-
-	/**
 	 * Respawns the player if they are online.
 	 */
 	public void respawn() {
@@ -234,12 +227,24 @@ public class MojangProfile {
 		try {
 			Reflection clientCommandObj = new Reflection("PacketPlayInClientCommand", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection enumCommandsObj = new Reflection("PacketPlayInClientCommand$EnumClientCommand", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection entityPlayerObj = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-			Object playerConnection = entityPlayerObj.getValue("playerConnection", this.getHandle());
+			Object playerConnection = this.getConnection();
 			Object[] titleActionEnums = enumCommandsObj.getClazz().getEnumConstants();
 			playerConnObj.invokeMethod("a", playerConnection, clientCommandObj.newInstance(titleActionEnums[1]));
 		} catch (Exception ex) { }
+	}
+
+	/**
+	 * Sends a packet to the profiles client, if they are online.
+	 * 
+	 * @param packet Packet to send.
+	 */
+	public final void sendPacket(Object packet) throws Exception {
+		if (!this.getOfflinePlayer().isOnline()) return;
+
+		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
+		Object playerConnectionObj = this.getConnection();
+		playerConnObj.invokeMethod("sendPacket", playerConnectionObj, packet);
 	}
 
 	@Override
