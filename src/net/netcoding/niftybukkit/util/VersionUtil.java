@@ -4,7 +4,6 @@ public class VersionUtil implements Comparable<VersionUtil> {
 
 	private final String version;
 
-
 	public VersionUtil(String version) {
 		if (StringUtil.isEmpty(version))  throw new IllegalArgumentException("Version can not be null");
 		if (!version.matches("[0-9]+(\\.[0-9]+)*")) throw new IllegalArgumentException("Invalid version format");
@@ -43,6 +42,11 @@ public class VersionUtil implements Comparable<VersionUtil> {
 	@Override
 	public int hashCode() {
 		return super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.getVersion();
 	}
 
 }
