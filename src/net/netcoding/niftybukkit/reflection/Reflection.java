@@ -56,6 +56,10 @@ public class Reflection {
 		return CLASS_CACHE.get(this.getClassPath());
 	}
 
+	public static Reflection getComatibleReflection(String className, String classEnum) {
+		return new Reflection(StringUtil.format("{0}{1}", (MinecraftPackage.IS_PRE_1_8_3 ? "" : StringUtil.format("{0}$", className)), classEnum), MinecraftPackage.MINECRAFT_SERVER);
+	}
+
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
