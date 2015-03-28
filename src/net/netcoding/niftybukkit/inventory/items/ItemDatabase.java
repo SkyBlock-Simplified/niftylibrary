@@ -165,13 +165,13 @@ public class ItemDatabase extends BukkitHelper {
 				String itemData = split[1];
 
 				if (NumberUtil.isInt(itemData))
-					itemDataList.add(new ItemData(itemNo, Short.parseShort(itemData)));
+					try { itemDataList.add(new ItemData(itemNo, Short.parseShort(itemData))); } catch (Exception ex) { }
 				else if (itemData.startsWith("[") && itemData.endsWith("]")) {
 					String[] dataValueList = itemData.substring(1, itemData.length() - 1).split(",");
 
 					for (String dataValue : dataValueList) {
 						if (NumberUtil.isInt(dataValue))
-							itemDataList.add(new ItemData(itemNo, Short.parseShort(dataValue)));
+							try { itemDataList.add(new ItemData(itemNo, Short.parseShort(dataValue))); } catch (Exception ex) { }
 						else if (dataValue.contains("-")) {
 							String[] rangeData = dataValue.split("-");
 
@@ -179,7 +179,7 @@ public class ItemDatabase extends BukkitHelper {
 								short start = Short.parseShort(rangeData[0]);
 								short end = Short.parseShort(rangeData[1]);
 								if (start > end) throw new IndexOutOfBoundsException(String.format("Data value start range %s must be below the end range %s!", start, end));
-								for (short i = start; i < end; i++) itemDataList.add(new ItemData(itemNo, i));
+								for (short i = start; i < end; i++) try { itemDataList.add(new ItemData(itemNo, i)); } catch (Exception ex) { }
 							} else
 								throw new NumberFormatException("Range data values must be an integer!");
 						} else
@@ -187,9 +187,8 @@ public class ItemDatabase extends BukkitHelper {
 					}
 				} else
 					throw new NumberFormatException("Data value must be an integer, list or range!");
-
 			} else
-				itemDataList.add(new ItemData(this.getId(item)));
+				try { itemDataList.add(new ItemData(this.getId(item))); } catch (Exception ex) { }
 		}
 
 		return Collections.unmodifiableList(itemDataList);
