@@ -212,7 +212,6 @@ public class MojangRepository {
 		}
 
 		for (String name : userList) {
-			@SuppressWarnings("deprecation")
 			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
 			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
