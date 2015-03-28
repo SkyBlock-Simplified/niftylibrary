@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.mojang;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -13,13 +14,12 @@ import net.netcoding.niftybukkit.util.StringUtil;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import com.google.common.base.Charsets;
-
 /**
  * Container for a players unique id and name.
  */
 public class MojangProfile {
 
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 	private String id;
 	private UUID uuid;
@@ -121,16 +121,6 @@ public class MojangProfile {
 	}
 
 	/**
-	 * Gets if the profile is of a premium user.
-	 * 
-	 * @return True if premium, otherwise false.
-	 */
-	public boolean isPremium() {
-		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", this.getName()).getBytes(Charsets.UTF_8));
-		return !this.getUniqueId().equals(offlineId);
-	}
-
-	/**
 	 * Get clients ping.
 	 * 
 	 * @return Client latency with the server.
@@ -223,6 +213,16 @@ public class MojangProfile {
 	 */
 	public boolean isOnline() {
 		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
+	}
+
+	/**
+	 * Gets if the profile is of a premium user.
+	 * 
+	 * @return True if premium, otherwise false.
+	 */
+	public boolean isPremium() {
+		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", this.getName()).getBytes(UTF8));
+		return !this.getUniqueId().equals(offlineId);
 	}
 
 	/**

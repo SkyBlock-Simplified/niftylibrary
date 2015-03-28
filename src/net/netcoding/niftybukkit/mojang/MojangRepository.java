@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.mojang;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,14 +29,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 
-import com.google.common.base.Charsets;
-
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
  */
 public class MojangRepository {
 
 	// API: http://wiki.vg/Mojang_API
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final int PROFILES_PER_REQUEST = 100;
 	private static long LAST_HTTP_REQUEST = System.currentTimeMillis();
 	private static final transient Gson GSON = new Gson();
@@ -213,7 +213,7 @@ public class MojangRepository {
 
 		for (String name : userList) {
 			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
-			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(UTF8));
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 			boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
 			boolean useOfflineId = (isOnline && !isOfflineId) || (!isOnline && isOfflineId);
@@ -369,7 +369,7 @@ public class MojangRepository {
 		}
 
 		OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
-		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(Charsets.UTF_8));
+		UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(UTF8));
 		boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 		boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
 		boolean useOfflineId = (isOnline && !isOfflineId) || (!isOnline && oplayer.getUniqueId().equals(isOfflineId));
