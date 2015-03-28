@@ -88,9 +88,9 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @throws SQLException
 	 */
 	public void addListener(String table, DatabaseListener notifier, long delay, boolean overwrite) throws SQLException {
-		this.listeners.add(new DatabaseNotification(this, table, notifier, delay, overwrite));
 		this.createLogTable();
 		this.createPurgeEvent();
+		this.listeners.add(new DatabaseNotification(this, table, notifier, delay, overwrite));
 
 		if (this.taskId == -1) this.taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(NiftyBukkit.getPlugin(), this, 0, delay).getTaskId();
 	}
