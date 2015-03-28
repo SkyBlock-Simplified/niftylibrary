@@ -12,6 +12,7 @@ import net.netcoding.niftybukkit.database.factory.callbacks.ResultCallback;
 import net.netcoding.niftybukkit.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.VersionUtil;
 import net.netcoding.niftybukkit.util.concurrent.ConcurrentList;
 
 /**
@@ -36,7 +37,7 @@ public class DatabaseNotification extends BukkitHelper {
 		this.listener = listener;
 		this.loadPrimaryKeys();
 
-		if (!this.triggersExist() || overwrite) {
+		if (!this.triggersExist() || overwrite || new VersionUtil(NiftyBukkit.getPlugin().getDescription().getVersion()).compareTo(new VersionUtil("3.3.5")) <= 0) {
 			for (TriggerEvent event : TriggerEvent.values()) {
 				this.dropTrigger(event);
 				this.createTrigger(event);
@@ -48,12 +49,12 @@ public class DatabaseNotification extends BukkitHelper {
 		if (this.primaryColumnNames.size() > 0) {
 			String primaryKeys = StringUtil.implode(",", this.primaryColumnNames);
 			String quote = this.sql.getIdentifierQuoteString();
-			String trigger = StringUtil.format("CREATE TRIGGER {1}.{2} AFTER {3} ON {4} FOR EACH ROW INSERT INTO {1}.{5} (schema_name, table_name, sql_action, primary_keys, _submitted, old_data, new_data) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(), ",
+			String trigger = StringUtil.format("CREATE TRIGGER {1}.{2} AFTER {3} ON {0}{4}{0} FOR EACH ROW INSERT INTO {1}.{5} (schema_name, table_name, sql_action, primary_keys, _submitted, old_data, new_data) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(), ",
 					quote, this.getSchema(), this.getName(event), event.toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE);
 			String _old = null;
 			String _new = null;
-			if (!TriggerEvent.INSERT.equals(event)) _old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.format("{0}{1}{0}", quote, StringUtil.implode(", ',', OLD.", this.primaryColumnNames)));
-			if (!TriggerEvent.DELETE.equals(event)) _new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.format("{0}{1}{0}", quote, StringUtil.implode(", ',', NEW.", this.primaryColumnNames)));
+			if (!TriggerEvent.INSERT.equals(event)) _old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', OLD.{0}", quote), this.primaryColumnNames));
+			if (!TriggerEvent.DELETE.equals(event)) _new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', NEW.{0}", quote), this.primaryColumnNames));
 			this.sql.updateAsync(String.format(trigger + "%s, %s);", _old, _new), this.getSchema(), this.getTable(), event.toUppercase(), primaryKeys);
 		} else
 			throw new SQLException(StringUtil.format("The table {0}.{1} has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
@@ -137,7 +138,7 @@ public class DatabaseNotification extends BukkitHelper {
 					int keyCount = primaryColumnNames.size();
 					String[] _new = result.getString("new_data").split(",");
 
-					if (keyCount != 0) {
+					if (keyCount > 0) {
 						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
 						sql.query(StringUtil.format("SELECT * FROM {0} WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 					}
@@ -226,6 +227,7 @@ public class DatabaseNotification extends BukkitHelper {
 
 	private boolean triggersExist() {
 		try {
+			// SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA LIKE '%nifty' AND TRIGGER_NAME LIKE '%onnifty';
 			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", new ResultCallback<Boolean>() {
 				@Override
 				public Boolean handle(ResultSet result) throws SQLException {
