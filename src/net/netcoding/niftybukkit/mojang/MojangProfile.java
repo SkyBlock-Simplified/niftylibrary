@@ -11,6 +11,7 @@ import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 /**
@@ -80,9 +81,9 @@ public class MojangProfile {
 	 */
 	public Object getHandle() throws Exception {
 		if (!this.getOfflinePlayer().isOnline()) return null;
-		Reflection craftPlayerObj = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
-		Object craftPlayer = craftPlayerObj.getClazz().cast(this.getOfflinePlayer().getPlayer());
-		return craftPlayerObj.invokeMethod("getHandle", craftPlayer);
+		Reflection craftPlayer = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
+		return craftPlayer.invokeMethod("getHandle", craftPlayerObj);
 	}
 
 	/**
@@ -245,6 +246,21 @@ public class MojangProfile {
 		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 		Object playerConnectionObj = this.getConnection();
 		playerConnObj.invokeMethod("sendPacket", playerConnectionObj, packet);
+	}
+
+	/**
+	* Sets this player as a spectator of a target entity.
+	*
+	* @param target The target to spectate.
+	*/
+	@SuppressWarnings("unused")
+	private final void spectate(Entity target) throws Exception {
+		if (!this.getOfflinePlayer().isOnline()) return;
+
+		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
+		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
+		Object targetHandle = entityTarget.invokeMethod("getHandle", target);
+		entityPlayer.invokeMethod("e", this.getHandle(), targetHandle);
 	}
 
 	@Override
