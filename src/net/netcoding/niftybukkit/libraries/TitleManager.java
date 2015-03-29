@@ -22,6 +22,10 @@ public class TitleManager {
 	private String title = "";
 	private ChatColor titleColor = ChatColor.WHITE;
 
+	public TitleManager() {
+		this("");
+	}
+
 	public TitleManager(String title) {
 		this(title, "");
 	}
@@ -163,7 +167,7 @@ public class TitleManager {
 		Reflection titleAction = Reflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Reflection chatSerializer = Reflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
 
-		if (this.getTimeStay() > 0) {
+		if (this.getTimeStay() > 0 && StringUtil.notEmpty(this.getTitle())) {
 			Object enumTimes = titleAction.getValue("TIMES", null);
 			Object enumTitle = titleAction.getValue("TITLE", null);
 			Object enumSubtitle = titleAction.getValue("SUBTITLE", null);
