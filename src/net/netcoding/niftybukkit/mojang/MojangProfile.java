@@ -14,6 +14,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import com.google.gson.JsonObject;
+
 /**
  * Container for a players unique id and name.
  */
@@ -114,7 +116,15 @@ public class MojangProfile {
 		if (player == null || player.getName().equals(this.name))
 			return this.name;
 
-		// TODO: Send update across BungeeCord to update players name if change is detected.
+		if (NiftyBukkit.getBungeeHelper().isDetected()) {
+			JsonObject json = new JsonObject();
+			json.addProperty("id", this.getUniqueId().toString());
+			json.addProperty("name", this.getName());
+			String serverName = NiftyBukkit.getBungeeHelper().getServerName();
+			NiftyBukkit.getBungeeHelper().forward(serverName, "PlayerUpdate", json.toString(), serverName);
+			NiftyBukkit.getBungeeHelper().forward("ONLINE", "PlayerUpdate", json.toString(), serverName);
+		}
+
 		return this.name = player.getName();
 	}
 

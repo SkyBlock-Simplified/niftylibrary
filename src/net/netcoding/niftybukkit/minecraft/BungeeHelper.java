@@ -14,6 +14,7 @@ import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
+import net.netcoding.niftybukkit.minecraft.events.PlayerNameChangeEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.ByteUtil;
 import net.netcoding.niftybukkit.util.ListUtil;
@@ -304,11 +305,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		if (!this.isRegistered()) return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
+		PluginManager manager = this.getPlugin().getServer().getPluginManager();
 
 		if (channel.equals(NIFTY_CHANNEL)) {
 			try {
-				PluginManager manager = this.getPlugin().getServer().getPluginManager();
-
 				if (subChannel.equals("BungeeInfo"))
 					BUNGEE_ONLINEMODE = input.readBoolean();
 				else if (subChannel.equals("GetServers")) {
@@ -371,11 +371,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 						if (subChannel.endsWith("Join")) {
 							server.playerList.add(profile);
-							manager.callEvent(new BungeePlayerJoinEvent(server, profile));
+							manager.callEvent(new BungeePlayerJoinEvent(profile));
 						} else if (subChannel.endsWith("Leave")) {
 							if (server.isCurrentServer()) server.playersLeft.add(profile);
 							server.playerList.remove(profile);
-							manager.callEvent(new BungeePlayerLeaveEvent(server, profile));
+							manager.callEvent(new BungeePlayerLeaveEvent(profile));
 						}
 					}
 				}
@@ -387,6 +387,22 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			if (channel.equals(BUNGEE_CHANNEL)) {
 				if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?|(?:Server)?IP$"))
 					return;
+				else if (subChannel.equals("PlayerUpdate")) {
+					JsonObject json = new JsonParser().parse(input.readUTF()).getAsJsonObject();
+					MojangProfile updatedProfile = GSON.fromJson(json.toString(), MojangProfile.class);
+					BungeeServer server = SERVERS.get(input.readUTF());
+
+					for (MojangProfile profile : server.getPlayerList()) {
+						if (profile.equals(updatedProfile)) {
+							server.playerList.remove(profile);
+							server.playerList.add(updatedProfile);
+							manager.callEvent(new PlayerNameChangeEvent(updatedProfile));
+							break;
+						}
+					}
+
+					return;
+				}
 			}
 
 			if (channel.equals(this.getChannel())) {
