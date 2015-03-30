@@ -281,7 +281,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
 	}
 
-	private void removeArgs(CommandSender sender, String... args) {
+	private void removeArgs(CommandSender sender) {
 		if (this.argCache.containsKey(sender.getName()))
 			this.argCache.remove(sender.getName());
 	}
@@ -473,7 +473,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 			this.getCommand().processCommand(sender, label, args);
-			this.getCommand().removeArgs(sender, args);
+			this.getCommand().removeArgs(sender);
 			return true;
 		}
 
