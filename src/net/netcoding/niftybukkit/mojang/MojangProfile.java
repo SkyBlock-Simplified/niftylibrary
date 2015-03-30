@@ -5,14 +5,20 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.StringUtil;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.SkullType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.gson.JsonObject;
 
@@ -181,6 +187,21 @@ public class MojangProfile {
 	 */
 	public BungeeServer getServer() {
 		return NiftyBukkit.getBungeeHelper().getPlayerServer(this);
+	}
+
+	/**
+	 * Gets a skull skinned to this profile's face.
+	 * 
+	 * @return Skull item with this profiles skin face.
+	 */
+	public final ItemStack getSkull() {
+		ItemData data = new ItemData(Material.SKULL_ITEM, (byte)SkullType.PLAYER.ordinal());
+		ItemStack stack = data.getItem();
+		SkullMeta meta = (SkullMeta)stack.getItemMeta();
+		meta.setOwner(this.getName());
+		meta.setDisplayName(ChatColor.RESET + this.getName());
+		stack.setItemMeta(meta);
+		return stack;
 	}
 
 	/**
