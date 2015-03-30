@@ -29,10 +29,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ItemDatabase extends BukkitHelper {
 
 	private final transient File itemsFile;
-	private final transient Map<String, Integer> items = new HashMap<String, Integer>();
-	private final transient Map<ItemData, List<String>> names = new HashMap<ItemData, List<String>>();
-	private final transient Map<ItemData, String> primaryName = new HashMap<ItemData, String>();
-	private final transient Map<String, Short> durabilities = new HashMap<String, Short>();
+	private final transient Map<String, Integer> items = new HashMap<>();
+	private final transient Map<ItemData, List<String>> names = new HashMap<>();
+	private final transient Map<ItemData, String> primaryName = new HashMap<>();
+	private final transient Map<String, Short> durabilities = new HashMap<>();
 	private final static transient Pattern splitPattern = Pattern.compile("((.*)[:+',;.](\\d+))");
 
 	public ItemDatabase(JavaPlugin plugin) {
@@ -44,7 +44,6 @@ public class ItemDatabase extends BukkitHelper {
 		this.itemsFile = new File(this.getPlugin().getDataFolder(), fileName);
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemStack get(final String id) throws RuntimeException {
 		if (StringUtil.isEmpty(id)) throw new NullPointerException("The value for id cannot be null!");
 		int itemid = -1;
@@ -91,12 +90,10 @@ public class ItemDatabase extends BukkitHelper {
 		return retval;
 	}
 
-	@SuppressWarnings("deprecation")
 	public int getId(final String itemName) throws RuntimeException {
 		return this.get(itemName).getTypeId();
 	}
 
-	@SuppressWarnings("deprecation")
 	public List<ItemStack> getMatching(Player player, String[] args) throws RuntimeException {
 		List<ItemStack> is = new ArrayList<ItemStack>();
 
@@ -111,7 +108,7 @@ public class ItemDatabase extends BukkitHelper {
 			}
 		} else if (args[0].equalsIgnoreCase("blocks")) {
 			for (ItemStack stack : player.getInventory().getContents()) {
-				if (stack == null || stack.getTypeId() > 255 || stack.getType() == Material.AIR) continue;
+				if (stack == null || stack.getType() == Material.AIR || !stack.getType().isBlock()) continue;
 				is.add(stack);
 			}
 		} else
@@ -123,39 +120,37 @@ public class ItemDatabase extends BukkitHelper {
 		return is;
 	}
 
-	@SuppressWarnings("deprecation")
 	public List<String> names(ItemStack item) {
 		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
 		List<String> nameList = this.names.get(itemData);
 
-		if (nameList == null) {
+		if (ListUtil.isEmpty(nameList)) {
 			itemData = new ItemData(item.getTypeId(), (short)0);
 			nameList = this.names.get(itemData);
-			if (nameList == null) return Collections.emptyList();
+			if (ListUtil.isEmpty(nameList)) return Collections.emptyList();
 		}
 
 		if (nameList.size() > 15) nameList = nameList.subList(0, 14);
 		return nameList;
 	}
 
-	@SuppressWarnings("deprecation")
 	public String name(ItemStack item) {
 		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
 		String name = this.primaryName.get(itemData);
 
-		if (name == null) {
+		if (StringUtil.isEmpty(name)) {
 			itemData = new ItemData(item.getTypeId(), (short)0);
 			name = this.primaryName.get(itemData);
-			if (name == null) return null;
+			if (StringUtil.isEmpty(name)) return null;
 		}
 
 		return name;
 	}
 
-	public List<ItemData> parse(String itemCommaList) throws NumberFormatException {
+	public List<ItemData> parse(String itemColonList) throws NumberFormatException {
 		List<ItemData> itemDataList = new ArrayList<>();
-		if (StringUtil.isEmpty(itemCommaList)) return Collections.unmodifiableList(itemDataList);
-		String[] itemList = StringUtil.stripNull(itemCommaList).split(",(?![^\\[]*\\])");
+		if (StringUtil.isEmpty(itemColonList)) return Collections.unmodifiableList(itemDataList);
+		String[] itemList = StringUtil.stripNull(itemColonList).split(",(?![^\\[]*\\])");
 		if (ListUtil.isEmpty(itemList)) return Collections.unmodifiableList(itemDataList);
 
 		for (String item : itemList) {
@@ -196,28 +191,21 @@ public class ItemDatabase extends BukkitHelper {
 
 	public List<String> getLines() {
 		try {
-			final BufferedReader reader;
+			try (InputStreamReader inputStream = (this.itemsFile.exists() ? new FileReader(this.itemsFile) : new InputStreamReader(this.getPlugin().getResource(this.itemsFile.getName())))) {
+				try (BufferedReader reader = new BufferedReader(inputStream)) {
+					List<String> lines = new ArrayList<>();
 
-			if (this.itemsFile.exists())
-				reader = new BufferedReader(new FileReader(this.itemsFile));
-			else
-				reader = new BufferedReader(new InputStreamReader(this.getPlugin().getResource(this.itemsFile.getName())));
+					do {
+						String line = reader.readLine();
+						if (StringUtil.isEmpty(line)) break;
+						lines.add(line);
+					} while (true);
 
-			try {
-				final List<String> lines = new ArrayList<String>();
-
-				do {
-					final String line = reader.readLine();
-					if (line == null) break;
-					lines.add(line);
-				} while (true);
-
-				return Collections.unmodifiableList(lines);
-			} finally {
-				reader.close();
+					return Collections.unmodifiableList(lines);
+				}
 			}
-		} catch (IOException ex) {
-			this.getLog().console(ex);
+		} catch (IOException ioex) {
+			this.getLog().console(ioex);
 			return Collections.emptyList();
 		}
 	}
@@ -245,9 +233,9 @@ public class ItemDatabase extends BukkitHelper {
 			if (line.length() > 0 && line.charAt(0) == '#') continue;
 			final String[] parts = line.split("[^a-z0-9]");
 			if (parts.length < 2) continue;
+			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
 			final short data = parts.length > 2 && !parts[2].equals("0") ? Short.parseShort(parts[2]) : 0;
-			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
 			this.durabilities.put(itemName, data);
 			this.items.put(itemName, numeric);
 			ItemData itemData = new ItemData(numeric, data);
