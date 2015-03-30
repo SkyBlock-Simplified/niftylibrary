@@ -3,18 +3,27 @@ package net.netcoding.niftybukkit.inventory.items;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
 @SuppressWarnings("deprecation")
 public class ItemData {
 
-	private int id = 0;
-	private short data = 0;
+	private final int id;
+	private final short data;
 	private boolean glow = false;
 
 	public ItemData(ItemStack item) {
 		this(item.getTypeId(), item.getDurability());
+	}
+
+	public ItemData(Material material) {
+		this(material.getId(), (short)0);
+	}
+
+	public ItemData(Material material, short data) {
+		this(material.getId(), data);
 	}
 
 	public ItemData(int id) {
