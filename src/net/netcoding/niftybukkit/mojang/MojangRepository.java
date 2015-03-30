@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.mojang;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -246,6 +247,7 @@ public class MojangRepository {
 					MojangProfile[] result = GSON.fromJson(HTTP.post(getProfilesUrl(), body, headers), MojangProfile[].class);
 					profiles.addAll(Arrays.asList(result));
 					CACHE.addAll(Arrays.asList(result));
+				} catch (SocketException sex) {
 				} catch (IOException ioex) {
 					if (ioex.getMessage().startsWith("Server returned HTTP response code: 429")) {
 						// Ignore for now, later use fallback api
@@ -276,6 +278,7 @@ public class MojangRepository {
 						profiles.add(result);
 						CACHE.add(result);
 					}
+				} catch (SocketException sex) {
 				} catch (IOException ioex) {
 					if (ioex.getMessage().startsWith("Server returned HTTP response code: 429")) {
 						// Ignore for now, later use fallback api
@@ -304,6 +307,7 @@ public class MojangRepository {
 						profiles.add(result);
 						CACHE.add(result);
 					}
+				} catch (SocketException sex) {
 				} catch (IOException ioex) {
 					if (ioex.getMessage().startsWith("Server returned HTTP response code: 429")) {
 						// Ignore for now, later use fallback api
@@ -394,6 +398,7 @@ public class MojangRepository {
 					found = GSON.fromJson(json.toString(), MojangProfile.class);
 					CACHE.add(found);
 				}
+			} catch (SocketException sex) {
 			} catch (IOException ioex) {
 				if (ioex.getMessage().startsWith("Server returned HTTP response code: 429")) {
 					// Ignore for now, later use fallback api
