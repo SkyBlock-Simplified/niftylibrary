@@ -147,9 +147,7 @@ public class ItemDatabase extends BukkitHelper {
 		return name;
 	}
 
-	public List<ItemData> parse(String itemColonList) throws NumberFormatException {
-		if (StringUtil.isEmpty(itemColonList)) return Collections.emptyList();
-		String[] itemList = itemColonList.split(",(?![^\\[]*\\])");
+	public List<ItemData> parse(String[] itemList) throws NumberFormatException {
 		if (ListUtil.isEmpty(itemList)) return Collections.emptyList();
 		List<ItemData> itemDataList = new ArrayList<>();
 
@@ -187,6 +185,11 @@ public class ItemDatabase extends BukkitHelper {
 		}
 
 		return Collections.unmodifiableList(itemDataList);
+	}
+
+	public List<ItemData> parse(String itemColonList) throws NumberFormatException {
+		if (StringUtil.isEmpty(itemColonList)) return Collections.emptyList();
+		return this.parse(itemColonList.split(",(?![^\\[]*\\])"));
 	}
 
 	public List<String> getLines() {
