@@ -146,7 +146,7 @@ public class BukkitServer extends MinecraftServer {
 		return GSON.fromJson(new String(data, Charset.forName("UTF-8")), StatusResponse.class);
     }
 
-	private class StatusResponse {
+	class StatusResponse {
 
 		private String description;
 		private Players players;
@@ -169,7 +169,7 @@ public class BukkitServer extends MinecraftServer {
 			return this.favicon;
 		}
 
-		public class Players {
+		class Players {
 
 			private int max;
 			private int online;
@@ -187,7 +187,7 @@ public class BukkitServer extends MinecraftServer {
 				return sample;
 			}
 
-			public class Player {
+			class Player {
 
 				private String name;
 				private String id;
@@ -204,7 +204,7 @@ public class BukkitServer extends MinecraftServer {
 
 		}
 
-		public class Version {
+		class Version {
 
 			private String name;
 			private int protocol;
