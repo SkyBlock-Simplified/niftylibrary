@@ -10,6 +10,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import net.netcoding.niftybukkit.util.StringUtil;
+
 public class HttpClient {
 
 	private final int DEFAULT_TIMEOUT = 3000;
@@ -56,14 +58,16 @@ public class HttpClient {
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setUseCaches(false);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-		while ((line = reader.readLine()) != null) {
-			response.append(line);
-			response.append('\r');
+		try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
+			try (BufferedReader reader = new BufferedReader(streamReader)) {
+				while (StringUtil.notEmpty(line = reader.readLine())) {
+					response.append(line);
+					response.append('\r');
+				}
+			}
 		}
 
-		reader.close();
 		return response.toString();
 	}
 
@@ -139,14 +143,15 @@ public class HttpClient {
 			writer.write(body.getBytes());
 		}
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-		while ((line = reader.readLine()) != null) {
-			response.append(line);
-			response.append('\r');
+		try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
+			try (BufferedReader reader = new BufferedReader(streamReader)) {
+				while (StringUtil.notEmpty(line = reader.readLine())) {
+					response.append(line);
+					response.append('\r');
+				}
+			}
 		}
 
-		reader.close();
 		return response.toString();
 	}
 
