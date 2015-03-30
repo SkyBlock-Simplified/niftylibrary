@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+import net.netcoding.niftybukkit.inventory.enchantments.EnchantmentDatabase;
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.BungeeHelper;
@@ -22,6 +23,7 @@ public final class NiftyBukkit extends BukkitPlugin {
 	private final static transient ConcurrentHashMap<String, ConcurrentList<String>> PLUGINS = new ConcurrentHashMap<>();
 	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
+	private static transient EnchantmentDatabase enchantmentDatabase;
 	private static transient MojangRepository repository;
 	private static transient BungeeHelper bungeeHelper;
 
@@ -31,6 +33,7 @@ public final class NiftyBukkit extends BukkitPlugin {
 		plugin = this;
 		repository = new MojangRepository();
 		(itemDatabase = new ItemDatabase(this)).reload();
+		(enchantmentDatabase = new EnchantmentDatabase(this)).reload();
 		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 
 		PLUGINS.put("Bukkit", new ConcurrentList<String>());
@@ -40,10 +43,7 @@ public final class NiftyBukkit extends BukkitPlugin {
 			plugin.getLogger().addHandler(new LogHandler(plugin));
 		}
 
-		this.getLog().console("Registering Commands");
 		new NiftyCommand(this);
-
-		this.getLog().console("Registering Listeners");
 		new NiftyListener(this);
 	}
 
@@ -54,6 +54,10 @@ public final class NiftyBukkit extends BukkitPlugin {
 
 	public final static BungeeHelper getBungeeHelper() {
 		return bungeeHelper;
+	}
+
+	public final static EnchantmentDatabase getEnchantmentDatabase() {
+		return enchantmentDatabase;
 	}
 
 	public final static ItemDatabase getItemDatabase() {
