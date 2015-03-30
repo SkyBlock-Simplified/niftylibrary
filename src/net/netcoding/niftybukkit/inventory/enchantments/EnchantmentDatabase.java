@@ -108,34 +108,6 @@ public class EnchantmentDatabase extends BukkitHelper {
 		return this.parse(enchStringList.split("[,\\s]+"));
 	}
 
-	/**
-30.03 01:04:39 [Server] INFO LUCK : 61 : 3
-30.03 01:04:39 [Server] INFO LURE : 62 : 3
-30.03 01:04:39 [Server] INFO FIRE_ASPECT : 20 : 2
-30.03 01:04:39 [Server] INFO LOOT_BONUS_MOBS : 21 : 3
-30.03 01:04:39 [Server] INFO DAMAGE_ARTHROPODS : 18 : 5
-30.03 01:04:39 [Server] INFO ARROW_DAMAGE : 48 : 5
-30.03 01:04:39 [Server] INFO KNOCKBACK : 19 : 2
-30.03 01:04:39 [Server] INFO ARROW_KNOCKBACK : 49 : 2
-30.03 01:04:39 [Server] INFO DAMAGE_ALL : 16 : 5
-30.03 01:04:39 [Server] INFO ARROW_FIRE : 50 : 1
-30.03 01:04:39 [Server] INFO DAMAGE_UNDEAD : 17 : 5
-30.03 01:04:39 [Server] INFO ARROW_INFINITE : 51 : 1
-30.03 01:04:39 [Server] INFO DEPTH_STRIDER : 8 : 3
-30.03 01:04:39 [Server] INFO THORNS : 7 : 3
-30.03 01:04:39 [Server] INFO WATER_WORKER : 6 : 1
-30.03 01:04:39 [Server] INFO OXYGEN : 5 : 3
-30.03 01:04:39 [Server] INFO PROTECTION_PROJECTILE : 4 : 4
-30.03 01:04:39 [Server] INFO PROTECTION_EXPLOSIONS : 3 : 4
-30.03 01:04:39 [Server] INFO SILK_TOUCH : 33 : 1
-30.03 01:04:39 [Server] INFO PROTECTION_FALL : 2 : 4
-30.03 01:04:39 [Server] INFO DIG_SPEED : 32 : 5
-30.03 01:04:39 [Server] INFO PROTECTION_FIRE : 1 : 4
-30.03 01:04:39 [Server] INFO LOOT_BONUS_BLOCKS : 35 : 3
-30.03 01:04:39 [Server] INFO PROTECTION_ENVIRONMENTAL : 0 : 4
-30.03 01:04:39 [Server] INFO DURABILITY : 34 : 3
-	 */
-
 	public List<String> getLines() {
 		try {
 			try (InputStreamReader inputStream = (this.enchantmentsFile.exists() ? new FileReader(this.enchantmentsFile) : new InputStreamReader(this.getPlugin().getResource(this.enchantmentsFile.getName())))) {
