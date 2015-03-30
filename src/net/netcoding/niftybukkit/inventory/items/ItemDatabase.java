@@ -148,10 +148,10 @@ public class ItemDatabase extends BukkitHelper {
 	}
 
 	public List<ItemData> parse(String itemColonList) throws NumberFormatException {
+		if (StringUtil.isEmpty(itemColonList)) return Collections.emptyList();
+		String[] itemList = itemColonList.split(",(?![^\\[]*\\])");
+		if (ListUtil.isEmpty(itemList)) return Collections.emptyList();
 		List<ItemData> itemDataList = new ArrayList<>();
-		if (StringUtil.isEmpty(itemColonList)) return Collections.unmodifiableList(itemDataList);
-		String[] itemList = StringUtil.stripNull(itemColonList).split(",(?![^\\[]*\\])");
-		if (ListUtil.isEmpty(itemList)) return Collections.unmodifiableList(itemDataList);
 
 		for (String item : itemList) {
 			if (item.contains(":")) {
@@ -231,7 +231,7 @@ public class ItemDatabase extends BukkitHelper {
 		for (String line : lines) {
 			line = line.trim().toLowerCase(Locale.ENGLISH);
 			if (line.length() > 0 && line.charAt(0) == '#') continue;
-			final String[] parts = line.split("[^a-z0-9]");
+			final String[] parts = line.split("[^a-zA-Z0-9]");
 			if (parts.length < 2) continue;
 			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
