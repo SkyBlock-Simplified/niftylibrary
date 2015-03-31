@@ -65,7 +65,7 @@ public class MojangProfile {
 	 * @return Socket address of the player if online, otherwise null.
 	 */
 	public InetSocketAddress getAddress() {
-		if (this.isOnline()) {
+		if (this.isOnlineAnywhere()) {
 			if (StringUtil.notEmpty(this.ip) && this.ipAddress == null)
 				this.ipAddress = InetSocketAddress.createUnresolved(this.ip, this.port);
 		}
@@ -242,11 +242,20 @@ public class MojangProfile {
 	}
 
 	/**
+	 * Checks if this profile is found anywhere on the local server.
+	 * 
+	 * @return True if online, otherwise false.
+	 */
+	public boolean isOnlineLocally() {
+		return this.getOfflinePlayer().isOnline();
+	}
+
+	/**
 	 * Checks if this profile is found anywhere on BungeeCord or local server.
 	 * 
 	 * @return True if online, otherwise false.
 	 */
-	public boolean isOnline() {
+	public boolean isOnlineAnywhere() {
 		return NiftyBukkit.getBungeeHelper().isPlayerOnline(this);
 	}
 

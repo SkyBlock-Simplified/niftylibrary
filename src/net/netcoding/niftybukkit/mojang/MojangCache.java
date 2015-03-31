@@ -40,12 +40,12 @@ public class MojangCache extends BukkitHelper {
 		return this.getProfile().hashCode();
 	}
 
-	public boolean isOnline() {
-		return this.getOfflinePlayer().isOnline();
+	public boolean isOnlineLocally() {
+		return this.getProfile().isOnlineLocally();
 	}
 
 	public boolean isOnlineAnywhere() {
-		return this.getProfile().isOnline();
+		return this.getProfile().isOnlineAnywhere();
 	}
 
 }
