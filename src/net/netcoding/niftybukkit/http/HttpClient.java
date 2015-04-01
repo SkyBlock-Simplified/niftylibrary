@@ -2,9 +2,11 @@ package net.netcoding.niftybukkit.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +52,7 @@ public class HttpClient {
 			String line;
 			StringBuffer response = new StringBuffer();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpCode.getCode(connection.getResponseCode()));
+			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpStatus.getByCode(connection.getResponseCode()));
 			connection.setRequestMethod("GET");
 
 			for (HttpHeader header : headers)
@@ -73,6 +75,10 @@ public class HttpClient {
 			return response.toString();
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
+		} catch (SocketException sex) {
+			throw new HttpConnectionException(HttpStatus.SOCKET_ERROR, sex);
+		} catch (IOException ioex) {
+			throw new HttpConnectionException(HttpStatus.IO_ERROR, ioex);
 		} catch (Exception ex) {
 			throw new HttpConnectionException(ex);
 		}
@@ -136,7 +142,7 @@ public class HttpClient {
 			String line;
 			StringBuffer response = new StringBuffer();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpCode.getCode(connection.getResponseCode()));
+			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpStatus.getByCode(connection.getResponseCode()));
 			connection.setRequestMethod("POST");
 
 			for (HttpHeader header : headers)
@@ -164,6 +170,10 @@ public class HttpClient {
 			return response.toString();
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
+		} catch (SocketException sex) {
+			throw new HttpConnectionException(HttpStatus.SOCKET_ERROR, sex);
+		} catch (IOException ioex) {
+			throw new HttpConnectionException(HttpStatus.IO_ERROR, ioex);
 		} catch (Exception ex) {
 			throw new HttpConnectionException(ex);
 		}
