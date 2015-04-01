@@ -35,6 +35,7 @@ final class NiftyCommand extends BukkitCommand {
 		if (ListUtil.isEmpty(args) || NumberUtil.isInt(args[0])) {
 			int page = ListUtil.isEmpty(args) ? 0 : NumberUtil.isInt(args[0]) ? totalCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0;
 			if (page == 0) page = 1;
+			if (page * 5 > totalCache.size()) page = (int)Math.floor(totalCache.size() / 5.0);
 			Iterator<String> totalIterator = totalCache.iterator();
 
 			if (totalCache.size() > 5 && page > 1) {
@@ -45,7 +46,7 @@ final class NiftyCommand extends BukkitCommand {
 			this.getLog().message(sender, "[{{0}} (Page {{1}}/{{2}})]", "NiftyBukkit Implementations", page, Math.ceil(totalCache.size() / 5.0));
 			this.getLog().message(sender, "----------------------------");
 
-			for (int i = 0; i < (totalCache.size() < 5 ? totalCache.size() : 5); i++) {
+			for (int i = 0; i < 5 && totalIterator.hasNext(); i++) {
 				String pluginName = totalIterator.next();
 				NiftyPluginInfo info = new NiftyPluginInfo(pluginName);
 				boolean trouble = !info.isUsingBukkitPlugin() || info.getBukkitCommandCount() < info.getTotalCommandCount();
