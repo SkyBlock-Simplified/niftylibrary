@@ -386,7 +386,7 @@ public class SignMonitor extends BukkitListener {
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
 											SignPacket outgoing = new SignPacket(signUpdatePacket.shallowClone());
-											outgoing.setLines(updateEvent.getModifiedLines());
+											outgoing.setLines(updateEvent.getModifiedLines(true));
 											event.setPacket(outgoing.getPacket());
 										}
 									}
