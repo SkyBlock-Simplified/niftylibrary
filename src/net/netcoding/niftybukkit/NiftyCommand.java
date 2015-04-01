@@ -33,10 +33,10 @@ final class NiftyCommand extends BukkitCommand {
 		totalCache.addAll(helperCache);
 
 		if (ListUtil.isEmpty(args) || NumberUtil.isInt(args[0])) {
-			int total = (int)Math.floor(totalCache.size() / 5.0);
+			int total = (int)Math.ceil(totalCache.size() / 5.0);
 			int page = ListUtil.isEmpty(args) ? 0 : NumberUtil.isInt(args[0]) ? totalCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0;
 			if (page == 0) page = 1;
-			if (page * 5 > totalCache.size()) page = total;
+			if (page * 5 >= totalCache.size()) page = total - 1;
 			Iterator<String> totalIterator = totalCache.iterator();
 
 			if (totalCache.size() > 5 && page > 1) {
