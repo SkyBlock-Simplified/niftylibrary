@@ -25,27 +25,30 @@ public class EnchantmentData {
 		return detail.getEnchantment().equals(this.getEnchantment());
 	}
 
-	public void apply(ItemStack stack) {
-		this.apply(stack, false);
+	public boolean apply(ItemStack stack) {
+		return this.apply(stack, false);
 	}
 
-	public void apply(ItemStack stack, boolean unsafe) {
+	public boolean apply(ItemStack stack, boolean unsafe) {
 		int level = this.getUserLevel();
 
 		if (unsafe)
 			stack.addUnsafeEnchantment(this.getEnchantment(), level);
 		else {
+			level = (level < this.getStartLevel() ? this.getStartLevel() : level);
 			level = (level > this.getMaxLevel() ? this.getMaxLevel() : level);
 
 			if (this.getEnchantment().canEnchantItem(stack)) {
 				for (Enchantment ench : stack.getEnchantments().keySet()) {
 					if (this.getEnchantment().conflictsWith(ench))
-						return;
+						return false;
 				}
 
 				stack.addEnchantment(this.getEnchantment(), level);
 			}
 		}
+
+		return true;
 	}
 
 	public Enchantment getEnchantment() {
@@ -82,7 +85,7 @@ public class EnchantmentData {
 	}
 
 	public void setUserLevel(int value) {
-		value = (value < this.getStartLevel() ? this.getStartLevel() : value);
+		value = (value < Short.MIN_VALUE ? Short.MIN_VALUE : value);
 		value = (value > Short.MAX_VALUE ? Short.MAX_VALUE : value);
 		this.userLevel = value;
 	}
