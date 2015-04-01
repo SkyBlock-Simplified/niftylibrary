@@ -163,6 +163,9 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 					event.setCancelled(true);
 					return;
 				}
+
+				if (event.isCancelled())
+					event.setResult(Result.DENY);
 			} else if (!Material.AIR.equals(placeClickItem.getType())) {
 				if (!frame.isTradingEnabled() && event.getRawSlot() < event.getInventory().getSize()) {
 					event.getInventory().setItem(event.getRawSlot(), new ItemStack(Material.AIR));
@@ -172,6 +175,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 					InventoryWorkaround.addItems(profile.getOfflinePlayer().getPlayer().getInventory(), newItem);
 					profile.getOfflinePlayer().getPlayer().updateInventory();
 					event.setCancelled(true);
+					event.setResult(Result.DENY);
 				}
 			}
 		}
