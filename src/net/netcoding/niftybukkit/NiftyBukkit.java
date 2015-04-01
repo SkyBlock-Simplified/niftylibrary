@@ -32,8 +32,6 @@ public final class NiftyBukkit extends BukkitPlugin {
 		this.getLog().console("Registering Helpers");
 		plugin = this;
 		repository = new MojangRepository();
-		(itemDatabase = new ItemDatabase(this)).reload();
-		(enchantmentDatabase = new EnchantmentDatabase(this)).reload();
 		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 
 		PLUGINS.put("Bukkit", new ConcurrentList<String>());
@@ -45,6 +43,9 @@ public final class NiftyBukkit extends BukkitPlugin {
 
 		new NiftyCommand(this);
 		new NiftyListener(this);
+
+		(itemDatabase = new ItemDatabase(this)).reload();
+		(enchantmentDatabase = new EnchantmentDatabase(this)).reload();
 	}
 
 	@Override
