@@ -209,10 +209,10 @@ public class TitleManager {
 				Object packetSubtitleObj = packetTitle.newInstance();
 
 				if (MinecraftPackage.IS_PRE_1_8) {
-					packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumSubtitle));
-					packetTitle.setValue(packetTitleObj, new FieldEntry("b", subtitle));
+					packetTitle.setValue(packetSubtitleObj, new FieldEntry("a", enumSubtitle));
+					packetTitle.setValue(packetSubtitleObj, new FieldEntry("b", subtitle));
 				} else
-					packetSubtitleObj = packetTitle.newInstance(enumSubtitle, title);
+					packetSubtitleObj = packetTitle.newInstance(enumSubtitle, subtitle);
 
 				profile.sendPacket(packetSubtitleObj);
 			}
