@@ -20,6 +20,7 @@ import net.netcoding.niftybukkit.util.NumberUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class EnchantmentDatabase extends BukkitHelper {
@@ -38,12 +39,23 @@ public class EnchantmentDatabase extends BukkitHelper {
 		this.enchantmentsFile = new File(this.getPlugin().getDataFolder(), fileName);
 	}
 
-	public EnchantmentData get(final Enchantment enchantment) throws RuntimeException {
+	public List<EnchantmentData> getPossibleEnchants(ItemStack stack) {
+		List<EnchantmentData> enchDataList = new ArrayList<>();
+
+		for (EnchantmentData enchData : names.keySet()) {
+			if (enchData.canEnchant(stack))
+				enchDataList.add(enchData);
+		}
+
+		return enchDataList;
+	}
+
+	public EnchantmentData get(Enchantment enchantment) {
 		if (enchantment == null) throw new NullPointerException("The value for enchantment cannot be null!");
 		return this.get(enchantment.getName());
 	}
 
-	public EnchantmentData get(final String name) throws RuntimeException {
+	public EnchantmentData get(String name) {
 		if (StringUtil.isEmpty(name)) throw new NullPointerException("The value for name cannot be null!");
 
 		for (EnchantmentData enchData : names.keySet()) {
@@ -70,7 +82,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 		return this.primaryName.get(enchantment);
 	}
 
-	public List<EnchantmentData> parse(String[] enchList) throws NumberFormatException {
+	public List<EnchantmentData> parse(String[] enchList) {
 		if (ListUtil.isEmpty(enchList)) return Collections.emptyList();
 		List<EnchantmentData> enchDataList = new ArrayList<>();
 
@@ -116,7 +128,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 		return Collections.unmodifiableList(enchDataList);
 	}
 
-	public List<EnchantmentData> parse(String enchStringList) throws NumberFormatException {
+	public List<EnchantmentData> parse(String enchStringList) {
 		if (StringUtil.isEmpty(enchStringList)) return Collections.emptyList();
 		return this.parse(enchStringList.split("[,\\s]+"));
 	}

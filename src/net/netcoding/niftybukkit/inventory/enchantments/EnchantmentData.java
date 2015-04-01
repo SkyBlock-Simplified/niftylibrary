@@ -38,7 +38,7 @@ public class EnchantmentData {
 			level = (level < this.getStartLevel() ? this.getStartLevel() : level);
 			level = (level > this.getMaxLevel() ? this.getMaxLevel() : level);
 
-			if (this.getEnchantment().canEnchantItem(stack)) {
+			if (this.canEnchant(stack)) {
 				for (Enchantment ench : stack.getEnchantments().keySet()) {
 					if (this.getEnchantment().conflictsWith(ench))
 						return false;
@@ -49,6 +49,10 @@ public class EnchantmentData {
 		}
 
 		return true;
+	}
+
+	public boolean canEnchant(ItemStack stack) {
+		return this.getEnchantment().canEnchantItem(stack);
 	}
 
 	public Enchantment getEnchantment() {
