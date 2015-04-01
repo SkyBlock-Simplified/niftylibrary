@@ -82,16 +82,16 @@ public class EnchantmentDatabase extends BukkitHelper {
 				EnchantmentData enchData = this.get(split[0]);
 				if (enchData == null) continue;
 				String enchLevel = split[1];
-				enchLevel = enchLevel.matches("^max(imum)?$") ? String.valueOf(Short.MAX_VALUE) : enchLevel;
 
-				if (NumberUtil.isInt(enchLevel)) {
-					try {
+				try {
+					if (NumberUtil.isInt(enchLevel)) {
 						enchData.setUserLevel(Integer.parseInt(enchLevel));
 						enchDataList.add(enchData);
-					} catch (NumberFormatException nfex) {
-						if (nfex.getMessage().startsWith("Value out of range"))
-							enchData.setUserLevel(Short.MAX_VALUE);
-					}
+					} else if (enchLevel.matches("^max(imum)?$"))
+						enchData.setUserLevel(Short.MAX_VALUE);
+				} catch (NumberFormatException nfex) {
+					if (nfex.getMessage().startsWith("Value out of range"))
+						enchData.setUserLevel(Short.MAX_VALUE);
 				}
 			} else {
 				EnchantmentData enchData = this.get(ench);
@@ -101,9 +101,8 @@ public class EnchantmentDatabase extends BukkitHelper {
 					try {
 						if (NumberUtil.isInt(enchList[i + 1]))
 							enchData.setUserLevel(Integer.parseInt(enchList[++i]));
-						else if (enchList[i + 1].matches("^max(imum)?$")) {
+						else if (enchList[i + 1].matches("^max(imum)?$"))
 							enchData.setUserLevel(Short.MAX_VALUE);
-						}
 					} catch (NumberFormatException nfex) {
 						if (nfex.getMessage().startsWith("Value out of range"))
 							enchData.setUserLevel(Short.MAX_VALUE);
