@@ -26,7 +26,7 @@ public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 	}
 
 	public ItemStack getClickedItem(boolean firstClick) {
-		return FakeInventory.getClickedItem(this.getClickEvent());
+		return FakeInventory.getClickedItem(this.getClickEvent(), firstClick);
 	}
 
 	public int getHotbarButton() {
