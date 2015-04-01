@@ -53,13 +53,6 @@ public class EnchantmentDatabase extends BukkitHelper {
 			}
 		}
 
-		for (EnchantmentData enchData : names.keySet()) {
-			for (String compare : enchData.getNames()) {
-				if (compare.startsWith(name.toLowerCase()))
-					return new EnchantmentData(enchData.getEnchantment());
-			}
-		}
-
 		return null;
 	}
 
