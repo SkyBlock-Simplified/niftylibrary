@@ -99,6 +99,15 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		return this.itemOpenerSlot > 0 ? this.itemOpenerSlot : 0;
 	}
 
+	public MojangProfile getTargeter(MojangProfile profile) {
+		for (MojangProfile targeter : HOLDERS.get(this.getUniqueId()).keySet()) {
+			if (HOLDERS.get(this.getUniqueId()).get(targeter).equals(profile))
+				return targeter;
+		}
+
+		return profile;
+	}
+
 	public UUID getUniqueId() {
 		return this.uniqueId;
 	}
@@ -116,6 +125,17 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		if (this.exists()) {
 			if (profile.getOfflinePlayer().isOnline())
 				return OPENED.get(this.getUniqueId()).keySet().contains(profile);
+		}
+
+		return false;
+	}
+
+	public boolean isTargeted(MojangProfile profile) {
+		if (this.exists()) {
+			if (profile.getOfflinePlayer().isOnline()) {
+				if (!HOLDERS.get(this.getUniqueId()).keySet().contains(profile))
+					return HOLDERS.get(this.getUniqueId()).values().contains(profile);
+			}
 		}
 
 		return false;
