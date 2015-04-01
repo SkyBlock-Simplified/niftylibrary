@@ -65,7 +65,7 @@ public class EnchantmentData {
 	}
 
 	public List<String> getNames() {
-		return NiftyBukkit.getEnchantmentDatabase().names(this.getEnchantment());
+		return NiftyBukkit.getEnchantmentDatabase().names(this);
 	}
 
 	public int getUserLevel() {

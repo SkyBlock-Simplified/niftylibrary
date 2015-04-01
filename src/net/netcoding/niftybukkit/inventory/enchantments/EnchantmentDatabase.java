@@ -64,7 +64,11 @@ public class EnchantmentDatabase extends BukkitHelper {
 	}
 
 	public List<String> names(Enchantment enchantment) {
-		List<String> nameList = this.names.get(enchantment);
+		return this.names(new EnchantmentData(enchantment));
+	}
+
+	public List<String> names(EnchantmentData enchantmentData) {
+		List<String> nameList = this.names.get(enchantmentData);
 		if (nameList.size() > 15) nameList = nameList.subList(0, 14);
 		return nameList;
 	}
@@ -79,7 +83,6 @@ public class EnchantmentDatabase extends BukkitHelper {
 
 		for (int i = 0; i < enchList.length; i++) {
 			String ench = enchList[i];
-			System.out.println("made it ench2: " + ench);
 
 			if (ench.contains(":")) {
 				String[] split = ench.split(":");
@@ -152,17 +155,17 @@ public class EnchantmentDatabase extends BukkitHelper {
 			if (line.length() > 0 && line.charAt(0) == '#') continue;
 			final String[] parts = line.split(",");
 			if (parts.length < 2) continue;
-			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
+			String enchName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
-			this.enchantments.put(itemName, numeric);
+			this.enchantments.put(enchName, numeric);
 			EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
 			if (enchData.getEnchantment() == null) continue;
 
 			if (!this.names.containsKey(enchData)) {
-				this.names.put(enchData, new ArrayList<>(Arrays.asList(itemName)));
-				this.primaryName.put(enchData, itemName);
+				this.names.put(enchData, new ArrayList<>(Arrays.asList(enchName)));
+				this.primaryName.put(enchData, enchName);
 			} else {
-				this.names.get(enchData).add(itemName);
+				this.names.get(enchData).add(enchName);
 				Collections.sort(this.names.get(enchData), compare);
 			}
 		}
