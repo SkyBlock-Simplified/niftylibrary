@@ -17,7 +17,7 @@ public class HttpConnectionException extends Exception {
 		this.code = HttpCode.UNKNOWN;
 	}
 
-	public HttpCode getCode() {
+	public HttpCode getHttpCode() {
 		return this.code;
 	}
 
