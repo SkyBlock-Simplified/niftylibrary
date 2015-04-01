@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.inventory;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +12,7 @@ import net.netcoding.niftybukkit.inventory.events.InventoryItemInteractEvent;
 import net.netcoding.niftybukkit.inventory.events.InventoryOpenEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
+import net.netcoding.niftybukkit.util.ListUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -62,16 +65,12 @@ public class FakeInventory extends FakeInventoryFrame {
 	}
 
 	public void close(MojangProfile profile) {
-		if (profile.getOfflinePlayer().isOnline())
-			profile.getOfflinePlayer().getPlayer().closeInventory();
-		else if (OPENED.get(this.getUniqueId()).keySet().contains(profile)) {
-			OPENED.get(this.getUniqueId()).remove(profile);
-			HOLDERS.get(this.getUniqueId()).remove(profile);
-		}
+		OPENED.get(this.getUniqueId()).remove(profile);
+		HOLDERS.get(this.getUniqueId()).remove(profile);
 	}
 
 	public void closeAll() {
-		for (MojangProfile profile : OPENED.get(this.getUniqueId()).keySet())
+		for (MojangProfile profile : this.getOpened().keySet())
 			this.close(profile);
 	}
 
@@ -118,6 +117,15 @@ public class FakeInventory extends FakeInventoryFrame {
 					profile.getOfflinePlayer().getPlayer().getInventory().setItem(this.getItemOpenerSlot(), this.getItemOpener());
 			}
 		}
+	}
+
+	public ConcurrentHashMap<MojangProfile, FakeInventoryFrame> getOpened() {
+		for (MojangProfile profile : OPENED.get(this.getUniqueId()).keySet()) {
+			if (!profile.isOnlineLocally())
+				OPENED.get(this.getUniqueId()).remove(profile);
+		}
+
+		return OPENED.get(this.getUniqueId());
 	}
 
 	public boolean isOpen(MojangProfile profile) {
@@ -337,6 +345,58 @@ public class FakeInventory extends FakeInventoryFrame {
 		if (!Material.AIR.equals(itemOpener.getType())) {
 			this.itemOpenerSlot = slot;
 			this.itemOpener = itemOpener;
+		}
+	}
+
+	public <T extends ItemStack> void update(T[] items) {
+		this.update(this.getOpened().keySet(), Arrays.asList(items));
+	}
+
+	public <T extends ItemStack> void update(MojangProfile profile, T[] items) {
+		this.update(Arrays.asList(profile), Arrays.asList(items));
+	}
+
+	public <T extends ItemStack> void update(Collection<MojangProfile> profiles, T[] items) {
+		this.update(profiles, Arrays.asList(items));
+	}
+
+	public <T extends ItemStack> void update(MojangProfile profile, Collection<? extends T> items) {
+		this.update(Arrays.asList(profile), items);
+	}
+
+	public <T extends ItemStack> void update(Collection<MojangProfile> profiles, Collection<? extends T> items) {
+		for (MojangProfile profile : profiles) {
+			Player player = profile.getOfflinePlayer().getPlayer();
+			player.getOpenInventory().getTopInventory().setContents(ListUtil.toArray(items, ItemStack.class));
+		}
+	}
+
+	public void update(FakeInventoryFrame updated) {
+		this.update(this.getOpened().keySet(), updated);
+	}
+
+	public void update(MojangProfile profile, FakeInventoryFrame updated) {
+		this.update(Arrays.asList(profile), updated);
+	}
+
+	public void update(Collection<MojangProfile> profiles, FakeInventoryFrame updated) {
+		for (MojangProfile profile : profiles) {
+			FakeInventoryFrame current = OPENED.get(this.getUniqueId()).get(profile);
+			boolean changed = false;
+			changed = current.isAutoCancelled() != updated.isAutoCancelled();
+			changed = changed || current.isAutoCentered() != updated.isAutoCentered();
+			changed = changed || current.isTradingEnabled() != updated.isTradingEnabled();
+			changed = changed || current.getTotalSlots() != updated.getTotalSlots();
+			changed = changed || !current.getTitle().equalsIgnoreCase(updated.getTitle());
+			Player player = profile.getOfflinePlayer().getPlayer();
+
+			if (!changed)
+				player.getOpenInventory().getTopInventory().setContents(ListUtil.toArray(updated.getItems(), ItemStack.class));
+			else {
+				MojangProfile target = HOLDERS.get(this.getUniqueId()).get(profile);
+				this.close(profile);
+				this.open(profile, target);
+			}
 		}
 	}
 
