@@ -127,11 +127,9 @@ public class ItemDatabase extends BukkitHelper {
 		if (ListUtil.isEmpty(nameList)) {
 			itemData = new ItemData(item.getTypeId(), (short)0);
 			nameList = this.names.get(itemData);
-			if (ListUtil.isEmpty(nameList)) return Collections.emptyList();
 		}
 
-		if (nameList.size() > 15) nameList = nameList.subList(0, 14);
-		return nameList;
+		return Collections.unmodifiableList(nameList);
 	}
 
 	public String name(ItemStack item) {
