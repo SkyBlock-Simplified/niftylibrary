@@ -99,6 +99,7 @@ public class MojangRepository {
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
 	 */
 	public MojangProfile[] searchByPlayer(Collection<? extends OfflinePlayer> oplayers) throws ProfileNotFoundException {
+		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.OFFLINE_PLAYERS;
 		List<MojangProfile> profiles = new ArrayList<>();
 
 		try {
@@ -126,9 +127,9 @@ public class MojangRepository {
 
 			return ListUtil.toArray(profiles, MojangProfile.class);
 		} catch (ProfileNotFoundException pnfex) {
-			throw new ProfileNotFoundException(pnfex.getReason(), ProfileNotFoundException.LookupType.OFFLINE_PLAYERS, pnfex.getCause(), ListUtil.toArray(oplayers, OfflinePlayer.class));
+			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(oplayers, OfflinePlayer.class));
 		} catch (Exception ex) {
-			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, ProfileNotFoundException.LookupType.USERNAMES, ex, ListUtil.toArray(oplayers, OfflinePlayer.class));
+			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(oplayers, OfflinePlayer.class));
 		}
 	}
 
@@ -320,7 +321,7 @@ public class MojangRepository {
 		}
 
 		if (profiles.size() == 0)
-			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.USERNAMES, ListUtil.toArray(usernames, String.class));
+			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, type, ListUtil.toArray(usernames, String.class));
 
 		return ListUtil.toArray(profiles, MojangProfile.class);
 	}
