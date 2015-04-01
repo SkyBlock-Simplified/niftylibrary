@@ -242,6 +242,7 @@ public class ItemDatabase extends BukkitHelper {
 			this.durabilities.put(itemName, data);
 			this.items.put(itemName, numeric);
 			ItemData itemData = new ItemData(numeric, data);
+			if (itemData.getItem() == null) continue;
 
 			if (!this.names.containsKey(itemData)) {
 				this.names.put(itemData, new ArrayList<>(Arrays.asList(itemName)));

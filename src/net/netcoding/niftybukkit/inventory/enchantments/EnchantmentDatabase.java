@@ -156,6 +156,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 			final int numeric = Integer.parseInt(parts[1]);
 			this.enchantments.put(itemName, numeric);
 			EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
+			if (enchData.getEnchantment() == null) continue;
 
 			if (!this.names.containsKey(enchData)) {
 				this.names.put(enchData, new ArrayList<>(Arrays.asList(itemName)));
