@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import net.netcoding.niftybukkit.http.enums.HttpCode;
 import net.netcoding.niftybukkit.http.exceptions.HttpConnectionException;
 import net.netcoding.niftybukkit.util.StringUtil;
 

@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.http.exceptions;
 
-import net.netcoding.niftybukkit.http.enums.HttpCode;
+import net.netcoding.niftybukkit.http.HttpCode;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 public class HttpConnectionException extends Exception {

@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.http.enums;
+package net.netcoding.niftybukkit.http;
 
 public enum HttpCode {
 
