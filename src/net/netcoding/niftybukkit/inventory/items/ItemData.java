@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.inventory.items;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 
@@ -14,8 +15,8 @@ public class ItemData {
 	private final short data;
 	private boolean glow = false;
 
-	public ItemData(ItemStack item) {
-		this(item.getTypeId(), item.getDurability());
+	public ItemData(ItemStack stack) {
+		this(stack.getTypeId(), stack.getDurability());
 	}
 
 	public ItemData(Material material) {
@@ -79,9 +80,10 @@ public class ItemData {
 	}
 
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(id, data);
-		if (this.hasGlow()) item = addGlow(item);
-		return item;
+		ItemStack stack = new ItemStack(id, data);
+		if (this.hasGlow()) stack = addGlow(stack);
+		if (!stack.hasItemMeta()) stack.setItemMeta(NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType()));
+		return stack;
 	}
 
 	public int getId() {
