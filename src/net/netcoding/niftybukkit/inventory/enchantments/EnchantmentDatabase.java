@@ -171,6 +171,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 
 			if (!this.names.containsKey(enchData)) {
 				this.names.put(enchData, new ArrayList<>(Arrays.asList(enchName)));
+				if (enchName.contains("_")) this.names.get(enchData).add(enchName.replace("_", ""));
 				this.primaryName.put(enchData, enchName);
 			} else {
 				this.names.get(enchData).add(enchName);
