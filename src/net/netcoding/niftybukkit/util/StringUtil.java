@@ -225,7 +225,18 @@ public class StringUtil {
 	}
 
 	/**
-	 * Removes null from string and will either be an empty
+	 * Gets a split array of the {@code value} using {@code glue}.
+	 * 
+	 * @param regex The delimiting regular expression.
+	 * @param value The value to split.
+	 * @return
+	 */
+	public static String[] split(String regex, String value) {
+		return isEmpty(value) ? new String[0] : value.split(regex);
+	}
+
+	/**
+	 * Removes null from {@code value} and will either be an empty
 	 * value or the original passed value.
 	 * 
 	 * @param value to safely return
