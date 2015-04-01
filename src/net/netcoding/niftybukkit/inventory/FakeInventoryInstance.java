@@ -28,7 +28,11 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 	}
 
 	public void open() {
-		this.inventory.open(this.getProfile(), this);
+		this.open(this.getProfile());
+	}
+
+	public void open(MojangProfile target) {
+		this.inventory.open(this.getProfile(), target, this);
 	}
 
 }

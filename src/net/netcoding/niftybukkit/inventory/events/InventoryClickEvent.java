@@ -29,7 +29,7 @@ public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 		return FakeInventory.getClickedItem(this.getClickEvent());
 	}
 
-	public int getHotgarButton() {
+	public int getHotbarButton() {
 		return this.getClickEvent().getHotbarButton();
 	}
 

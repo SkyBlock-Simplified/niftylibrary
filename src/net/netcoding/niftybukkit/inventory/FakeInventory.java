@@ -1,7 +1,5 @@
 package net.netcoding.niftybukkit.inventory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,7 +33,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class FakeInventory extends FakeInventoryFrame implements Listener {
 
 	private static final transient ConcurrentHashMap<UUID, ConcurrentHashMap<MojangProfile, FakeInventoryFrame>> OPENED = new ConcurrentHashMap<>();
-	private static final transient List<Action> OPEN_ACTIONS = Arrays.asList(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK, Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK);
+	private static final transient ConcurrentHashMap<UUID, ConcurrentHashMap<MojangProfile, MojangProfile>> HOLDERS = new ConcurrentHashMap<>();
 	private final UUID uniqueId = UUID.randomUUID();
 	private final transient FakeInventoryListener listener;
 	private ItemStack itemOpener;
@@ -67,8 +65,10 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	public void close(MojangProfile profile) {
 		if (profile.getOfflinePlayer().isOnline())
 			profile.getOfflinePlayer().getPlayer().closeInventory();
-		else if (OPENED.get(this.getUniqueId()).keySet().contains(profile))
+		else if (OPENED.get(this.getUniqueId()).keySet().contains(profile)) {
 			OPENED.get(this.getUniqueId()).remove(profile);
+			HOLDERS.get(this.getUniqueId()).remove(profile);
+		}
 	}
 
 	public void closeAll() {
@@ -78,11 +78,13 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 
 	public void create() {
 		OPENED.put(this.getUniqueId(), new ConcurrentHashMap<MojangProfile, FakeInventoryFrame>());
+		HOLDERS.put(this.getUniqueId(), new ConcurrentHashMap<MojangProfile, MojangProfile>());
 	}
 
 	public void destroy() {
 		this.closeAll();
 		OPENED.remove(this.getUniqueId());
+		HOLDERS.remove(this.getUniqueId());
 	}
 
 	public boolean exists() {
@@ -184,6 +186,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 
 			if (this.isOpen(profile)) {
 				OPENED.get(this.getUniqueId()).remove(profile);
+				HOLDERS.get(this.getUniqueId()).remove(profile);
 				this.listener.onInventoryClose(new InventoryCloseEvent(profile, event));
 			}
 		}
@@ -241,7 +244,7 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 		MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 
 		if (!this.isOpen(profile)) {
-			if (OPEN_ACTIONS.contains(event.getAction())) {
+			if (!Action.PHYSICAL.equals(event.getAction())) {
 				if (handItem != null && this.getItemOpener() != null) {
 					if (!Material.AIR.equals(handItem.getType())) {
 						if (handItem.isSimilar(this.getItemOpener())) {
@@ -266,14 +269,20 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 	}
 
 	public void open(MojangProfile profile) {
-		this.open(profile, this);
+		this.open(profile, profile);
 	}
 
-	void open(MojangProfile profile, FakeInventoryFrame frame) {
+	public void open(MojangProfile profile, MojangProfile target) {
+		this.open(profile, target, this);
+	}
+
+	void open(MojangProfile profile, MojangProfile target, FakeInventoryFrame frame) {
 		if (frame.getItems().size() > 0) {
-			if (!this.isOpen(profile)) {
-				Player player = profile.getOfflinePlayer().getPlayer();
-				Inventory inventory = Bukkit.createInventory(player, frame.getTotalSlots(), frame.getTitle());
+			if (!this.isOpen(profile) && target.isOnlineLocally()) {
+				Player viewerPlayer = profile.getOfflinePlayer().getPlayer();
+				Player targetPlayer = profile.getOfflinePlayer().getPlayer();
+				Inventory inventory = Bukkit.createInventory(targetPlayer, frame.getTotalSlots(), frame.getTitle());
+				HOLDERS.get(this.getUniqueId()).put(profile, target);
 
 				if (frame.isAutoCentered()) {
 					int full = this.calculateTotalSlots(frame.getItems().size()) - 9;
@@ -289,9 +298,10 @@ public class FakeInventory extends FakeInventoryFrame implements Listener {
 						inventory.setItem(frame.getItems().indexOf(item), item);
 				}
 
+
 				OPENED.get(this.getUniqueId()).put(profile, frame);
-				player.closeInventory();
-				player.openInventory(inventory);
+				viewerPlayer.closeInventory();
+				viewerPlayer.openInventory(inventory);
 			}
 		}
 	}
