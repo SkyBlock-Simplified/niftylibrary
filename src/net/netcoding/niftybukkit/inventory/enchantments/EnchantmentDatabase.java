@@ -79,24 +79,26 @@ public class EnchantmentDatabase extends BukkitHelper {
 
 		for (int i = 0; i < enchList.length; i++) {
 			String ench = enchList[i];
+			System.out.println("made it ench2: " + ench);
 
 			if (ench.contains(":")) {
 				String[] split = ench.split(":");
 				EnchantmentData enchData = this.get(split[0]);
+				if (enchData == null) continue;
 				String enchLevel = split[1];
 
 				if (NumberUtil.isInt(enchLevel)) {
 					enchData.setUserLevel(Short.parseShort(enchLevel));
-					try { enchDataList.add(enchData); } catch (Exception ex) { }
-				} else
-					throw new NumberFormatException("Data value must be an integer, list or range!");
+					enchDataList.add(enchData);
+				}
 			} else {
 				EnchantmentData enchData = this.get(ench);
+				if (enchData == null) continue;
 
 				if (NumberUtil.isInt(enchList[i + 1]))
 					enchData.setUserLevel(Short.parseShort(enchList[++i]));
 
-				try { enchDataList.add(enchData); } catch (Exception ex) { }
+				enchDataList.add(enchData);
 			}
 		}
 
@@ -149,7 +151,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 			line = line.trim().toLowerCase(Locale.ENGLISH);
 			if (line.length() > 0 && line.charAt(0) == '#') continue;
 			final String[] parts = line.split(",");
-			if (parts.length < 3) continue;
+			if (parts.length < 2) continue;
 			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
 			this.enchantments.put(itemName, numeric);
