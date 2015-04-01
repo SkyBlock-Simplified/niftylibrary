@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -116,7 +116,7 @@ public class ConfigMapper extends BukkitHelper {
 	protected void loadFromYaml() throws InvalidConfigurationException {
 		this.root = new ConfigSection();
 
-		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(this.configFile), Charset.forName("UTF-8"))) {
+		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(this.configFile), StandardCharsets.UTF_8)) {
 			Object object = this.yaml.load(fileReader);
 			if (object != null) convertMapsToSections((Map<?, ?>)object, this.root);
 		} catch (IOException | ClassCastException | YAMLException ex) {
@@ -155,7 +155,7 @@ public class ConfigMapper extends BukkitHelper {
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {
-		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(this.configFile), Charset.forName("UTF-8"))) {
+		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(this.configFile), StandardCharsets.UTF_8)) {
 			if (ListUtil.notEmpty(this.header)) {
 				for (String line : this.header) fileWriter.write("# " + line + "\n");
 				fileWriter.write("\n");

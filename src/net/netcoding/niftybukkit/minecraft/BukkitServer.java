@@ -4,11 +4,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +20,6 @@ import net.netcoding.niftybukkit.util.gson.Gson;
 
 import com.google.common.io.ByteArrayDataOutput;
 
-@SuppressWarnings("unused")
 public class BukkitServer extends MinecraftServer {
 
 	private static final transient Gson GSON = new Gson();
@@ -133,17 +131,17 @@ public class BukkitServer extends MinecraftServer {
     }
 
     private StatusResponse processResponse(DataInputStream input) throws IOException {
-		int size = DataUtil.readVarInt(input);
+		DataUtil.readVarInt(input); // Packet Size
 
-		int id = DataUtil.readVarInt(input);
+		int id = DataUtil.readVarInt(input); // Packet ID
 		if (id != 0) throw new IOException("Invalid packetID.");
 
-		int length = DataUtil.readVarInt(input);
+		int length = DataUtil.readVarInt(input); // Packet Length
 		if (length < 1) throw new IOException("Invalid string length.");
 
 		byte[] data = new byte[length];
 		input.readFully(data);
-		return GSON.fromJson(new String(data, Charset.forName("UTF-8")), StatusResponse.class);
+		return GSON.fromJson(new String(data, StandardCharsets.UTF_8), StatusResponse.class);
     }
 
 	class StatusResponse {

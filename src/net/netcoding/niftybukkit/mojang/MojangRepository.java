@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit.mojang;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +36,6 @@ import org.bukkit.event.EventHandler;
 public class MojangRepository {
 
 	// API: http://wiki.vg/Mojang_API
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final int PROFILES_PER_REQUEST = 100;
 	private static long LAST_HTTP_REQUEST = System.currentTimeMillis();
 	private static final transient Gson GSON = new Gson();
@@ -230,7 +229,7 @@ public class MojangRepository {
 			// Check Offline Player Cache
 			for (String name : userList) {
 				OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(name);
-				UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(UTF8));
+				UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(StandardCharsets.UTF_8));
 				boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 				boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
 				boolean useOfflineId = !isOnline || !isOfflineId;
@@ -374,7 +373,7 @@ public class MojangRepository {
 
 			// Check Offline Player Cache
 			OfflinePlayer oplayer = NiftyBukkit.getPlugin().getServer().getOfflinePlayer(uniqueId);
-			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(UTF8));
+			UUID offlineId = UUID.nameUUIDFromBytes(StringUtil.format("OfflinePlayer:{0}", oplayer.getName()).getBytes(StandardCharsets.UTF_8));
 			boolean isOnline = Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 			boolean isOfflineId = oplayer.getUniqueId().equals(offlineId);
 			boolean useOfflineId = !isOnline || !isOfflineId;
