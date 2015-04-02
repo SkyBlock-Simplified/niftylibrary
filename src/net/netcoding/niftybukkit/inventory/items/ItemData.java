@@ -10,6 +10,7 @@ import net.netcoding.niftybukkit.util.ListUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 @SuppressWarnings("deprecation")
 public class ItemData {
@@ -37,6 +38,11 @@ public class ItemData {
 	public ItemData(int id, short data) {
 		this.id = id;
 		this.data = data;
+	}
+
+	private ItemData(ItemData source) {
+		this.id = source.id;
+		this.data = source.data;
 	}
 
 	public void addGlow() {
@@ -68,7 +74,7 @@ public class ItemData {
 				if ((boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
 					enchants |= (int)tagCompound.invokeMethod("getInt", tagObj, "HideFlags");
 
-				tagCompound.invokeMethod("setInt", tagObj, "HideFlags", 63);
+				tagCompound.invokeMethod("setInt", tagObj, "HideFlags", enchants);
 			} else {
 				if (!stack.getItemMeta().hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
 					stack.getItemMeta().addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
@@ -84,6 +90,11 @@ public class ItemData {
 	}
 
 	@Override
+	public Object clone() {
+		return new ItemData(this);
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (!(obj instanceof ItemData)) return false;
@@ -95,22 +106,29 @@ public class ItemData {
 	public ItemStack getItem() {
 		ItemStack stack = new ItemStack(id, data);
 		if (this.hasGlow()) stack = addGlow(stack);
+		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType());
 
-		if (!stack.hasItemMeta() || stack.getItemMeta() == null)
-			stack.setItemMeta(NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType()));
+		if (!stack.hasItemMeta() || stack.getItemMeta() == null && factory != null)
+			stack.setItemMeta(factory);
 
-		if (!stack.getItemMeta().hasLore() || ListUtil.isEmpty(stack.getItemMeta().getLore()))
-			stack.getItemMeta().setLore(new ArrayList<String>());
+		if (stack.hasItemMeta()) {
+			if (!stack.getItemMeta().hasLore() || ListUtil.isEmpty(stack.getItemMeta().getLore()))
+				stack.getItemMeta().setLore(new ArrayList<String>());
+		}
 
 		return stack;
 	}
 
 	public int getId() {
-		return this.getItem().getTypeId();
+		return this.id;
 	}
 
 	public short getData() {
-		return this.getItem().getDurability();
+		return this.data;
+	}
+
+	public Material getType() {
+		return Material.getMaterial(this.getId());
 	}
 
 	public boolean hasGlow() {
