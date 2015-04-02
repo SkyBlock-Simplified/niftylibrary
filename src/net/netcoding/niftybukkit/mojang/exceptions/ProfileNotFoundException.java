@@ -34,7 +34,7 @@ public class ProfileNotFoundException extends RuntimeException {
 	 * @param obj       Object to be used in the exception message.
 	 */
 	public ProfileNotFoundException(Reason reason, LookupType type, Throwable throwable, Object obj) {
-		super(throwable == null ? reason.getCause() : StringUtil.format("{0}: {1}: {2}", reason.getCause(), throwable.getClass().getName(), throwable.getMessage()), throwable);
+		super(throwable == null ? getCustomMessage(type, obj) : StringUtil.format("{0}: {1}: {2}", getCustomMessage(type, obj), throwable.getClass().getName(), throwable.getMessage()), throwable);
 		this.reason = reason;
 		this.type = type;
 		this.details = getCustomMessage(this.type, obj);
