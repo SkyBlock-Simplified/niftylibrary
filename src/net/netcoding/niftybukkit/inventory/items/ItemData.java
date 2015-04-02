@@ -1,8 +1,11 @@
 package net.netcoding.niftybukkit.inventory.items;
 
+import java.util.ArrayList;
+
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
+import net.netcoding.niftybukkit.util.ListUtil;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -88,7 +91,13 @@ public class ItemData {
 	public ItemStack getItem() {
 		ItemStack stack = new ItemStack(id, data);
 		if (this.hasGlow()) stack = addGlow(stack);
-		if (!stack.hasItemMeta()) stack.setItemMeta(NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType()));
+
+		if (!stack.hasItemMeta() || stack.getItemMeta() == null)
+			stack.setItemMeta(NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType()));
+
+		if (!stack.getItemMeta().hasLore() || ListUtil.isEmpty(stack.getItemMeta().getLore()))
+			stack.getItemMeta().setLore(new ArrayList<String>());
+
 		return stack;
 	}
 
