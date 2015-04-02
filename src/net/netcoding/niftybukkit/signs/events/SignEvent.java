@@ -2,7 +2,6 @@ package net.netcoding.niftybukkit.signs.events;
 
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
-import net.netcoding.niftybukkit.util.RegexUtil;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -109,16 +108,7 @@ abstract class SignEvent implements Cancellable {
 	 * @return Modified sign text.
 	 */
 	public String[] getModifiedLines(boolean filtered) {
-		String[] modified = this.getModifiedLines();
-
-		if (filtered) {
-			modified = modified.clone();
-
-			for (int i = 0; i < modified.length; i++)
-				modified[i] = RegexUtil.replaceColor(modified[i], RegexUtil.REPLACE_ALL_PATTERN);
-		}
-
-		return modified;
+		return this.signInfo.getModifiedLines(filtered);
 	}
 
 	/**

@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.signs;
 
 import java.util.Arrays;
 
+import net.netcoding.niftybukkit.util.RegexUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 
 import org.bukkit.Location;
@@ -83,6 +84,25 @@ public class SignInfo {
 	 */
 	public String[] getModifiedLines() {
 		return this.modified;
+	}
+
+	/**
+	 * Gets the color modified lines of text.
+	 * 
+	 * @param filtered True to replace color codes, otherwise false.
+	 * @return Modified sign text.
+	 */
+	public String[] getModifiedLines(boolean filtered) {
+		String[] modified = this.getModifiedLines();
+
+		if (filtered) {
+			modified = modified.clone();
+
+			for (int i = 0; i < modified.length; i++)
+				modified[i] = RegexUtil.replaceColor(modified[i], RegexUtil.REPLACE_ALL_PATTERN);
+		}
+
+		return modified;
 	}
 
 	/**
