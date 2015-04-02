@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.signs;
 import java.util.List;
 import java.util.Map;
 
+import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.util.ListUtil;
 import net.netcoding.niftybukkit.util.StringUtil;
 import net.netcoding.niftybukkit.util.gson.Gson;
@@ -24,26 +25,43 @@ class SignPacket {
 	}
 
 	private StructureModifier<BlockPosition> getBlockModifier() {
-		return this.updateSignPacket.getBlockPositionModifier();
+		return this.getPacket().getBlockPositionModifier();
+	}
+
+	private Integer getCoord(int index) {
+		return this.getPacket().getIntegers().read(index);
 	}
 
 	public Vector getPosition() {
-		BlockPosition position = this.getBlockModifier().read(0);
-		return new Vector(position.getX(), position.getY(), position.getZ());
-	}
+		int x = 0;
+		int y = 0;
+		int z = 0;
 
-	void setPosition(Vector position) {
-		this.getBlockModifier().write(0, new BlockPosition(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
+		if (MinecraftPackage.IS_PRE_1_8) {
+			x = this.getCoord(0);
+			y = this.getCoord(1);
+			z = this.getCoord(1);
+		} else {
+			BlockPosition position = this.getBlockModifier().read(0);
+			x = position.getX();
+			y = position.getY();
+			z = position.getZ();
+		}
+
+		return new Vector(x, y, z);
 	}
 
 	private String getLine(int index) {
-		String json = this.updateSignPacket.getChatComponentArrays().read(0)[index].getJson();
+		String json = this.getPacket().getChatComponentArrays().read(0)[index].getJson();
 		if (StringUtil.isEmpty(json) || json.equals("\"\"")) return "";
 		Map<?, ?> jsonMap = GSON.fromJson(json, Map.class);
 		return (String)((List<?>)jsonMap.get("extra")).get(0);
 	}
 
 	public String[] getLines() {
+		if (MinecraftPackage.IS_PRE_1_8)
+			return this.getPacket().getStringArrays().read(0);
+
 		String[] lines = new String[4];
 
 		for (int i = 0; i < lines.length; i++)
@@ -52,20 +70,51 @@ class SignPacket {
 		return lines;
 	}
 
-	void setLines(String[] lines) {
-		if (ListUtil.isEmpty(lines)) throw new IllegalArgumentException("The passed lines cannot be null!");
-		if (lines.length < 1 || lines.length > 4) throw new IllegalArgumentException("You must provide between 1 and 4 lines!");
-		WrappedChatComponent[] chat = this.updateSignPacket.getChatComponentArrays().read(0);
-		if (chat.length == 0) chat = new WrappedChatComponent[4];
-
-		for (int i = 0; i < 4; i++)
-			chat[i] = WrappedChatComponent.fromText(StringUtil.notEmpty(lines[i]) ? lines[i] : "");
-
-		this.updateSignPacket.getChatComponentArrays().write(0, chat);
+	private void setCoord(int index, int value) {
+		this.getPacket().getIntegers().write(index, value);
 	}
 
 	PacketContainer getPacket() {
-		return updateSignPacket;
+		return this.updateSignPacket;
+	}
+
+	void setLines(String[] lines) {
+		if (ListUtil.isEmpty(lines)) throw new IllegalArgumentException("The passed lines cannot be null!");
+		if (lines.length < 1) throw new IllegalArgumentException("You must provide between at least 1 line!");
+		if (lines.length > 4) lines = new String[] { lines[0], lines[1], lines[2], lines[3] };
+
+		if (lines.length < 4) {
+			String[] newLines = new String[4];
+
+			for (int i = 0; i < lines.length; i++)
+				newLines[i] = StringUtil.notEmpty(lines[i]) ? lines[i] : "";
+
+			for (int i = lines.length; i < 4; i++)
+				newLines[i] = "";
+
+			lines = newLines;
+		}
+
+		if (MinecraftPackage.IS_PRE_1_8)
+			this.getPacket().getStringArrays().write(0, lines);
+		else {
+			WrappedChatComponent[] chat = this.getPacket().getChatComponentArrays().read(0);
+			if (chat.length == 0) chat = new WrappedChatComponent[4];
+
+			for (int i = 0; i < lines.length; i++)
+				chat[i] = WrappedChatComponent.fromText(lines[i]);
+
+			this.getPacket().getChatComponentArrays().write(0, chat);
+		}
+	}
+
+	void setPosition(Vector position) {
+		if (MinecraftPackage.IS_PRE_1_8) {
+			this.setCoord(0, position.getBlockX());
+			this.setCoord(1, position.getBlockY());
+			this.setCoord(2, position.getBlockZ());
+		} else
+			this.getBlockModifier().write(0, new BlockPosition(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
 	}
 
 }
