@@ -45,7 +45,7 @@ public class ItemData {
 
 	public final static ItemStack addGlow(ItemStack stack) {
 		try {
-			if (!MinecraftPackage.IS_PRE_1_8) 
+			if (!MinecraftPackage.IS_PRE_1_8)
 				stack.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
 
 			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
@@ -63,8 +63,12 @@ public class ItemData {
 			if (MinecraftPackage.IS_PRE_1_8)
 				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
 			else if (MinecraftPackage.IS_PRE_1_8_3) {
-				if (!(boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
-					tagCompound.invokeMethod("setInt", tagObj, "HideFlags", 1);
+				int enchants = 1;
+
+				if ((boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
+					enchants |= (int)tagCompound.invokeMethod("getInt", tagObj, "HideFlags");
+
+				tagCompound.invokeMethod("setInt", tagObj, "HideFlags", 63);
 			} else {
 				if (!stack.getItemMeta().hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
 					stack.getItemMeta().addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
