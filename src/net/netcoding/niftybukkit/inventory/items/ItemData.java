@@ -40,33 +40,39 @@ public class ItemData {
 		this.glow = true;
 	}
 
-	public final static ItemStack addGlow(ItemStack item) {
+	public final static ItemStack addGlow(ItemStack stack) {
 		try {
-			item.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
+			if (!MinecraftPackage.IS_PRE_1_8) 
+				stack.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
+
 			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
 			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection tagCompound = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
-			Object itemStack = craftItemStack.invokeMethod("asNMSCopy", null, item);
-			Object tag = nmsItemStack.invokeMethod("getTag", itemStack);
+			Object itemStackObj = craftItemStack.invokeMethod("asNMSCopy", null, stack);
+			Object tagObj = nmsItemStack.invokeMethod("getTag", itemStackObj);
 
-			if (tag == null) {
-				tag = tagCompound.newInstance();
-				nmsItemStack.invokeMethod("setTag", itemStack, tag);
-				tag = nmsItemStack.invokeMethod("getTag", itemStack);
+			if (tagObj == null) {
+				tagObj = tagCompound.newInstance();
+				nmsItemStack.invokeMethod("setTag", itemStackObj, tagObj);
+				tagObj = nmsItemStack.invokeMethod("getTag", itemStackObj);
 			}
-
 
 			if (MinecraftPackage.IS_PRE_1_8)
-				tagCompound.invokeMethod("set", tag, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
-			else {
-				if (!(boolean)tagCompound.invokeMethod("hasKey", tag, "HideFlags"))
-					tagCompound.invokeMethod("setInt", tag, "HideFlags", 1);
+				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
+			else if (MinecraftPackage.IS_PRE_1_8_3) {
+				if (!(boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
+					tagCompound.invokeMethod("setInt", tagObj, "HideFlags", 1);
+			} else {
+				if (!stack.getItemMeta().hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+					stack.getItemMeta().addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+
+				return stack;
 			}
 
-			nmsItemStack.invokeMethod("setTag", itemStack, tag);
-			return (ItemStack)craftItemStack.invokeMethod("asCraftMirror", null, itemStack);
+			nmsItemStack.invokeMethod("setTag", itemStackObj, tagObj);
+			return (ItemStack)craftItemStack.invokeMethod("asCraftMirror", null, itemStackObj);
 		} catch (Exception ex) {
-			return item;
+			return stack;
 		}
 	}
 
