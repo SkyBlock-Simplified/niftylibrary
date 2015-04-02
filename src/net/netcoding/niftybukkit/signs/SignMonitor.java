@@ -341,7 +341,7 @@ public class SignMonitor extends BukkitListener {
 								outgoing.setPosition(new Vector(sign.getX(), sign.getY(), sign.getZ()));
 
 								try {
-									outgoing.setLines(signInfo.getLines());
+									outgoing.setLines(signInfo.getModifiedLines(true));
 									NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
 								} catch (Exception ex) {
 									this.getLog().console("Unable to send sign update packet!", ex);
