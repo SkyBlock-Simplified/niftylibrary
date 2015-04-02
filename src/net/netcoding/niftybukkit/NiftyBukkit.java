@@ -27,7 +27,6 @@ public final class NiftyBukkit extends BukkitPlugin {
 	private static transient MojangRepository repository;
 	private static transient BungeeHelper bungeeHelper;
 
-	// Test
 	@Override
 	public void onEnable() {
 		this.getLog().console("Registering Helpers");
