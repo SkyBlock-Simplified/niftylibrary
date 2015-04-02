@@ -10,6 +10,7 @@ import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
 import net.netcoding.niftybukkit.util.StringUtil;
+import net.netcoding.niftybukkit.util.gson.JsonObject;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,8 +20,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import com.google.gson.JsonObject;
 
 /**
  * Container for a players unique id and name.
