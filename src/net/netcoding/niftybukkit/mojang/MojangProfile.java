@@ -32,6 +32,8 @@ public class MojangProfile {
 	private String name;
 	private String ip;
 	private int port;
+	private boolean legacy = false;
+	private boolean demo = false;
 	private InetSocketAddress ipAddress;
 	private long updated = System.currentTimeMillis();
 	// http://skins.minecraft.net/MinecraftSkins/<username>.png
@@ -238,6 +240,24 @@ public class MojangProfile {
 	@Override
 	public int hashCode() {
 		return this.getUniqueId().hashCode();
+	}
+
+	/**
+	 * Gets if the account is unpaid.
+	 * 
+	 * @return True if unpaid, otherwise false.
+	 */
+	public boolean isDemo() {
+		return this.demo;
+	}
+
+	/**
+	 * Gets if the account has not been migrated to Mojang.
+	 * 
+	 * @return True if not migrated, otherwise false.
+	 */
+	public boolean isLegacy() {
+		return this.legacy;
 	}
 
 	/**
