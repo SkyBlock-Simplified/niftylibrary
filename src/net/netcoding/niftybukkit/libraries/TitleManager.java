@@ -103,6 +103,7 @@ public class TitleManager {
 
 		// Text
 		JsonObject json = new JsonObject();
+		json.addProperty("text", RegexUtil.replaceColor(text, RegexUtil.REPLACE_ALL_PATTERN));
 		Object actionJson = chatSerializer.invokeMethod("a", null, json.toString());
 		Object packetChatObj = packetChat.newInstance(actionJson, (byte)2);
 		profile.sendPacket(packetChatObj);
