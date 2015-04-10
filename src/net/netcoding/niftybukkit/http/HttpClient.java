@@ -18,41 +18,45 @@ public class HttpClient {
 
 	private final int DEFAULT_TIMEOUT = 3000;
 
-	public String get(URL url, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, Arrays.asList(headers));
 	}
 
-	public String get(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, timeout, Arrays.asList(headers));
 	}
 
-	public String get(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, proxy, Arrays.asList(headers));
 	}
 
-	public String get(URL url, int timeout, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, int timeout, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, timeout, proxy, Arrays.asList(headers));
 	}
 
-	public String get(URL url, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, null, headers);
 	}
 
-	public String get(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, timeout, null, headers);
 	}
 
-	public String get(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, proxy, headers);
 	}
 
-	public String get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+		HttpStatus status = HttpStatus.OK;
+		String bodyResponse = "";
+
 		try {
 			if (proxy == null) proxy = Proxy.NO_PROXY;
 			String line;
-			StringBuffer response = new StringBuffer();
+			StringBuffer buffer = new StringBuffer();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpStatus.getByCode(connection.getResponseCode()));
+			status = HttpStatus.getByCode(connection.getResponseCode());
+			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(status);
 			connection.setRequestMethod("GET");
 
 			for (HttpHeader header : headers)
@@ -66,13 +70,13 @@ public class HttpClient {
 			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
 					while (StringUtil.notEmpty(line = reader.readLine())) {
-						response.append(line);
-						response.append('\r');
+						buffer.append(line);
+						buffer.append('\r');
 					}
 				}
 			}
 
-			return response.toString();
+			bodyResponse = buffer.toString();
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
 		} catch (SocketException sex) {
@@ -82,67 +86,73 @@ public class HttpClient {
 		} catch (Exception ex) {
 			throw new HttpConnectionException(ex);
 		}
+
+		return new HttpResponse(status, new HttpBody(bodyResponse));
 	}
 
-	public String post(URL url, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, null, timeout, headers);
 	}
 
-	public String post(URL url, HttpBody body, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, HttpBody body, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, body, timeout, headers);
 	}
 
-	public String post(URL url, Proxy proxy, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, null, timeout, headers);
 	}
 
-	public String post(URL url, Proxy proxy, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, body, timeout, Arrays.asList(headers));
 	}
 
-	public String post(URL url, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, null, timeout, headers);
 	}
 
-	public String post(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, HttpBody body, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, HttpBody body, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public String post(URL url, Proxy proxy, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, proxy, null, timeout, headers);
 	}
 
-	public String post(URL url, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, body, timeout, headers);
 	}
 
-	public String post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+		HttpStatus status = HttpStatus.OK;
+		String bodyResponse = "";
+
 		try {
 			if (proxy == null) proxy = Proxy.NO_PROXY;
 			String line;
-			StringBuffer response = new StringBuffer();
+			StringBuffer buffer = new StringBuffer();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(HttpStatus.getByCode(connection.getResponseCode()));
+			status = HttpStatus.getByCode(connection.getResponseCode());
+			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(status);
 			connection.setRequestMethod("POST");
 
 			for (HttpHeader header : headers)
@@ -161,13 +171,13 @@ public class HttpClient {
 			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
 					while (StringUtil.notEmpty(line = reader.readLine())) {
-						response.append(line);
-						response.append('\r');
+						buffer.append(line);
+						buffer.append('\r');
 					}
 				}
 			}
 
-			return response.toString();
+			bodyResponse = buffer.toString();
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
 		} catch (SocketException sex) {
@@ -177,6 +187,8 @@ public class HttpClient {
 		} catch (Exception ex) {
 			throw new HttpConnectionException(ex);
 		}
+
+		return new HttpResponse(status, new HttpBody(bodyResponse));
 	}
 
 }

@@ -107,7 +107,7 @@ public enum HttpStatus {
 		return HttpStatus.OK;
 	}
 
-	public HttpState getStatus() {
+	public HttpState getState() {
 		if (this.getCode() >= 990)
 			return HttpState.JAVA_ERROR;
 		if (this.getCode() >= 500)
