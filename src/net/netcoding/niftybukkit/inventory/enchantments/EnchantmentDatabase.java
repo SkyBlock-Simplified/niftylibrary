@@ -73,7 +73,9 @@ public class EnchantmentDatabase extends BukkitHelper {
 	}
 
 	public List<String> names(EnchantmentData enchantmentData) {
-		return Collections.unmodifiableList(this.names.get(enchantmentData));
+		List<String> nameList = this.names.get(enchantmentData);
+		if (nameList.size() > 15) nameList = nameList.subList(0, 15);
+		return Collections.unmodifiableList(nameList);
 	}
 
 	public String name(Enchantment enchantment) {

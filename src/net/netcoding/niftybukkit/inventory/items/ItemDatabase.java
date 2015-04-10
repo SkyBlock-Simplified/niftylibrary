@@ -129,6 +129,7 @@ public class ItemDatabase extends BukkitHelper {
 			nameList = this.names.get(itemData);
 		}
 
+		if (nameList.size() > 15) nameList = nameList.subList(0, 15);
 		return Collections.unmodifiableList(nameList);
 	}
 
