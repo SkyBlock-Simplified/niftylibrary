@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
@@ -52,7 +53,7 @@ public class EnchantmentData {
 	}
 
 	public boolean canEnchant(ItemStack stack) {
-		return this.getEnchantment().canEnchantItem(stack);
+		return (stack == null || Material.AIR.equals(stack.getType())) ? false : this.getEnchantment().canEnchantItem(stack);
 	}
 
 	public Enchantment getEnchantment() {
