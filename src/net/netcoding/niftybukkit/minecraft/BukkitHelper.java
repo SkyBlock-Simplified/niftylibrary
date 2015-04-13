@@ -67,7 +67,7 @@ public abstract class BukkitHelper {
 	}
 
 	public static boolean isConsole(String senderName) {
-		return senderName.equals("CONSOLE") || senderName.equals("@");
+		return Bukkit.getConsoleSender().getName().equals(senderName) || "@".equals(senderName);
 	}
 
 	public static boolean isPlayer(CommandSender sender) {
