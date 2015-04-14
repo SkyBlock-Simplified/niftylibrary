@@ -5,30 +5,26 @@ import java.util.ArrayList;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
-import net.netcoding.niftybukkit.util.ListUtil;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-@SuppressWarnings("deprecation")
-public class ItemData {
+public class ItemData extends ItemStack {
 
-	private final int id;
-	private final short data;
 	private boolean glow = false;
 
 	public ItemData(ItemStack stack) {
-		this(stack.getTypeId(), stack.getDurability());
+		super(stack);
 	}
 
 	public ItemData(Material material) {
 		this(material.getId(), (short)0);
 	}
 
-	public ItemData(Material material, short data) {
-		this(material.getId(), data);
+	public ItemData(Material material, short durability) {
+		super(material, durability);
 	}
 
 	public ItemData(int id) {
@@ -36,17 +32,11 @@ public class ItemData {
 	}
 
 	public ItemData(int id, short data) {
-		this.id = id;
-		this.data = data;
+		super(id, data);
 	}
 
 	private ItemData(ItemData source) {
-		this.id = source.id;
-		this.data = source.data;
-	}
-
-	public void addGlow() {
-		this.glow = true;
+		super(source);
 	}
 
 	public final static ItemStack addGlow(ItemStack stack) {
@@ -90,49 +80,29 @@ public class ItemData {
 	}
 
 	@Override
-	public Object clone() {
+	public ItemData clone() {
 		return new ItemData(this);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (!(obj instanceof ItemData)) return false;
-		if (this == obj) return true;
-		ItemData item = (ItemData)obj;
-		return this.getId() == item.getId() && this.getData() == item.getData();
-	}
+	public ItemMeta getItemMeta() {
+		ItemMeta itemMeta = super.getItemMeta();
+		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType());
 
-	public ItemStack getItem() {
-		ItemStack stack = new ItemStack(id, data);
-		if (this.hasGlow()) stack = addGlow(stack);
-		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType());
+		if (itemMeta == null && factory != null)
+			super.setItemMeta(factory);
 
-		if (stack.getItemMeta() == null && factory != null)
-			stack.setItemMeta(factory);
-
-		if (stack.hasItemMeta()) {
-			ItemMeta itemMeta = stack.getItemMeta();
-
-			if (ListUtil.isEmpty(itemMeta.getLore())) {
-				itemMeta.setLore(new ArrayList<String>());
-				stack.setItemMeta(itemMeta);
-			}
+		if (itemMeta.getLore() == null) {
+			itemMeta.setLore(new ArrayList<String>());
+			this.setItemMeta(itemMeta);
 		}
 
-		return stack;
+		return itemMeta;
 	}
 
-	public int getId() {
-		return this.id;
-	}
-
-	public short getData() {
-		return this.data;
-	}
-
-	public Material getType() {
-		return Material.getMaterial(this.getId());
+	@Override
+	public int getTypeId() {
+		return super.getTypeId();
 	}
 
 	public boolean hasGlow() {
@@ -140,12 +110,21 @@ public class ItemData {
 	}
 
 	@Override
-	public int hashCode() {
-		return (31 * this.getId()) ^ this.getData();
+	public boolean hasItemMeta() {
+		return this.getItemMeta() != null;
 	}
 
-	public void removeGlow() {
-		this.glow = false;
+	public void setGlow() {
+		this.setGlow(true);
+	}
+
+	public void setGlow(boolean value) {
+		this.glow = value;
+	}
+
+	@Override
+	public void setTypeId(int type) {
+		super.setTypeId(type);
 	}
 
 }

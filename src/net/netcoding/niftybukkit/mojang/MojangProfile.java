@@ -197,12 +197,11 @@ public class MojangProfile {
 	 */
 	public final ItemStack getSkull() {
 		ItemData data = new ItemData(Material.SKULL_ITEM, (byte)SkullType.PLAYER.ordinal());
-		ItemStack stack = data.getItem();
-		SkullMeta meta = (SkullMeta)stack.getItemMeta();
+		SkullMeta meta = (SkullMeta)data.getItemMeta();
 		meta.setOwner(this.getName());
 		meta.setDisplayName(ChatColor.RESET + this.getName());
-		stack.setItemMeta(meta);
-		return stack;
+		data.setItemMeta(meta);
+		return data;
 	}
 
 	/**

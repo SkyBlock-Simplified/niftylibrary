@@ -29,7 +29,7 @@ public abstract class FakeInventoryFrame extends BukkitListener {
 	}
 
 	public void add(int index, ItemData item, int amount, String displayName, List<String> lore) {
-		ItemStack stack = NiftyBukkit.getItemDatabase().get(StringUtil.format("{0}:{1}", item.getId(), item.getData()), amount);
+		ItemStack stack = NiftyBukkit.getItemDatabase().get(StringUtil.format("{0}:{1}", item.getTypeId(), item.getData()), amount);
 		ItemMeta meta = stack.getItemMeta();
 		if (StringUtil.notEmpty(displayName)) meta.setDisplayName(displayName);
 		if (ListUtil.notEmpty(lore)) meta.setLore(lore);
