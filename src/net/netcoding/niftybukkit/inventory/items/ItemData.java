@@ -108,12 +108,16 @@ public class ItemData {
 		if (this.hasGlow()) stack = addGlow(stack);
 		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(stack.getType());
 
-		if (!stack.hasItemMeta() || stack.getItemMeta() == null && factory != null)
+		if (stack.getItemMeta() == null && factory != null)
 			stack.setItemMeta(factory);
 
 		if (stack.hasItemMeta()) {
-			if (!stack.getItemMeta().hasLore() || ListUtil.isEmpty(stack.getItemMeta().getLore()))
-				stack.getItemMeta().setLore(new ArrayList<String>());
+			ItemMeta itemMeta = stack.getItemMeta();
+
+			if (ListUtil.isEmpty(itemMeta.getLore())) {
+				itemMeta.setLore(new ArrayList<String>());
+				stack.setItemMeta(itemMeta);
+			}
 		}
 
 		return stack;
