@@ -47,35 +47,35 @@ public class ItemDatabase extends BukkitHelper {
 	public ItemStack get(final String id) throws RuntimeException {
 		if (StringUtil.isEmpty(id)) throw new NullPointerException("The value for id cannot be null!");
 		int itemid = -1;
-		String itemname = id;
+		String itemName = id;
 		short metaData = 0;
 		Matcher parts = splitPattern.matcher(id);
 
 		if (parts.matches()) {
-			itemname = parts.group(2);
+			itemName = parts.group(2);
 			metaData = Short.parseShort(parts.group(3));
 		}
 
-		if (NumberUtil.isInt(itemname))
-			itemid = Integer.parseInt(itemname);
+		if (NumberUtil.isInt(itemName))
+			itemid = Integer.parseInt(itemName);
 		else if (NumberUtil.isInt(id))
 			itemid = Integer.parseInt(id);
 		else
-			itemname = itemname.toLowerCase(Locale.ENGLISH);
+			itemName = itemName.toLowerCase(Locale.ENGLISH);
 
 		if (itemid < 0) {
-			if (this.items.containsKey(itemname)) {
-				itemid = this.items.get(itemname);
+			if (this.items.containsKey(itemName)) {
+				itemid = this.items.get(itemName);
 
-				if (this.durabilities.containsKey(itemname) && metaData == 0)
-					metaData = this.durabilities.get(itemname);
-			} else if (!Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)).equals(null))
-				itemid = Material.getMaterial(itemname.toUpperCase(Locale.ENGLISH)).getId();
+				if (this.durabilities.containsKey(itemName) && metaData == 0)
+					metaData = this.durabilities.get(itemName);
+			} else if (!Material.getMaterial(itemName.toUpperCase(Locale.ENGLISH)).equals(null))
+				itemid = Material.getMaterial(itemName.toUpperCase(Locale.ENGLISH)).getId();
 			else
-				throw new RuntimeException("Unknown item name: " + itemname);
+				throw new RuntimeException("Unknown item name: " + itemName);
 		}
 
-		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemname);
+		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemName);
 		final Material mat = Material.getMaterial(itemid);
 		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
 		final ItemStack retval = new ItemStack(mat);
@@ -95,7 +95,7 @@ public class ItemDatabase extends BukkitHelper {
 	}
 
 	public List<ItemStack> getMatching(Player player, String[] args) throws RuntimeException {
-		List<ItemStack> is = new ArrayList<ItemStack>();
+		List<ItemStack> is = new ArrayList<>();
 
 		if (args.length < 1)
 			is.add(player.getItemInHand());
@@ -120,12 +120,12 @@ public class ItemDatabase extends BukkitHelper {
 		return is;
 	}
 
-	public List<String> names(ItemStack item) {
-		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
+	public List<String> names(ItemStack stack) {
+		ItemData itemData = new ItemData(stack);
 		List<String> nameList = this.names.get(itemData);
 
 		if (ListUtil.isEmpty(nameList)) {
-			itemData = new ItemData(item.getTypeId(), (short)0);
+			itemData = new ItemData(stack.getTypeId(), (short)0);
 			nameList = this.names.get(itemData);
 		}
 
@@ -133,12 +133,12 @@ public class ItemDatabase extends BukkitHelper {
 		return Collections.unmodifiableList(nameList);
 	}
 
-	public String name(ItemStack item) {
-		ItemData itemData = new ItemData(item.getTypeId(), item.getDurability());
+	public String name(ItemStack stack) {
+		ItemData itemData = new ItemData(stack);
 		String name = this.primaryName.get(itemData);
 
 		if (StringUtil.isEmpty(name)) {
-			itemData = new ItemData(item.getTypeId(), (short)0);
+			itemData = new ItemData(stack.getTypeId(), (short)0);
 			name = this.primaryName.get(itemData);
 			if (StringUtil.isEmpty(name)) return null;
 		}
@@ -236,12 +236,19 @@ public class ItemDatabase extends BukkitHelper {
 			final String[] parts = line.split("[^a-zA-Z0-9]");
 			if (parts.length < 2) continue;
 			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
+
+			if (!NumberUtil.isInt(parts[1])) continue;
 			final int numeric = Integer.parseInt(parts[1]);
-			final short data = parts.length > 2 && !parts[2].equals("0") ? Short.parseShort(parts[2]) : 0;
+
+			if (parts.length > 2)
+				parts[2] = NumberUtil.isInt(parts[2]) ? parts[2] : "0";
+
+			final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
+			if (numeric < 0 || data < 0) continue;
+			ItemData itemData = new ItemData(numeric, data);
+			if (numeric > 0 && Material.AIR.equals(Material.getMaterial(numeric))) continue;
 			this.durabilities.put(itemName, data);
 			this.items.put(itemName, numeric);
-			ItemData itemData = new ItemData(numeric, data);
-			if (itemData.getType() == null) continue;
 
 			if (!this.names.containsKey(itemData)) {
 				this.names.put(itemData, new ArrayList<>(Arrays.asList(itemName)));

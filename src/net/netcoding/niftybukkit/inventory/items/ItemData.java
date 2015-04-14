@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.Reflection;
+import net.netcoding.niftybukkit.util.ListUtil;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -90,11 +91,13 @@ public class ItemData extends ItemStack {
 		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType());
 
 		if (itemMeta == null && factory != null)
-			super.setItemMeta(factory);
+			super.setItemMeta(itemMeta = factory);
 
-		if (itemMeta.getLore() == null) {
-			itemMeta.setLore(new ArrayList<String>());
-			this.setItemMeta(itemMeta);
+		if (itemMeta != null) {
+			if (ListUtil.isEmpty(itemMeta.getLore())) {
+				itemMeta.setLore(new ArrayList<String>());
+				super.setItemMeta(itemMeta);
+			}
 		}
 
 		return itemMeta;
