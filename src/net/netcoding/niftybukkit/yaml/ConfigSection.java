@@ -18,7 +18,7 @@ public class ConfigSection {
 	}
 
 	public ConfigSection create(String path) {
-		if (path == null) throw new IllegalArgumentException("Cannot create section at empty path");
+		if (path == null) throw new IllegalArgumentException("Cannot create section at empty path!");
 		int i1 = -1, i2;
 		ConfigSection section = this;
 
@@ -43,14 +43,20 @@ public class ConfigSection {
 	}
 
 	public void set(String path, Object value) {
-		if (path == null) throw new IllegalArgumentException("Cannot set a value at empty path");
-		int i1 = -1, i2;
+		this.set(path, value, true);
+	}
+
+	public void set(String path, Object value, boolean searchForSubNodes) {
+		if (path == null) throw new IllegalArgumentException("Cannot set a value at empty path!");
+		int i1 = -1, i2 = 0;
 		ConfigSection section = this;
 
-		while ((i1 = path.indexOf('.', i2 = i1 + 1)) != -1) {
-			String node = path.substring(i2, i1);
-			ConfigSection subSection = section.getConfigSection(node);
-			section = (subSection == null ? section.create(node) : subSection);
+		if (searchForSubNodes) {
+			while ((i1 = path.indexOf('.', i2 = i1 + 1)) != -1) {
+				String node = path.substring(i2, i1);
+				ConfigSection subSection = section.getConfigSection(node);
+				section = (subSection == null ? section.create(node) : subSection);
+			}
 		}
 
 		String key = path.substring(i2);

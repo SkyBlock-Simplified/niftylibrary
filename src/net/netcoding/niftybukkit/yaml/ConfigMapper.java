@@ -85,9 +85,9 @@ public class ConfigMapper extends BukkitHelper {
 			Object value = entry.getValue();
 
 			if (value instanceof Map)
-				convertMapsToSections((Map<?, ?>)value, section.create(key));
+				this.convertMapsToSections((Map<?, ?>)value, section.create(key));
 			else
-				section.set(key, value);
+				section.set(key, value, false);
 		}
 	}
 
