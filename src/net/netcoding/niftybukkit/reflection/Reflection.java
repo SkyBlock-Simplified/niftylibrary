@@ -14,10 +14,6 @@ public class Reflection {
 	private static final transient ConcurrentHashMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentHashMap<>();
 	private static final transient ConcurrentHashMap<Class<?>[], Constructor<?>> CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
 	private static final transient ConcurrentHashMap<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
-	private final String className;
-	private final String subPackage;
-	private final String packagePath;
-
 	static {
 		CORRESPONDING_TYPES.put(Byte.class, byte.class);
 		CORRESPONDING_TYPES.put(Short.class, short.class);
@@ -28,17 +24,21 @@ public class Reflection {
 		CORRESPONDING_TYPES.put(Double.class, double.class);
 		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
 	}
+	private final String className;
+	private final String subPackage;
+
+	private final String packagePath;
 
 	public Reflection(String className, MinecraftPackage minecraftPackage) {
 		this(className, "", minecraftPackage);
 	}
 
-	public Reflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
-		this(className, subPackage, minecraftPackage.toString());
-	}
-
 	public Reflection(String className, String packagePath) {
 		this(className, "", packagePath);
+	}
+
+	public Reflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
+		this(className, subPackage, minecraftPackage.toString());
 	}
 
 	public Reflection(String className, String subPackage, String packagePath) {
@@ -47,17 +47,54 @@ public class Reflection {
 		this.packagePath = packagePath;
 	}
 
+	public static Reflection getComatibleReflection(String className, String classEnum) {
+		return new Reflection(StringUtil.format("{0}{1}", (MinecraftPackage.IS_PRE_1_8_3 ? "" : StringUtil.format("{0}$", className)), classEnum), MinecraftPackage.MINECRAFT_SERVER);
+	}
+
+	private static Class<?> getPrimitiveType(Class<?> clazz) {
+		return clazz != null ? CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz : null;
+	}
+
+	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
+		if (a.length != o.length) return false;
+
+		for (int i = 0; i < a.length; i++) {
+			if (o[i] != null && !a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
+				return false;
+		}
+
+		return true;
+	}
+
+	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(classes[i]);
+
+		return types;
+	}
+
+	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
+
+		return types;
+	}
+
 	public String getClassName() {
 		return this.className;
+	}
+
+	public String getClassPath() {
+		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
 	public Class<?> getClazz() throws Exception {
 		if (!CLASS_CACHE.containsKey(this.getClassPath())) CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
 		return CLASS_CACHE.get(this.getClassPath());
-	}
-
-	public static Reflection getComatibleReflection(String className, String classEnum) {
-		return new Reflection(StringUtil.format("{0}{1}", (MinecraftPackage.IS_PRE_1_8_3 ? "" : StringUtil.format("{0}$", className)), classEnum), MinecraftPackage.MINECRAFT_SERVER);
 	}
 
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
@@ -79,8 +116,21 @@ public class Reflection {
 		return CONSTRUCTOR_CACHE.put(types, null);
 	}
 
-	public String getClassPath() {
-		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
+	public Field getField(Class<?> type) throws Exception {
+		for (Field field : this.getClazz().getDeclaredFields()) {
+			if (field.getType().equals(type) || type.isAssignableFrom(field.getType())) {
+				field.setAccessible(true);
+				return field;
+			}
+		}
+
+		return null;
+	}
+
+	public Field getField(String name) throws Exception {
+		Field field = this.getClazz().getDeclaredField(name);
+		field.setAccessible(true);
+		return field;
 	}
 
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
@@ -103,41 +153,24 @@ public class Reflection {
 		return this.packagePath;
 	}
 
-	private static Class<?> getPrimitiveType(Class<?> clazz) {
-		return clazz != null ? CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz : null;
-	}
-
 	public String getSubPackage() {
 		return this.subPackage;
+	}
+
+	public Object getValue(Class<?> type, Object obj) throws Exception {
+		return this.getField(type).get(obj);
+	}
+
+	public Object getValue(String name, Object obj) throws Exception {
+		return this.getField(name).get(obj);
 	}
 
 	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
 		return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
 	}
 
-	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
-		if (a.length != o.length) return false;
-
-		for (int i = 0; i < a.length; i++) {
-			if (o[i] != null && !a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
-				return false;
-		}
-
-		return true;
-	}
-
 	public Object newInstance(Object... args) throws Exception {
 		return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
-	}
-
-	public Field getField(String name) throws Exception {
-		return this.getClazz().getDeclaredField(name);
-	}
-
-	public Object getValue(String name, Object obj) throws Exception {
-		Field f = this.getField(name);
-		f.setAccessible(true);
-		return f.get(obj);
 	}
 
 	public void setValue(Object obj, FieldEntry entry) throws Exception {
@@ -149,24 +182,6 @@ public class Reflection {
 	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
 		for (FieldEntry entry : entrys)
 			this.setValue(obj, entry);
-	}
-
-	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
-
-		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(classes[i]);
-
-		return types;
-	}
-
-	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
-
-		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
-
-		return types;
 	}
 
 }
