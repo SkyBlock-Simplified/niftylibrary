@@ -35,7 +35,16 @@ public class ServerPingEvent extends ServerListPingEvent {
 		return socket.cast(NETWORK_MANAGER.invokeMethod("getSocketAddress", this.networkManager));
 	}
 
-	public void sendSpoofedPing(String name, int protocol) throws Exception {
+	/**
+	 * Will respond to the ping request with your own mod name and version.
+	 * <p>
+	 * Note that invoking this event will cancel the original response,
+	 * and any modification after invocation future changes will be ignored.
+	 * 
+	 * @param name Server mod name.
+	 * @param protocol Server protocol version.
+	 */
+	public void sendSpoofedVersion(String name, int protocol) throws Exception {
 		Object pingObj = SERVER_PING.newInstance();
 		SERVER_PING.invokeMethod("setPlayerSample", pingObj, SERVER_PING_SAMPLE.newInstance(Bukkit.getMaxPlayers(), 0));
 		SERVER_PING.invokeMethod("setServerInfo", pingObj, SERVER_PING_DATA.newInstance(name, protocol));
