@@ -31,7 +31,11 @@ public class BukkitServer extends MinecraftServer {
 	}
 
 	public BukkitServer(String ip, int port, ServerPingListener listener) {
-		this.setAddress(ip, port);
+		this(new InetSocketAddress(ip, port), listener);
+	}
+
+	public BukkitServer(InetSocketAddress address, ServerPingListener listener) {
+		this.setAddress(address);
 		this.listener = listener;
 	}
 
