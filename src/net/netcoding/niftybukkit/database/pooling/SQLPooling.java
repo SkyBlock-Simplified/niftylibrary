@@ -15,11 +15,15 @@ import org.bukkit.Bukkit;
  */
 public abstract class SQLPooling extends SQLFactory implements Runnable {
 
+	private final static int DEFAULT_MIN_CONNECTIONS = 2;
+	private final static int DEFAULT_MAX_CONNECTIONS = 10;
 	private volatile transient Vector<Connection> availableConnections = new Vector<>();
 	private volatile transient Vector<Connection> usedConnections = new Vector<>();
 	private String validationQuery = "SELECT 1;";
-	private int maximumConnections = 10;
+	private int minimumConnections = DEFAULT_MIN_CONNECTIONS;
+	private int maximumConnections = DEFAULT_MAX_CONNECTIONS;
 	private boolean testOnBorrow = true;
+	private boolean firstConnect = true;
 
 	/**
 	 * Create a new pooling instance.
@@ -61,6 +65,14 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 		return this.getConnection(WaitTime.IMMEDIATELY);
 	}
 
+	private void initializeConnections() throws SQLException {
+		if (!this.firstConnect) return;
+		this.firstConnect = false;
+
+		for (int i = 0; i < this.getMinimumConnections(); i++)
+			this.availableConnections.addElement(this.getConnection());
+	}
+
 	/**
 	 * Gets a connection from connection pool, waiting if necessary.
 	 * 
@@ -73,6 +85,8 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 		Connection connection;
 
 		if (this.availableConnections != null) {
+			this.initializeConnections();
+
 			synchronized (SQLPooling.class) {
 				if (this.availableConnections.size() == 0) {
 					if (this.usedConnections.size() < this.getMaximumConnections())
@@ -113,6 +127,15 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
+	 * Gets the minimum number of concurrent connections.
+	 * 
+	 * @return Minimum number of connections to be stored in the pool.
+	 */
+	public int getMinimumConnections() {
+		return this.minimumConnections;
+	}
+
+	/**
 	 * Gets the maximum number of concurrent connections.
 	 * 
 	 * @return Maximum number of connections to be stored in the pool.
@@ -147,11 +170,23 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	/**
+	 * Sets the minimum number of concurrent connections.
+	 * 
+	 * @param count Minimum number of connections to have available.
+	 */
+	public void setMinimumConnections(int count) {
+		count = count < 0 ? DEFAULT_MIN_CONNECTIONS : count;
+		count = count > this.getMaximumConnections() ? this.getMaximumConnections() : count;
+		this.minimumConnections = count;
+	}
+
+	/**
 	 * Sets the maximum number of concurrent connections.
 	 * 
 	 * @param count Maximum number of connections to have available.
 	 */
 	public void setMaximumConnections(int count) {
+		count = count <= this.getMinimumConnections() ? this.getMinimumConnections() + 1 : count;
 		this.maximumConnections = count;
 	}
 
@@ -177,7 +212,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	@Override
 	public void run() {
-		while (this.availableConnections.size() > 0) {
+		while (this.availableConnections.size() > this.getMinimumConnections()) {
 			Connection connection = this.availableConnections.lastElement();
 			this.availableConnections.removeElement(connection);
 
