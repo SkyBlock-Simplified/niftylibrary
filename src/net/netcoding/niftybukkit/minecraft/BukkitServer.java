@@ -8,14 +8,12 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.MojangProfile;
 import net.netcoding.niftybukkit.util.DataUtil;
-import net.netcoding.niftybukkit.util.concurrent.ConcurrentSet;
 import net.netcoding.niftybukkit.util.gson.Gson;
 
 import com.google.common.io.ByteArrayDataOutput;
@@ -66,27 +64,12 @@ public class BukkitServer extends MinecraftServer {
 									setMotd(response.getMotd());
 									setMaxPlayers(response.getPlayers().getMax());
 									setOnline(true);
+									playerList.clear();
 									StatusResponse.Players players = response.getPlayers();
 
 									if (players != null) {
-										if (players.getSample() != null) {
-											List<String> current = new ArrayList<>();
-
-											for (StatusResponse.Players.Player player : players.getSample())
-												current.add(player.getName());
-
-											// TODO: MojangProfile GSON
-											ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
-
-											for (MojangProfile profile : playerList) {
-												if (profiles.contains(profile))
-													profiles.remove(profile);
-												else
-													playerList.remove(profile);
-											}
-
-											playerList.addAll(profiles);
-										}
+										if (players.getSample() != null)
+											playerList.addAll(Arrays.asList(GSON.fromJson(GSON.toJson(players.getSample()), MojangProfile[].class)));
 									}
 								}
 							}
