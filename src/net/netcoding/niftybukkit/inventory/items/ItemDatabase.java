@@ -129,6 +129,9 @@ public class ItemDatabase extends BukkitHelper {
 			nameList = this.names.get(itemData);
 		}
 
+		if (ListUtil.isEmpty(nameList))
+			nameList = new ArrayList<>();
+
 		if (nameList.size() > 15) nameList = nameList.subList(0, 15);
 		return Collections.unmodifiableList(nameList);
 	}
@@ -140,10 +143,9 @@ public class ItemDatabase extends BukkitHelper {
 		if (StringUtil.isEmpty(name)) {
 			itemData = new ItemData(stack.getTypeId(), (short)0);
 			name = this.primaryName.get(itemData);
-			if (StringUtil.isEmpty(name)) return null;
 		}
 
-		return name;
+		return StringUtil.isEmpty(name) ? "" : name;
 	}
 
 	public List<ItemData> parse(String[] itemList) throws NumberFormatException {
