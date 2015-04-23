@@ -8,8 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -23,7 +21,6 @@ import net.netcoding.niftybukkit.util.StringUtil;
  */
 public abstract class SQLFactory {
 
-	private static final List<String> INVALID_SCHEMAS = Arrays.asList("test", "information_schema");
 	private final String driver;
 	private final boolean driverAvailable;
 	private final String url;
@@ -230,7 +227,7 @@ public abstract class SQLFactory {
 	 * @return Url for this DBMS.
 	 */
 	public String getUrl() {
-		return StringUtil.format("{0}?characterEncoding=UTF-8&autoReconnectForPools=true", this.url);
+		return StringUtil.format("{0}?autoReconnectForPools=true&characterEncoding=UTF-8", this.url);
 	}
 
 	/**
@@ -246,18 +243,7 @@ public abstract class SQLFactory {
 		try (Connection connection = this.getConnection()) {
 			this.product = connection.getMetaData().getDatabaseProductName();
 			this.quote = connection.getMetaData().getIdentifierQuoteString();
-
-			try (ResultSet result = connection.getMetaData().getCatalogs()) {
-				while (result.next()) {
-					String schema = result.getString(1);
-					if (INVALID_SCHEMAS.contains(schema)) continue;
-
-					if (this.url.endsWith(schema)) {
-						this.schema = schema;
-						break;
-					}
-				}
-			}
+			this.schema = connection.getCatalog();
 		}
 
 		if (StringUtil.isEmpty(this.product))
@@ -350,7 +336,12 @@ public abstract class SQLFactory {
 		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement("USE ?;")) {
 				assignArgs(statement, schema);
-				return statement.executeUpdate() > 0;
+				boolean result = statement.executeUpdate() > 0;
+
+				if (result)
+					this.schema = schema;
+
+				return result;
 			}
 		}
 	}
