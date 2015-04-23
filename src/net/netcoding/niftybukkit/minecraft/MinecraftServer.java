@@ -12,13 +12,12 @@ abstract class MinecraftServer {
 
 	private static final InetSocketAddress serverAddress = new InetSocketAddress(NiftyBukkit.getPlugin().getServer().getIp(), NiftyBukkit.getPlugin().getServer().getPort());
 	protected InetSocketAddress address;
-	private String gameVersion = "";
 	private int maxPlayers = 0;
 	private String motd = "";
 	protected boolean online = false;
 	protected final ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>();
-	private int protocolVersion = -1;
 	protected String serverName = "";
+	private Version version = Version.DEFAULT;
 
 	MinecraftServer() { }
 
@@ -35,10 +34,6 @@ abstract class MinecraftServer {
 
 	public InetSocketAddress getAddress() {
 		return this.address;
-	}
-
-	public String getGameVersion() {
-		return this.gameVersion;
 	}
 
 	public int getMaxPlayers() {
@@ -61,8 +56,8 @@ abstract class MinecraftServer {
 		return Collections.unmodifiableSet(this.playerList);
 	}
 
-	public int getProtocolVersion() {
-		return this.protocolVersion;
+	public Version getVersion() {
+		return this.version;
 	}
 
 	@Override
@@ -79,15 +74,10 @@ abstract class MinecraftServer {
 	}
 
 	void reset() {
-		this.protocolVersion = -1;
-		this.gameVersion = "";
 		this.motd = "";
 		this.maxPlayers = 0;
 		this.playerList.clear();
-	}
-
-	void setGameVersion(String gameVersion) {
-		this.gameVersion = gameVersion;
+		this.version = Version.DEFAULT;
 	}
 
 	void setMaxPlayers(int maxPlayers) {
@@ -102,8 +92,29 @@ abstract class MinecraftServer {
 		this.online = online;
 	}
 
-	void setProtocolVersion(int protocolVersion) {
-		this.protocolVersion = protocolVersion;
+	void setVersion(String name, int protocol) {
+		this.version = new Version(name, protocol);
+	}
+
+	public static class Version {
+
+		static final Version DEFAULT = new Version("", 0);
+		private final String name;
+		private final int protocol;
+
+		Version(String name, int protocol) {
+			this.name = name;
+			this.protocol = protocol;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public int getProtocol() {
+			return this.protocol;
+		}
+
 	}
 
 }

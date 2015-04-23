@@ -45,7 +45,6 @@ public class BukkitServer extends MinecraftServer {
 
 	public void ping() {
 		if (this.getAddress() == null) return;
-		final BukkitServer that = this;
 
 		NiftyBukkit.getPlugin().getServer().getScheduler().runTaskAsynchronously(NiftyBukkit.getPlugin(), new Runnable() {
 			@Override
@@ -62,10 +61,9 @@ public class BukkitServer extends MinecraftServer {
 							try (InputStream inputStream = socket.getInputStream()) {
 								try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
 									StatusResponse response = processResponse(dataInputStream);
-		
+
+									setVersion(response.getVersion().getName(), response.getVersion().getProtocol());
 									setMotd(response.getMotd());
-									setGameVersion(response.getVersion().getName());
-									setProtocolVersion(response.getVersion().getProtocol());
 									setMaxPlayers(response.getPlayers().getMax());
 									setOnline(true);
 									StatusResponse.Players players = response.getPlayers();
@@ -77,6 +75,7 @@ public class BukkitServer extends MinecraftServer {
 											for (StatusResponse.Players.Player player : players.getSample())
 												current.add(player.getName());
 
+											// TODO: MojangProfile GSON
 											ConcurrentSet<MojangProfile> profiles = new ConcurrentSet<>(Arrays.asList(NiftyBukkit.getMojangRepository().searchByUsername(current)));
 
 											for (MojangProfile profile : playerList) {
@@ -98,7 +97,7 @@ public class BukkitServer extends MinecraftServer {
 					reset();
 				} finally {
 					if (listener != null)
-						listener.onServerPing(that);
+						listener.onServerPing(BukkitServer.this); // TODO: Returns uninitiated base class
 				}
 			}
 		});
