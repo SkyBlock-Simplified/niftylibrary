@@ -227,12 +227,10 @@ public class MojangProfile {
 
 	/**
 	 * Checks if this players profile is expired.
-	 * <p>
-	 * This is only used for cache and can currently be ignored.
 	 * 
 	 * @return True if expired, otherwise false.
 	 */
-	public boolean hasExpired() {
+	boolean hasExpired() {
 		return System.currentTimeMillis() - this.updated >= 1800000;
 	}
 
