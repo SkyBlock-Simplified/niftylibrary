@@ -334,19 +334,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 						if (server.isOnline()) {
 							server.setMotd(input.readUTF());
-							server.setGameVersion(input.readUTF());
-							server.setProtocolVersion(input.readInt());
+							server.setVersion(input.readUTF(), input.readInt());
 							server.setMaxPlayers(input.readInt());
 							server.playerList.clear();
 
 							if (input.readBoolean()) {
-								JsonParser parser = new JsonParser();
 								int count = input.readInt();
 
-								for (int i = 0; i < count; i++) {
-									JsonObject json = parser.parse(input.readUTF()).getAsJsonObject();
-									server.playerList.add(GSON.fromJson(json.toString(), MojangProfile.class));
-								}
+								for (int i = 0; i < count; i++)
+									server.playerList.add(GSON.fromJson(input.readUTF(), MojangProfile.class));
 							}
 						} else
 							server.reset();
@@ -366,14 +362,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							}
 						}
 					} else if (subChannel.startsWith("Player")) {
-						JsonObject json = new JsonParser().parse(input.readUTF()).getAsJsonObject();
-						MojangProfile profile = GSON.fromJson(json.toString(), MojangProfile.class);
+						MojangProfile profile = GSON.fromJson(input.readUTF(), MojangProfile.class);
 
 						if (subChannel.endsWith("Join")) {
 							server.playerList.add(profile);
 							manager.callEvent(new BungeePlayerJoinEvent(profile));
 						} else if (subChannel.endsWith("Leave")) {
-							if (server.isCurrentServer()) server.playersLeft.add(profile);
+							if (server.isCurrentServer())
+								server.playersLeft.add(profile);
+
 							server.playerList.remove(profile);
 							manager.callEvent(new BungeePlayerLeaveEvent(profile));
 						}
@@ -408,7 +405,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			if (channel.equals(this.getChannel())) {
 				if (this.listener != null) {
 					try {
-						this.listener.onMessageReceived(channel, player, message);
+						this.listener.onMessageReceived(channel, message);
 					} catch (IllegalStateException isex) {
 					} catch (Exception ex) {
 						this.getLog().console(ex);
@@ -495,6 +492,22 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			this.getPlugin().getServer().getPluginManager().callEvent(new PlayerDisconnectEvent(profile, kicked));
 		}
 
+		// TODO: NiftyPing
+		/*boolean pingOverride = false;
+		@EventHandler
+		public void onServerListPing(ServerListPingEvent event) {
+			if (this.pingOverride) {
+				try {
+					ServerPingEvent pingEvent = new ServerPingEvent(event);
+					InetSocketAddress socketAddress = pingEvent.getSocketAddress(InetSocketAddress.class);
+					pingEvent.sendSpoofedVersion(StringUtil.format("{0} {1}", "NiftyPing", socketAddress.getPort()), true);
+					this.getLog().console("Ping Event: {0}", socketAddress);
+				} catch (Exception ex) {
+					this.getLog().console("Unable to obtain SocketAddress!", ex);
+				}
+			}
+		}*/
+
 		@EventHandler
 		public void onPlayerKick(PlayerKickEvent event) {
 			this.handleDisconnect(event.getPlayer(), true);
@@ -504,7 +517,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		public void onPlayerQuit(PlayerQuitEvent event) {
 			this.handleDisconnect(event.getPlayer(), false);
 		}
-		
+
 	}
 
 }
