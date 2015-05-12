@@ -127,7 +127,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	 * @return Profile associated with the given player.
 	 * @throws ProfileNotFoundException If unable to locate the players profile.
 	 */
-	public MojangProfile searchByPlayer(OfflinePlayer oplayer) throws ProfileNotFoundException {
+	public BukkitMojangProfile searchByPlayer(OfflinePlayer oplayer) throws ProfileNotFoundException {
 		try {
 			return this.searchByPlayer(Arrays.asList(oplayer))[0];
 		} catch (ProfileNotFoundException pnfex) {
@@ -149,7 +149,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
 	 */
-	public MojangProfile[] searchByPlayer(OfflinePlayer[] oplayers) throws ProfileNotFoundException {
+	public BukkitMojangProfile[] searchByPlayer(OfflinePlayer[] oplayers) throws ProfileNotFoundException {
 		return this.searchByPlayer(Arrays.asList(oplayers));
 	}
 
