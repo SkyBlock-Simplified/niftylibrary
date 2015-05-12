@@ -3,7 +3,7 @@ version: ${project.version}
 website: ${project.url}
 author: ${author}
 
-main: ${project.parent.groupId}.${project.artifactId}.${project.name}
+main: ${project.groupId}.${project.artifactId}.${project.name}
 softdepend: [Vault, ProtocolLib]
 
 commands:
