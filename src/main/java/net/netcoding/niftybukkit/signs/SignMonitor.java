@@ -370,7 +370,7 @@ public class SignMonitor extends BukkitListener {
 				public void onPacketSending(PacketEvent event) {
 					PacketContainer signUpdatePacket = event.getPacket();
 					SignPacket incoming = new SignPacket(signUpdatePacket);
-					BukkitMojangProfile bukkitProfile = (BukkitMojangProfile)NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+					BukkitMojangProfile bukkitProfile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 					Location location = new Location(bukkitProfile.getOfflinePlayer().getPlayer().getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
 					Block block = location.getBlock();
 
