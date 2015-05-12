@@ -1,9 +1,9 @@
-name: NiftyBukkit
-version: 3.3.7
-website: https://netcoding.net/
-author: Brian Graham (CraftedFury)
+name: ${project.name}
+version: ${project.version}
+website: ${project.url}
+author: ${author}
 
-main: net.netcoding.niftybukkit.NiftyBukkit
+main: ${project.parent.groupId}.${project.artifactId}.${project.name}
 softdepend: [Vault, ProtocolLib]
 
 commands:
