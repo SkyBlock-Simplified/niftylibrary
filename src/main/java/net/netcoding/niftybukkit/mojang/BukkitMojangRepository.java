@@ -135,7 +135,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
-				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, MojangProfile.class));
+				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, BukkitMojangProfile.class));
 			}
 
 			throw pnfex;
@@ -163,7 +163,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	public BukkitMojangProfile[] searchByPlayer(Collection<? extends OfflinePlayer> oplayers) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.OFFLINE_PLAYERS;
 		List<BukkitMojangProfile> profiles = new ArrayList<>();
-		ConcurrentList<MojangProfile> tempProfiles = new ConcurrentList<>();
+		ConcurrentList<BukkitMojangProfile> tempProfiles = new ConcurrentList<>();
 
 		try {
 			// Create Temporary Matching Profiles
@@ -171,7 +171,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
-				tempProfiles.add(GSON.fromJson(json, MojangProfile.class));
+				tempProfiles.add(GSON.fromJson(json, BukkitMojangProfile.class));
 			}
 
 			// Search Online Servers
@@ -196,13 +196,13 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 
 			return ListUtil.toArray(profiles, BukkitMojangProfile.class);
 		} catch (ProfileNotFoundException pnfex) {
-			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(tempProfiles, MojangProfile.class));
+			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
 		} catch (Exception ex) {
 			// TODO: Offline-Mode NullPointerException
 			if (ex instanceof NullPointerException)
 				ex.printStackTrace();
 
-			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(tempProfiles, MojangProfile.class));
+			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
 		}
 	}
 
