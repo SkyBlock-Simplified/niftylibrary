@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.minecraft;
+package net.netcoding.niftybukkit.minecraft.messages;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;

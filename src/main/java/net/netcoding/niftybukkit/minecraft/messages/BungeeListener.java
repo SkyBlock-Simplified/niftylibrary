@@ -1,5 +1,4 @@
-package net.netcoding.niftybukkit.minecraft;
-
+package net.netcoding.niftybukkit.minecraft.messages;
 
 public interface BungeeListener {
 

@@ -9,8 +9,8 @@ import java.util.UUID;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.BungeeServer;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.mojang.MojangRepository;
 import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;

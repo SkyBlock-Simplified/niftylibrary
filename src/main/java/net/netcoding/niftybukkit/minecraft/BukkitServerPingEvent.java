@@ -12,7 +12,7 @@ import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.server.ServerListPingEvent;
 
-public class ServerPingEvent extends ServerListPingEvent {
+public class BukkitServerPingEvent extends ServerListPingEvent {
 
 	private final static transient Reflection SERVER_LIST_PING = new Reflection("PacketStatusListener$1ServerListPingEvent", MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection PACKET_LISTENER = new Reflection("PacketStatusListener", MinecraftPackage.MINECRAFT_SERVER);
@@ -25,7 +25,7 @@ public class ServerPingEvent extends ServerListPingEvent {
 
 	private final Object networkManager;
 
-	public ServerPingEvent(ServerListPingEvent event) throws Exception {
+	public BukkitServerPingEvent(ServerListPingEvent event) throws Exception {
 		super(event.getAddress(), event.getMotd(), event.getNumPlayers(), event.getMaxPlayers());
 		Object packetListener = SERVER_LIST_PING.getValue(PACKET_LISTENER.getClazz(), event);
 		this.networkManager = PACKET_LISTENER.getValue(NETWORK_MANAGER.getClazz(), packetListener);

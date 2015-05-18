@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;

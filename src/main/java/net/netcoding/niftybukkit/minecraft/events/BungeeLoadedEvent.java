@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.netcoding.niftybukkit.minecraft.BungeeServer;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

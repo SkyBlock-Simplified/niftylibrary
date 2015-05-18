@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.minecraft_new;
+package net.netcoding.niftybukkit.minecraft;
 
 import java.net.InetSocketAddress;
 

@@ -1,6 +1,5 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import net.netcoding.niftybukkit.minecraft_new.BukkitMinecraftLogger;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.StringUtil;

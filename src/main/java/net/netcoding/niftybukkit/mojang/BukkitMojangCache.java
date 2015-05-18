@@ -6,11 +6,11 @@ import net.netcoding.niftycore.mojang.MojangProfile;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class MojangCache extends BukkitHelper {
+public class BukkitMojangCache extends BukkitHelper {
 
 	private final MojangProfile profile;
 
-	public MojangCache(JavaPlugin plugin, MojangProfile profile) {
+	public BukkitMojangCache(JavaPlugin plugin, MojangProfile profile) {
 		super(plugin);
 		this.profile = profile;
 	}
@@ -19,8 +19,8 @@ public class MojangCache extends BukkitHelper {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (this == obj) return true;
-		if (!(obj instanceof MojangCache)) return false;
-		MojangCache cache = (MojangCache)obj;
+		if (!(obj instanceof BukkitMojangCache)) return false;
+		BukkitMojangCache cache = (BukkitMojangCache)obj;
 		return this.getProfile().equals(cache.getProfile());
 	}
 

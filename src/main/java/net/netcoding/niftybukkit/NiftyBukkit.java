@@ -9,7 +9,7 @@ import java.util.logging.LogRecord;
 import net.netcoding.niftybukkit.inventory.enchantments.EnchantmentDatabase;
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
-import net.netcoding.niftybukkit.minecraft.BungeeHelper;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.BukkitMojangRepository;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;

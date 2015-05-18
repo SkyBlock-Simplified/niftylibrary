@@ -1,6 +1,5 @@
-package net.netcoding.niftybukkit.minecraft_new;
+package net.netcoding.niftybukkit.minecraft;
 
-import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftycore.minecraft.MinecraftLogger;
 import net.netcoding.niftycore.util.StringUtil;
 

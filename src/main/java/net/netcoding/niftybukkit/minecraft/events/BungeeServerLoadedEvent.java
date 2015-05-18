@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftybukkit.minecraft.BungeeServer;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

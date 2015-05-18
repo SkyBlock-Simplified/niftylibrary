@@ -1,9 +1,9 @@
-package net.netcoding.niftybukkit.minecraft;
+package net.netcoding.niftybukkit.minecraft.messages;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
 
-import net.netcoding.niftybukkit.minecraft_new.BukkitMinecraftServer;
+import net.netcoding.niftybukkit.minecraft.BukkitMinecraftServer;
 import net.netcoding.niftycore.minecraft.MinecraftVersion;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;

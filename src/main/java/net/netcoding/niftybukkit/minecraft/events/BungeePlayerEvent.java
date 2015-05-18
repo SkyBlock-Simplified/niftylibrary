@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftybukkit.minecraft.BungeeServer;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 
 class BungeePlayerEvent extends PlayerEvent {
