@@ -15,15 +15,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class BukkitPlugin extends JavaPlugin {
 
 	private final static transient ConcurrentList<String> PLUGINS = new ConcurrentList<>();
-	private final transient BukkitMinecraftLogger log;
+	private final transient BukkitLogger log;
 	private long enable = System.currentTimeMillis();
 
 	public BukkitPlugin() {
-		this.log = new BukkitMinecraftLogger(this);
+		this.log = new BukkitLogger(this);
 		PLUGINS.add(this.getDescription().getName());
 	}
 
-	public BukkitMinecraftLogger getLog() {
+	public BukkitLogger getLog() {
 		return this.log;
 	}
 

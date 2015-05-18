@@ -3,13 +3,16 @@ package net.netcoding.niftybukkit.minecraft.messages;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
-import net.netcoding.niftybukkit.minecraft.BukkitMinecraftServer;
+import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.minecraft.MinecraftVersion;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
-public class BungeeServer extends BukkitMinecraftServer {
+import org.bukkit.Bukkit;
 
+public class BungeeServer extends MinecraftServer {
+
+	private static final InetSocketAddress serverAddress = new InetSocketAddress(Bukkit.getIp(), Bukkit.getPort());
 	boolean loadedOnce = false;
 	final ConcurrentSet<MojangProfile> playersLeft = new ConcurrentSet<>();
 
@@ -25,6 +28,10 @@ public class BungeeServer extends BukkitMinecraftServer {
 		ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>(super.getPlayerList());
 		playerList.addAll(this.playersLeft);
 		return playerList;
+	}
+
+	public final boolean isCurrentServer() {
+		return serverAddress.getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress()) && serverAddress.getPort() == this.getAddress().getPort();
 	}
 
 	@Override
