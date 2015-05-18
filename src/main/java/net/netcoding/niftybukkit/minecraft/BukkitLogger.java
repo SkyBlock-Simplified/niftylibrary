@@ -6,9 +6,9 @@ import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class BukkitMinecraftLogger extends MinecraftLogger {
+public class BukkitLogger extends MinecraftLogger {
 
-	public BukkitMinecraftLogger(JavaPlugin plugin) {
+	public BukkitLogger(JavaPlugin plugin) {
 		super(plugin.getLogger());
 	}
 
