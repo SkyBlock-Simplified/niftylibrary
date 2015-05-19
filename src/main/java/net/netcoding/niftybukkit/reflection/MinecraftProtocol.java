@@ -2,8 +2,10 @@ package net.netcoding.niftybukkit.reflection;
 
 import java.net.URL;
 
+import net.netcoding.niftycore.http.HttpBody;
 import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpResponse;
+import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.gson.JsonObject;
 import net.netcoding.niftycore.util.gson.JsonParser;
 
@@ -176,12 +178,13 @@ public enum MinecraftProtocol {
 				return protocol.getProtocol();
 		}
 
-		return getFetchedProtocol();
+		return getFetchedProtocol(version);
 	}
 
-	private final static int getFetchedProtocol() {
+	private final static int getFetchedProtocol(String version) {
 		try {
-			HttpResponse response = new HttpClient().get(new URL("https://api.netcoding.net/minecraft/protocol/search.php"));
+			HttpBody body = new HttpBody(StringUtil.format("version={0}", version));
+			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
 			return Integer.valueOf(response.getBody().toString());
 		} catch (Exception ex) {
 			return values()[0].getProtocol();
