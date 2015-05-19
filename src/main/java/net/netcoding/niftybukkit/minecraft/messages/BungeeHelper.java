@@ -348,13 +348,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							server.setVersion(input.readUTF(), input.readInt());
 							server.setMaxPlayers(input.readInt());
 							server.getUnsafePlayerList().clear();
+							int count = input.readInt();
 
-							if (input.readBoolean()) {
-								int count = input.readInt();
-
-								for (int i = 0; i < count; i++)
-									server.getUnsafePlayerList().add(GSON.fromJson(input.readUTF(), BukkitMojangProfile.class));
-							}
+							for (int i = 0; i < count; i++)
+								server.getUnsafePlayerList().add(GSON.fromJson(input.readUTF(), BukkitMojangProfile.class));
 						} else
 							server.reset();
 
