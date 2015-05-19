@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 
@@ -21,7 +22,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	private final static transient Reflection SERVER_PING_SAMPLE = new Reflection("ServerPingPlayerSample", MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection SERVER_PING_DATA = new Reflection(StringUtil.format("ServerPing{0}ServerData", (MinecraftPackage.IS_PRE_1_8_3 ? "" : ".")), MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection SERVER_PING_PACKET = new Reflection("PacketStatusOutServerInfo", MinecraftPackage.MINECRAFT_SERVER);
-	private final static int PROTOCOL = 5; // TODO: Protocol version
+	private final static int PROTOCOL = MinecraftProtocol.getCurrentProtocol();
 
 	private final Object networkManager;
 
