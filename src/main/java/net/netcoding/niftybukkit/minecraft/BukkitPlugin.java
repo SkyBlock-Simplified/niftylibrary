@@ -53,11 +53,11 @@ public abstract class BukkitPlugin extends JavaPlugin {
 	}
 
 	public static boolean isConsole(CommandSender sender) {
-		return !isPlayer(sender);
+		return isConsole(sender.getName());
 	}
 
 	public static boolean isConsole(String senderName) {
-		return !isPlayer(senderName);
+		return Bukkit.getConsoleSender().getName().equals(senderName) || "@".equals(senderName);
 	}
 
 	public static boolean isPlayer(CommandSender sender) {
@@ -65,7 +65,7 @@ public abstract class BukkitPlugin extends JavaPlugin {
 	}
 
 	public static boolean isPlayer(String senderName) {
-		return !senderName.equalsIgnoreCase("console");
+		return !isConsole(senderName);
 	}
 
 	public static Player findPlayer(String playerName) {
