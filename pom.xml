@@ -22,18 +22,18 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
 	<repositories>
 		<repository>
-			<id>shadowvolt-repo</id>
-			<url>http://ci.shadowvolt.com/plugin/repository/everything</url>
-		</repository>
-		<repository>
-			<id>vault-repo</id>
-			<url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
-		</repository>
-		<repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public</url>
+			<id>netcoding-repo</id>
+			<url>https://nexus.netcoding.net/content/groups/public</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>netcoding-repo</id>
+			<name>Releases</name>
+			<url>https://nexus.netcoding.net/content/repositories/releases</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
@@ -45,7 +45,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.8.3-R0.1-SNAPSHOT</version>
+			<version>1.8-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -57,15 +57,15 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<groupId>com.comphenix.protocol</groupId>
 			<artifactId>ProtocolLib</artifactId>
 			<version>3.6.3-SNAPSHOT</version>
-			<optional>true</optional>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
 			<artifactId>Vault</artifactId>
 			<version>1.5.3</version>
-			<optional>true</optional>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
