@@ -15,7 +15,6 @@ import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
-import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 
@@ -174,7 +173,7 @@ public class SignMonitor extends BukkitListener {
 
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onBlockBreak(BlockBreakEvent event) {
-		MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+		BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 		Block block = event.getBlock();
 		Set<Location> fallingSigns = getSignsThatWouldFall(block);
 		Set<Location> removeSigns = new HashSet<>();
@@ -229,11 +228,13 @@ public class SignMonitor extends BukkitListener {
 							for (String line : signInfo.getLines()) {
 								for (String key : keys) {
 									if (line.toLowerCase().contains(key.toLowerCase())) {
-										MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+										BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 										SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
 										Sign sign = (Sign)block.getState();
-										for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
+
+										for (int j = 0; j < 4; j++)
+											sign.setLine(j, signInfo.getLine(j));
 
 										if (interactEvent.isCancelled()) {
 											event.setCancelled(true);
@@ -271,10 +272,12 @@ public class SignMonitor extends BukkitListener {
 					for (String line : signInfo.getLines()) {
 						for (String key : keys) {
 							if (line.toLowerCase().contains(key.toLowerCase())) {
-								MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+								BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
-								for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
+
+								for (int j = 0; j < 4; j++)
+									sign.setLine(j, signInfo.getLine(j));
 
 								if (createEvent.isCancelled()) {
 									event.setCancelled(true);
@@ -304,7 +307,7 @@ public class SignMonitor extends BukkitListener {
 	 * Send an update to any signs we are listening to in the vicinity of all players.
 	 */
 	public void sendSignUpdate() {
-		for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
+		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
 			this.sendSignUpdate(profile);
 	}
 
@@ -313,7 +316,7 @@ public class SignMonitor extends BukkitListener {
 	 * 
 	 * @param player Player to send updates to.
 	 */
-	public void sendSignUpdate(MojangProfile profile) {
+	public void sendSignUpdate(BukkitMojangProfile profile) {
 		this.sendSignUpdate(profile, "");
 	}
 
@@ -323,10 +326,9 @@ public class SignMonitor extends BukkitListener {
 	 * @param player Player to send updates to.
 	 * @param key    Only signs with this key.
 	 */
-	public void sendSignUpdate(MojangProfile profile, String key) {
-		BukkitMojangProfile bukkitPlayer = (BukkitMojangProfile)profile;
-		if (!bukkitPlayer.isOnlineLocally()) return;
-		Player player = bukkitPlayer.getOfflinePlayer().getPlayer();
+	public void sendSignUpdate(BukkitMojangProfile profile, String key) {
+		if (!profile.isOnlineLocally()) return;
+		Player player = profile.getOfflinePlayer().getPlayer();
 
 		if (this.isListening()) {
 			for (Location location : this.signLocations.keySet()) {

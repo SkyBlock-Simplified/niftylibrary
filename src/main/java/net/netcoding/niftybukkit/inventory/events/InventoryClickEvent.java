@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.inventory.events;
 
 import net.netcoding.niftybukkit.inventory.FakeInventory;
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 
-	public InventoryClickEvent(MojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
+	public InventoryClickEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
 		super(profile, event);
 	}
 

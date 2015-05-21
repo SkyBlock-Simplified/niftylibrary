@@ -182,18 +182,18 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	public Collection<MojangProfile> getPlayerList() {
+	public Collection<BukkitMojangProfile> getPlayerList() {
 		if (this.isDetected())
 			return this.getPlayerList(this.getServerName());
 
-		MojangProfile[] profiles = NiftyBukkit.getMojangRepository().searchByPlayer(this.getPlugin().getServer().getOnlinePlayers());
+		BukkitMojangProfile[] profiles = NiftyBukkit.getMojangRepository().searchByPlayer(this.getPlugin().getServer().getOnlinePlayers());
 		return Collections.unmodifiableCollection(Arrays.asList(profiles));
 	}
 
-	public Collection<MojangProfile> getPlayerList(String serverName) {
+	public Collection<BukkitMojangProfile> getPlayerList(String serverName) {
 		if (this.isDetected()) {
 			if (serverName.equalsIgnoreCase("ALL")) {
-				Set<MojangProfile> playerNames = new HashSet<>();
+				Set<BukkitMojangProfile> playerNames = new HashSet<>();
 
 				for (BungeeServer server : SERVERS.values())
 					playerNames.addAll(server.getPlayerList());
@@ -370,7 +370,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							}
 						}
 					} else if (subChannel.startsWith("Player")) {
-						MojangProfile profile = GSON.fromJson(input.readUTF(), BukkitMojangProfile.class);
+						BukkitMojangProfile profile = GSON.fromJson(input.readUTF(), BukkitMojangProfile.class);
 
 						if (subChannel.endsWith("Join")) {
 							server.getUnsafePlayerList().add(profile);
@@ -394,7 +394,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 					return;
 				else if (subChannel.equals("PlayerUpdate")) {
 					JsonObject json = new JsonParser().parse(input.readUTF()).getAsJsonObject();
-					MojangProfile updatedProfile = GSON.fromJson(json.toString(), MojangProfile.class);
+					BukkitMojangProfile updatedProfile = GSON.fromJson(json.toString(), BukkitMojangProfile.class);
 					BungeeServer server = SERVERS.get(input.readUTF());
 
 					for (MojangProfile profile : server.getPlayerList()) {

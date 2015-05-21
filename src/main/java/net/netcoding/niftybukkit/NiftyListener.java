@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit;
 
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -19,7 +19,7 @@ final class NiftyListener extends BukkitListener {
 		this.getPlugin().getServer().getScheduler().runTaskLater(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
-				MojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+				BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 				getPlugin().getServer().getPluginManager().callEvent(new PlayerPostLoginEvent(profile));
 			}
 		}, 10L);

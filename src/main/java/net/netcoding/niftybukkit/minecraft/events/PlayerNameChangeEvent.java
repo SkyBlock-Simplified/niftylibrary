@@ -1,10 +1,10 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 public class PlayerNameChangeEvent extends PlayerEvent {
 
-	public PlayerNameChangeEvent(MojangProfile profile) {
+	public PlayerNameChangeEvent(BukkitMojangProfile profile) {
 		super(profile);
 	}
 

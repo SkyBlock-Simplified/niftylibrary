@@ -3,29 +3,29 @@ package net.netcoding.niftybukkit.minecraft.messages;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.minecraft.MinecraftVersion;
-import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
 import org.bukkit.Bukkit;
 
-public class BungeeServer extends MinecraftServer {
+public class BungeeServer extends MinecraftServer<BukkitMojangProfile> {
 
 	private static final InetSocketAddress serverAddress = new InetSocketAddress(Bukkit.getIp(), Bukkit.getPort());
 	boolean loadedOnce = false;
-	final ConcurrentSet<MojangProfile> playersLeft = new ConcurrentSet<>();
+	final ConcurrentSet<BukkitMojangProfile> playersLeft = new ConcurrentSet<>();
 
 	BungeeServer(String serverName) {
 		this.serverName = serverName;
 	}
 
-	Set<MojangProfile> getUnsafePlayerList() {
+	Set<BukkitMojangProfile> getUnsafePlayerList() {
 		return this.playerList;
 	}
 
-	Set<MojangProfile> getTotalPlayerList() {
-		ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>(super.getPlayerList());
+	Set<BukkitMojangProfile> getTotalPlayerList() {
+		ConcurrentSet<BukkitMojangProfile> playerList = new ConcurrentSet<>(super.getPlayerList());
 		playerList.addAll(this.playersLeft);
 		return playerList;
 	}

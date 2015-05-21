@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.inventory.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.Cancellable;
 
@@ -8,7 +8,7 @@ abstract class InventoryCancellableEvent extends InventoryEvent implements Cance
 
 	private boolean cancelled = false;
 
-	InventoryCancellableEvent(MojangProfile profile) {
+	InventoryCancellableEvent(BukkitMojangProfile profile) {
 		super(profile);
 	}
 

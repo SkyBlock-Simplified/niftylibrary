@@ -1,10 +1,10 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 public class PlayerPostLoginEvent extends PlayerEvent {
 
-	public PlayerPostLoginEvent(MojangProfile profile) {
+	public PlayerPostLoginEvent(BukkitMojangProfile profile) {
 		super(profile);
 	}
 

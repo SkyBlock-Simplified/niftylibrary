@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit.inventory.events;
 
 import java.util.List;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
@@ -12,7 +12,7 @@ abstract class InventoryBukkitEvent extends InventoryEvent {
 
 	protected final transient org.bukkit.event.inventory.InventoryEvent event;
 
-	InventoryBukkitEvent(MojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
+	InventoryBukkitEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
 		super(profile);
 		this.event = event;
 	}

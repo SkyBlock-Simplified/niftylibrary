@@ -1,17 +1,17 @@
 package net.netcoding.niftybukkit.inventory.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 abstract class InventoryEvent {
 
-	private final MojangProfile profile;
-	private final MojangProfile target;
+	private final BukkitMojangProfile profile;
+	private final BukkitMojangProfile target;
 
-	InventoryEvent(MojangProfile profile) {
+	InventoryEvent(BukkitMojangProfile profile) {
 		this(profile, profile);
 	}
 
-	InventoryEvent(MojangProfile profile, MojangProfile target) {
+	InventoryEvent(BukkitMojangProfile profile, BukkitMojangProfile target) {
 		this.profile = profile;
 		this.target = target;
 	}
@@ -21,7 +21,7 @@ abstract class InventoryEvent {
 	 * 
 	 * @return Profile of who performed the event.
 	 */
-	public MojangProfile getProfile() {
+	public BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 
@@ -30,7 +30,7 @@ abstract class InventoryEvent {
 	 * 
 	 * @return Profile being viewed by the event.
 	 */
-	public MojangProfile getTarget() {
+	public BukkitMojangProfile getTarget() {
 		return this.target;
 	}
 

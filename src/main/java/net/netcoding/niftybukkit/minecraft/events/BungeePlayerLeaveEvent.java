@@ -1,10 +1,10 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 public class BungeePlayerLeaveEvent extends BungeePlayerEvent {
 
-	public BungeePlayerLeaveEvent(MojangProfile profile) {
+	public BungeePlayerLeaveEvent(BukkitMojangProfile profile) {
 		super(profile);
 	}
 

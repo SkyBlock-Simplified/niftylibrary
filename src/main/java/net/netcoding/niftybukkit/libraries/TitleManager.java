@@ -4,7 +4,6 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.FieldEntry;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.RegexUtil;
@@ -46,27 +45,27 @@ public class TitleManager {
 	}
 
 	public static void broadcastActionBar(String text) throws Exception {
-		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			sendActionBar(profile, text);
 	}
 
 	public void broadcastClear() throws Exception {
-		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendClear(profile);
 	}
 
 	public void broadcastReset() throws Exception {
-		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendReset(profile);
 	}
 
 	public static void broadcastTabList(String header, String footer) throws Exception {
-		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			sendTabList(profile, header, footer);
 	}
 
 	public void broadcastTitle() throws Exception {
-		for (MojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
+		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendTitle(profile);
 	}
 
@@ -98,8 +97,8 @@ public class TitleManager {
 		return this.titleColor;
 	}
 
-	public static void sendActionBar(MojangProfile profile, String text) throws Exception {
-		if (!((BukkitMojangProfile)profile).getOfflinePlayer().isOnline()) return;
+	public static void sendActionBar(BukkitMojangProfile profile, String text) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
@@ -109,11 +108,11 @@ public class TitleManager {
 		json.addProperty("text", RegexUtil.replaceColor(text, RegexUtil.REPLACE_ALL_PATTERN));
 		Object actionJson = chatSerializer.invokeMethod("a", null, json.toString());
 		Object packetChatObj = packetChat.newInstance(actionJson, (byte)2);
-		((BukkitMojangProfile)profile).sendPacket(packetChatObj);
+		profile.sendPacket(packetChatObj);
 	}
 
-	public void sendClear(MojangProfile profile) throws Exception {
-		if (!((BukkitMojangProfile)profile).getOfflinePlayer().isOnline()) return;
+	public void sendClear(BukkitMojangProfile profile) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
@@ -125,11 +124,11 @@ public class TitleManager {
 		else
 			packetTitleObj = packetTitle.newInstance(enumClear, null);
 
-		((BukkitMojangProfile)profile).sendPacket(packetTitleObj);
+		profile.sendPacket(packetTitleObj);
 	}
 
-	public void sendReset(MojangProfile profile) throws Exception {
-		if (!((BukkitMojangProfile)profile).getOfflinePlayer().isOnline()) return;
+	public void sendReset(BukkitMojangProfile profile) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
@@ -141,11 +140,11 @@ public class TitleManager {
 		else
 			packetTitleObj = packetTitle.newInstance(enumReset, null);
 
-		((BukkitMojangProfile)profile).sendPacket(packetTitleObj);
+		profile.sendPacket(packetTitleObj);
 	}
 
-	public static void sendTabList(MojangProfile profile, String header, String footer) throws Exception {
-		if (!((BukkitMojangProfile)profile).getOfflinePlayer().isOnline()) return;
+	public static void sendTabList(BukkitMojangProfile profile, String header, String footer) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetList = new Reflection("PacketPlayOutPlayerListHeaderFooter", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
 		Object packetListObj = packetList.newInstance();
@@ -161,11 +160,11 @@ public class TitleManager {
 		json.addProperty("text", RegexUtil.replaceColor(footer, RegexUtil.REPLACE_ALL_PATTERN));
 		Object footerJson = chatSerializer.invokeMethod("a", null, json.toString());
 		packetList.setValue(packetListObj, new FieldEntry("b", footerJson));
-		((BukkitMojangProfile)profile).sendPacket(packetListObj);
+		profile.sendPacket(packetListObj);
 	}
 
-	public void sendTitle(MojangProfile profile) throws Exception {
-		if (!((BukkitMojangProfile)profile).getOfflinePlayer().isOnline()) return;
+	public void sendTitle(BukkitMojangProfile profile) throws Exception {
+		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
@@ -187,7 +186,7 @@ public class TitleManager {
 			} else
 				packetTimingsObj = packetTitle.newInstance(enumTimes, null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
 
-			((BukkitMojangProfile)profile).sendPacket(packetTimingsObj);
+			profile.sendPacket(packetTimingsObj);
 
 			// Title
 			JsonObject json = new JsonObject();
@@ -202,7 +201,7 @@ public class TitleManager {
 			} else
 				packetTitleObj = packetTitle.newInstance(enumTitle, title);
 
-			((BukkitMojangProfile)profile).sendPacket(packetTitleObj);
+			profile.sendPacket(packetTitleObj);
 
 			// Subtitle
 			if (StringUtil.notEmpty(this.getSubtitle())) {
@@ -218,7 +217,7 @@ public class TitleManager {
 				} else
 					packetSubtitleObj = packetTitle.newInstance(enumSubtitle, subtitle);
 
-				((BukkitMojangProfile)profile).sendPacket(packetSubtitleObj);
+				profile.sendPacket(packetSubtitleObj);
 			}
 		}
 	}

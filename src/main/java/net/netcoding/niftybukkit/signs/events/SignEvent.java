@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
-import net.netcoding.niftycore.mojang.MojangProfile;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,13 +14,13 @@ import org.bukkit.event.block.Action;
  */
 abstract class SignEvent implements Cancellable {
 
-	private final transient MojangProfile profile;
+	private final transient BukkitMojangProfile profile;
 	private final transient SignInfo signInfo;
 	private final transient Action action;
 	protected final String key;
 	private boolean cancelled = false;
 
-	SignEvent(MojangProfile profile, SignInfo signInfo, Action action, String key) {
+	SignEvent(BukkitMojangProfile profile, SignInfo signInfo, Action action, String key) {
 		this.profile = profile;
 		this.signInfo = signInfo;
 		this.action = action;
@@ -116,7 +116,7 @@ abstract class SignEvent implements Cancellable {
 	 * 
 	 * @return Profile of who performed the event.
 	 */
-	public MojangProfile getProfile() {
+	public BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 

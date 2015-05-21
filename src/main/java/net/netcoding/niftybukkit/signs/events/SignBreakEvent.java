@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.signs.events;
 
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.signs.SignInfo;
-import net.netcoding.niftycore.mojang.MojangProfile;
 
 import org.bukkit.event.block.Action;
 
@@ -10,7 +10,7 @@ import org.bukkit.event.block.Action;
  */
 public class SignBreakEvent extends SignEvent {
 
-	public SignBreakEvent(MojangProfile profile, SignInfo signInfo, String key) {
+	public SignBreakEvent(BukkitMojangProfile profile, SignInfo signInfo, String key) {
 		super(profile, signInfo, Action.LEFT_CLICK_BLOCK, key);
 	}
 

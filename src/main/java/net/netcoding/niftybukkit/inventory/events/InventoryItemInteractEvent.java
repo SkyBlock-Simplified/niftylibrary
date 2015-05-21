@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.inventory.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -9,7 +9,7 @@ public class InventoryItemInteractEvent extends InventoryCancellableEvent {
 
 	private final transient PlayerInteractEvent event;
 
-	public InventoryItemInteractEvent(MojangProfile profile, PlayerInteractEvent event) {
+	public InventoryItemInteractEvent(BukkitMojangProfile profile, PlayerInteractEvent event) {
 		super(profile);
 		this.event = event;
 	}

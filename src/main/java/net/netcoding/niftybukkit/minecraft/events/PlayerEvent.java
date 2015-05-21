@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,9 +8,9 @@ import org.bukkit.event.HandlerList;
 class PlayerEvent extends Event {
 
 	private static final transient HandlerList handlers = new HandlerList();
-	private final MojangProfile profile;
+	private final BukkitMojangProfile profile;
 
-	PlayerEvent(MojangProfile profile) {
+	PlayerEvent(BukkitMojangProfile profile) {
 		this.profile = profile;
 	}
 
@@ -23,7 +23,7 @@ class PlayerEvent extends Event {
 		return handlers;
 	}
 
-	public MojangProfile getProfile() {
+	public BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 
