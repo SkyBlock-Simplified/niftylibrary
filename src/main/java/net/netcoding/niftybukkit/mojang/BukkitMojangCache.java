@@ -1,16 +1,15 @@
 package net.netcoding.niftybukkit.mojang;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftycore.mojang.MojangProfile;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BukkitMojangCache extends BukkitHelper {
 
-	private final MojangProfile profile;
+	private final BukkitMojangProfile profile;
 
-	public BukkitMojangCache(JavaPlugin plugin, MojangProfile profile) {
+	public BukkitMojangCache(JavaPlugin plugin, BukkitMojangProfile profile) {
 		super(plugin);
 		this.profile = profile;
 	}
@@ -24,12 +23,12 @@ public class BukkitMojangCache extends BukkitHelper {
 		return this.getProfile().equals(cache.getProfile());
 	}
 
-	public MojangProfile getProfile() {
+	public BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 
 	public OfflinePlayer getOfflinePlayer() {
-		return ((BukkitMojangProfile)this.getProfile()).getOfflinePlayer();
+		return this.getProfile().getOfflinePlayer();
 	}
 
 	public boolean hasPermissions(String... permissions) {
@@ -42,7 +41,7 @@ public class BukkitMojangCache extends BukkitHelper {
 	}
 
 	public boolean isOnlineLocally() {
-		return ((BukkitMojangProfile)this.getProfile()).isOnlineLocally();
+		return this.getProfile().isOnlineLocally();
 	}
 
 	public boolean isOnlineAnywhere() {
