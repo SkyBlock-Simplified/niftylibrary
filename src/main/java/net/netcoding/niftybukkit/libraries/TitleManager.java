@@ -9,10 +9,11 @@ import net.netcoding.niftycore.reflection.FieldEntry;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.gson.JsonObject;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+
+import com.google.gson.JsonObject;
 
 public class TitleManager {
 

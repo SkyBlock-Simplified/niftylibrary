@@ -17,11 +17,12 @@ import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import net.netcoding.niftycore.util.gson.JsonObject;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
+
+import com.google.gson.JsonObject;
 
 public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile> {
 

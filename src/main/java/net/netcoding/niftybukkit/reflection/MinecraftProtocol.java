@@ -6,11 +6,11 @@ import net.netcoding.niftycore.http.HttpBody;
 import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpResponse;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.gson.JsonObject;
-import net.netcoding.niftycore.util.gson.JsonParser;
 
 import org.bukkit.Bukkit;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public enum MinecraftProtocol {
 

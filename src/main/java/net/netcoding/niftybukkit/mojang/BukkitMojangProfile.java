@@ -6,7 +6,6 @@ import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.gson.JsonObject;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,6 +15,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+
+import com.google.gson.JsonObject;
 
 public class BukkitMojangProfile extends MojangProfile {
 

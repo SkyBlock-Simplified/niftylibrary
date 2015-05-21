@@ -23,9 +23,6 @@ import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.gson.Gson;
-import net.netcoding.niftycore.util.gson.JsonObject;
-import net.netcoding.niftycore.util.gson.JsonParser;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,6 +34,9 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class BungeeHelper extends BukkitHelper implements PluginMessageListener {
 

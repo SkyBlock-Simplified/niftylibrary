@@ -6,7 +6,6 @@ import java.util.Map;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.gson.Gson;
 
 import org.bukkit.util.Vector;
 
@@ -14,6 +13,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.google.gson.Gson;
 
 class SignPacket {
 
