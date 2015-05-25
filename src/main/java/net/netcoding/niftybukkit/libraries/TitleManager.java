@@ -18,9 +18,9 @@ public class TitleManager {
 
 	private String subtitle = "";
 	private ChatColor subtitleColor = ChatColor.WHITE;
-	private int timeFadeIn = 0;
-	private int timeFadeOut = 0;
-	private int timeStay = 0;
+	private int fadeIn = 0;
+	private int fadeOut = 0;
+	private int ftay = 0;
 	private String title = "";
 	private ChatColor titleColor = ChatColor.WHITE;
 
@@ -39,9 +39,9 @@ public class TitleManager {
 	public TitleManager(String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
 		this.setTitle(title);
 		this.setSubtitle(subtitle);
-		this.setTimeFadeIn(fadeInTime);
-		this.setTimeStay(stayTime);
-		this.setTimeFadeOut(fadeInTime);
+		this.setFadeIn(fadeInTime);
+		this.setStay(stayTime);
+		this.setFadeOut(fadeInTime);
 	}
 
 	public static void broadcastActionBar(String text) throws Exception {
@@ -49,12 +49,12 @@ public class TitleManager {
 			sendActionBar(profile, text);
 	}
 
-	public void broadcastClear() throws Exception {
+	public void clear() throws Exception {
 		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendClear(profile);
 	}
 
-	public void broadcastReset() throws Exception {
+	public void reset() throws Exception {
 		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendReset(profile);
 	}
@@ -64,7 +64,7 @@ public class TitleManager {
 			sendTabList(profile, header, footer);
 	}
 
-	public void broadcastTitle() throws Exception {
+	public void broadcast() throws Exception {
 		for (BukkitMojangProfile profile : NiftyBukkit.getMojangRepository().searchByPlayer(Bukkit.getOnlinePlayers()))
 			this.sendTitle(profile);
 	}
@@ -77,16 +77,16 @@ public class TitleManager {
 		return this.subtitleColor;
 	}
 
-	public int getTimeFadeIn() {
-		return this.timeFadeIn;
+	public int getFadeIn() {
+		return this.fadeIn;
 	}
 
-	public int getTimeFadeOut() {
-		return this.timeFadeOut;
+	public int getFadeOut() {
+		return this.fadeOut;
 	}
 
-	public int getTimeStay() {
-		return this.timeStay;
+	public int getStay() {
+		return this.ftay;
 	}
 
 	public String getTitle() {
@@ -170,7 +170,7 @@ public class TitleManager {
 		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
 
-		if (this.getTimeStay() > 0 && StringUtil.notEmpty(this.getTitle())) {
+		if (this.getStay() > 0 && StringUtil.notEmpty(this.getTitle())) {
 			Object enumTimes = titleAction.getValue("TIMES", null);
 			Object enumTitle = titleAction.getValue("TITLE", null);
 			Object enumSubtitle = titleAction.getValue("SUBTITLE", null);
@@ -180,11 +180,11 @@ public class TitleManager {
 
 			if (MinecraftPackage.IS_PRE_1_8) {
 				packetTitle.setValue(packetTimingsObj, new FieldEntry("a", enumTimes));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("c", this.getTimeFadeIn()));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("d", this.getTimeStay()));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("e", this.getTimeFadeOut()));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("c", this.getFadeIn()));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("d", this.getStay()));
+				packetTitle.setValue(packetTimingsObj, new FieldEntry("e", this.getFadeOut()));
 			} else
-				packetTimingsObj = packetTitle.newInstance(enumTimes, null, this.getTimeFadeIn(), this.getTimeStay(), this.getTimeFadeOut());
+				packetTimingsObj = packetTitle.newInstance(enumTimes, null, this.getFadeIn(), this.getStay(), this.getFadeOut());
 
 			profile.sendPacket(packetTimingsObj);
 
@@ -230,16 +230,16 @@ public class TitleManager {
 		this.subtitleColor = color;
 	}
 
-	public void setTimeFadeIn(int value) {
-		this.timeFadeIn = value < 0 ? 0 : value;
+	public void setFadeIn(int value) {
+		this.fadeIn = value < 0 ? 0 : value;
 	}
 
-	public void setTimeFadeOut(int value) {
-		this.timeFadeOut = value < 0 ? 0 : value;
+	public void setFadeOut(int value) {
+		this.fadeOut = value < 0 ? 0 : value;
 	}
 
-	public void setTimeStay(int value) {
-		this.timeStay = value < 0 ? 0 : value;
+	public void setStay(int value) {
+		this.ftay = value < 0 ? 0 : value;
 	}
 
 	public void setTitle(String title) {
