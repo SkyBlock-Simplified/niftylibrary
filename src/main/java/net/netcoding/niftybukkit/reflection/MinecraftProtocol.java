@@ -1,11 +1,9 @@
 package net.netcoding.niftybukkit.reflection;
 
-import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import net.netcoding.niftycore.http.HttpBody;
-import net.netcoding.niftycore.http.HttpClient;
-import net.netcoding.niftycore.http.HttpResponse;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.reflection.Reflection;
 
 import org.bukkit.Bukkit;
 
@@ -158,14 +156,17 @@ public enum MinecraftProtocol {
 	}
 
 	public final static String getCurrentVersion() {
-		String json = Bukkit.getVersion().replaceAll("^[a-zA-Z0-9]+(?=\\{)", "");
-		json = json.replace("=", "':'").replace("{", "{'").replace("}", "'}");
-		JsonObject version = new JsonParser().parse(json).getAsJsonObject();
-		return version.get("minecraftVersion").getAsString();
-		/*Reflection craftServer = new Reflection("CraftServer", MinecraftPackage.CRAFTBUKKIT);
-		Reflection minecraftServer = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
-		Object serverObj = craftServer.getValue(minecraftServer.getClazz(), Bukkit.getServer());
-		return (String)minecraftServer.invokeMethod("getVersion", serverObj);*/
+		try {
+			Reflection server = new Reflection("CraftServer", MinecraftPackage.CRAFTBUKKIT);
+			Reflection minecraftServer = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
+			Object minecraftServerObj = server.getValue(minecraftServer.getClazz(), Bukkit.getServer());
+			return (String)minecraftServer.invokeMethod("getVersion", minecraftServerObj);
+		} catch (Exception ex) {
+			String json = Bukkit.getServer().toString().replaceAll("^[a-zA-Z0-9]+(?=\\{)", "");
+			json = json.replace("=", "':'").replace(",", "','").replace("{", "{'").replace("}", "'}");
+			JsonObject version = new JsonParser().parse(json).getAsJsonObject();
+			return version.get("minecraftVersion").getAsString();
+		}
 	}
 
 	public final static int getCurrentProtocol() {
@@ -182,13 +183,13 @@ public enum MinecraftProtocol {
 	}
 
 	private final static int getFetchedProtocol(String version) {
-		try {
+		/*try {
 			HttpBody body = new HttpBody(StringUtil.format("version={0}", version));
 			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
 			return Integer.valueOf(response.getBody().toString());
-		} catch (Exception ex) {
+		} catch (Exception ex) {*/
 			return values()[0].getProtocol();
-		}
+		//}
 	}
 
 }
