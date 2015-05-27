@@ -1,9 +1,12 @@
 package net.netcoding.niftybukkit.reflection;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.net.URL;
 
+import net.netcoding.niftycore.http.HttpBody;
+import net.netcoding.niftycore.http.HttpClient;
+import net.netcoding.niftycore.http.HttpResponse;
 import net.netcoding.niftycore.reflection.Reflection;
+import net.netcoding.niftycore.util.StringUtil;
 
 import org.bukkit.Bukkit;
 
@@ -183,13 +186,13 @@ public enum MinecraftProtocol {
 	}
 
 	private final static int getFetchedProtocol(String version) {
-		/*try {
+		try {
 			HttpBody body = new HttpBody(StringUtil.format("version={0}", version));
-			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
+			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol.php"), body);
 			return Integer.valueOf(response.getBody().toString());
-		} catch (Exception ex) {*/
+		} catch (Exception ex) {
 			return values()[0].getProtocol();
-		//}
+		}
 	}
 
 }
