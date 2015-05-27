@@ -187,8 +187,8 @@ public enum MinecraftProtocol {
 
 	private final static int getFetchedProtocol(String version) {
 		try {
-			HttpBody body = new HttpBody(StringUtil.format("version={0}", version));
-			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol.php"), body);
+			HttpBody body = new HttpBody(StringUtil.format("ver={0}", version));
+			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
 			return Integer.valueOf(response.getBody().toString());
 		} catch (Exception ex) {
 			return values()[0].getProtocol();
