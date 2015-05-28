@@ -1,5 +1,9 @@
 package net.netcoding.niftybukkit.minecraft.messages;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
+import net.netcoding.niftybukkit.minecraft.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
@@ -19,6 +24,7 @@ import net.netcoding.niftybukkit.minecraft.events.BungeeServerLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerNameChangeEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.ListUtil;
@@ -28,6 +34,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -42,8 +49,10 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public static final String BUNGEE_CHANNEL = "BungeeCord";
 	public static final String NIFTY_CHANNEL = "NiftyBungee";
-	private static final ConcurrentHashMap<Class<?>, Integer> LOADED_LISTENERS = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, BungeeServer> SERVERS = new ConcurrentHashMap<>();
+	private static Socket SOCKET = null;
+	private static boolean SOCKET_LISTENING = false;
+	private static boolean SOCKET_TRIED_ONCE = false;
 	private static boolean BUNGEE_DETECTED = false;
 	private static boolean BUNGEE_ONLINEMODE = false;
 	private static boolean LOADED_ONCE = false;
@@ -82,7 +91,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public BungeeHelper(JavaPlugin plugin, String channel, BungeeListener listener, boolean register) {
 		super(plugin);
-		if (StringUtil.isEmpty(channel)) throw new IllegalArgumentException("A channel name must be passed when instantiating an instance of BungeeHelper!");
+
+		if (StringUtil.isEmpty(channel))
+			throw new IllegalArgumentException("A channel name must be passed when instantiating an instance of BungeeHelper!");
 
 		if (LOADED_ONCE) {
 			if (!this.isDetected())
@@ -94,7 +105,9 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 		this.channel = channel;
 		this.listener = listener;
-		if (register) this.register();
+
+		if (register)
+			this.register();
 	}
 
 	public void connect(MojangProfile profile, String targetServer) {
@@ -311,8 +324,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this.write(fromProfile, BUNGEE_CHANNEL, "Message", profile.getName(), message);
 	}
 
-	@Override
-	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+	private void handleMessage(String channel, byte[] message) {
 		if (!this.isRegistered()) return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
@@ -423,6 +435,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		}
 	}
 
+	@Override
+	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+		this.handleMessage(channel, message);
+	}
+
 	public void register() {
 		if (this.isRegistered()) return;
 		this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
@@ -432,9 +449,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			if (!this.isRegistered(BUNGEE_CHANNEL)) {
 				this.getPlugin().getServer().getMessenger().registerIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
 				this.getPlugin().getServer().getMessenger().registerOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
-				LOADED_LISTENERS.put(this.getPlugin().getClass(), 1);
-			} else
-				LOADED_LISTENERS.put(this.getPlugin().getClass(), LOADED_LISTENERS.get(this.getPlugin().getClass()) + 1);
+			}
 		}
 	}
 
@@ -443,13 +458,15 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), this.getChannel(), this);
 		this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), this.getChannel());
 
-		if (!this.getChannel().equals(BUNGEE_CHANNEL)) {
-			int current = LOADED_LISTENERS.get(this.getPlugin().getClass());
-			LOADED_LISTENERS.put(this.getPlugin().getClass(), current - 1);
+		if (this.getChannel().equals(NIFTY_CHANNEL)) {
+			this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
+			this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 
-			if (current == 0) {
-				this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
-				this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
+			SOCKET_LISTENING = false;
+			try {
+				SOCKET.close();
+			} catch (Exception ex) {
+				getLog().console("Unable to close socket", ex);
 			}
 		}
 	}
@@ -501,21 +518,55 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			this.getPlugin().getServer().getPluginManager().callEvent(new PlayerDisconnectEvent(profile, kicked));
 		}
 
-		// TODO: NiftyPing
-		/*boolean pingOverride = false;
+		private ServerSocket serverSocket;
+
 		@EventHandler
-		public void onServerListPing(ServerListPingEvent event) {
-			if (this.pingOverride) {
+		public void onServerListPing(final ServerListPingEvent event) {
+			if (!SOCKET_TRIED_ONCE) {
+				SOCKET_TRIED_ONCE = true;
+
 				try {
-					ServerPingEvent pingEvent = new ServerPingEvent(event);
-					InetSocketAddress socketAddress = pingEvent.getSocketAddress(InetSocketAddress.class);
-					pingEvent.sendSpoofedVersion(StringUtil.format("{0} {1}", "NiftyPing", socketAddress.getPort()), true);
-					this.getLog().console("Ping Event: {0}", socketAddress);
+					this.serverSocket = new ServerSocket(0);
+					BukkitServerPingEvent pingEvent = new BukkitServerPingEvent(event);
+					pingEvent.sendSpoofedVersion(StringUtil.format("{0} {1,number,#}", "NiftyPing", serverSocket.getLocalPort()), true);
+
+					MinecraftScheduler.runAsync(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								getLog().console("{0}: Waiting for NiftyPing", System.currentTimeMillis());
+								Socket socket = serverSocket.accept();
+								getLog().console("Accepted: {0}", socket);
+
+								try (DataInputStream inputStream = new DataInputStream(socket.getInputStream())) {
+									if ("NiftyPing".equals(inputStream.readUTF())) {
+										String ip = inputStream.readUTF();
+										int port = inputStream.readInt();
+										getLog().console("Preparing: {0}:{1,number,#}", ip, port);
+										SOCKET = new Socket(ip, port);
+										getLog().console("Loaded Socket: {0}", socket);
+										SOCKET.setKeepAlive(true);
+										SOCKET.setSoTimeout(0);
+										SOCKET_LISTENING = true;
+										MinecraftScheduler.runAsync(new SocketRunnable());
+									}
+								}
+							} catch (Exception ex) {
+								getLog().console("Unable to accept socket connection!", ex);
+							} finally {
+								try {
+									serverSocket.close();
+								} catch (Exception ex) {
+									getLog().console("Unable to close server socket", ex);
+								}
+							}
+						}
+					});
 				} catch (Exception ex) {
-					this.getLog().console("Unable to obtain SocketAddress!", ex);
+					this.getLog().console("Unable to setup socket channel!");
 				}
 			}
-		}*/
+		}
 
 		@EventHandler
 		public void onPlayerKick(PlayerKickEvent event) {
@@ -525,6 +576,30 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		@EventHandler
 		public void onPlayerQuit(PlayerQuitEvent event) {
 			this.handleDisconnect(event.getPlayer(), false);
+		}
+
+		private class SocketRunnable implements Runnable {
+
+			@Override
+			public void run() {
+				try {
+					try (DataInputStream inputStream = new DataInputStream(SOCKET.getInputStream())) {
+						while (SOCKET_LISTENING) {
+							System.out.println("made it x1");
+							String channel = inputStream.readUTF();
+							System.out.println("made it x2: " + channel);
+							int length = inputStream.readInt();
+							byte[] data = new byte[length];
+							inputStream.read(data);
+							NiftyBukkit.getBungeeHelper().handleMessage(channel, data);
+						}
+					}
+				} catch (IOException ioex) {
+					getLog().console(ioex);
+					// TODO: Possibly Disable Socket
+				}
+			}
+
 		}
 
 	}
