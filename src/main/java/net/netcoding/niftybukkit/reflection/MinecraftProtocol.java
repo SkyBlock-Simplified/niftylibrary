@@ -15,6 +15,7 @@ import com.google.gson.JsonParser;
 
 public enum MinecraftProtocol {
 
+	v1_8_6(47),
 	v1_8_3(47),
 	v1_8_2(47),
 	v1_8_1(47),
