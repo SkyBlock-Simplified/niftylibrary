@@ -37,7 +37,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	}
 
 	public final String getServerModName() throws Exception {
-		return (String)MINECRAFT_SERVER.invokeMethod("getServerModName", this.minecraftServer);
+		return (String)MINECRAFT_SERVER.invokeMethod("getServerModName", String.class, this.minecraftServer);
 	}
 
 	public final SocketAddress getSocketAddress() throws Exception {
