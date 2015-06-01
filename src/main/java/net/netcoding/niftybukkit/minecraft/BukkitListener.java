@@ -1,9 +1,9 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BukkitListener extends BukkitHelper implements Listener {
 
@@ -19,7 +19,7 @@ public abstract class BukkitListener extends BukkitHelper implements Listener {
 			PLUGINS.put(this.getPlugin().getName(), PLUGINS.get(this.getPlugin().getName()) + 1);
 	}
 
-	public final static int getPluginCache(String pluginName) {
+	public static int getPluginCache(String pluginName) {
 		return PLUGINS.keySet().contains(pluginName) ? PLUGINS.get(pluginName) : 0;
 	}
 
