@@ -1,18 +1,10 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,6 +13,13 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A command wrapper that assists with common tasks like checking execution permissions,
@@ -97,7 +96,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		return (size > 0 ? properArgs.get(size - 1) : "");
 	}
 
-	public final static int getPluginCache(String pluginName) {
+	public static int getPluginCache(String pluginName) {
 		return PLUGINS.keySet().contains(pluginName) ? PLUGINS.get(pluginName) : 0;
 	}
 
@@ -176,16 +175,13 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 * @return True if looking for help, otherwise false.
 	 */
 	protected boolean isHelp(String... args) {
-		if (args.length > 0 && args[args.length - 1].matches("^[\\?]{1,}|help$"))
-			return true;
-
-		return false;
+		return (args.length > 0 && args[args.length - 1].matches("^[\\?]+|help$"));
 	}
 
 	protected abstract void onCommand(CommandSender sender, String alias, String[] args) throws Exception;
 
 	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) throws Exception {
-		return Collections.<String>emptyList();
+		return Collections.emptyList();
 	}
 
 	private void processCommand(CommandSender sender, String label, String[] args) {
@@ -238,7 +234,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		}
 	}
 
-	public final static List<String> getMatchingPlayers(String lookup) {
+	public static List<String> getMatchingPlayers(String lookup) {
 		List<String> names = new ArrayList<>();
 
 		if (NiftyBukkit.getBungeeHelper().isDetected()) {
