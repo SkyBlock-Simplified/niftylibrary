@@ -66,14 +66,11 @@ final class NiftyCommand extends BukkitCommand {
 					return;
 				}
 
-				String lookup = args[1];
-				BukkitMojangProfile profile = null;
-
 				try {
-					profile = NiftyBukkit.getMojangRepository().searchByUniqueId(UUID.fromString(lookup));
+                    BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByUniqueId(UUID.fromString(args[1]));
 					this.getLog().message(sender, "The name for {{0}} is {{1}}.", profile.getUniqueId(), profile.getName());
 				} catch (Exception ex) {
-					profile = NiftyBukkit.getMojangRepository().searchByUsername(lookup);
+                    BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByUsername(args[1]);
 					this.getLog().message(sender, "The UUID of {{0}} is {{1}}.", profile.getName(), profile.getUniqueId());
 				}
 			} else {
