@@ -1,9 +1,5 @@
 package net.netcoding.niftybukkit;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.UUID;
-
 import net.netcoding.niftybukkit.minecraft.BukkitCommand;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
@@ -12,7 +8,6 @@ import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.NumberUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
@@ -20,9 +15,13 @@ import org.bukkit.help.HelpTopic;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.UUID;
+
 final class NiftyCommand extends BukkitCommand {
 
-	public NiftyCommand(JavaPlugin plugin) {
+    NiftyCommand(JavaPlugin plugin) {
 		super(plugin, "nifty");
 		this.setMinimumArgsLength(0);
 		this.editUsage(1, "search", "<player|uuid>");
