@@ -1,10 +1,8 @@
 package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -35,7 +33,7 @@ public abstract class BukkitHelper {
 		return plugin.cast(this.getPlugin());
 	}
 
-	public final static ConcurrentList<String> getPluginCache() {
+	public static ConcurrentList<String> getPluginCache() {
 		return PLUGINS;
 	}
 
@@ -43,13 +41,12 @@ public abstract class BukkitHelper {
 		return this.getPlugin().getDescription();
 	}
 
-	public final boolean hasPermissions(MojangProfile profile, String... permissions) {
+	public final boolean hasPermissions(BukkitMojangProfile profile, String... permissions) {
 		return this.hasPermissions(profile, false, permissions);
 	}
 
-	public final boolean hasPermissions(MojangProfile profile, boolean defaultError, String... permissions) {
-		BukkitMojangProfile bukkitProfile = (BukkitMojangProfile)profile;
-		return bukkitProfile.getOfflinePlayer().isOnline() ? this.hasPermissions(bukkitProfile.getOfflinePlayer().getPlayer(), defaultError, permissions) : false;
+	public final boolean hasPermissions(BukkitMojangProfile profile, boolean defaultError, String... permissions) {
+		return profile.getOfflinePlayer().isOnline() && this.hasPermissions(profile.getOfflinePlayer().getPlayer(), defaultError, permissions);
 	}
 
 	public final boolean hasPermissions(CommandSender sender, String... permissions) {
