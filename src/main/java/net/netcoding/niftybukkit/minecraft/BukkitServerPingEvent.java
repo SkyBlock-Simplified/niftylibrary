@@ -1,18 +1,17 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Bukkit;
 import org.bukkit.event.server.ServerListPingEvent;
+
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class BukkitServerPingEvent extends ServerListPingEvent {
 
@@ -37,7 +36,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	}
 
 	public final String getServerModName() throws Exception {
-		return (String)MINECRAFT_SERVER.invokeMethod("getServerModName", String.class, this.minecraftServer);
+		return (String)MINECRAFT_SERVER.invokeMethod("getServerModName", this.minecraftServer);
 	}
 
 	public final SocketAddress getSocketAddress() throws Exception {
@@ -57,7 +56,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * <p>
 	 * Note that invoking this event will cancel the original response,
 	 * and any modification after invocation future changes will be ignored.
-	 * 
+	 *
 	 * @param name Server mod name.
 	 */
 	public final void sendSpoofedVersion(String name) throws Exception {
@@ -70,7 +69,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * <p>
 	 * Note that invoking this event will cancel the original response,
 	 * and any modification after invocation future changes will be ignored.
-	 * 
+	 *
 	 * @param name  Server mod name.
 	 * @param merge True to merge the previous name, otherwise false.
 	 */
@@ -83,7 +82,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * <p>
 	 * Note that invoking this event will cancel the original response,
 	 * and any modification after invocation future changes will be ignored.
-	 * 
+	 *
 	 * @param name     Server mod name.
 	 * @param protocol Server protocol version.
 	 */
@@ -97,7 +96,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * <p>
 	 * Note that invoking this event will cancel the original response,
 	 * and any modification after invocation future changes will be ignored.
-	 * 
+	 *
 	 * @param name     Server mod name.
 	 * @param protocol Server protocol version.
 	 * @param merge    True to merge the previous name, otherwise false.
