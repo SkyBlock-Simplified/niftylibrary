@@ -1,12 +1,11 @@
 package net.netcoding.niftybukkit.inventory.enchantments;
 
-import java.util.List;
-
 import net.netcoding.niftybukkit.NiftyBukkit;
-
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class EnchantmentData {
 
@@ -39,14 +38,14 @@ public class EnchantmentData {
 			level = (level < this.getStartLevel() ? this.getStartLevel() : level);
 			level = (level > this.getMaxLevel() ? this.getMaxLevel() : level);
 
-			if (this.canEnchant(stack)) {
-				for (Enchantment ench : stack.getEnchantments().keySet()) {
-					if (this.getEnchantment().conflictsWith(ench))
-						return false;
-				}
+			//if (this.canEnchant(stack)) {
+				//for (Enchantment ench : stack.getEnchantments().keySet()) {
+					//if (this.getEnchantment().conflictsWith(ench))
+					//return false;
+				//}
 
-				stack.addEnchantment(this.getEnchantment(), level);
-			}
+			stack.addEnchantment(this.getEnchantment(), level);
+			//}
 		}
 
 		return true;
