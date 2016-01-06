@@ -1,12 +1,10 @@
 package net.netcoding.niftybukkit.signs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
@@ -17,7 +15,6 @@ import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,11 +31,12 @@ import org.bukkit.material.Attachable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Monitor and update signs by tracking sign update packets.
@@ -74,7 +72,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Create new sign monitor instance.
-	 * 
+	 *
 	 * @param plugin Java plugin to run it for.
 	 */
 	public SignMonitor(JavaPlugin plugin) {
@@ -83,7 +81,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Add listener for the given keys.
-	 * 
+	 *
 	 * @param listener Listener to send events to.
 	 * @param keys     Keys to check when receiving sign update packets.
 	 */
@@ -110,7 +108,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Gets a list of signs that would fall if the given block were to break.
-	 * 
+	 *
 	 * @param block Block that is going to break.
 	 * @return List of signs locations that will break if the block is broken.
 	 */
@@ -142,7 +140,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Gets if the passed block is an attachable block.
-	 * 
+	 *
 	 * @param block Block to check if it can be attached to other blocks.
 	 * @return True if attachable, otherwise false.
 	 */
@@ -152,7 +150,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Gets if the passed block is attached to the other passed block.
-	 * 
+	 *
 	 * @param isThisAttached Block to check if attached to toThisBlock.
 	 * @param toThisBlock    Block to check if isThisAttached is attached to.
 	 * @return True if attached, otherwise false.
@@ -164,7 +162,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Gets if the monitor is currently listening for sign update packets.
-	 * 
+	 *
 	 * @return True if listening, otherwise false.
 	 */
 	public boolean isListening() {
@@ -295,7 +293,7 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Remove listener from monitor.
-	 * 
+	 *
 	 * @param listener Listener to no longer send packet updates to.
 	 */
 	public void removeListener(SignListener listener) {
@@ -313,18 +311,28 @@ public class SignMonitor extends BukkitListener {
 
 	/**
 	 * Send an update to any signs we are listening to in the vicinity of the given player.
-	 * 
-	 * @param player Player to send updates to.
+	 *
+	 * @param profile Player to send updates to.
 	 */
 	public void sendSignUpdate(BukkitMojangProfile profile) {
 		this.sendSignUpdate(profile, "");
 	}
 
 	/**
+	 * Send an update to any signs we are listening to in the vicinity of the given player.
+	 *
+	 * @param key Only signs with this key.
+	 */
+	public void sendSignUpdate(String key) {
+		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
+			this.sendSignUpdate(profile, key);
+	}
+
+	/**
 	 * Send an update to signs with the given key in the vicinity of the given player.
-	 * 
-	 * @param player Player to send updates to.
-	 * @param key    Only signs with this key.
+	 *
+	 * @param profile Profile to send updates to.
+	 * @param key     Only signs with this key.
 	 */
 	public void sendSignUpdate(BukkitMojangProfile profile, String key) {
 		if (!profile.isOnlineLocally()) return;
