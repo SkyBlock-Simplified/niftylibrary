@@ -10,8 +10,22 @@ import org.bukkit.event.block.Action;
  */
 public class SignInteractEvent extends SignEvent {
 
+	private boolean modified = false;
+
 	public SignInteractEvent(BukkitMojangProfile profile, SignInfo signInfo, Action action, String key) {
 		super(profile, signInfo, action, key);
+	}
+
+	@Override
+	public boolean isModified() {
+		return super.isModified() || this.modified;
+	}
+
+	/**
+	 * Sends an update packet for this sign event.
+	 */
+	public void updateSign() {
+		this.modified = true;
 	}
 
 }
