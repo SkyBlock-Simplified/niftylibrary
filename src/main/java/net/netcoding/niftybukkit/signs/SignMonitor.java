@@ -340,30 +340,32 @@ public class SignMonitor extends BukkitListener {
 
 		if (this.isListening()) {
 			for (Location location : this.signLocations.keySet()) {
-				if (player.getLocation().distance(location) < 16) {
-					Material material = location.getBlock().getType();
+				if (location.getWorld().equals(player.getWorld())) {
+					if (player.getLocation().distance(location) < 16) {
+						Material material = location.getBlock().getType();
 
-					if (SIGN_ITEMS.contains(material)) {
-						Sign sign = (Sign)location.getBlock().getState();
-						SignInfo signInfo = this.signLocations.get(sign.getLocation());
+						if (SIGN_ITEMS.contains(material)) {
+							Sign sign = (Sign)location.getBlock().getState();
+							SignInfo signInfo = this.signLocations.get(sign.getLocation());
 
-						for (String line : signInfo.getLines()) {
-							if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
-								SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
-								outgoing.setPosition(new Vector(sign.getX(), sign.getY(), sign.getZ()));
+							for (String line : signInfo.getLines()) {
+								if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
+									SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
+									outgoing.setPosition(new Vector(sign.getX(), sign.getY(), sign.getZ()));
 
-								try {
-									outgoing.setLines(signInfo.getLines());
-									NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
-								} catch (Exception ex) {
-									this.getLog().console("Unable to send sign update packet!", ex);
+									try {
+										outgoing.setLines(signInfo.getLines());
+										NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
+									} catch (Exception ex) {
+										this.getLog().console("Unable to send sign update packet!", ex);
+									}
+
+									break;
 								}
-
-								break;
 							}
-						}
-					} else
-						this.signLocations.remove(location);
+						} else
+							this.signLocations.remove(location);
+					}
 				}
 			}
 		}
