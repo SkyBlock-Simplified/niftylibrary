@@ -1,14 +1,13 @@
 package net.netcoding.niftybukkit.signs;
 
-import java.util.Arrays;
-
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+
+import java.util.Arrays;
 
 /**
  * Used to access sign methods as well as retrieve or modify the lines.
@@ -21,7 +20,7 @@ public class SignInfo {
 
 	/**
 	 * Create new sign info instance.
-	 * 
+	 *
 	 * @param sign Sign to get/set data with.
 	 */
 	SignInfo(Sign sign) {
@@ -32,7 +31,7 @@ public class SignInfo {
 
 	/**
 	 * Get the block of the sign.
-	 * 
+	 *
 	 * @return Sign block.
 	 */
 	public Block getBlock() {
@@ -41,7 +40,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the original line of text, given the index.
-	 * 
+	 *
 	 * @param index Line number to retrieve.
 	 * @return Unmodified sign text from given line number.
 	 */
@@ -51,7 +50,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the original lines on the sign.
-	 * 
+	 *
 	 * @return Unmodified sign text.
 	 */
 	public String[] getLines() {
@@ -60,7 +59,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the location of the sign.
-	 * 
+	 *
 	 * @return Location of the sign.
 	 */
 	public Location getLocation() {
@@ -69,7 +68,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the modified line of text, given the index.
-	 * 
+	 *
 	 * @param index Line number to retrieve.
 	 * @return Modified sign text from given line number.
 	 */
@@ -79,7 +78,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the modified lines of text.
-	 * 
+	 *
 	 * @return Modified sign text.
 	 */
 	public String[] getModifiedLines() {
@@ -88,7 +87,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the color modified lines of text.
-	 * 
+	 *
 	 * @param filtered True to replace color codes, otherwise false.
 	 * @return Modified sign text.
 	 */
@@ -107,7 +106,7 @@ public class SignInfo {
 
 	/**
 	 * Gets the world the sign belongs to.
-	 * 
+	 *
 	 * @return World the sign belongs to.
 	 */
 	public World getWorld() {
@@ -116,7 +115,7 @@ public class SignInfo {
 
 	/**
 	 * Gets if the sign has been modified.
-	 * 
+	 *
 	 * @return True if modified, otherwise false.
 	 */
 	public boolean isModified() {
@@ -125,7 +124,7 @@ public class SignInfo {
 
 	/**
 	 * Modify the text on the sign, given the index.
-	 * 
+	 *
 	 * @param index The line number to modify.
 	 * @param value The text to change it to.
 	 */
