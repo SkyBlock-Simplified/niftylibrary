@@ -89,8 +89,8 @@ public class SignMonitor extends BukkitListener {
 		if (listener == null) throw new IllegalArgumentException("The listener must not be null!");
 		if (ListUtil.isEmpty(keys) || keys.length == 0) throw new IllegalArgumentException("You cannot listen to signs without at least one key!");
 
-		for (int i = 0; i < keys.length; i++) {
-			if (keys[i].length() > 15)
+		for (String key : keys) {
+			if (key.length() > 15)
 				throw new IllegalArgumentException("The key must not be longer then 15 characters!");
 		}
 
@@ -98,9 +98,10 @@ public class SignMonitor extends BukkitListener {
 		if (ListUtil.notEmpty(this.listeners.get(listener)))
 			newKeys.addAll(this.listeners.get(listener));
 
-		for (int i = 0; i < keys.length; i++) {
-			if (!newKeys.contains(keys[i]))
-				newKeys.add(StringUtil.format("[{0}]", keys[i]));
+		//for (int i = 0; i < keys.length; i++) {
+		for (String key : keys) {
+			if (!newKeys.contains(key))
+				newKeys.add(StringUtil.format("[{0}]", key));
 		}
 
 		this.listeners.put(listener, newKeys);
@@ -237,7 +238,8 @@ public class SignMonitor extends BukkitListener {
 										if (interactEvent.isCancelled()) {
 											event.setCancelled(true);
 											return;
-										}
+										}// else
+										//	this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
 									}
 								}
 							}
@@ -321,7 +323,7 @@ public class SignMonitor extends BukkitListener {
 	/**
 	 * Send an update to any signs we are listening to in the vicinity of the given player.
 	 *
-	 * @param key Only signs with this key.
+	 * @param key Only signs containing this key.
 	 */
 	public void sendSignUpdate(String key) {
 		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
@@ -332,7 +334,7 @@ public class SignMonitor extends BukkitListener {
 	 * Send an update to signs with the given key in the vicinity of the given player.
 	 *
 	 * @param profile Profile to send updates to.
-	 * @param key     Only signs with this key.
+	 * @param key     Only signs containing this key.
 	 */
 	public void sendSignUpdate(BukkitMojangProfile profile, String key) {
 		if (!profile.isOnlineLocally()) return;
@@ -347,26 +349,37 @@ public class SignMonitor extends BukkitListener {
 						if (SIGN_ITEMS.contains(material)) {
 							Sign sign = (Sign)location.getBlock().getState();
 							SignInfo signInfo = this.signLocations.get(sign.getLocation());
-
-							for (String line : signInfo.getLines()) {
-								if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
-									SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
-									outgoing.setPosition(new Vector(sign.getX(), sign.getY(), sign.getZ()));
-
-									try {
-										outgoing.setLines(signInfo.getLines());
-										NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
-									} catch (Exception ex) {
-										this.getLog().console("Unable to send sign update packet!", ex);
-									}
-
-									break;
-								}
-							}
+							this.sendSignUpdate(player, key, signInfo);
 						} else
 							this.signLocations.remove(location);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param player   Player the outgoing packet is going to.
+	 * @param key      Only signs containing this key.
+	 * @param signInfo The private sign information.
+	 */
+	private void sendSignUpdate(Player player, String key, SignInfo signInfo) {
+		Location location = signInfo.getLocation();
+
+		for (String line : signInfo.getLines()) {
+			if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
+				SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
+				outgoing.setPosition(new Vector(location.getX(), location.getY(), location.getZ()));
+
+				try {
+					outgoing.setLines(signInfo.getLines());
+					NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
+				} catch (Exception ex) {
+					this.getLog().console("Unable to send sign update packet!", ex);
+				}
+
+				break;
 			}
 		}
 	}
