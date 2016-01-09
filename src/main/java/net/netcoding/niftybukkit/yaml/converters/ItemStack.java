@@ -1,14 +1,16 @@
 package net.netcoding.niftybukkit.yaml.converters;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
-
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
-
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class ItemStack extends Converter {
@@ -19,28 +21,34 @@ public class ItemStack extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		java.util.Map<String, Object> itemMap = (java.util.Map<String, Object>)(section instanceof java.util.Map ? (java.util.Map<String, Object>)section : ((ConfigSection)section).getRawMap());
-		java.util.Map<String, Object> metaMap = (java.util.Map<String, Object>)(itemMap.get("meta") instanceof java.util.Map ? (java.util.Map<String, Object>)itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
-		org.bukkit.inventory.ItemStack stack = NiftyBukkit.getItemDatabase().get((String)itemMap.get("id"));
-		stack.setAmount((int)itemMap.get("amount"));
-		ItemMeta meta = stack.getItemMeta();
-		if (metaMap.get("name") != null) meta.setDisplayName((String)metaMap.get("name"));
-		if (metaMap.get("lore") != null) meta.setLore((java.util.List<String>)this.getConverter(java.util.List.class).fromConfig(java.util.List.class, metaMap.get("lore"), null));
-		stack.setItemMeta(meta);
+		Map<String, Object> itemMap = (Map<String, Object>)(section instanceof Map ? (Map<String, Object>)section : ((ConfigSection)section).getRawMap());
+		Map<String, Object> metaMap = (Map<String, Object>)(itemMap.get("meta") instanceof Map ? (Map<String, Object>)itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
+		ItemData itemData = new ItemData(NiftyBukkit.getItemDatabase().get((String)itemMap.get("id")));
+		itemData.setAmount((int)itemMap.get("amount"));
+		ItemMeta meta = itemData.getItemMeta();
 
-		return stack;
+		if (metaMap != null) {
+			if (metaMap.get("name") != null)
+				meta.setDisplayName((String)metaMap.get("name"));
+
+			if (metaMap.get("lore") != null)
+				meta.setLore((List<String>)this.getConverter(java.util.List.class).fromConfig(List.class, metaMap.get("lore"), null));
+		}
+
+		itemData.setItemMeta(meta);
+		return itemData;
 	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		org.bukkit.inventory.ItemStack itemStack = (org.bukkit.inventory.ItemStack)obj;
-		java.util.Map<String, Object> saveMap = new HashMap<>();
+		Map<String, Object> saveMap = new HashMap<>();
 		saveMap.put("id", itemStack.getType() + ((itemStack.getDurability() > 0) ? ":" + itemStack.getDurability() : ""));
 		saveMap.put("amount", itemStack.getAmount());
 		Converter listConverter = this.getConverter(java.util.List.class);
-		java.util.Map<String, Object> meta = new HashMap<>();
+		Map<String, Object> meta = new HashMap<>();
 		meta.put("name", itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : null);
-		meta.put("lore", itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore() ? listConverter.toConfig(java.util.List.class, itemStack.getItemMeta().getLore(), null) : null);
+		meta.put("lore", itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore() ? listConverter.toConfig(List.class, itemStack.getItemMeta().getLore(), null) : null);
 		saveMap.put("meta", meta);
 
 		return saveMap;
