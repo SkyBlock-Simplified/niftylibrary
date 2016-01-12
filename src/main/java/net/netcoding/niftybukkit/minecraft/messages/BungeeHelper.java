@@ -537,11 +537,11 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 		}
 
 		private void handleDisconnect(Player player, boolean kicked) {
-			MojangProfile profile = null;
+			BukkitMojangProfile profile = null;
 
 			if (NiftyBukkit.getBungeeHelper().isDetected()) {
-				for (MojangProfile left : NiftyBukkit.getBungeeHelper().getServer().getTotalPlayerList()) {
-					if (((BukkitMojangProfile)left).belongsTo(player)) {
+				for (BukkitMojangProfile left : NiftyBukkit.getBungeeHelper().getServer().getTotalPlayerList()) {
+					if (left.belongsTo(player)) {
 						profile = left;
 						break;
 					}
