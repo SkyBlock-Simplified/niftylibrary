@@ -1,17 +1,16 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
-import net.netcoding.niftycore.mojang.MojangProfile;
-
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class PlayerDisconnectEvent extends Event {
 
 	private static final transient HandlerList handlers = new HandlerList();
-	private final MojangProfile profile;
+	private final BukkitMojangProfile profile;
 	private final boolean kicked;
 
-	public PlayerDisconnectEvent(MojangProfile profile, boolean kicked) {
+	public PlayerDisconnectEvent(BukkitMojangProfile profile, boolean kicked) {
 		this.profile = profile;
 		this.kicked = kicked;
 	}
@@ -25,7 +24,7 @@ public class PlayerDisconnectEvent extends Event {
 		return handlers;
 	}
 
-	public MojangProfile getProfile() {
+	public BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 
