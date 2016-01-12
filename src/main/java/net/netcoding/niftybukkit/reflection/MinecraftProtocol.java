@@ -1,20 +1,69 @@
 package net.netcoding.niftybukkit.reflection;
 
-import java.net.URL;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.netcoding.niftycore.http.HttpBody;
 import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpResponse;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Bukkit;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.net.URL;
 
 public enum MinecraftProtocol {
 
+	//http://wiki.vg/Protocol_version_numbers
+	v15w51b(94),
+	v15w51a(93),
+	v15w50a(92),
+	v15w49b(91),
+	v15w49a(90),
+	v15w47c(89),
+	v15w47b(88),
+	v15w47a(87),
+	v15w46a(86),
+	v15w45a(85),
+	v15w44b(84),
+	v15w44a(83),
+	v15w43c(82),
+	v15w43b(81),
+	v15w43a(80),
+	v15w42a(79),
+	v15w41b(78),
+	v15w41a(77),
+	v15w40b(76),
+	v15w40a(75),
+	v15w39c(74),
+	v15w38b(73),
+	v15w38a(72),
+	v15w37a(71),
+	v15w36d(70),
+	v15w36c(69),
+	v15w36b(68),
+	v15w36a(67),
+	v15w35e(66),
+	v15w35d(65),
+	v15w35c(64),
+	v15w35b(63),
+	v15w35a(62),
+	v15w34d(61),
+	v15w34c(60),
+	v15w34b(59),
+	v15w34a(58),
+	v15w33c(57),
+	v15w33b(56),
+	v15w33a(55),
+	v15w32c(54),
+	v15w32b(53),
+	v15w32a(52),
+	v15w31c(51),
+	v15w31b(50),
+	v15w31a(49),
+	v15w14a(48),
+	v1_8_9(47),
+	v1_8_8(47),
+	v1_8_7(47),
 	v1_8_6(47),
 	v1_8_3(47),
 	v1_8_2(47),
@@ -146,7 +195,7 @@ public enum MinecraftProtocol {
 	private final int protocol;
 	private final String version;
 
-	private MinecraftProtocol(int protocol) {
+	MinecraftProtocol(int protocol) {
 		this.protocol = protocol;
 		this.version = this.name().replace("v", "").replace("_pre", "-pre").replace("_", ".");
 	}
@@ -159,7 +208,7 @@ public enum MinecraftProtocol {
 		return this.version;
 	}
 
-	public final static String getCurrentVersion() {
+	public static String getCurrentVersion() {
 		try {
 			Reflection server = new Reflection("CraftServer", MinecraftPackage.CRAFTBUKKIT);
 			Reflection minecraftServer = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
@@ -173,11 +222,11 @@ public enum MinecraftProtocol {
 		}
 	}
 
-	public final static int getCurrentProtocol() {
+	public static int getCurrentProtocol() {
 		return getProtocol(getCurrentVersion());
 	}
 
-	public final static int getProtocol(String version) {
+	public static int getProtocol(String version) {
 		for (MinecraftProtocol protocol : values()) {
 			if (protocol.getVersion().equals(version))
 				return protocol.getProtocol();
@@ -186,7 +235,7 @@ public enum MinecraftProtocol {
 		return getFetchedProtocol(version);
 	}
 
-	private final static int getFetchedProtocol(String version) {
+	private static int getFetchedProtocol(String version) {
 		try {
 			HttpBody body = new HttpBody(StringUtil.format("ver={0}", version));
 			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
