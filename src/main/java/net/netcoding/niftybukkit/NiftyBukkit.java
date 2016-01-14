@@ -1,11 +1,5 @@
 package net.netcoding.niftybukkit;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-
 import net.netcoding.niftybukkit.inventory.enchantments.EnchantmentDatabase;
 import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
@@ -13,10 +7,15 @@ import net.netcoding.niftybukkit.minecraft.messages.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.BukkitMojangRepository;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public final class NiftyBukkit extends BukkitPlugin {
 
@@ -53,50 +52,55 @@ public final class NiftyBukkit extends BukkitPlugin {
 		bungeeHelper.unregister();
 	}
 
-	public final static BungeeHelper getBungeeHelper() {
+	public static BungeeHelper getBungeeHelper() {
 		return bungeeHelper;
 	}
 
-	public final static EnchantmentDatabase getEnchantmentDatabase() {
+	public static EnchantmentDatabase getEnchantmentDatabase() {
 		return enchantmentDatabase;
 	}
 
-	public final static ItemDatabase getItemDatabase() {
+	public static ItemDatabase getItemDatabase() {
 		return itemDatabase;
 	}
 
-	public final static BukkitMojangRepository getMojangRepository() {
+	public static BukkitMojangRepository getMojangRepository() {
 		return repository;
 	}
 
-	public final static BukkitPlugin getPlugin() {
+	public static BukkitPlugin getPlugin() {
 		return plugin;
 	}
 
-	public final static List<String> getPluginCache(String pluginName) {
+	public static List<String> getPluginCache(String pluginName) {
 		return PLUGINS.keySet().contains(pluginName) ? PLUGINS.get(pluginName) : Collections.<String>emptyList();
 	}
 
-	public final static net.milkbowl.vault.permission.Permission getPermissions() {
+	public static net.milkbowl.vault.permission.Permission getPermissions() {
 		try {
 			RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 			return (permissionProvider != null ? permissionProvider.getProvider() : null);
-		} catch (NoClassDefFoundError ex) { }
+		} catch (NoClassDefFoundError ignore) { }
 
 		return null;
 	}
 
-	public final static com.comphenix.protocol.ProtocolManager getProtocolManager() {
+	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {
 		try {
 			return com.comphenix.protocol.ProtocolLibrary.getProtocolManager();
 		} catch (NoClassDefFoundError ex) { return null; }
 	}
 
-	public final static boolean hasProtocolManager() {
+	public static boolean hasProtocolManager() {
 		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 	}
 
-	public final static boolean hasPermissions() {
+	@Deprecated
+	public static boolean hasPermissions() {
+		return hasVault();
+	}
+
+	public static boolean hasVault() {
 		return NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin("Vault") != null;
 	}
 
@@ -128,7 +132,7 @@ public final class NiftyBukkit extends BukkitPlugin {
 						String[] parts = record.getLoggerName().split("\\.");
 						Plugin plugin = NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(parts[parts.length - 1]);
 						if (plugin != null) pluginName = parts[parts.length - 1];
-					} catch (Exception ex) { }
+					} catch (Exception ignore) { }
 				}
 
 				PLUGINS.get(StringUtil.isEmpty(pluginName) ? "Bukkit" : pluginName).add(record.getThrown().getMessage());
