@@ -43,10 +43,11 @@ public class LocationUtil {
 	 * @return centered location
 	 */
 	public static Location center(Location location) {
-		location.setX(location.getBlockX() + 0.5D);
-		location.setY(location.getBlockY() + 0.5D);
-		location.setZ(location.getBlockZ() + 0.5D);
-		return location;
+		Location loc = location.clone();
+		loc.setX(location.getBlockX() + 0.5D);
+		loc.setY(location.getBlockY() + 0.5D);
+		loc.setZ(location.getBlockZ() + 0.5D);
+		return loc;
 	}
 
 	/**
@@ -55,8 +56,9 @@ public class LocationUtil {
 	 * @return levelled off location
 	 */
 	public static Location level(Location location) {
-		location.setPitch(0.0f);
-		return location;
+		Location loc = location.clone();
+		loc.setPitch(0.0f);
+		return loc;
 	}
 
 	/**
@@ -65,8 +67,9 @@ public class LocationUtil {
 	 * @return straightened location
 	 */
 	public static Location straighten(Location location) {
-		location.setYaw(Math.round(location.getYaw() / 90f) * 90f);
-		return location;
+		Location loc = location.clone();
+		loc.setYaw(Math.round(location.getYaw() / 90f) * 90f);
+		return loc;
 	}
 
 }
