@@ -5,11 +5,11 @@ import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class BukkitMojangCache extends BukkitHelper {
+public class BukkitMojangCache<T extends BukkitMojangProfile> extends BukkitHelper {
 
-	private final BukkitMojangProfile profile;
+	private final T profile;
 
-	public BukkitMojangCache(JavaPlugin plugin, BukkitMojangProfile profile) {
+	public BukkitMojangCache(JavaPlugin plugin, T profile) {
 		super(plugin);
 		this.profile = profile;
 	}
@@ -23,7 +23,7 @@ public class BukkitMojangCache extends BukkitHelper {
 		return this.getProfile().equals(cache.getProfile());
 	}
 
-	public BukkitMojangProfile getProfile() {
+	public T getProfile() {
 		return this.profile;
 	}
 
