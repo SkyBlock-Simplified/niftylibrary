@@ -1,12 +1,6 @@
 package net.netcoding.niftybukkit.mojang;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
+import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
@@ -17,12 +11,17 @@ import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 
-import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile> {
 
@@ -123,16 +122,16 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 
 	/**
 	 * Locates the profile for this server associated with the given offline player.
-	 * 
+	 *
 	 * @param oplayer Offline player to search with.
 	 * @return Profile associated with the given player.
 	 * @throws ProfileNotFoundException If unable to locate the players profile.
 	 */
 	public BukkitMojangProfile searchByPlayer(OfflinePlayer oplayer) throws ProfileNotFoundException {
 		try {
-			return this.searchByPlayer(Arrays.asList(oplayer))[0];
+			return this.searchByPlayer(Collections.singletonList(oplayer))[0];
 		} catch (ProfileNotFoundException pnfex) {
-			if (ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER.equals(pnfex.getReason())) {
+			if (ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER == pnfex.getReason()) {
 				JsonObject json = new JsonObject();
 				json.addProperty("id", oplayer.getUniqueId().toString());
 				json.addProperty("name", oplayer.getName());
@@ -145,7 +144,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 
 	/**
 	 * Locates the profiles for this server associated with the given offline players.
-	 * 
+	 *
 	 * @param oplayers Offline players to search with.
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
@@ -156,7 +155,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 
 	/**
 	 * Locates the profiles for this server associated with the given offline players.
-	 * 
+	 *
 	 * @param oplayers Offline players to search with.
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
@@ -177,10 +176,10 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 
 			// Search Online Servers
 			if (NiftyBukkit.getBungeeHelper().isDetected()) {
-				for (MojangProfile temp : tempProfiles) {
-					for (MojangProfile profile : NiftyBukkit.getBungeeHelper().getServer().getPlayerList()) {
+				for (BukkitMojangProfile temp : tempProfiles) {
+					for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getServer().getPlayerList()) {
 						if (profile.equals(temp)) {
-							profiles.add((BukkitMojangProfile)profile);
+							profiles.add(profile);
 							tempProfiles.remove(temp);
 							break;
 						}
@@ -189,9 +188,9 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 			}
 
 			// Search Unique ID
-			for (MojangProfile temp : tempProfiles) {
-				MojangProfile profile = this.searchByUniqueId(temp.getUniqueId());
-				profiles.add((BukkitMojangProfile)profile);
+			for (BukkitMojangProfile temp : tempProfiles) {
+				BukkitMojangProfile profile = this.searchByUniqueId(temp.getUniqueId());
+				profiles.add(profile);
 				tempProfiles.remove(temp);
 			}
 
@@ -229,7 +228,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 				}
 			}
 		}
-		
+
 	}
 
 }
