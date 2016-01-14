@@ -41,7 +41,7 @@ public class TitleManager {
 		this.setSubtitle(subtitle);
 		this.setFadeIn(fadeInTime);
 		this.setStay(stayTime);
-		this.setFadeOut(fadeInTime);
+		this.setFadeOut(fadeOutTime);
 	}
 
 	public static void broadcastActionBar(String text) throws Exception {
@@ -119,7 +119,7 @@ public class TitleManager {
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
-		if (MinecraftPackage.IS_PRE_1_8) 
+		if (MinecraftPackage.IS_PRE_1_8)
 			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumClear));
 		else
 			packetTitleObj = packetTitle.newInstance(enumClear, null);
@@ -135,7 +135,7 @@ public class TitleManager {
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumReset = titleAction.getValue("RESET", null);
 
-		if (MinecraftPackage.IS_PRE_1_8) 
+		if (MinecraftPackage.IS_PRE_1_8)
 			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumReset));
 		else
 			packetTitleObj = packetTitle.newInstance(enumReset, null);
