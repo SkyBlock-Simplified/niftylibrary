@@ -7,7 +7,6 @@ import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 import org.bukkit.Bukkit;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.Set;
 
 public class BungeeServer extends MinecraftServer<BukkitMojangProfile> {
@@ -18,11 +17,6 @@ public class BungeeServer extends MinecraftServer<BukkitMojangProfile> {
 
 	BungeeServer(String serverName) {
 		this.serverName = serverName;
-	}
-
-	@Override
-	public Collection<BukkitMojangProfile> getPlayerList() {
-		return super.getPlayerList();
 	}
 
 	Set<BukkitMojangProfile> getUnsafePlayerList() {
