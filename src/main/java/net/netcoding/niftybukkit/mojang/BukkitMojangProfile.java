@@ -1,12 +1,12 @@
 package net.netcoding.niftybukkit.mojang;
 
+import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.Reflection;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -15,8 +15,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import com.google.gson.JsonObject;
 
 public class BukkitMojangProfile extends MojangProfile {
 
@@ -143,7 +141,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return BungeeServer Server object.
 	 */
 	@Override
-	public MinecraftServer<BukkitMojangProfile> getServer() {
+	public BungeeServer getServer() {
 		return NiftyBukkit.getBungeeHelper().getPlayerServer(this);
 	}
 
