@@ -98,7 +98,6 @@ public class SignMonitor extends BukkitListener {
 		if (ListUtil.notEmpty(this.listeners.get(listener)))
 			newKeys.addAll(this.listeners.get(listener));
 
-		//for (int i = 0; i < keys.length; i++) {
 		for (String key : keys) {
 			if (!newKeys.contains(key))
 				newKeys.add(StringUtil.format("[{0}]", key));
