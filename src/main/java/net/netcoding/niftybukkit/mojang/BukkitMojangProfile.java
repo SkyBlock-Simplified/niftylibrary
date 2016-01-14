@@ -18,6 +18,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 public class BukkitMojangProfile extends MojangProfile {
 
+	protected BukkitMojangProfile() { }
+
 	/**
 	 * Checks if the player is associated to this profile.
 	 *
