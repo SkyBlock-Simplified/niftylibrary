@@ -100,7 +100,7 @@ public class SignMonitor extends BukkitListener {
 
 		for (String key : keys) {
 			if (!newKeys.contains(key))
-				newKeys.add(StringUtil.format("[{0}]", key));
+				newKeys.add(StringUtil.format("[{0}]", key.toLowerCase()));
 		}
 
 		this.listeners.put(listener, newKeys);
@@ -186,7 +186,7 @@ public class SignMonitor extends BukkitListener {
 
 						for (String line : signInfo.getLines()) {
 							for (String key : keys) {
-								if (line.toLowerCase().contains(key.toLowerCase())) {
+								if (line.toLowerCase().contains(key)) {
 									SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
 									listener.onSignBreak(breakEvent);
 									Sign sign = (Sign)location.getBlock().getState();
@@ -225,7 +225,7 @@ public class SignMonitor extends BukkitListener {
 
 							for (String line : signInfo.getLines()) {
 								for (String key : keys) {
-									if (line.toLowerCase().contains(key.toLowerCase())) {
+									if (line.toLowerCase().contains(key)) {
 										BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 										SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 										listener.onSignInteract(interactEvent);
@@ -270,7 +270,7 @@ public class SignMonitor extends BukkitListener {
 
 					for (String line : signInfo.getLines()) {
 						for (String key : keys) {
-							if (line.toLowerCase().contains(key.toLowerCase())) {
+							if (line.toLowerCase().contains(key)) {
 								BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
@@ -404,7 +404,7 @@ public class SignMonitor extends BukkitListener {
 						for (SignListener listener : listeners.keySet()) {
 							for (int i = 0; i < 4; i++) {
 								for (String key : listeners.get(listener)) {
-									if (sign.getLine(i).toLowerCase().contains(key.toLowerCase())) {
+									if (sign.getLine(i).toLowerCase().contains(key)) {
 										SignInfo signInfo = signLocations.get(location);
 										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
 										SignUpdateEvent updateEvent = new SignUpdateEvent(bukkitProfile, signInfo, key);
