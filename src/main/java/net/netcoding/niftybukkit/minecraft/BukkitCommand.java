@@ -46,7 +46,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Creates a command wrapper.
-	 * 
+	 *
 	 * @param plugin the plugin to load the command from
 	 * @param command the command name for this class
 	 */
@@ -69,7 +69,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets a custom usage based on label or argument.
-	 * 
+	 *
 	 * @param index index of the argument. 0 will modify the command usage based on label, 1 or more will modify based on argument index
 	 * @param arg the label/argument to check
 	 * @param usage the usage to display (after the label/argument)
@@ -83,7 +83,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Gets the command created for your plugin.
-	 * 
+	 *
 	 * @return Command associated to this class
 	 */
 	public PluginCommand getCommand() {
@@ -116,7 +116,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if this command can only be run when BungeeCord is detected.
-	 * 
+	 *
 	 * @return True if bungee detected, otherwise false.
 	 */
 	public boolean isBungeeOnly() {
@@ -125,7 +125,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if the arguments are being looked at for help.
-	 * 
+	 *
 	 * @return True if checking, otherwise false.
 	 */
 	public boolean isCheckingHelp() {
@@ -134,7 +134,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if the users permissions will be checked immediately upon running the command.
-	 * 
+	 *
 	 * @return True if checking, otherwise false.
 	 */
 	public boolean isCheckingPerms() {
@@ -143,7 +143,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if this command can only be ran as console.
-	 * 
+	 *
 	 * @return True if console only, otherwise false.
 	 */
 	public boolean isConsoleOnly() {
@@ -152,7 +152,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if this command can only be ran as a player.
-	 * 
+	 *
 	 * @return True if player only, otherwise false.
 	 */
 	public boolean isPlayerOnly() {
@@ -161,7 +161,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if this command will tab complete for player names.
-	 * 
+	 *
 	 * @return True if auto tab completing, otherwise false.
 	 */
 	public boolean isPlayerTabComplete() {
@@ -170,7 +170,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Checks if the arguments are looking for help.
-	 * 
+	 *
 	 * @param args Arguments to check if are looking for help.
 	 * @return True if looking for help, otherwise false.
 	 */
@@ -292,7 +292,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets command to run only if BungeeCord is detected.
-	 * 
+	 *
 	 * @param value True to run only when detected, otherwise false.
 	 */
 	public void setBungeeOnly(boolean value) {
@@ -308,7 +308,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets command to check if user has permission to run.
-	 * 
+	 *
 	 * @param value true to check permissions (default), otherwise false
 	 */
 	public void setCheckPerms(boolean value) {
@@ -324,7 +324,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets command to only allow console execution. This command sets {@link #setPlayerOnly() setPlayerOnly} to false.
-	 * 
+	 *
 	 * @param value true to only allow console, otherwise false
 	 */
 	public void setConsoleOnly(boolean value) {
@@ -341,7 +341,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets command to check for help.
-	 * 
+	 *
 	 * @param value true to only allow console, otherwise false
 	 */
 	public void setCheckHelp(boolean value) {
@@ -350,7 +350,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets the maximum arguments that can be passed to this command.
-	 * 
+	 *
 	 * @param value Maximum number of arguments allowed.
 	 */
 	public void setMaximumArgsLength(int value) {
@@ -359,7 +359,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets the minimum arguments that need to be passed to this command.
-	 * 
+	 *
 	 * @param value Minimum number of arguments allowed.
 	 */
 	public void setMinimumArgsLength(int value) {
@@ -375,7 +375,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets command to only allow player execution. This command sets {@link #setConsoleOnly() setConsoleOnly} to false.
-	 * 
+	 *
 	 * @param value True to only allow players, otherwise false
 	 */
 	public void setPlayerOnly(boolean value) {
@@ -392,7 +392,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets this command to automatically tab complete player names.
-	 * 
+	 *
 	 * @param value True to enable player tab complete, otherwise false.
 	 */
 	public void setPlayerTabComplete(boolean value) {
@@ -401,7 +401,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	/**
 	 * Sets this index to use when automatically tab completing player names.
-	 * 
+	 *
 	 * @param value Index to tab complete player names.
 	 */
 	public void setPlayerTabCompleteIndex(int value) {
@@ -422,7 +422,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 * Also if they have too few or too many arguments.
 	 * <p>
 	 * Defaults label to {@link PluginCommand#getName()}
-	 * 
+	 *
 	 * @param sender The sender to send the usage to
 	 */
 	public void showUsage(CommandSender sender) {
@@ -432,7 +432,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 	/**
 	 * Shows command usage if arguments end in a question mark or help.
 	 * Also if they have too few or too many arguments.
-	 * 
+	 *
 	 * @param sender The sender to send the usage to
 	 * @param label The label to use in the usage (defaults to {@link PluginCommand#getName()})
 	 */
