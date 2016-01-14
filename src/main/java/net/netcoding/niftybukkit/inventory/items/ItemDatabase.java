@@ -1,12 +1,20 @@
 package net.netcoding.niftybukkit.inventory.items;
 
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.NumberUtil;
+import net.netcoding.niftycore.util.StringUtil;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,16 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.StringUtil;
-
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class ItemDatabase extends BukkitHelper {
 
@@ -69,7 +67,7 @@ public class ItemDatabase extends BukkitHelper {
 
 				if (this.durabilities.containsKey(itemName) && metaData == 0)
 					metaData = this.durabilities.get(itemName);
-			} else if (!Material.getMaterial(itemName.toUpperCase(Locale.ENGLISH)).equals(null))
+			} else if (Material.getMaterial(itemName.toUpperCase(Locale.ENGLISH)) != null)
 				itemid = Material.getMaterial(itemName.toUpperCase(Locale.ENGLISH)).getId();
 			else
 				throw new RuntimeException("Unknown item name: " + itemName);
@@ -99,14 +97,14 @@ public class ItemDatabase extends BukkitHelper {
 
 		if (args.length < 1)
 			is.add(player.getItemInHand());
-		else if (args[0].equalsIgnoreCase("hand"))
+		else if ("hand".equalsIgnoreCase(args[0]))
 			is.add(player.getItemInHand());
-		else if (args[0].equalsIgnoreCase("inventory") || args[0].equalsIgnoreCase("invent") || args[0].equalsIgnoreCase("all")) {
+		else if ("inventory".equalsIgnoreCase(args[0]) || "invent".equalsIgnoreCase(args[0]) || "all".equalsIgnoreCase(args[0])) {
 			for (ItemStack stack : player.getInventory().getContents()) {
 				if (stack == null || stack.getType() == Material.AIR) continue;
 				is.add(stack);
 			}
-		} else if (args[0].equalsIgnoreCase("blocks")) {
+		} else if ("blocks".equalsIgnoreCase(args[0])) {
 			for (ItemStack stack : player.getInventory().getContents()) {
 				if (stack == null || stack.getType() == Material.AIR || !stack.getType().isBlock()) continue;
 				is.add(stack);
@@ -114,7 +112,7 @@ public class ItemDatabase extends BukkitHelper {
 		} else
 			is.add(get(args[0]));
 
-		if (is.isEmpty() || is.get(0).getType().equals(Material.AIR))
+		if (is.isEmpty() || is.get(0).getType() == Material.AIR)
 			throw new RuntimeException("No item found!");
 
 		return is;
@@ -159,13 +157,13 @@ public class ItemDatabase extends BukkitHelper {
 				String itemData = split[1];
 
 				if (NumberUtil.isInt(itemData))
-					try { itemDataList.add(new ItemData(itemNo, Short.parseShort(itemData))); } catch (Exception ex) { }
+					try { itemDataList.add(new ItemData(itemNo, Short.parseShort(itemData))); } catch (Exception ignore) { }
 				else if (itemData.startsWith("[") && itemData.endsWith("]")) {
 					String[] dataValueList = itemData.substring(1, itemData.length() - 1).split(",");
 
 					for (String dataValue : dataValueList) {
 						if (NumberUtil.isInt(dataValue))
-							try { itemDataList.add(new ItemData(itemNo, Short.parseShort(dataValue))); } catch (Exception ex) { }
+							try { itemDataList.add(new ItemData(itemNo, Short.parseShort(dataValue))); } catch (Exception ignore) { }
 						else if (dataValue.contains("-")) {
 							String[] rangeData = dataValue.split("-");
 
@@ -173,7 +171,7 @@ public class ItemDatabase extends BukkitHelper {
 								short start = Short.parseShort(rangeData[0]);
 								short end = Short.parseShort(rangeData[1]);
 								if (start > end) throw new IndexOutOfBoundsException(String.format("Data value start range %s must be below the end range %s!", start, end));
-								for (short i = start; i < end; i++) try { itemDataList.add(new ItemData(itemNo, i)); } catch (Exception ex) { }
+								for (short i = start; i < end; i++) try { itemDataList.add(new ItemData(itemNo, i)); } catch (Exception ignore) { }
 							} else
 								throw new NumberFormatException("Range data values must be an integer!");
 						} else
@@ -182,7 +180,7 @@ public class ItemDatabase extends BukkitHelper {
 				} else
 					throw new NumberFormatException("Data value must be an integer, list or range!");
 			} else
-				try { itemDataList.add(new ItemData(this.getId(item))); } catch (Exception ex) { }
+				try { itemDataList.add(new ItemData(this.getId(item))); } catch (Exception ignore) { }
 		}
 
 		return Collections.unmodifiableList(itemDataList);
@@ -234,7 +232,7 @@ public class ItemDatabase extends BukkitHelper {
 
 		for (String line : lines) {
 			line = line.trim().toLowerCase(Locale.ENGLISH);
-			if (line.length() > 0 && line.charAt(0) == '#') continue;
+			if (!line.isEmpty() && line.charAt(0) == '#') continue;
 			final String[] parts = line.split("[^a-zA-Z0-9]");
 			if (parts.length < 2) continue;
 			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
@@ -248,12 +246,12 @@ public class ItemDatabase extends BukkitHelper {
 			final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
 			if (numeric < 0 || data < 0) continue;
 			ItemData itemData = new ItemData(numeric, data);
-			if (numeric > 0 && Material.AIR.equals(Material.getMaterial(numeric))) continue;
+			if (numeric > 0 && Material.AIR == Material.getMaterial(numeric)) continue;
 			this.durabilities.put(itemName, data);
 			this.items.put(itemName, numeric);
 
 			if (!this.names.containsKey(itemData)) {
-				this.names.put(itemData, new ArrayList<>(Arrays.asList(itemName)));
+				this.names.put(itemData, new ArrayList<>(Collections.singletonList(itemName)));
 				this.primaryName.put(itemData, itemName);
 			} else {
 				this.names.get(itemData).add(itemName);

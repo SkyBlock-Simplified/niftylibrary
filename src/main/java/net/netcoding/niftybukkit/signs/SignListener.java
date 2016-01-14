@@ -7,12 +7,12 @@ import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 
 public interface SignListener {
 
-	public void onSignBreak(SignBreakEvent event);
+	void onSignBreak(SignBreakEvent event);
 
-	public void onSignCreate(SignCreateEvent event);
+	void onSignCreate(SignCreateEvent event);
 
-	public void onSignInteract(SignInteractEvent event);
+	void onSignInteract(SignInteractEvent event);
 
-	public void onSignUpdate(SignUpdateEvent event);
+	void onSignUpdate(SignUpdateEvent event);
 
 }

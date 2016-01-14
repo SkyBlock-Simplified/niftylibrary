@@ -7,12 +7,12 @@ import net.netcoding.niftybukkit.inventory.events.InventoryOpenEvent;
 
 public interface FakeInventoryListener {
 
-	public void onInventoryClick(InventoryClickEvent event);
+	void onInventoryClick(InventoryClickEvent event);
 
-	public void onInventoryClose(InventoryCloseEvent event);
+	void onInventoryClose(InventoryCloseEvent event);
 
-	public void onInventoryOpen(InventoryOpenEvent event);
+	void onInventoryOpen(InventoryOpenEvent event);
 
-	public void onInventoryItemInteract(InventoryItemInteractEvent event);
+	void onInventoryItemInteract(InventoryItemInteractEvent event);
 
 }

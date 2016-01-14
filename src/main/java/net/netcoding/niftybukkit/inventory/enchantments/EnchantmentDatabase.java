@@ -1,12 +1,19 @@
 package net.netcoding.niftybukkit.inventory.enchantments;
 
+import net.netcoding.niftybukkit.minecraft.BukkitHelper;
+import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.NumberUtil;
+import net.netcoding.niftycore.util.StringUtil;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,19 +21,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.StringUtil;
-
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
-
 public class EnchantmentDatabase extends BukkitHelper {
 
 	private final transient File enchantmentsFile;
-	private final transient Map<String, Integer> enchantments = new HashMap<>();
+	//private final transient Map<String, Integer> enchantments = new HashMap<>();
 	final transient Map<EnchantmentData, List<String>> names = new HashMap<>();
 	final transient Map<EnchantmentData, String> primaryName = new HashMap<>();
 
@@ -79,7 +77,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 	}
 
 	public String name(Enchantment enchantment) {
-		return this.primaryName.get(enchantment);
+		return this.primaryName.get(new EnchantmentData(enchantment));
 	}
 
 	public List<EnchantmentData> parse(String[] enchList) {
@@ -172,17 +170,17 @@ public class EnchantmentDatabase extends BukkitHelper {
 
 		for (String line : lines) {
 			line = line.trim().toLowerCase(Locale.ENGLISH);
-			if (line.length() > 0 && line.charAt(0) == '#') continue;
+			if (!line.isEmpty() && line.charAt(0) == '#') continue;
 			final String[] parts = line.split(",");
 			if (parts.length < 2) continue;
 			String enchName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
-			this.enchantments.put(enchName, numeric);
+			//this.enchantments.put(enchName, numeric);
 			EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
 			if (enchData.getEnchantment() == null) continue;
 
 			if (!this.names.containsKey(enchData)) {
-				this.names.put(enchData, new ArrayList<>(Arrays.asList(enchName)));
+				this.names.put(enchData, new ArrayList<>(Collections.singletonList(enchName)));
 				if (enchName.contains("_")) this.names.get(enchData).add(enchName.replace("_", ""));
 				this.primaryName.put(enchData, enchName);
 			} else {

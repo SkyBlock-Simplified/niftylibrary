@@ -213,7 +213,7 @@ public class SignMonitor extends BukkitListener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK.equals(event.getAction()) || Action.RIGHT_CLICK_BLOCK.equals(event.getAction()))) {
+		if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK == event.getAction() || Action.RIGHT_CLICK_BLOCK == event.getAction())) {
 			Block block = event.getClickedBlock();
 
 			if (this.isListening()) {

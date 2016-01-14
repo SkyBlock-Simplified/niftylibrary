@@ -1,19 +1,17 @@
 package net.netcoding.niftybukkit.signs;
 
-import java.util.List;
-import java.util.Map;
-
-import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-
-import org.bukkit.util.Vector;
-
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.gson.Gson;
+import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.StringUtil;
+import org.bukkit.util.Vector;
+
+import java.util.List;
+import java.util.Map;
 
 class SignPacket {
 
@@ -33,9 +31,9 @@ class SignPacket {
 	}
 
 	public Vector getPosition() {
-		int x = 0;
-		int y = 0;
-		int z = 0;
+		int x;
+		int y;
+		int z;
 
 		if (MinecraftPackage.IS_PRE_1_8) {
 			x = this.getCoord(0);
@@ -53,7 +51,7 @@ class SignPacket {
 
 	private String getLine(int index) {
 		String json = this.getPacket().getChatComponentArrays().read(0)[index].getJson();
-		if (StringUtil.isEmpty(json) || json.equals("\"\"")) return "";
+		if (StringUtil.isEmpty(json) || "\"\"".equals(json)) return "";
 		Map<?, ?> jsonMap = GSON.fromJson(json, Map.class);
 		return (String)((List<?>)jsonMap.get("extra")).get(0);
 	}

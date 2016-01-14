@@ -22,18 +22,17 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Checks if the player is associated to this profile.
-	 * 
+	 *
 	 * @param oplayer Offline player to check.
 	 * @return True if associated, otherwise false.
 	 */
 	public boolean belongsTo(OfflinePlayer oplayer) {
-		if (oplayer == null) return false;
-		return oplayer.getUniqueId().equals(this.getUniqueId());
+		return oplayer != null && oplayer.getUniqueId().equals(this.getUniqueId());
 	}
 
 	/**
 	 * Gets the connection of this profiles client, if they are online.
-	 * 
+	 *
 	 * @return Connection of the client.
 	 */
 	public Object getConnection() throws Exception {
@@ -42,7 +41,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets the handle of this profiles client, if they are online.
-	 * 
+	 *
 	 * @return Handle of the client.
 	 */
 	public Object getHandle() throws Exception {
@@ -54,7 +53,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets clients locale.
-	 * 
+	 *
 	 * @return Clients locale.
 	 */
 	public String getLocale() {
@@ -63,7 +62,7 @@ public class BukkitMojangProfile extends MojangProfile {
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
 				locale = (String)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("locale", this.getHandle());
-			} catch (Exception ex) { }
+			} catch (Exception ignore) { }
 		}
 
 		return locale;
@@ -71,7 +70,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets the players name associated to this UUID.
-	 * 
+	 *
 	 * @return Current player name.
 	 */
 	public String getName() {
@@ -94,7 +93,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets the players offline player object associated to this profile.
-	 * 
+	 *
 	 * @return Offline Offline player object.
 	 */
 	public OfflinePlayer getOfflinePlayer() {
@@ -103,7 +102,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Get clients ping.
-	 * 
+	 *
 	 * @return Client latency with the server.
 	 */
 	public int getPing() {
@@ -112,7 +111,7 @@ public class BukkitMojangProfile extends MojangProfile {
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
 				ping = (int)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("ping", this.getHandle());
-			} catch (Exception ex) { }
+			} catch (Exception ignore) { }
 		}
 
 		return ping;
@@ -120,7 +119,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Get clients protocol version.
-	 * 
+	 *
 	 * @return Client protocol version.
 	 */
 	public int getProtocolVersion() {
@@ -132,7 +131,7 @@ public class BukkitMojangProfile extends MojangProfile {
 				Reflection networkManager = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
 				Object networkManagerObj = playerConnection.getValue("networkManager", this.getConnection());
 				version = (int)networkManager.invokeMethod("getVersion", networkManagerObj);
-			} catch (Exception ex) { }
+			} catch (Exception ignore) { }
 		}
 
 		return version;
@@ -140,7 +139,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets the server this profile belongs to.
-	 * 
+	 *
 	 * @return BungeeServer Server object.
 	 */
 	@Override
@@ -150,7 +149,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Gets a skull skinned to this profile's face.
-	 * 
+	 *
 	 * @return Skull item with this profiles skin face.
 	 */
 	public final ItemStack getSkull() {
@@ -164,7 +163,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Checks if this profile is found anywhere on the local server.
-	 * 
+	 *
 	 * @return True if online, otherwise false.
 	 */
 	public boolean isOnlineLocally() {
@@ -173,7 +172,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 	/**
 	 * Checks if this profile is found anywhere on BungeeCord or local server.
-	 * 
+	 *
 	 * @return True if online, otherwise false.
 	 */
 	public boolean isOnlineAnywhere() {
@@ -193,12 +192,12 @@ public class BukkitMojangProfile extends MojangProfile {
 			Object playerConnection = this.getConnection();
 			Object[] titleActionEnums = enumCommandsObj.getClazz().getEnumConstants();
 			playerConnObj.invokeMethod("a", playerConnection, clientCommandObj.newInstance(titleActionEnums[1]));
-		} catch (Exception ex) { }
+		} catch (Exception ignore) { }
 	}
 
 	/**
 	 * Sends a packet to the profiles client, if they are online.
-	 * 
+	 *
 	 * @param packet Packet to send.
 	 */
 	public final void sendPacket(Object packet) throws Exception {
@@ -215,7 +214,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	* @param target The target to spectate.
 	*/
 	@SuppressWarnings("unused")
-	private final void spectate(Entity target) throws Exception {
+	private void spectate(Entity target) throws Exception {
 		if (!this.getOfflinePlayer().isOnline()) return;
 
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);

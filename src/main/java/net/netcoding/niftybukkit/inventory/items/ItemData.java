@@ -1,16 +1,15 @@
 package net.netcoding.niftybukkit.inventory.items;
 
-import java.util.ArrayList;
-
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
-
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
 
 public class ItemData extends ItemStack {
 
@@ -40,7 +39,7 @@ public class ItemData extends ItemStack {
 		super(source);
 	}
 
-	public final static ItemStack addGlow(ItemStack stack) {
+	public static ItemStack addGlow(ItemStack stack) {
 		try {
 			if (!MinecraftPackage.IS_PRE_1_8)
 				stack.addUnsafeEnchantment(Enchantment.DURABILITY, -1);

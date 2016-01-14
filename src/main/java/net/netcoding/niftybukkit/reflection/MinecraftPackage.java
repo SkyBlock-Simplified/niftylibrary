@@ -23,7 +23,7 @@ public class MinecraftPackage {
 			Reflection spigotPlayerRef = new Reflection("Spigot", "Player", "org.bukkit.entity");
 			spigotPlayerRef.getClazz();
 			spigot = true;
-		} catch (Exception ex) { }
+		} catch (Exception ignore) { }
 
 		IS_SPIGOT = spigot;
 	}

@@ -484,7 +484,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 			try {
 				getLog().console("Closing socket?");
-				BUKKIT_SOCKET.close();
+				//BUKKIT_SOCKET.close();
 				getLog().console("Socket closed?");
 			} catch (Exception ex) {
 				getLog().console("Unable to close socket", ex);
