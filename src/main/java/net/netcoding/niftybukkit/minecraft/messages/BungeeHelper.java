@@ -361,6 +361,8 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 							}
 						} else if (subChannel.startsWith("Player")) {
 							BukkitMojangProfile profile = GSON.fromJson(input.readUTF(), BukkitMojangProfile.class);
+							this.getLog().console("{0} {1}s {2}", profile.getName(), subChannel.toLowerCase().replace("player", ""), server.getName());
+							// TODO
 
 							if (subChannel.endsWith("Join")) {
 								server.getUnsafePlayerList().add(profile);
