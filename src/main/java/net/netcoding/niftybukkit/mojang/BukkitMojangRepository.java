@@ -60,9 +60,9 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 				String criteriaName = name.toLowerCase();
 
 				for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
-					MojangProfile found = null;
+					BukkitMojangProfile found = null;
 
-					for (MojangProfile profile : server.getPlayerList()) {
+					for (BukkitMojangProfile profile : server.getPlayerList()) {
 						if (profile.getName().equalsIgnoreCase(criteriaName)) {
 							found = profile;
 							break;
@@ -70,7 +70,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 					}
 
 					if (found == null) {
-						for (MojangProfile profile : server.getPlayerList()) {
+						for (BukkitMojangProfile profile : server.getPlayerList()) {
 							if (profile.getName().toLowerCase().startsWith(criteriaName)) {
 								found = profile;
 								break;
@@ -79,7 +79,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 					}
 
 					if (found != null) {
-						profiles.add((BukkitMojangProfile)found);
+						profiles.add(found);
 						userList.remove(name);
 						break;
 					}
@@ -110,9 +110,9 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	protected final BukkitMojangProfile processOnlineUniqueId(UUID uniqueId) {
 		if (NiftyBukkit.getBungeeHelper().isDetected()) {
 			for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
-				for (MojangProfile profile : server.getPlayerList()) {
+				for (BukkitMojangProfile profile : server.getPlayerList()) {
 					if (profile.getUniqueId().equals(uniqueId))
-						return (BukkitMojangProfile)profile;
+						return profile;
 				}
 			}
 		}
