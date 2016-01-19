@@ -6,6 +6,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.inventory.InventoryWorkaround;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
@@ -15,6 +16,7 @@ import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,6 +29,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -271,7 +274,8 @@ public class SignMonitor extends BukkitListener {
 					for (String line : signInfo.getLines()) {
 						for (String key : keys) {
 							if (line.toLowerCase().contains(key)) {
-								BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+								Player player = event.getPlayer();
+								BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
 								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
 
@@ -280,6 +284,11 @@ public class SignMonitor extends BukkitListener {
 
 								if (createEvent.isCancelled()) {
 									event.setCancelled(true);
+									block.setType(Material.AIR);
+
+									if (GameMode.CREATIVE != player.getGameMode())
+										InventoryWorkaround.addItems(player.getInventory(), new ItemStack(Material.SIGN));
+
 									return;
 								}
 							}
