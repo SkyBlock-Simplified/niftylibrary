@@ -240,8 +240,8 @@ public class SignMonitor extends BukkitListener {
 										if (interactEvent.isCancelled()) {
 											event.setCancelled(true);
 											return;
-										}// else
-										//	this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
+										} else
+											this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
 									}
 								}
 							}
