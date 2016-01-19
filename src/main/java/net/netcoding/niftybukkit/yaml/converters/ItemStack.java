@@ -21,8 +21,8 @@ public class ItemStack extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> itemMap = (Map<String, Object>)(section instanceof Map ? (Map<String, Object>)section : ((ConfigSection)section).getRawMap());
-		Map<String, Object> metaMap = (Map<String, Object>)(itemMap.get("meta") instanceof Map ? (Map<String, Object>)itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
+		Map<String, Object> itemMap = (Map<String, Object>)(section instanceof Map ? section : ((ConfigSection)section).getRawMap());
+		Map<String, Object> metaMap = (Map<String, Object>)(itemMap.get("meta") instanceof Map ? itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
 		ItemData itemData = new ItemData(NiftyBukkit.getItemDatabase().get((String)itemMap.get("id")));
 		itemData.setAmount((int)itemMap.get("amount"));
 		ItemMeta meta = itemData.getItemMeta();
@@ -32,7 +32,7 @@ public class ItemStack extends Converter {
 				meta.setDisplayName((String)metaMap.get("name"));
 
 			if (metaMap.get("lore") != null)
-				meta.setLore((List<String>)this.getConverter(java.util.List.class).fromConfig(List.class, metaMap.get("lore"), null));
+				meta.setLore((List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null));
 		}
 
 		itemData.setItemMeta(meta);
@@ -45,7 +45,7 @@ public class ItemStack extends Converter {
 		Map<String, Object> saveMap = new HashMap<>();
 		saveMap.put("id", itemStack.getType() + ((itemStack.getDurability() > 0) ? ":" + itemStack.getDurability() : ""));
 		saveMap.put("amount", itemStack.getAmount());
-		Converter listConverter = this.getConverter(java.util.List.class);
+		Converter listConverter = this.getConverter(List.class);
 		Map<String, Object> meta = new HashMap<>();
 		meta.put("name", itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : null);
 		meta.put("lore", itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore() ? listConverter.toConfig(List.class, itemStack.getItemMeta().getLore(), null) : null);
