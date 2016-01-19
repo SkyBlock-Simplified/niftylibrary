@@ -35,7 +35,7 @@ final class NiftyListener extends BukkitListener {
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onSignChange(SignChangeEvent event) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < event.getLines().length; i++) {
 			String newLine = "";
 
 			for (char c : event.getLine(i).toCharArray()) {
