@@ -4,6 +4,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.NumberUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.comparator.LengthCompare;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -258,19 +258,6 @@ public class ItemDatabase extends BukkitHelper {
 				Collections.sort(this.names.get(itemData), compare);
 			}
 		}
-	}
-
-	private class LengthCompare implements Comparator<String> {
-
-		public LengthCompare() {
-			super();
-		}
-
-		@Override
-		public int compare(String s1, String s2) {
-			return s1.length() - s2.length();
-		}
-
 	}
 
 }
