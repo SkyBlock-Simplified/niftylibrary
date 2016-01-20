@@ -117,7 +117,9 @@ public class SignMonitor extends BukkitListener {
 	 */
 	public static Set<Location> getSignsThatWouldFall(Block block) {
 		Set<Location> locations = new HashSet<>();
-		if (SIGN_ITEMS.contains(block.getType())) locations.add(block.getLocation());
+
+		if (SIGN_ITEMS.contains(block.getType()))
+			locations.add(block.getLocation());
 
 		for (BlockFace direction : RELATIVE_DIRECTIONS) {
 			Block sideBlock = block.getRelative(direction);
@@ -125,7 +127,9 @@ public class SignMonitor extends BukkitListener {
 
 			if (isAttachable(sideBlock)) {
 				if (isAttachedTo(sideBlock, block)) {
-					if (SIGN_ITEMS.contains(sideMaterial)) locations.add(sideBlock.getLocation());
+					if (SIGN_ITEMS.contains(sideMaterial))
+						locations.add(sideBlock.getLocation());
+
 					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
 
 					if (GRAVITY_ITEMS.contains(sideUpBlock.getType()))
@@ -135,6 +139,7 @@ public class SignMonitor extends BukkitListener {
 		}
 
 		Block upBlock = block.getRelative(BlockFace.UP);
+
 		if (GRAVITY_ITEMS.contains(upBlock.getType()))
 			locations.addAll(getSignsThatWouldFall(upBlock));
 
@@ -288,9 +293,6 @@ public class SignMonitor extends BukkitListener {
 								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 								listener.onSignCreate(createEvent);
 
-								for (int j = 0; j < 4; j++)
-									sign.setLine(j, signInfo.getLine(j));
-
 								if (createEvent.isCancelled()) {
 									event.setCancelled(true);
 									block.setType(Material.AIR);
@@ -299,13 +301,16 @@ public class SignMonitor extends BukkitListener {
 										InventoryWorkaround.addItems(player.getInventory(), new ItemStack(Material.SIGN));
 
 									return;
+								} else {
+									for (int j = 0; j < 4; j++)
+										sign.setLine(j, signInfo.getLine(j));
+
+									this.signLocations.put(block.getLocation(), signInfo);
 								}
 							}
 						}
 					}
 				}
-
-				this.signLocations.put(block.getLocation(), signInfo);
 			}
 		}
 	}
