@@ -192,11 +192,14 @@ public class SignMonitor extends BukkitListener {
 								if (line.toLowerCase().contains(key)) {
 									SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
 									listener.onSignBreak(breakEvent);
-									Sign sign = (Sign)location.getBlock().getState();
-									for (int j = 0; j < 4; j++) sign.setLine(j, signInfo.getLine(j));
 
 									if (breakEvent.isCancelled()) {
 										event.setCancelled(true);
+										Sign sign = (Sign)location.getBlock().getState();
+
+										for (int j = 0; j < 4; j++)
+											sign.setLine(j, signInfo.getLine(j));
+
 										return;
 									}
 
@@ -209,7 +212,8 @@ public class SignMonitor extends BukkitListener {
 				}
 			}
 
-			for (Location signLocation : removeSigns) this.signLocations.remove(signLocation);
+			for (Location signLocation : removeSigns)
+				this.signLocations.remove(signLocation);
 		}
 	}
 
@@ -230,7 +234,6 @@ public class SignMonitor extends BukkitListener {
 								for (String line : signInfo.getLines()) {
 									for (String key : keys) {
 										if (line.toLowerCase().contains(key)) {
-
 											BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 											SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 											listener.onSignInteract(interactEvent);
@@ -268,7 +271,10 @@ public class SignMonitor extends BukkitListener {
 		if (this.isListening()) {
 			if (!this.signLocations.containsKey(block.getLocation())) {
 				Sign sign = (Sign)block.getState();
-				for (int i = 0; i < 4; i++) sign.setLine(i, event.getLine(i));
+
+				for (int i = 0; i < 4; i++)
+					sign.setLine(i, event.getLine(i));
+
 				SignInfo signInfo = new SignInfo(sign);
 
 				for (SignListener listener : this.listeners.keySet()) {
