@@ -215,39 +215,42 @@ public class SignMonitor extends BukkitListener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK == event.getAction() || Action.RIGHT_CLICK_BLOCK == event.getAction())) {
-			Block block = event.getClickedBlock();
+		if (!(GameMode.CREATIVE == event.getPlayer().getGameMode() && Action.LEFT_CLICK_BLOCK == event.getAction())) {
+			if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK == event.getAction() || Action.RIGHT_CLICK_BLOCK == event.getAction())) {
+				Block block = event.getClickedBlock();
 
-			if (this.isListening()) {
-				if (this.signLocations.containsKey(block.getLocation())) {
-					if (SIGN_ITEMS.contains(block.getType())) {
-						SignInfo signInfo = this.signLocations.get(block.getLocation());
+				if (this.isListening()) {
+					if (this.signLocations.containsKey(block.getLocation())) {
+						if (SIGN_ITEMS.contains(block.getType())) {
+							SignInfo signInfo = this.signLocations.get(block.getLocation());
 
-						for (SignListener listener : this.listeners.keySet()) {
-							List<String> keys = this.listeners.get(listener);
+							for (SignListener listener : this.listeners.keySet()) {
+								List<String> keys = this.listeners.get(listener);
 
-							for (String line : signInfo.getLines()) {
-								for (String key : keys) {
-									if (line.toLowerCase().contains(key)) {
-										BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-										SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
-										listener.onSignInteract(interactEvent);
-										Sign sign = (Sign)block.getState();
+								for (String line : signInfo.getLines()) {
+									for (String key : keys) {
+										if (line.toLowerCase().contains(key)) {
 
-										for (int j = 0; j < 4; j++)
-											sign.setLine(j, signInfo.getLine(j));
+											BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+											SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
+											listener.onSignInteract(interactEvent);
+											Sign sign = (Sign)block.getState();
 
-										if (interactEvent.isCancelled()) {
-											event.setCancelled(true);
-											return;
-										} else
-											this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
+											for (int j = 0; j < 4; j++)
+												sign.setLine(j, signInfo.getLine(j));
+
+											if (interactEvent.isCancelled()) {
+												event.setCancelled(true);
+												return;
+											} else
+												this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
+										}
 									}
 								}
 							}
-						}
-					} else
-						this.signLocations.remove(block.getLocation());
+						} else
+							this.signLocations.remove(block.getLocation());
+					}
 				}
 			}
 		}
