@@ -484,13 +484,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			this.getPlugin().getServer().getMessenger().unregisterIncomingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL, this);
 			this.getPlugin().getServer().getMessenger().unregisterOutgoingPluginChannel(this.getPlugin(), BUNGEE_CHANNEL);
 
-			try {
+			/*try {
 				getLog().console("Closing socket?");
-				//BUKKIT_SOCKET.close();
+				BUKKIT_SOCKET.close();
 				getLog().console("Socket closed?");
 			} catch (Exception ex) {
 				getLog().console("Unable to close socket", ex);
-			}
+			}*/
 		}
 	}
 
