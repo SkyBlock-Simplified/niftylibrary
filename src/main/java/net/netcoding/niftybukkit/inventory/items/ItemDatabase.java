@@ -92,6 +92,27 @@ public class ItemDatabase extends BukkitHelper {
 		return this.get(itemName).getTypeId();
 	}
 
+	public List<String> getLines() {
+		try {
+			try (InputStreamReader inputStream = (this.itemsFile.exists() ? new FileReader(this.itemsFile) : new InputStreamReader(this.getPlugin().getResource(this.itemsFile.getName())))) {
+				try (BufferedReader reader = new BufferedReader(inputStream)) {
+					List<String> lines = new ArrayList<>();
+
+					do {
+						String line = reader.readLine();
+						if (StringUtil.isEmpty(line)) break;
+						lines.add(line);
+					} while (true);
+
+					return Collections.unmodifiableList(lines);
+				}
+			}
+		} catch (IOException ioex) {
+			this.getLog().console(ioex);
+			return Collections.emptyList();
+		}
+	}
+
 	public List<ItemStack> getMatching(Player player, String[] args) throws RuntimeException {
 		List<ItemStack> is = new ArrayList<>();
 
@@ -118,6 +139,18 @@ public class ItemDatabase extends BukkitHelper {
 		return is;
 	}
 
+	public String name(ItemStack stack) {
+		ItemData itemData = new ItemData(stack);
+		String name = this.primaryName.get(itemData);
+
+		if (StringUtil.isEmpty(name)) {
+			itemData = new ItemData(stack.getTypeId(), (short)0);
+			name = this.primaryName.get(itemData);
+		}
+
+		return StringUtil.isEmpty(name) ? "" : name;
+	}
+
 	public List<String> names(ItemStack stack) {
 		ItemData itemData = new ItemData(stack);
 		List<String> nameList = this.names.get(itemData);
@@ -130,20 +163,10 @@ public class ItemDatabase extends BukkitHelper {
 		if (ListUtil.isEmpty(nameList))
 			nameList = new ArrayList<>();
 
-		if (nameList.size() > 15) nameList = nameList.subList(0, 15);
+		if (nameList.size() > 15)
+			nameList = nameList.subList(0, 15);
+
 		return Collections.unmodifiableList(nameList);
-	}
-
-	public String name(ItemStack stack) {
-		ItemData itemData = new ItemData(stack);
-		String name = this.primaryName.get(itemData);
-
-		if (StringUtil.isEmpty(name)) {
-			itemData = new ItemData(stack.getTypeId(), (short)0);
-			name = this.primaryName.get(itemData);
-		}
-
-		return StringUtil.isEmpty(name) ? "" : name;
 	}
 
 	public List<ItemData> parse(String[] itemList) throws NumberFormatException {
@@ -191,25 +214,8 @@ public class ItemDatabase extends BukkitHelper {
 		return this.parse(itemColonList.split(",(?![^\\[]*\\])"));
 	}
 
-	public List<String> getLines() {
-		try {
-			try (InputStreamReader inputStream = (this.itemsFile.exists() ? new FileReader(this.itemsFile) : new InputStreamReader(this.getPlugin().getResource(this.itemsFile.getName())))) {
-				try (BufferedReader reader = new BufferedReader(inputStream)) {
-					List<String> lines = new ArrayList<>();
-
-					do {
-						String line = reader.readLine();
-						if (StringUtil.isEmpty(line)) break;
-						lines.add(line);
-					} while (true);
-
-					return Collections.unmodifiableList(lines);
-				}
-			}
-		} catch (IOException ioex) {
-			this.getLog().console(ioex);
-			return Collections.emptyList();
-		}
+	public List<String> primaryNames() {
+		return Collections.unmodifiableList(new ArrayList<>(this.primaryName.values()));
 	}
 
 	public void save() {
