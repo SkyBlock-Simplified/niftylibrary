@@ -24,7 +24,6 @@ import java.util.Map;
 public class EnchantmentDatabase extends BukkitHelper {
 
 	private final transient File enchantmentsFile;
-	//private final transient Map<String, Integer> enchantments = new HashMap<>();
 	final transient Map<EnchantmentData, List<String>> names = new HashMap<>();
 	final transient Map<EnchantmentData, String> primaryName = new HashMap<>();
 
@@ -40,7 +39,7 @@ public class EnchantmentDatabase extends BukkitHelper {
 	public List<EnchantmentData> getPossibleEnchants(ItemStack stack) {
 		List<EnchantmentData> enchDataList = new ArrayList<>();
 
-		for (EnchantmentData enchData : names.keySet()) {
+		for (EnchantmentData enchData : this.names.keySet()) {
 			if (enchData.canEnchant(stack))
 				enchDataList.add(enchData);
 		}
@@ -49,14 +48,17 @@ public class EnchantmentDatabase extends BukkitHelper {
 	}
 
 	public EnchantmentData get(Enchantment enchantment) {
-		if (enchantment == null) throw new NullPointerException("The value for enchantment cannot be null!");
+		if (enchantment == null)
+			throw new NullPointerException("The value for enchantment cannot be null!");
+
 		return this.get(enchantment.getName());
 	}
 
 	public EnchantmentData get(String name) {
-		if (StringUtil.isEmpty(name)) throw new NullPointerException("The value for name cannot be null!");
+		if (StringUtil.isEmpty(name))
+			throw new NullPointerException("The value for name cannot be null!");
 
-		for (EnchantmentData enchData : names.keySet()) {
+		for (EnchantmentData enchData : this.names.keySet()) {
 			for (String compare : enchData.getNames()) {
 				if (compare.equalsIgnoreCase(name))
 					return new EnchantmentData(enchData.getEnchantment());
@@ -66,18 +68,42 @@ public class EnchantmentDatabase extends BukkitHelper {
 		return null;
 	}
 
+	public List<String> getLines() {
+		try {
+			try (InputStreamReader inputStream = (this.enchantmentsFile.exists() ? new FileReader(this.enchantmentsFile) : new InputStreamReader(this.getPlugin().getResource(this.enchantmentsFile.getName())))) {
+				try (BufferedReader reader = new BufferedReader(inputStream)) {
+					List<String> lines = new ArrayList<>();
+
+					do {
+						String line = reader.readLine();
+						if (StringUtil.isEmpty(line)) break;
+						lines.add(line);
+					} while (true);
+
+					return Collections.unmodifiableList(lines);
+				}
+			}
+		} catch (IOException ex) {
+			this.getLog().console(ex);
+			return Collections.emptyList();
+		}
+	}
+
+	public String name(Enchantment enchantment) {
+		return this.primaryName.get(new EnchantmentData(enchantment));
+	}
+
 	public List<String> names(Enchantment enchantment) {
 		return this.names(new EnchantmentData(enchantment));
 	}
 
 	public List<String> names(EnchantmentData enchantmentData) {
 		List<String> nameList = this.names.get(enchantmentData);
-		if (nameList.size() > 15) nameList = nameList.subList(0, 15);
-		return Collections.unmodifiableList(nameList);
-	}
 
-	public String name(Enchantment enchantment) {
-		return this.primaryName.get(new EnchantmentData(enchantment));
+		if (nameList.size() > 15)
+			nameList = nameList.subList(0, 15);
+
+		return Collections.unmodifiableList(nameList);
 	}
 
 	public List<EnchantmentData> parse(String[] enchList) {
@@ -131,25 +157,8 @@ public class EnchantmentDatabase extends BukkitHelper {
 		return this.parse(enchStringList.split("[,\\s]+"));
 	}
 
-	public List<String> getLines() {
-		try {
-			try (InputStreamReader inputStream = (this.enchantmentsFile.exists() ? new FileReader(this.enchantmentsFile) : new InputStreamReader(this.getPlugin().getResource(this.enchantmentsFile.getName())))) {
-				try (BufferedReader reader = new BufferedReader(inputStream)) {
-					List<String> lines = new ArrayList<>();
-
-					do {
-						String line = reader.readLine();
-						if (StringUtil.isEmpty(line)) break;
-						lines.add(line);
-					} while (true);
-
-					return Collections.unmodifiableList(lines);
-				}
-			}
-		} catch (IOException ex) {
-			this.getLog().console(ex);
-			return Collections.emptyList();
-		}
+	public List<String> primaryNames() {
+		return Collections.unmodifiableList(new ArrayList<>(this.primaryName.values()));
 	}
 
 	public void save() {
@@ -175,7 +184,6 @@ public class EnchantmentDatabase extends BukkitHelper {
 			if (parts.length < 2) continue;
 			String enchName = parts[0].toLowerCase(Locale.ENGLISH);
 			final int numeric = Integer.parseInt(parts[1]);
-			//this.enchantments.put(enchName, numeric);
 			EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
 			if (enchData.getEnchantment() == null) continue;
 
