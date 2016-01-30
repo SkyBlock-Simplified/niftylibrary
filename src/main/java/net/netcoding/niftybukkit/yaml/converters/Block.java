@@ -19,7 +19,7 @@ public class Block extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> blockMap = (Map<String, Object>)(section instanceof Map ? section : ((ConfigSection)section).getRawMap());
+		Map<String, Object> blockMap = (section instanceof Map ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
 		org.bukkit.Location location = (org.bukkit.Location)this.getConverter(org.bukkit.Location.class).fromConfig(org.bukkit.Location.class, blockMap.get("location"), null);
 		org.bukkit.block.Block block = location.getBlock();
 		ItemStack stack = NiftyBukkit.getItemDatabase().get((String)blockMap.get("id"));

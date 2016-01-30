@@ -21,7 +21,7 @@ public class ItemStack extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> itemMap = (Map<String, Object>)(section instanceof Map ? section : ((ConfigSection)section).getRawMap());
+		Map<String, Object> itemMap = (section instanceof Map ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
 		Map<String, Object> metaMap = (Map<String, Object>)(itemMap.get("meta") instanceof Map ? itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
 		ItemData itemData = new ItemData(NiftyBukkit.getItemDatabase().get((String)itemMap.get("id")));
 		itemData.setAmount((int)itemMap.get("amount"));

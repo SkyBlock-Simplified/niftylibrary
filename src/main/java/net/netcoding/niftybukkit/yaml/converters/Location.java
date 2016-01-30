@@ -22,7 +22,7 @@ public class Location extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> map = (Map<String, Object>)((section instanceof Map) ? section : ((ConfigSection)section).getRawMap());
+		Map<String, Object> map = ((section instanceof Map) ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
 		float yaw = (map.get("yaw") instanceof Double) ? ((Double)map.get("yaw")).floatValue() : (Float)map.get("yaw");
 		float pitch = (map.get("pitch") instanceof Double) ? ((Double)map.get("pitch")).floatValue() : (Float)map.get("pitch");
 		String mapName = (String)map.get("world");
