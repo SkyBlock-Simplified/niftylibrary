@@ -438,18 +438,21 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 */
 	public void showUsage(CommandSender sender, String label) {
 		String usage = this.getCommand().getUsage().replace("<command>", StringUtil.notEmpty(label) ? label : this.getCommand().getName());
-		String[] args = this.argCache.get(sender.getName());
-		List<String> argList = this.getProperArgs(args);
-		int index = argList.size();
+		String[] args = ListUtil.toArray(this.getProperArgs(this.argCache.get(sender.getName())), String.class);
 
-		if (this.usages.containsKey(index)) {
-			Map<String, String> usageMap = this.usages.get(index);
-			String lastArg = index == 0 ? label : this.getLastArg(args);
+		for (int i = args.length; i >= 0; i--) {
+			if (this.usages.containsKey(i)) {
+				Map<String, String> usageMap = this.usages.get(i);
+				String lastArg = (i == 0 ? label : this.getLastArg(args));
 
-			if (usageMap.containsKey(lastArg)) {
-				String argStart = (index > 0 ? StringUtil.format("{0} ", StringUtil.implode(" ", argList)) : "");
-				usage = StringUtil.format("/{0} {1}{2}", label, argStart, usageMap.get(lastArg));
-			}
+				if (usageMap.containsKey(lastArg)) {
+					String argStart = (i > 0 ? StringUtil.format("{0} ", StringUtil.implode(" ", args)) : "");
+					usage = StringUtil.format("/{0} {1}{2}", label, argStart, usageMap.get(lastArg));
+				}
+
+				break;
+			} else
+				args = StringUtil.split(" ", StringUtil.implode(" ", args, 0, args.length - 1));
 		}
 
 		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
