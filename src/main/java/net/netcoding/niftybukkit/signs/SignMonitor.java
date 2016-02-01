@@ -22,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,6 +31,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
@@ -177,6 +179,20 @@ public class SignMonitor extends BukkitListener {
 	 */
 	public boolean isListening() {
 		return this.listening;
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onEntityBreakEvent(EntityExplodeEvent event) {
+		if (EntityType.PLAYER != event.getEntityType()) {
+			for (Block block : event.blockList()) {
+				Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+				if (!fallingSigns.isEmpty()) {
+					event.setCancelled(true);
+					break;
+				}
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
