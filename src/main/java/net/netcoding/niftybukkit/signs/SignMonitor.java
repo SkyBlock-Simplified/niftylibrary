@@ -27,6 +27,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -219,6 +221,30 @@ public class SignMonitor extends BukkitListener {
 
 			for (Location signLocation : removeSigns)
 				this.signLocations.remove(signLocation);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+		for (Block block : event.getBlocks()) {
+			Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+			if (!fallingSigns.isEmpty()) {
+				event.setCancelled(true);
+				break;
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+		for (Block block : event.getBlocks()) {
+			Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+			if (!fallingSigns.isEmpty()) {
+				event.setCancelled(true);
+				break;
+			}
 		}
 	}
 
