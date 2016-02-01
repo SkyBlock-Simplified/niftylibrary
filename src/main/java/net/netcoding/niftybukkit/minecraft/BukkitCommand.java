@@ -440,7 +440,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		String usage = this.getCommand().getUsage().replace("<command>", StringUtil.notEmpty(label) ? label : this.getCommand().getName());
 		String[] args = ListUtil.toArray(this.getProperArgs(this.argCache.get(sender.getName())), String.class);
 
-		for (int i = args.length; i >= 0; i--) {
+		for (int i = args.length; i > 0; i--) {
 			if (this.usages.containsKey(i)) {
 				Map<String, String> usageMap = this.usages.get(i);
 				String lastArg = (i == 0 ? label : this.getLastArg(args));
