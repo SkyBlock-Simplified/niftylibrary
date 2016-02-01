@@ -39,7 +39,7 @@ final class NiftyCommand extends BukkitCommand {
 		List<String> nameCache = this.getNameCache();
 
 		if (ListUtil.isEmpty(args) || NumberUtil.isInt(args[0])) {
-			int rounded = NumberUtil.round(nameCache.size(), 5);
+			int rounded = NumberUtil.roundUp(nameCache.size(), 5);
 			int pages = rounded / 5;
 			int page = args.length > 1 ? NumberUtil.isInt(args[0]) ? nameCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0 : 0;
 
