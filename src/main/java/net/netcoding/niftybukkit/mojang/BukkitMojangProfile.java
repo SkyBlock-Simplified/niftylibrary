@@ -213,7 +213,6 @@ public class BukkitMojangProfile extends MojangProfile {
 	*
 	* @param target The target to spectate.
 	*/
-	@SuppressWarnings("unused")
 	private void spectate(Entity target) throws Exception {
 		if (!this.getOfflinePlayer().isOnline()) return;
 
