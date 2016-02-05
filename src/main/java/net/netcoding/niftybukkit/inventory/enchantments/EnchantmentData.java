@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class EnchantmentData {
 
 	private final Enchantment enchantment;
@@ -40,7 +41,7 @@ public class EnchantmentData {
 			stack.addEnchantment(this.getEnchantment(), level);
 		}
 
-		return true;
+		return stack.containsEnchantment(this.getEnchantment()) && stack.getEnchantmentLevel(this.getEnchantment()) == level;
 	}
 
 	public boolean canEnchant(ItemStack stack) {
