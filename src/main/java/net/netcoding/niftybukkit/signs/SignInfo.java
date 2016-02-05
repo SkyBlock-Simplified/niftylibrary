@@ -16,7 +16,7 @@ public class SignInfo {
 
 	private final transient Sign sign;
 	private final String[] lines;
-	private String[] modified;
+	private final String[] modified;
 
 	/**
 	 * Create new sign info instance.
