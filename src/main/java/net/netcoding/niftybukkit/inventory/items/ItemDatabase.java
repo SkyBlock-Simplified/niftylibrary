@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("deprecation")
 public class ItemDatabase extends BukkitHelper {
 
 	private final transient File itemsFile;
