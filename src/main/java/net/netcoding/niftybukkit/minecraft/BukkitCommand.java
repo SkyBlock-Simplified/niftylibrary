@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class BukkitCommand extends BukkitHelper {
 
 	private final static transient ConcurrentHashMap<String, Integer> PLUGINS = new ConcurrentHashMap<>();
+	private final Map<Integer, Map<String, String>> usages = new HashMap<>();
+	private final Map<String, String[]> argCache = new HashMap<>();
 	private PluginCommand command = null;
 	private boolean consoleOnly = false;
 	private boolean playerOnly = false;
@@ -40,8 +42,6 @@ public abstract class BukkitCommand extends BukkitHelper {
 	private int playerTabCompleteIndex = 0;
 	private int minimumArgsLength = 1;
 	private int maximumArgsLength = -1;
-	private Map<Integer, Map<String, String>> usages = new HashMap<>();
-	private Map<String, String[]> argCache = new HashMap<>();
 	private String permission;
 
 	/**
