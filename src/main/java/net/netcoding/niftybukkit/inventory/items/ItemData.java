@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("deprecation")
 public class ItemData extends ItemStack {
 
 	private boolean glow = false;
@@ -80,6 +81,7 @@ public class ItemData extends ItemStack {
 	}
 
 	@Override
+	@SuppressWarnings("CloneDoesntCallSuperClone")
 	public ItemData clone() {
 		return new ItemData(this);
 	}

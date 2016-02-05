@@ -44,7 +44,7 @@ public class EnchantmentData {
 	}
 
 	public boolean canEnchant(ItemStack stack) {
-		return !(stack == null || Material.AIR.equals(stack.getType())) && this.getEnchantment().canEnchantItem(stack);
+		return !(stack == null || Material.AIR == stack.getType()) && this.getEnchantment().canEnchantItem(stack);
 	}
 
 	public Enchantment getEnchantment() {
