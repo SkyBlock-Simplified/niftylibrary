@@ -10,7 +10,7 @@ class BungeePlayerEvent extends PlayerEvent {
 	}
 
 	public BungeeServer getServer() {
-		return (BungeeServer)this.getProfile().getServer();
+		return this.getProfile().getServer();
 	}
 
 }
