@@ -63,7 +63,7 @@ final class NiftyCommand extends BukkitCommand {
 		} else {
 			String pluginName = args[0];
 
-			if (pluginName.matches("^(lookup|search)$")) {
+			if (pluginName.matches("^(lookup|search|uuid|user(name)?)$")) {
 				if (args.length < 2) {
 					this.showUsage(sender);
 					return;
