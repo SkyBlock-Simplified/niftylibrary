@@ -14,6 +14,22 @@ import java.net.URL;
 public enum MinecraftProtocol {
 
 	//http://wiki.vg/Protocol_version_numbers
+	v1_9_1_pre3(108),
+	v1_9_1_pre2(108),
+	v1_9_1_pre1(107),
+	v1_9(107),
+	v1_9_pre4(106),
+	v1_9_pre3(105),
+	v1_9_pre2(104),
+	v1_9_pre1(103),
+	v16w07b(102),
+	v16w07a(101),
+	v16w06a(100),
+	v16w05b(99),
+	v16w05a(98),
+	v16w04a(97),
+	v16w03a(96),
+	v16w02a(95),
 	v15w51b(94),
 	v15w51a(93),
 	v15w50a(92),
