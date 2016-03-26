@@ -2,9 +2,11 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,10 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A command wrapper that assists with common tasks like checking execution permissions,
@@ -29,9 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class BukkitCommand extends BukkitHelper {
 
-	private final static transient ConcurrentHashMap<String, Integer> PLUGINS = new ConcurrentHashMap<>();
-	private final Map<Integer, Map<String, String>> usages = new HashMap<>();
-	private final Map<String, String[]> argCache = new HashMap<>();
+	private final static transient ConcurrentMap<String, Integer> PLUGINS = new ConcurrentMap<>();
+	private final ConcurrentMap<Integer, ConcurrentMap<String, String>> usages = new ConcurrentMap<>();
+	private final ConcurrentMap<String, String[]> argCache = new ConcurrentMap<>();
 	private PluginCommand command = null;
 	private boolean consoleOnly = false;
 	private boolean playerOnly = false;
@@ -76,7 +75,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 */
 	public void editUsage(int index, String arg, String usage) {
 		if (!this.usages.containsKey(index))
-			this.usages.put(index, new HashMap<String, String>());
+			this.usages.put(index, new ConcurrentMap<String, String>());
 
 		this.usages.get(index).put(arg, usage);
 	}
@@ -184,7 +183,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		return Collections.emptyList();
 	}
 
-	private void processCommand(CommandSender sender, String label, String[] args) {
+	private void processCommand(final CommandSender sender, final String label, final String[] args) {
 		if (this.isConsoleOnly() && isPlayer(sender)) {
 			this.getLog().error(sender, "The command {{0}} is only possible from console!", this.getCommand().getName());
 			return;
@@ -227,11 +226,19 @@ public abstract class BukkitCommand extends BukkitHelper {
 			return;
 		}
 
-		try {
-			this.onCommand(sender, label, args);
-		} catch (Exception ex) {
-			this.getLog().console(ex);
-		}
+		MinecraftScheduler.schedule(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					onCommand(sender, label, args);
+				} catch (Exception ex) {
+					getLog().console(ex);
+				}
+
+				if (argCache.containsKey(sender.getName()))
+					argCache.remove(sender.getName());
+			}
+		});
 	}
 
 	public static List<String> getMatchingPlayers(String lookup) {
@@ -278,10 +285,10 @@ public abstract class BukkitCommand extends BukkitHelper {
 		return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
 	}
 
-	private void removeArgs(CommandSender sender) {
+	/*private void removeArgs(CommandSender sender) {
 		if (this.argCache.containsKey(sender.getName()))
-			this.argCache.remove(sender.getName());
-	}
+		this.argCache.remove(sender.getName());
+	}*/
 
 	/**
 	 * Sets command to run only if BungeeCord is detected.
@@ -442,7 +449,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 		for (int i = args.length; i > 0; i--) {
 			if (this.usages.containsKey(i)) {
-				Map<String, String> usageMap = this.usages.get(i);
+				ConcurrentMap<String, String> usageMap = this.usages.get(i);
 				String lastArg = (i == 0 ? label : this.getLastArg(args));
 
 				if (usageMap.containsKey(lastArg)) {
@@ -473,7 +480,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 			this.getCommand().processCommand(sender, label, args);
-			this.getCommand().removeArgs(sender);
+			//this.getCommand().removeArgs(sender);
 			return true;
 		}
 
