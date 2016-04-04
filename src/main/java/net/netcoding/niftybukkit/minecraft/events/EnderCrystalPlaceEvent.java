@@ -1,6 +1,8 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.event.Cancellable;
 
@@ -12,6 +14,10 @@ public class EnderCrystalPlaceEvent extends PlayerEvent implements Cancellable {
 	public EnderCrystalPlaceEvent(BukkitMojangProfile profile, EnderCrystal entity) {
 		super(profile);
 		this.entity = entity;
+	}
+
+	public final Block getBaseBlock() {
+		return this.entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
 	}
 
 	public final EnderCrystal getEntity() {
