@@ -126,7 +126,6 @@ public class BukkitMojangProfile extends MojangProfile {
 	 */
 	public int getProtocolVersion() {
 		int version = MinecraftProtocol.getCurrentProtocol();
-		// TODO: 1.9 Requires Packets, See ProtocolLib
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
