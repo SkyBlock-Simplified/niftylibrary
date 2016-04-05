@@ -5,9 +5,11 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
+import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.Reflection;
-import org.bukkit.ChatColor;
+import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
@@ -123,7 +125,8 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Client protocol version.
 	 */
 	public int getProtocolVersion() {
-		int version = 0;
+		int version = MinecraftProtocol.getCurrentProtocol();
+		// TODO: 1.9 Requires Packets, See ProtocolLib
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
@@ -153,10 +156,10 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Skull item with this profiles skin face.
 	 */
 	public final ItemStack getSkull() {
-		ItemData data = new ItemData(Material.SKULL_ITEM, (byte)SkullType.PLAYER.ordinal());
+		ItemData data = new ItemData(Material.SKULL_ITEM, (short)SkullType.PLAYER.ordinal());
 		SkullMeta meta = (SkullMeta)data.getItemMeta();
 		meta.setOwner(this.getName());
-		meta.setDisplayName(ChatColor.RESET + this.getName());
+		meta.setDisplayName(StringUtil.format("{0}{1}''s Head", ChatColor.RESET, this.getName()));
 		data.setItemMeta(meta);
 		return data;
 	}
