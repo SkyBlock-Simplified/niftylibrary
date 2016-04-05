@@ -223,6 +223,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 		if (this.isCheckingHelp() && this.isHelp(args)) {
 			this.showUsage(sender, label);
+			this.removeArgs(sender);
 			return;
 		}
 
@@ -235,8 +236,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 					getLog().console(ex);
 				}
 
-				if (argCache.containsKey(sender.getName()))
-					argCache.remove(sender.getName());
+				removeArgs(sender);
 			}
 		});
 	}
@@ -285,10 +285,10 @@ public abstract class BukkitCommand extends BukkitHelper {
 		return ListUtil.notEmpty(complete) ? complete : Collections.<String>emptyList();
 	}
 
-	/*private void removeArgs(CommandSender sender) {
+	private void removeArgs(CommandSender sender) {
 		if (this.argCache.containsKey(sender.getName()))
 		this.argCache.remove(sender.getName());
-	}*/
+	}
 
 	/**
 	 * Sets command to run only if BungeeCord is detected.
