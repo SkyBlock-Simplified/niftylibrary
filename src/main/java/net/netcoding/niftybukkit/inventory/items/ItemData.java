@@ -21,11 +21,11 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(Material material) {
-		this(material.getId(), (short)0);
+		this(material, (short)0);
 	}
 
 	public ItemData(Material material, short durability) {
-		super(material, durability);
+		super(material.getId(), durability);
 	}
 
 	public ItemData(int id) {
