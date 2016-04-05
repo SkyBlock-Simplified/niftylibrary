@@ -20,7 +20,7 @@ public class TitleManager {
 	private ChatColor subtitleColor = ChatColor.WHITE;
 	private int fadeIn = 0;
 	private int fadeOut = 0;
-	private int ftay = 0;
+	private int stay = 0;
 	private String title = "";
 	private ChatColor titleColor = ChatColor.WHITE;
 
@@ -86,7 +86,7 @@ public class TitleManager {
 	}
 
 	public int getStay() {
-		return this.ftay;
+		return this.stay;
 	}
 
 	public String getTitle() {
@@ -239,7 +239,7 @@ public class TitleManager {
 	}
 
 	public void setStay(int value) {
-		this.ftay = value < 0 ? 0 : value;
+		this.stay = value < 0 ? 0 : value;
 	}
 
 	public void setTitle(String title) {
