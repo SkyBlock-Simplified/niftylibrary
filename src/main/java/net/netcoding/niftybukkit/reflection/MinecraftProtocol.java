@@ -224,22 +224,37 @@ public enum MinecraftProtocol {
 		return this.version;
 	}
 
+	public static MinecraftProtocol getCurrent() {
+		int currentProtocol = getProtocol(getServerVersion());
+
+		for (MinecraftProtocol protocol : values()) {
+			if (protocol.getProtocol() == currentProtocol)
+				return protocol;
+		}
+
+		return MinecraftProtocol.values()[0];
+	}
+
+	public static int getCurrentProtocol() {
+		return getCurrent().getProtocol();
+	}
+
 	public static String getCurrentVersion() {
+		return getCurrent().getVersion();
+	}
+
+	private static String getServerVersion() {
 		try {
 			Reflection server = new Reflection("CraftServer", MinecraftPackage.CRAFTBUKKIT);
 			Reflection minecraftServer = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
 			Object minecraftServerObj = server.getValue(minecraftServer.getClazz(), Bukkit.getServer());
-			return (String)minecraftServer.invokeMethod("getVersion", minecraftServerObj);
+			return (String) minecraftServer.invokeMethod("getVersion", minecraftServerObj);
 		} catch (Exception ex) {
 			String json = Bukkit.getServer().toString().replaceAll("^[a-zA-Z0-9]+(?=\\{)", "");
 			json = json.replace("=", "':'").replace(",", "','").replace("{", "{'").replace("}", "'}");
 			JsonObject version = new JsonParser().parse(json).getAsJsonObject();
 			return version.get("minecraftVersion").getAsString();
 		}
-	}
-
-	public static int getCurrentProtocol() {
-		return getProtocol(getCurrentVersion());
 	}
 
 	public static int getProtocol(String version) {
