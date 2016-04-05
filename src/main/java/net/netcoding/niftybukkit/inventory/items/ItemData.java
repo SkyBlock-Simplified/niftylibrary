@@ -20,20 +20,20 @@ public class ItemData extends ItemStack {
 		super(stack);
 	}
 
-	public ItemData(Material material) {
-		this(material, (short)0);
-	}
-
-	public ItemData(Material material, short durability) {
-		super(material.getId(), durability);
-	}
-
 	public ItemData(int id) {
 		this(id, (short)0);
 	}
 
 	public ItemData(int id, short data) {
-		super(id, data);
+		super(Material.getMaterial(id), data);
+	}
+
+	public ItemData(Material material) {
+		this(material, (short)0);
+	}
+
+	public ItemData(Material material, short data) {
+		super(material, 0, data);
 	}
 
 	private ItemData(ItemData source) {
