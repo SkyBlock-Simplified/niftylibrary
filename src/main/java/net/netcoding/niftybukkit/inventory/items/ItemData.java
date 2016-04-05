@@ -33,7 +33,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(Material material, short data) {
-		super(material, 0, data);
+		super(material, 1, data);
 	}
 
 	private ItemData(ItemData source) {
