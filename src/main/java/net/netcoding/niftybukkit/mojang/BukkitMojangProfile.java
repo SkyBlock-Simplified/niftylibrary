@@ -127,7 +127,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	public int getProtocolVersion() {
 		int version = MinecraftProtocol.getCurrentProtocol();
 
-		if (this.getOfflinePlayer().isOnline() && MinecraftProtocol.getCurrentProtocol() < MinecraftProtocol.v1_9_pre1.getProtocol()) {
+		if (this.getOfflinePlayer().isOnline()) {
 			try {
 				Reflection playerConnection = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 				Reflection networkManager = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
