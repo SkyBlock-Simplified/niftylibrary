@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
+import net.netcoding.niftybukkit.util.LocationUtil;
 import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.Reflection;
@@ -13,6 +14,7 @@ import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -39,6 +41,20 @@ public class BukkitMojangProfile extends MojangProfile {
 	 */
 	public Object getConnection() throws Exception {
 		return this.getOfflinePlayer().isOnline() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
+	}
+
+	/**
+	 * Gets the direction a player is looking
+	 *
+	 * @return The direction the player is looking
+	 */
+	public BlockFace getFacing() {
+		if (this.isOnlineLocally()) {
+			float yaw = this.getOfflinePlayer().getPlayer().getLocation().getYaw();
+			return LocationUtil.yawToFace(yaw);
+		}
+
+		return null;
 	}
 
 	/**
