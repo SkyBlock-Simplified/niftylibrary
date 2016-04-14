@@ -25,7 +25,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(int id, short data) {
-		super(Material.getMaterial(id), data);
+		super(Material.getMaterial(id), 1, data);
 	}
 
 	public ItemData(Material material) {
