@@ -11,8 +11,8 @@ public interface FakeInventoryListener {
 
 	void onInventoryClose(InventoryCloseEvent event);
 
-	void onInventoryOpen(InventoryOpenEvent event);
-
 	void onInventoryItemInteract(InventoryItemInteractEvent event);
+
+	void onInventoryOpen(InventoryOpenEvent event);
 
 }
