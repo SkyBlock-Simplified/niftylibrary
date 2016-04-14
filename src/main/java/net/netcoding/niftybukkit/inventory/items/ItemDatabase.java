@@ -43,7 +43,7 @@ public class ItemDatabase extends BukkitHelper {
 		this.itemsFile = new File(this.getPlugin().getDataFolder(), fileName);
 	}
 
-	public ItemStack get(final String id) throws RuntimeException {
+	public ItemData get(final String id) throws RuntimeException {
 		if (StringUtil.isEmpty(id)) throw new NullPointerException("The value for id cannot be null!");
 		int itemid = -1;
 		String itemName = id;
@@ -77,14 +77,14 @@ public class ItemDatabase extends BukkitHelper {
 		if (itemid < 0) throw new RuntimeException("Unknown item name: " + itemName);
 		final Material mat = Material.getMaterial(itemid);
 		if (mat == null) throw new RuntimeException("Unknown item id: " + itemid);
-		final ItemStack retval = new ItemStack(mat);
+		final ItemData retval = new ItemData(mat);
 		retval.setAmount(mat.getMaxStackSize());
 		retval.setDurability(metaData);
 		return retval;
 	}
 
-	public ItemStack get(final String id, final int quantity) throws RuntimeException {
-		final ItemStack retval = get(id.toLowerCase(Locale.ENGLISH));
+	public ItemData get(final String id, final int quantity) throws RuntimeException {
+		final ItemData retval = get(id.toLowerCase(Locale.ENGLISH));
 		retval.setAmount(quantity);
 		return retval;
 	}
@@ -114,22 +114,22 @@ public class ItemDatabase extends BukkitHelper {
 		}
 	}
 
-	public List<ItemStack> getMatching(Player player, String[] args) throws RuntimeException {
-		List<ItemStack> is = new ArrayList<>();
+	public List<ItemData> getMatching(Player player, String[] args) throws RuntimeException {
+		List<ItemData> is = new ArrayList<>();
 
 		if (args.length < 1)
-			is.add(player.getItemInHand());
+			is.add(new ItemData(player.getItemInHand()));
 		else if ("hand".equalsIgnoreCase(args[0]))
-			is.add(player.getItemInHand());
+			is.add(new ItemData(player.getItemInHand()));
 		else if ("inventory".equalsIgnoreCase(args[0]) || "invent".equalsIgnoreCase(args[0]) || "all".equalsIgnoreCase(args[0])) {
 			for (ItemStack stack : player.getInventory().getContents()) {
 				if (stack == null || stack.getType() == Material.AIR) continue;
-				is.add(stack);
+				is.add(new ItemData(stack));
 			}
 		} else if ("blocks".equalsIgnoreCase(args[0])) {
 			for (ItemStack stack : player.getInventory().getContents()) {
 				if (stack == null || stack.getType() == Material.AIR || !stack.getType().isBlock()) continue;
-				is.add(stack);
+				is.add(new ItemData(stack));
 			}
 		} else
 			is.add(get(args[0]));
