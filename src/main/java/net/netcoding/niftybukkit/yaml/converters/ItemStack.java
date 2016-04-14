@@ -2,12 +2,14 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +31,16 @@ public class ItemStack extends Converter {
 
 		if (metaMap != null) {
 			if (metaMap.get("name") != null)
-				meta.setDisplayName((String)metaMap.get("name"));
+				meta.setDisplayName(RegexUtil.replaceColor((String)metaMap.get("name"), RegexUtil.REPLACE_ALL_PATTERN));
 
-			if (metaMap.get("lore") != null)
-				meta.setLore((List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null));
+			if (metaMap.get("lore") != null) {
+				List<String> lore = (List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null);
+
+				for (int i = 0; i < lore.size(); i++)
+					lore.set(i, RegexUtil.replaceColor(lore.get(i), RegexUtil.REPLACE_ALL_PATTERN));
+
+				meta.setLore(lore);
+			}
 		}
 
 		itemData.setItemMeta(meta);
@@ -47,10 +55,22 @@ public class ItemStack extends Converter {
 		saveMap.put("amount", itemStack.getAmount());
 		Converter listConverter = this.getConverter(List.class);
 		Map<String, Object> meta = new HashMap<>();
-		meta.put("name", itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : null);
-		meta.put("lore", itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore() ? listConverter.toConfig(List.class, itemStack.getItemMeta().getLore(), null) : null);
-		saveMap.put("meta", meta);
 
+		if (itemStack.hasItemMeta()) {
+			meta.put("name", itemStack.getItemMeta().hasDisplayName() ? RegexUtil.replace(itemStack.getItemMeta().getDisplayName(), RegexUtil.VANILLA_PATTERN, "&$1") : null);
+			List<String> lore = new ArrayList<>();
+
+			if (itemStack.getItemMeta().hasLore()) {
+				lore.addAll(itemStack.getItemMeta().getLore());
+
+				for (int i = 0; i < lore.size(); i++)
+					lore.set(i, RegexUtil.replace(lore.get(i), RegexUtil.VANILLA_PATTERN, "&$1"));
+			}
+
+			meta.put("lore", listConverter.toConfig(List.class, lore, null));
+		}
+
+		saveMap.put("meta", meta);
 		return saveMap;
 	}
 
