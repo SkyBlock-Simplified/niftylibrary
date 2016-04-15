@@ -18,6 +18,9 @@ public class ItemData extends ItemStack {
 
 	public ItemData(ItemStack stack) {
 		super(stack);
+
+		if (this.getAmount() <= 0)
+			this.setAmount(1);
 	}
 
 	public ItemData(int id) {
@@ -25,7 +28,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(int id, short data) {
-		super(Material.getMaterial(id), 1, data);
+		this(Material.getMaterial(id), data);
 	}
 
 	public ItemData(Material material) {
@@ -33,51 +36,56 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(Material material, short data) {
-		super(material, 1, data);
+		this(new ItemStack(material, data));
 	}
 
-	private ItemData(ItemData source) {
-		super(source);
-	}
+	public void addGlow() {
+		if (this.hasGlow())
+			return;
 
-	public static ItemStack addGlow(ItemStack stack) {
 		try {
 			if (!MinecraftPackage.IS_PRE_1_8)
-				stack.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
+				this.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
 
 			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
 			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection tagCompound = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
-			Object itemStackObj = craftItemStack.invokeMethod("asNMSCopy", null, stack);
-			Object tagObj = nmsItemStack.invokeMethod("getTag", itemStackObj);
+			Object nmsItem = craftItemStack.invokeMethod("asNMSCopy", null, this);
+			Object tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
 
 			if (tagObj == null) {
 				tagObj = tagCompound.newInstance();
-				nmsItemStack.invokeMethod("setTag", itemStackObj, tagObj);
-				tagObj = nmsItemStack.invokeMethod("getTag", itemStackObj);
+				nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+				tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
 			}
 
 			if (MinecraftPackage.IS_PRE_1_8)
 				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
-			else if (MinecraftPackage.IS_PRE_1_8_3) {
+			else {
 				int enchants = 1;
 
 				if ((boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
 					enchants |= (int)tagCompound.invokeMethod("getInt", tagObj, "HideFlags");
 
 				tagCompound.invokeMethod("setInt", tagObj, "HideFlags", enchants);
-			} else {
-				if (!stack.getItemMeta().hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
-					stack.getItemMeta().addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+				ItemMeta meta = this.getItemMeta();
 
-				return stack;
+				if (!meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+					meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+
+				this.setItemMeta(meta);
 			}
 
-			nmsItemStack.invokeMethod("setTag", itemStackObj, tagObj);
-			return (ItemStack)craftItemStack.invokeMethod("asCraftMirror", null, itemStackObj);
-		} catch (Exception ex) {
-			return stack;
-		}
+			nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+			this.glow = true;
+		} catch (Exception ignore) { }
+	}
+
+	@Deprecated
+	public static ItemStack addGlow(ItemStack stack) {
+		ItemData data = new ItemData(stack);
+		data.addGlow();
+		return data;
 	}
 
 	@Override
@@ -89,7 +97,7 @@ public class ItemData extends ItemStack {
 	@Override
 	public ItemMeta getItemMeta() {
 		ItemMeta itemMeta = super.getItemMeta();
-		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType());
+		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType()).clone();
 
 		if (itemMeta == null && factory != null)
 			super.setItemMeta(itemMeta = factory);
@@ -118,12 +126,60 @@ public class ItemData extends ItemStack {
 		return this.getItemMeta() != null;
 	}
 
-	public void setGlow() {
-		this.setGlow(true);
+	@Override
+	public boolean isSimilar(ItemStack stack) {
+		if (stack == null) return false;
+		ItemData data = new ItemData(stack);
+
+		if (this.getTypeId() == data.getTypeId()) {
+			if (this.getDurability() == data.getDurability()) {
+				if (this.getData().getData() == data.getData().getData()) {
+					if (this.getItemMeta().hasDisplayName() && this.getItemMeta().getDisplayName().equals(data.getItemMeta().getDisplayName())) {
+						if (this.getItemMeta().getLore().equals(data.getItemMeta().getLore()))
+							return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
-	public void setGlow(boolean value) {
-		this.glow = value;
+	public void removeGlow() {
+		if (!this.hasGlow())
+			return;
+
+		try {
+			if (!MinecraftPackage.IS_PRE_1_8)
+				this.removeEnchantment(Enchantment.DURABILITY);
+
+			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
+			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection tagCompound = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
+			Object nmsItem = craftItemStack.invokeMethod("asNMSCopy", null, this);
+			Object tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
+
+			if (tagObj == null) {
+				tagObj = tagCompound.newInstance();
+				nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+				tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
+			}
+
+			if (MinecraftPackage.IS_PRE_1_8)
+				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
+			else {
+				tagCompound.invokeMethod("remove", tagObj, "HideFlags");
+				ItemMeta meta = this.getItemMeta();
+
+				if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+					meta.removeItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+
+				this.setItemMeta(meta);
+			}
+
+			nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+			this.glow = false;
+		} catch (Exception ignore) { }
 	}
 
 	@Override
