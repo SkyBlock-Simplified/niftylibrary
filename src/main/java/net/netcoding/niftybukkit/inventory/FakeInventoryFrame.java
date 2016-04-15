@@ -14,7 +14,7 @@ import java.util.Iterator;
 public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
 
 	private ConcurrentList<ItemData> items = new ConcurrentList<>();
-	private ConcurrentMap<String, Object> temp = new ConcurrentMap<>();
+	private ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
 	private int totalSlots = -1;
 	private boolean centered = false;
 	private boolean autoCancel = false;
@@ -28,7 +28,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	FakeInventoryFrame(FakeInventoryFrame frame) {
 		super(frame.getPlugin());
 		this.items = frame.items;
-		this.temp = frame.temp;
+		this.metadata = frame.metadata;
 		this.totalSlots = frame.totalSlots;
 		this.centered = frame.centered;
 		this.autoCancel = frame.autoCancel;
@@ -64,8 +64,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
 	}
 
-	public void clearTemp() {
-		this.temp.clear();
+	public void clearMetadata() {
+		this.metadata.clear();
 	}
 
 	ConcurrentList<ItemData> getItems() {
@@ -78,6 +78,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public int getTotalSlots() {
 		return this.totalSlots >= this.getItems().size() ? this.totalSlots : this.calculateTotalSlots(this.getItems().size());
+	}
+
+	public boolean hasMetadata(String key) {
+		return this.metadata.containsKey(key);
 	}
 
 	public boolean isAutoCancelled() {
@@ -97,8 +101,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return Collections.unmodifiableList(this.items).iterator();
 	}
 
-	public void removeTempObj(String key) {
-		this.temp.remove(key);
+	public void removeMetadata(String key) {
+		this.metadata.remove(key);
 	}
 
 	public void setAutoCancelled() {
@@ -117,8 +121,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.centered = value;
 	}
 
-	public void setTempObj(String key, Object obj) {
-		this.temp.put(key, obj);
+	public void setMetadata(String key, Object obj) {
+		this.metadata.put(key, obj);
 	}
 
 	public void setTitle(String value) {
