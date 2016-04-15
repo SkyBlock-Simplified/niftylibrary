@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.inventory;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,6 +14,7 @@ import java.util.Iterator;
 public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
 
 	private ConcurrentList<ItemData> items = new ConcurrentList<>();
+	private ConcurrentMap<String, Object> temp = new ConcurrentMap<>();
 	private int totalSlots = -1;
 	private boolean centered = false;
 	private boolean autoCancel = false;
@@ -21,6 +23,17 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	FakeInventoryFrame(JavaPlugin plugin) {
 		super(plugin);
+	}
+
+	FakeInventoryFrame(FakeInventoryFrame frame) {
+		super(frame.getPlugin());
+		this.items = frame.items;
+		this.temp = frame.temp;
+		this.totalSlots = frame.totalSlots;
+		this.centered = frame.centered;
+		this.autoCancel = frame.autoCancel;
+		this.tradingEnabled = frame.tradingEnabled;
+		this.title = frame.title;
 	}
 
 	public void add(int index, ItemData item) {
@@ -49,6 +62,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	protected int calculateTotalSlots(int value) {
 		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
+	}
+
+	public void clearTemp() {
+		this.temp.clear();
 	}
 
 	ConcurrentList<ItemData> getItems() {
@@ -80,6 +97,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return Collections.unmodifiableList(this.items).iterator();
 	}
 
+	public void removeTempObj(String key) {
+		this.temp.remove(key);
+	}
+
 	public void setAutoCancelled() {
 		this.setAutoCancelled(true);
 	}
@@ -94,6 +115,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public void setAutoCenter(boolean value) {
 		this.centered = value;
+	}
+
+	public void setTempObj(String key, Object obj) {
+		this.temp.put(key, obj);
 	}
 
 	public void setTitle(String value) {

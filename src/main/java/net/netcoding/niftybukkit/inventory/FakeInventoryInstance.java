@@ -22,6 +22,12 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 		this.profile = profile;
 	}
 
+	FakeInventoryInstance(FakeInventoryFrame frame, FakeInventory inventory, BukkitMojangProfile profile) {
+		super(frame);
+		this.inventory = inventory;
+		this.profile = profile;
+	}
+
 	public void close() {
 		this.inventory.close(this.getProfile());
 	}
