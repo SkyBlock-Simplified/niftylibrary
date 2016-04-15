@@ -1,9 +1,8 @@
 package net.netcoding.niftybukkit.inventory.events;
 
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 
 public class InventoryItemInteractEvent extends InventoryCancellableEvent {
 
@@ -14,8 +13,8 @@ public class InventoryItemInteractEvent extends InventoryCancellableEvent {
 		this.event = event;
 	}
 
-	public ItemStack getItem() {
-		return this.event.getItem();
+	public ItemData getItem() {
+		return new ItemData(this.event.getItem());
 	}
 
 }

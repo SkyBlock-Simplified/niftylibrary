@@ -1,11 +1,10 @@
 package net.netcoding.niftybukkit.inventory.events;
 
 import net.netcoding.niftybukkit.inventory.FakeInventory;
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.inventory.ItemStack;
 
 public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 
@@ -21,11 +20,11 @@ public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 		return this.getClickEvent().getClick();
 	}
 
-	public ItemStack getClickedItem() {
+	public ItemData getClickedItem() {
 		return this.getClickedItem(true);
 	}
 
-	public ItemStack getClickedItem(boolean firstClick) {
+	public ItemData getClickedItem(boolean firstClick) {
 		return FakeInventory.getClickedItem(this.getClickEvent(), firstClick);
 	}
 
