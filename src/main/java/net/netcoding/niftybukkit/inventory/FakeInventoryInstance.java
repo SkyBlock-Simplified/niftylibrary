@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.inventory;
 
+import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import org.bukkit.entity.Player;
@@ -53,23 +54,23 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 		this.inventory.update(profiles, this);
 	}
 
-	public <T extends ItemStack> void update(T[] items) {
+	public <T extends ItemData> void update(T[] items) {
 		this.update(this.inventory.getOpened().keySet(), Arrays.asList(items));
 	}
 
-	public <T extends ItemStack> void update(BukkitMojangProfile profile, T[] items) {
+	public <T extends ItemData> void update(BukkitMojangProfile profile, T[] items) {
 		this.update(Collections.singletonList(profile), Arrays.asList(items));
 	}
 
-	public <T extends ItemStack> void update(Collection<BukkitMojangProfile> profiles, T[] items) {
+	public <T extends ItemData> void update(Collection<BukkitMojangProfile> profiles, T[] items) {
 		this.update(profiles, Arrays.asList(items));
 	}
 
-	public <T extends ItemStack> void update(BukkitMojangProfile profile, Collection<? extends T> items) {
+	public <T extends ItemData> void update(BukkitMojangProfile profile, Collection<? extends T> items) {
 		this.update(Collections.singletonList(profile), items);
 	}
 
-	public <T extends ItemStack> void update(Collection<BukkitMojangProfile> profiles, Collection<? extends T> items) {
+	public <T extends ItemData> void update(Collection<BukkitMojangProfile> profiles, Collection<? extends T> items) {
 		for (BukkitMojangProfile profile : profiles) {
 			Player player = profile.getOfflinePlayer().getPlayer();
 			player.getOpenInventory().getTopInventory().setContents(ListUtil.toArray(items, ItemStack.class));
