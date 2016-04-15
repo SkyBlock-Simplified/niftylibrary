@@ -27,16 +27,16 @@ public class ItemData extends ItemStack {
 		this(id, (short)0);
 	}
 
-	public ItemData(int id, short data) {
-		this(Material.getMaterial(id), data);
+	public ItemData(int id, short durability) {
+		this(Material.getMaterial(id), durability);
 	}
 
 	public ItemData(Material material) {
 		this(material, (short)0);
 	}
 
-	public ItemData(Material material, short data) {
-		this(new ItemStack(material, data));
+	public ItemData(Material material, short durability) {
+		this(new ItemStack(material, durability));
 	}
 
 	public void addGlow() {
