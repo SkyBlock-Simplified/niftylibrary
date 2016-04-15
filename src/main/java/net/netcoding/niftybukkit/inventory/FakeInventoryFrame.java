@@ -1,23 +1,18 @@
 package net.netcoding.niftybukkit.inventory;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class FakeInventoryFrame extends BukkitListener {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
-	private ConcurrentList<ItemStack> items = new ConcurrentList<>();
+public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
+
+	private ConcurrentList<ItemData> items = new ConcurrentList<>();
 	private int totalSlots = -1;
 	private boolean centered = false;
 	private boolean autoCancel = false;
@@ -28,40 +23,27 @@ public abstract class FakeInventoryFrame extends BukkitListener {
 		super(plugin);
 	}
 
-	public void add(int index, ItemData item, int amount, String displayName, List<String> lore) {
-		ItemStack stack = NiftyBukkit.getItemDatabase().get(StringUtil.format("{0}:{1}", item.getTypeId(), item.getData()), amount);
-		ItemMeta meta = stack.getItemMeta();
-		if (StringUtil.notEmpty(displayName)) meta.setDisplayName(displayName);
-		if (ListUtil.notEmpty(lore)) meta.setLore(lore);
-		stack.setItemMeta(meta);
-		this.add(index, stack);
-	}
-
-	public void add(int index, ItemData item, int amount, String displayName, String... lore) {
-		this.add(index, item, amount, displayName, Arrays.asList(lore));
-	}
-
-	public void add(int index, ItemStack item) {
+	public void add(int index, ItemData item) {
 		this.items.add(index, item);
 	}
 
-	public void add(ItemData item, int amount, String displayName, List<String> lore) {
-		this.add(this.items.size(), item, amount, displayName, lore);
+	public void add(int index, ItemStack item) {
+		this.add(index, new ItemData(item));
 	}
 
-	public void add(ItemData item, int amount, String displayName, String... lore) {
-		this.add(this.items.size(), item, amount, displayName, Arrays.asList(lore));
-	}
-
-	public void add(ItemStack item) {
+	public void add(ItemData item) {
 		this.items.add(item);
 	}
 
-	public void addAll(Collection<? extends ItemStack> collection) {
+	public void add(ItemStack item) {
+		this.add(new ItemData(item));
+	}
+
+	public void addAll(Collection<? extends ItemData> collection) {
 		this.items.addAll(collection);
 	}
 
-	public void addAll(int index, Collection<? extends ItemStack> collection) {
+	public void addAll(int index, Collection<? extends ItemData> collection) {
 		this.items.addAll(index, collection);
 	}
 
@@ -69,7 +51,7 @@ public abstract class FakeInventoryFrame extends BukkitListener {
 		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
 	}
 
-	ConcurrentList<ItemStack> getItems() {
+	ConcurrentList<ItemData> getItems() {
 		return this.items;
 	}
 
@@ -91,6 +73,11 @@ public abstract class FakeInventoryFrame extends BukkitListener {
 
 	public boolean isTradingEnabled() {
 		return this.tradingEnabled;
+	}
+
+	@Override
+	public Iterator<ItemData> iterator() {
+		return Collections.unmodifiableList(this.items).iterator();
 	}
 
 	public void setAutoCancelled() {
