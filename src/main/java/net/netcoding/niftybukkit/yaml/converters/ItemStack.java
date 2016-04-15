@@ -3,7 +3,6 @@ package net.netcoding.niftybukkit.yaml.converters;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
@@ -31,19 +30,8 @@ public class ItemStack extends Converter {
 		ItemMeta meta = itemData.getItemMeta();
 
 		if (metaMap != null) {
-			if (metaMap.get("name") != null) {
-				String name = RegexUtil.replaceColor((String)metaMap.get("name"), RegexUtil.REPLACE_ALL_PATTERN);
-				meta.setDisplayName(StringUtil.notEmpty(name) ? name : null);
-			}
-
-			if (metaMap.get("lore") != null) {
-				List<String> lore = (List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null);
-
-				for (int i = 0; i < lore.size(); i++)
-					lore.set(i, RegexUtil.replaceColor(lore.get(i), RegexUtil.REPLACE_ALL_PATTERN));
-
-				meta.setLore(lore);
-			}
+			meta.setDisplayName(metaMap.get("name") != null ? (String)metaMap.get("name") : meta.getDisplayName());
+			meta.setLore(metaMap.get("lore") != null ? (List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null) : meta.getLore());
 		}
 
 		itemData.setItemMeta(meta);
