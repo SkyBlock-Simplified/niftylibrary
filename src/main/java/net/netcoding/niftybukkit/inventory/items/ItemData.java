@@ -122,6 +122,10 @@ public class ItemData extends ItemStack {
 		return itemMeta;
 	}
 
+	public Object getMetadata(String key) {
+		return this.metadata.get(key);
+	}
+
 	@Override
 	public int getTypeId() {
 		return super.getTypeId();
