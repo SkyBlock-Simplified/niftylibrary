@@ -72,6 +72,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return this.items;
 	}
 
+	public Object getMetadata(String key) {
+		return this.metadata.get(key);
+	}
+
 	public String getTitle() {
 		return this.title;
 	}
