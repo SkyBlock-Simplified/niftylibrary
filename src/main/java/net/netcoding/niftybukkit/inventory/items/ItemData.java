@@ -4,12 +4,14 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.RegexUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class ItemData extends ItemStack {
@@ -180,6 +182,23 @@ public class ItemData extends ItemStack {
 			nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
 			this.glow = false;
 		} catch (Exception ignore) { }
+	}
+
+	@Override
+	public boolean setItemMeta(ItemMeta itemMeta) {
+		if (itemMeta.hasDisplayName())
+			itemMeta.setDisplayName(RegexUtil.replaceColor(itemMeta.getDisplayName(), RegexUtil.REPLACE_ALL_PATTERN));
+
+		if (ListUtil.isEmpty(itemMeta.getLore()))
+			itemMeta.setLore(new ArrayList<String>());
+
+		List<String> lore = itemMeta.getLore();
+
+		for (int i = 0; i < lore.size(); i++)
+			lore.set(i, RegexUtil.replaceColor(lore.get(i), RegexUtil.REPLACE_ALL_PATTERN));
+
+		itemMeta.setLore(lore);
+		return super.setItemMeta(itemMeta);
 	}
 
 	@Override
