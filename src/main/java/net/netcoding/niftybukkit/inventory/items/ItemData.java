@@ -5,6 +5,7 @@ import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +17,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class ItemData extends ItemStack {
 
+	private ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
 	private boolean glow = false;
 
 	public ItemData(ItemStack stack) {
@@ -90,10 +92,16 @@ public class ItemData extends ItemStack {
 		return data;
 	}
 
+	public void clearMetadata() {
+		this.metadata.clear();
+	}
+
 	@Override
-	@SuppressWarnings("CloneDoesntCallSuperClone")
 	public ItemData clone() {
-		return new ItemData(this);
+		ItemData itemData = new ItemData(super.clone());
+		itemData.metadata.putAll(this.metadata);
+		if (this.hasGlow()) itemData.addGlow();
+		return itemData;
 	}
 
 	@Override
@@ -126,6 +134,10 @@ public class ItemData extends ItemStack {
 	@Override
 	public boolean hasItemMeta() {
 		return this.getItemMeta() != null;
+	}
+
+	public boolean hasMetadata(String key) {
+		return this.metadata.containsKey(key);
 	}
 
 	@Override
@@ -184,6 +196,10 @@ public class ItemData extends ItemStack {
 		} catch (Exception ignore) { }
 	}
 
+	public void removeMetadata(String key) {
+		this.metadata.remove(key);
+	}
+
 	@Override
 	public boolean setItemMeta(ItemMeta itemMeta) {
 		if (itemMeta.hasDisplayName())
@@ -199,6 +215,10 @@ public class ItemData extends ItemStack {
 
 		itemMeta.setLore(lore);
 		return super.setItemMeta(itemMeta);
+	}
+
+	public void setMetadata(String key, Object obj) {
+		this.metadata.put(key, obj);
 	}
 
 	@Override
