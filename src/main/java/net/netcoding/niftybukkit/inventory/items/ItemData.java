@@ -36,7 +36,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(Material material, short durability) {
-		this(new ItemStack(material, durability));
+		this(new ItemStack(material, 1, durability));
 	}
 
 	public void addGlow() {
