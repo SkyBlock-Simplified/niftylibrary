@@ -20,7 +20,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	private final static transient Reflection MINECRAFT_SERVER = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection NETWORK_MANAGER = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection SERVER_PING = new Reflection("ServerPing", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection SERVER_PING_SAMPLE = BukkitReflection.getComatibleReflection("ServerPing", "ServerPingPlayerSample");
+	private final static transient Reflection SERVER_PING_SAMPLE = BukkitReflection.getCompatibleReflection("ServerPing", "ServerPingPlayerSample");
 	private final static transient Reflection SERVER_PING_DATA = new Reflection(StringUtil.format("ServerPing{0}ServerData", (MinecraftPackage.IS_PRE_1_8_3 ? "" : "$")), MinecraftPackage.MINECRAFT_SERVER);
 	private final static transient Reflection SERVER_PING_PACKET = new Reflection("PacketStatusOutServerInfo", MinecraftPackage.MINECRAFT_SERVER);
 	private final static int PROTOCOL = MinecraftProtocol.getCurrentProtocol();
