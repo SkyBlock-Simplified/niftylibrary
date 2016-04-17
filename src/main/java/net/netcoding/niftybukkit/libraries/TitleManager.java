@@ -101,7 +101,7 @@ public class TitleManager {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 
 		// Text
 		JsonObject json = new JsonObject();
@@ -115,7 +115,7 @@ public class TitleManager {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
@@ -131,7 +131,7 @@ public class TitleManager {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumReset = titleAction.getValue("RESET", null);
 
@@ -146,7 +146,7 @@ public class TitleManager {
 	public static void sendTabList(BukkitMojangProfile profile, String header, String footer) throws Exception {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetList = new Reflection("PacketPlayOutPlayerListHeaderFooter", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 		Object packetListObj = packetList.newInstance();
 
 		// Header
@@ -167,8 +167,8 @@ public class TitleManager {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getComatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Reflection chatSerializer = BukkitReflection.getComatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 
 		if (this.getStay() > 0 && StringUtil.notEmpty(this.getTitle())) {
 			Object enumTimes = titleAction.getValue("TIMES", null);
