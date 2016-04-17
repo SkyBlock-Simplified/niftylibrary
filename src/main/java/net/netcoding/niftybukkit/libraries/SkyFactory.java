@@ -1,16 +1,20 @@
 package net.netcoding.niftybukkit.libraries;
 
-import java.lang.reflect.InvocationTargetException;
-
-import net.netcoding.niftybukkit.NiftyBukkit;
-
-import org.bukkit.entity.Player;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
+import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftycore.reflection.Reflection;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class SkyFactory {
 
+	private final static Reflection GAME_STATE_CHANGE = new Reflection("PacketPlayOutGameStateChange", MinecraftPackage.MINECRAFT_SERVER);
+
+	@Deprecated
 	public static PacketContainer changeGameState(int reason, float value) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.GAME_STATE_CHANGE);
 		packet.getIntegers().write(0, reason);
@@ -40,16 +44,25 @@ public class SkyFactory {
 		LIGHT_SEPIA_BLACK(2, 6),
 		BLUE_SKY_DARK_TERRAIN(3, 9);
 
-		private final float i1, i2;
+		private final int value1;
+		private final float value2;
 
-		SkyColor(float i1, float i2) {
-			this.i1 = i1;
-			this.i2 = i2;
+		SkyColor(int value1, float value2) {
+			this.value1 = value1;
+			this.value2 = value2;
 		}
 
+		public void show(BukkitMojangProfile profile) throws Exception {
+			if (!profile.isOnlineLocally()) return;
+
+			profile.sendPacket(GAME_STATE_CHANGE.newInstance(7, this.value1));
+			profile.sendPacket(GAME_STATE_CHANGE.newInstance(8, this.value2));
+		}
+
+		@Deprecated
 		public void show(Player player) throws InvocationTargetException {
-			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(7, i1));
-			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(8, i2));
+			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(7, this.value1));
+			NiftyBukkit.getProtocolManager().sendServerPacket(player, changeGameState(8, this.value2));
 		}
 
 	}
