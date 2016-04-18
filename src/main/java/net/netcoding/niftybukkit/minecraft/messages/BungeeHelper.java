@@ -49,6 +49,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public static final String BUNGEE_CHANNEL = "BungeeCord";
 	public static final String NIFTY_CHANNEL = "NiftyBungee";
+	private static final transient Gson GSON = new Gson();
 	private static final ConcurrentHashMap<String, BungeeServer> SERVERS = new ConcurrentHashMap<>();
 	private static final ServerSocket BUKKIT_SOCKET;
 	private static final ServerSocketWrapper BUKKIT_SOCKET_WRAPPER;
@@ -59,7 +60,6 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	private static boolean BUNGEE_ONLINEMODE = false;
 	private static boolean LOADED_ONCE = false;
 	private static boolean LOADED_EVENTONCE = false;
-	private static final transient Gson GSON = new Gson();
 	private final transient BungeeListener listener;
 	private final String channel;
 
