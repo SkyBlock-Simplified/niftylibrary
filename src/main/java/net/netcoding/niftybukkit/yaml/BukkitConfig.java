@@ -1,13 +1,13 @@
 package net.netcoding.niftybukkit.yaml;
 
-import java.io.File;
-
 import net.netcoding.niftybukkit.yaml.converters.Block;
 import net.netcoding.niftybukkit.yaml.converters.ItemStack;
 import net.netcoding.niftybukkit.yaml.converters.Location;
-import net.netcoding.niftycore.yaml.Config;
+import net.netcoding.niftycore.yaml.YamlConfig;
 
-public class BukkitConfig extends Config {
+import java.io.File;
+
+public class BukkitConfig extends YamlConfig {
 
 	public BukkitConfig(File folder, String fileName, String... header) {
 		this(folder, fileName, false, header);
