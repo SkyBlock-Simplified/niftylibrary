@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.inventory.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
+import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftybukkit.util.LocationUtil;
@@ -11,6 +12,7 @@ import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.json.JsonMessage;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
@@ -40,7 +42,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Connection of the client.
 	 */
 	public Object getConnection() throws Exception {
-		return this.getOfflinePlayer().isOnline() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
+		return this.isOnlineLocally() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
 	}
 
 	/**
@@ -63,7 +65,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Handle of the client.
 	 */
 	public Object getHandle() throws Exception {
-		if (!this.getOfflinePlayer().isOnline()) return null;
+		if (!this.isOnlineLocally()) return null;
 		Reflection craftPlayer = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
 		return craftPlayer.invokeMethod("getHandle", craftPlayerObj);
@@ -77,7 +79,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	public String getLocale() {
 		String locale = "en_EN";
 
-		if (this.getOfflinePlayer().isOnline()) {
+		if (this.isOnlineLocally()) {
 			try {
 				locale = (String)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("locale", this.getHandle());
 			} catch (Exception ignore) { }
@@ -101,6 +103,8 @@ public class BukkitMojangProfile extends MojangProfile {
 			JsonObject json = new JsonObject();
 			json.addProperty("id", this.getUniqueId().toString());
 			json.addProperty("name", this.getName());
+			json.addProperty("ip", this.ip);
+			json.addProperty("port", this.port);
 			String serverName = NiftyBukkit.getBungeeHelper().getServerName();
 			NiftyBukkit.getBungeeHelper().forward(serverName, "PlayerUpdate", json.toString(), serverName);
 			NiftyBukkit.getBungeeHelper().forward("ONLINE", "PlayerUpdate", json.toString(), serverName);
@@ -126,7 +130,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	public int getPing() {
 		int ping = 0;
 
-		if (this.getOfflinePlayer().isOnline()) {
+		if (this.isOnlineLocally()) {
 			try {
 				ping = (int)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("ping", this.getHandle());
 			} catch (Exception ignore) { }
@@ -171,12 +175,12 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Skull item with this profiles skin face.
 	 */
 	public final ItemStack getSkull() {
-		ItemData data = new ItemData(Material.SKULL_ITEM, (short)SkullType.PLAYER.ordinal());
-		SkullMeta meta = (SkullMeta)data.getItemMeta();
+		ItemData itemData = new ItemData(Material.SKULL_ITEM, (short)SkullType.PLAYER.ordinal());
+		SkullMeta meta = (SkullMeta)itemData.getItemMeta();
 		meta.setOwner(this.getName());
 		meta.setDisplayName(StringUtil.format("{0}{1}''s Head", ChatColor.RESET, this.getName()));
-		data.setItemMeta(meta);
-		return data;
+		itemData.setItemMeta(meta);
+		return itemData;
 	}
 
 	/**
@@ -201,16 +205,33 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * Respawns the player if they are online.
 	 */
 	public void respawn() {
-		if (!this.getOfflinePlayer().isOnline()) return;
+		if (!this.isOnlineLocally()) return;
 
 		try {
 			Reflection clientCommandObj = new Reflection("PacketPlayInClientCommand", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection enumCommandsObj = new Reflection("PacketPlayInClientCommand$EnumClientCommand", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-			Object playerConnection = this.getConnection();
 			Object[] titleActionEnums = enumCommandsObj.getClazz().getEnumConstants();
-			playerConnObj.invokeMethod("a", playerConnection, clientCommandObj.newInstance(titleActionEnums[1]));
+			playerConnObj.invokeMethod("a", this.getConnection(), clientCommandObj.newInstance(titleActionEnums[1]));
 		} catch (Exception ignore) { }
+	}
+
+	@Override
+	public void sendMessage(JsonMessage message) throws Exception {
+		if (!this.isOnlineLocally()) return;
+
+		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
+		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Object chatJson = chatSerializer.invokeMethod("a", null, message.toJSONString());
+		Object packetChatObj = packetChat.newInstance(chatJson);
+		this.sendPacket(packetChatObj);
+	}
+
+	@Override
+	public void sendMessage(String message) {
+		if (!this.isOnlineLocally()) return;
+
+		this.getOfflinePlayer().getPlayer().sendMessage(message);
 	}
 
 	/**
@@ -219,7 +240,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @param packet Packet to send.
 	 */
 	public final void sendPacket(Object packet) throws Exception {
-		if (!this.getOfflinePlayer().isOnline()) return;
+		if (!this.isOnlineLocally()) return;
 
 		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 		Object playerConnectionObj = this.getConnection();
@@ -232,7 +253,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	* @param target The target to spectate.
 	*/
 	private void spectate(Entity target) throws Exception {
-		if (!this.getOfflinePlayer().isOnline()) return;
+		if (!this.isOnlineLocally()) return;
 
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
 		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
