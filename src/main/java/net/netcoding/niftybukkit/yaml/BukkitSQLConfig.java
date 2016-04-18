@@ -4,11 +4,11 @@ import net.netcoding.niftybukkit.yaml.converters.Block;
 import net.netcoding.niftybukkit.yaml.converters.ItemStack;
 import net.netcoding.niftybukkit.yaml.converters.Location;
 import net.netcoding.niftycore.database.factory.SQLWrapper;
-import net.netcoding.niftycore.yaml.SQLConfig;
+import net.netcoding.niftycore.yaml.SQLYamlConfig;
 
 import java.io.File;
 
-public class BukkitSQLConfig extends SQLConfig<SQLWrapper> {
+public abstract class BukkitSQLConfig<T extends SQLWrapper> extends SQLYamlConfig<T> {
 
 	public BukkitSQLConfig(File folder, String fileName, String... header) {
 		this(folder, fileName, false, header);
