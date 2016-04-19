@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 
 import java.net.InetSocketAddress;
 
-public abstract class BukkitMinecraftServer extends MinecraftServer<MojangProfile> {
+public abstract class BukkitMinecraftServer<T extends MojangProfile> extends MinecraftServer<T> {
 
 	private static final InetSocketAddress serverAddress = new InetSocketAddress(Bukkit.getIp(), Bukkit.getPort());
 
