@@ -1,7 +1,7 @@
-package net.netcoding.niftybukkit.signs.events;
+package net.netcoding.niftybukkit.minecraft.signs.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit.signs.SignInfo;
+import net.netcoding.niftybukkit.minecraft.signs.SignInfo;
 
 import org.bukkit.event.block.Action;
 

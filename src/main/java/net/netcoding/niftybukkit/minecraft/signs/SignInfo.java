@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.signs;
+package net.netcoding.niftybukkit.minecraft.signs;
 
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;

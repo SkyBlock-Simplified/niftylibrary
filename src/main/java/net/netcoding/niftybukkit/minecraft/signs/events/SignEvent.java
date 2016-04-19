@@ -1,7 +1,7 @@
-package net.netcoding.niftybukkit.signs.events;
+package net.netcoding.niftybukkit.minecraft.signs.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit.signs.SignInfo;
+import net.netcoding.niftybukkit.minecraft.signs.SignInfo;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -29,7 +29,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Action taken on the event.
-	 * 
+	 *
 	 * @return Left/right click block if interact, physical if break/update and left click air on create.
 	 */
 	public Action getAction() {
@@ -38,7 +38,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Get the block of the sign.
-	 * 
+	 *
 	 * @return Sign block.
 	 */
 	public Block getBlock() {
@@ -47,7 +47,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the key of the current event.
-	 * 
+	 *
 	 * @return Key of this event.
 	 */
 	public String getKey() {
@@ -56,7 +56,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the original line of text, given the index.
-	 * 
+	 *
 	 * @param index Line number to retrieve.
 	 * @return Unmodified sign text from given line number.
 	 */
@@ -66,7 +66,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the original lines on the sign.
-	 * 
+	 *
 	 * @return Unmodified sign text.
 	 */
 	public String[] getLines() {
@@ -75,7 +75,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the location of the sign.
-	 * 
+	 *
 	 * @return Location of the sign.
 	 */
 	public Location getLocation() {
@@ -84,7 +84,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the modified line of text, given the index.
-	 * 
+	 *
 	 * @param index Line number to retrieve.
 	 * @return Modified sign text from given line number.
 	 */
@@ -94,7 +94,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the modified lines of text.
-	 * 
+	 *
 	 * @return Modified sign text.
 	 */
 	public String[] getModifiedLines() {
@@ -103,7 +103,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the color modified lines of text.
-	 * 
+	 *
 	 * @param filtered True to replace color codes, otherwise false.
 	 * @return Modified sign text.
 	 */
@@ -113,7 +113,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the profile associated with the event.
-	 * 
+	 *
 	 * @return Profile of who performed the event.
 	 */
 	public BukkitMojangProfile getProfile() {
@@ -122,7 +122,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets the world the sign belongs to.
-	 * 
+	 *
 	 * @return World the sign belongs to.
 	 */
 	public World getWorld() {
@@ -131,7 +131,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets if the event is cancelled.
-	 * 
+	 *
 	 * @return True if cancelled, otherwise false.
 	 */
 	@Override
@@ -141,7 +141,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Gets if the sign has been modified.
-	 * 
+	 *
 	 * @return True if modified, otherwise false.
 	 */
 	public boolean isModified() {
@@ -150,7 +150,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Prevents the event from occurring.
-	 * 
+	 *
 	 * @param cancelled True to cancel, otherwise false.
 	 */
 	@Override
@@ -160,7 +160,7 @@ abstract class SignEvent implements Cancellable {
 
 	/**
 	 * Modify the text on the sign, given the index.
-	 * 
+	 *
 	 * @param index The line number to modify.
 	 * @param value The text to change it to.
 	 */

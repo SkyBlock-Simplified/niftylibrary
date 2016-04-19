@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.signs;
+package net.netcoding.niftybukkit.minecraft.signs;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -10,10 +10,10 @@ import net.netcoding.niftybukkit.minecraft.inventory.InventoryWorkaround;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit.signs.events.SignBreakEvent;
-import net.netcoding.niftybukkit.signs.events.SignCreateEvent;
-import net.netcoding.niftybukkit.signs.events.SignInteractEvent;
-import net.netcoding.niftybukkit.signs.events.SignUpdateEvent;
+import net.netcoding.niftybukkit.minecraft.signs.events.SignBreakEvent;
+import net.netcoding.niftybukkit.minecraft.signs.events.SignCreateEvent;
+import net.netcoding.niftybukkit.minecraft.signs.events.SignInteractEvent;
+import net.netcoding.niftybukkit.minecraft.signs.events.SignUpdateEvent;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.GameMode;

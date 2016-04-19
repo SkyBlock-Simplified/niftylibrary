@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.signs;
+package net.netcoding.niftybukkit.minecraft.signs;
 
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
