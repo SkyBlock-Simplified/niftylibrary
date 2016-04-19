@@ -65,6 +65,7 @@ public abstract class BukkitPlugin extends JavaPlugin {
 		return !isConsole(senderName);
 	}
 
+	@Deprecated
 	public static Player findPlayer(String playerName) {
 		playerName = playerName.toLowerCase();
 
