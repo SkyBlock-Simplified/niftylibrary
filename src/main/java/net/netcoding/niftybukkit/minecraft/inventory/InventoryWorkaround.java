@@ -1,11 +1,12 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class InventoryWorkaround {
 
@@ -47,10 +48,6 @@ public class InventoryWorkaround {
 		Map<Integer, ItemStack> leftover = new HashMap<>();
 		Map<Material, Integer> lastPartial = new HashMap<>();
 		ItemStack[] combined = new ItemStack[items.length];
-
-		/*
-		 * TODO: Cache firstEmpty result
-		 */
 
 		for (ItemStack item : items) {
 			if (item == null || item.getAmount() < 1) continue;
