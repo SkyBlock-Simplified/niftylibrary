@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.BukkitServerPingEvent;
+import net.netcoding.niftybukkit.minecraft.events.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeeLoadedEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerJoinEvent;
 import net.netcoding.niftybukkit.minecraft.events.BungeePlayerLeaveEvent;
