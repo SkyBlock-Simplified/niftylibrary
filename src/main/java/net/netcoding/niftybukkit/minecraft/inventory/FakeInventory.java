@@ -148,9 +148,15 @@ public class FakeInventory extends FakeInventoryFrame {
 		return false;
 	}
 
-	public FakeInventoryInstance newInstance(BukkitMojangProfile profile) {
+	public FakeInventoryInstance getInstance(BukkitMojangProfile profile) {
 		if (!this.exists()) this.create();
-		FakeInventoryInstance instance = new FakeInventoryInstance(this.getPlugin(), this, profile);
+		FakeInventoryInstance instance;
+
+		if (this.isOpen(profile))
+			instance = new FakeInventoryInstance(OPENED.get(this.getUniqueId()).get(profile), this, profile);
+		else
+			instance = new FakeInventoryInstance(this.getPlugin(), this, profile);
+
 		instance.setAutoCancelled(this.isAutoCancelled());
 		instance.setAutoCenter(this.isAutoCentered());
 		instance.setTradingEnabled(this.isTradingEnabled());
