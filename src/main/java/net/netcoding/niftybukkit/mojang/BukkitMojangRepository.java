@@ -198,10 +198,6 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 		} catch (ProfileNotFoundException pnfex) {
 			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
 		} catch (Exception ex) {
-			// TODO: Offline-Mode NullPointerException
-			if (ex instanceof NullPointerException)
-				ex.printStackTrace();
-
 			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
 		}
 	}
