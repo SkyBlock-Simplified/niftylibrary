@@ -9,7 +9,6 @@ import java.util.Set;
 
 public class BungeeServer extends BukkitMinecraftServer<BukkitMojangProfile> {
 
-	//private static final InetSocketAddress serverAddress = new InetSocketAddress(Bukkit.getIp(), Bukkit.getPort());
 	boolean loadedOnce = false;
 	final ConcurrentSet<BukkitMojangProfile> playersLeft = new ConcurrentSet<>();
 
@@ -27,10 +26,6 @@ public class BungeeServer extends BukkitMinecraftServer<BukkitMojangProfile> {
 		return playerList;
 	}
 
-	/*public final boolean isCurrentServer() {
-		return serverAddress.getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress()) && serverAddress.getPort() == this.getAddress().getPort();
-	}*/
-
 	@Override
 	public void reset() {
 		super.reset();
@@ -41,7 +36,7 @@ public class BungeeServer extends BukkitMinecraftServer<BukkitMojangProfile> {
 		this.address = new InetSocketAddress(ip, port);
 	}
 
-	/*protected void setMaxPlayers(int maxPlayers) {
+	protected void setMaxPlayers(int maxPlayers) {
 		this.maxPlayers = maxPlayers;
 	}
 
@@ -55,6 +50,6 @@ public class BungeeServer extends BukkitMinecraftServer<BukkitMojangProfile> {
 
 	protected void setVersion(String name, int protocol) {
 		this.version = new Version(name, protocol);
-	}*/
+	}
 
 }
