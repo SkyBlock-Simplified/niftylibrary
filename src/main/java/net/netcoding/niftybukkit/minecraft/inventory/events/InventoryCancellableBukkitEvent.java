@@ -1,20 +1,20 @@
-package net.netcoding.niftybukkit.inventory.events;
+package net.netcoding.niftybukkit.minecraft.inventory.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
 import org.bukkit.event.Cancellable;
 
-abstract class InventoryCancellableEvent extends InventoryEvent implements Cancellable {
+abstract class InventoryCancellableBukkitEvent extends InventoryBukkitEvent implements Cancellable {
 
 	private boolean cancelled = false;
 
-	InventoryCancellableEvent(BukkitMojangProfile profile) {
-		super(profile);
+	InventoryCancellableBukkitEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
+		super(profile, event);
 	}
 
 	/**
 	 * Gets if the event is cancelled.
-	 * 
+	 *
 	 * @return True if cancelled, otherwise false.
 	 */
 	@Override
@@ -24,7 +24,7 @@ abstract class InventoryCancellableEvent extends InventoryEvent implements Cance
 
 	/**
 	 * Prevents the event from occurring.
-	 * 
+	 *
 	 * @param cancelled True to cancel, otherwise false.
 	 */
 	@Override

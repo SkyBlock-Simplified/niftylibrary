@@ -1,6 +1,6 @@
-package net.netcoding.niftybukkit.inventory;
+package net.netcoding.niftybukkit.minecraft.inventory;
 
-import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import org.bukkit.entity.Player;

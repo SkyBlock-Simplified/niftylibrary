@@ -1,10 +1,10 @@
-package net.netcoding.niftybukkit.inventory;
+package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.inventory.events.InventoryClickEvent;
-import net.netcoding.niftybukkit.inventory.events.InventoryCloseEvent;
-import net.netcoding.niftybukkit.inventory.events.InventoryItemInteractEvent;
-import net.netcoding.niftybukkit.inventory.events.InventoryOpenEvent;
+import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryClickEvent;
+import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryCloseEvent;
+import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryItemInteractEvent;
+import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryOpenEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.util.ListUtil;

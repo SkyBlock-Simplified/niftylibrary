@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.inventory.items;
+package net.netcoding.niftybukkit.minecraft.items;
 
 import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftycore.util.ListUtil;

@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.inventory.events;
+package net.netcoding.niftybukkit.minecraft.inventory.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 
@@ -18,7 +18,7 @@ abstract class InventoryEvent {
 
 	/**
 	 * Gets the profile performing the event.
-	 * 
+	 *
 	 * @return Profile of who performed the event.
 	 */
 	public BukkitMojangProfile getProfile() {
@@ -27,7 +27,7 @@ abstract class InventoryEvent {
 
 	/**
 	 * Gets the profile being viewed by the event.
-	 * 
+	 *
 	 * @return Profile being viewed by the event.
 	 */
 	public BukkitMojangProfile getTarget() {

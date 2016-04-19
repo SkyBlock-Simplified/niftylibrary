@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit;
 
-import net.netcoding.niftybukkit.inventory.enchantments.EnchantmentDatabase;
-import net.netcoding.niftybukkit.inventory.items.ItemDatabase;
+import net.netcoding.niftybukkit.minecraft.items.enchantments.EnchantmentDatabase;
+import net.netcoding.niftybukkit.minecraft.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.BukkitMojangRepository;

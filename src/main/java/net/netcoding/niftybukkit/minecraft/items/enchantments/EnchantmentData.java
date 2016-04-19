@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.inventory.enchantments;
+package net.netcoding.niftybukkit.minecraft.items.enchantments;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import org.bukkit.Material;

@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;

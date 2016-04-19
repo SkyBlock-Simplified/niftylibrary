@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit.mojang;
 
 import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;

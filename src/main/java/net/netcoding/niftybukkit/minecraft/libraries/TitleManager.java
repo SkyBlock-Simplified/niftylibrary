@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.libraries;
+package net.netcoding.niftybukkit.minecraft.libraries;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;

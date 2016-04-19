@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.inventory.events;
+package net.netcoding.niftybukkit.minecraft.inventory.events;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 

@@ -1,7 +1,7 @@
-package net.netcoding.niftybukkit.inventory.events;
+package net.netcoding.niftybukkit.minecraft.inventory.events;
 
-import net.netcoding.niftybukkit.inventory.FakeInventory;
-import net.netcoding.niftybukkit.inventory.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType.SlotType;

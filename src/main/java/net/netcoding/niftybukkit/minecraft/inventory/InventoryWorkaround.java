@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.inventory;
+package net.netcoding.niftybukkit.minecraft.inventory;
 
 import java.util.HashMap;
 import java.util.Map;

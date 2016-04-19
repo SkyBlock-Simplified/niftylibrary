@@ -6,7 +6,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.inventory.InventoryWorkaround;
+import net.netcoding.niftybukkit.minecraft.inventory.InventoryWorkaround;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;

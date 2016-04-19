@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.libraries;
+package net.netcoding.niftybukkit.minecraft.libraries;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
