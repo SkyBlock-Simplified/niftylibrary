@@ -14,6 +14,12 @@ import java.net.URL;
 public enum MinecraftProtocol {
 
 	//http://wiki.vg/Protocol_version_numbers
+	v16w15b(109),
+	v16w15a(109),
+	v16w14a(109),
+	v1_9_2(109),
+	v1_RV_pre1(108),
+	v1_9_1(108),
 	v1_9_1_pre3(108),
 	v1_9_1_pre2(108),
 	v1_9_1_pre1(107),
@@ -213,7 +219,7 @@ public enum MinecraftProtocol {
 
 	MinecraftProtocol(int protocol) {
 		this.protocol = protocol;
-		this.version = this.name().replace("v", "").replace("_pre", "-pre").replace("_", ".");
+		this.version = "v1_RV_pre1".equals(name()) /* April Fools */ ? "1.9.1" : this.name().replace("v1_RV_pre1", "1.9.1").replace("v", "").replace("_pre", "-pre").replace("_", ".");
 	}
 
 	public final int getProtocol() {
