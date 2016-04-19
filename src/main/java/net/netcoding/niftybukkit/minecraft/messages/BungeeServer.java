@@ -2,7 +2,6 @@ package net.netcoding.niftybukkit.minecraft.messages;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.minecraft.MinecraftVersion;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 import org.bukkit.Bukkit;
 
@@ -43,7 +42,7 @@ public class BungeeServer extends MinecraftServer<BukkitMojangProfile> {
 		this.address = new InetSocketAddress(ip, port);
 	}
 
-	protected void setMaxPlayers(int maxPlayers) {
+	/*protected void setMaxPlayers(int maxPlayers) {
 		this.maxPlayers = maxPlayers;
 	}
 
@@ -56,7 +55,7 @@ public class BungeeServer extends MinecraftServer<BukkitMojangProfile> {
 	}
 
 	protected void setVersion(String name, int protocol) {
-		this.version = new MinecraftVersion(name, protocol);
-	}
+		this.version = new Version(name, protocol);
+	}*/
 
 }
