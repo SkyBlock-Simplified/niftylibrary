@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.minecraft;
+package net.netcoding.niftybukkit.minecraft.events;
 
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
