@@ -1,7 +1,7 @@
 package net.netcoding.niftybukkit;
 
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.BukkitServerPingEvent;
+import net.netcoding.niftybukkit.minecraft.events.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.EnderCrystalPlaceEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
