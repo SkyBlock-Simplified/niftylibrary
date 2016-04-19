@@ -29,9 +29,9 @@ final class NiftyCommand extends BukkitCommand {
 	}
 
 	private List<String> getNameCache() {
-		HashSet<String> cache = new HashSet<>(BukkitPlugin.getPluginCache());
+		List<String> cache = new ArrayList<>(BukkitPlugin.getPluginCache());
 		cache.addAll(BukkitHelper.getPluginCache());
-		return new ArrayList<>(cache);
+		return cache;
 	}
 
 	@Override
