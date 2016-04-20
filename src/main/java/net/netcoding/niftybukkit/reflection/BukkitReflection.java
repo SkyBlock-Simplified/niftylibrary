@@ -13,7 +13,7 @@ public class BukkitReflection extends Reflection {
 		super(className, subPackage, minecraftPackage.toString());
 	}
 
-	public static Reflection getComatibleReflection(String className, String classEnum) {
+	public static Reflection getCompatibleReflection(String className, String classEnum) {
 		return new Reflection(StringUtil.format("{0}{1}", (MinecraftPackage.IS_PRE_1_8_3 ? "" : StringUtil.format("{0}$", className)), classEnum), MinecraftPackage.MINECRAFT_SERVER);
 	}
 
