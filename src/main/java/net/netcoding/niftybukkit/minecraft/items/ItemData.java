@@ -1,11 +1,12 @@
 package net.netcoding.niftybukkit.minecraft.items;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -17,15 +18,9 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class ItemData extends ItemStack {
 
-	private ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
+	private final NbtCompound root;
 	private boolean glow = false;
-
-	public ItemData(ItemStack stack) {
-		super(stack);
-
-		if (this.getAmount() <= 0)
-			this.setAmount(1);
-	}
 
 	public ItemData(int id) {
 		this(id, (short)0);
@@ -41,6 +36,19 @@ public class ItemData extends ItemStack {
 
 	public ItemData(Material material, short durability) {
 		this(new ItemStack(material, 1, durability));
+	}
+
+	public ItemData(ItemStack stack) {
+		this(stack, (CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : NbtFactory.createCompound()));
+	}
+
+	private ItemData(ItemStack stack, NbtCompound root) {
+		super(stack);
+
+		if (this.getAmount() <= 0)
+			this.setAmount(1);
+
+		this.root = root;
 	}
 
 	public void addGlow() {
@@ -86,31 +94,42 @@ public class ItemData extends ItemStack {
 	}
 
 	@Deprecated
-	public static ItemStack addGlow(ItemStack stack) {
+	public static ItemData addGlow(ItemStack stack) {
 		ItemData data = new ItemData(stack);
 		data.addGlow();
 		return data;
 	}
 
-	public void clearMetadata() {
-		this.metadata.clear();
+	public final ItemStack asCraftCopy() {
+		ItemStack craftStack = NbtFactory.getCraftItemStack(this);
+		NbtCompound c = NbtFactory.fromItemTag(craftStack);
+
+		for (String key : this.root.keySet())
+			c.put(key, this.root.get(key));
+
+		return craftStack;
 	}
 
 	@Override
 	public ItemData clone() {
-		ItemData itemData = new ItemData(super.clone());
-		itemData.metadata.putAll(this.metadata);
-		if (this.hasGlow()) itemData.addGlow();
+		ItemData itemData = new ItemData(super.clone(), this.root.clone());
+
+		if (this.hasGlow())
+			itemData.addGlow();
+
 		return itemData;
 	}
 
 	@Override
 	public ItemMeta getItemMeta() {
 		ItemMeta itemMeta = super.getItemMeta();
-		ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType()).clone();
 
-		if (itemMeta == null && factory != null)
-			super.setItemMeta(itemMeta = factory);
+		if (itemMeta == null) {
+			ItemMeta factory = NiftyBukkit.getPlugin().getServer().getItemFactory().getItemMeta(this.getType());
+
+			if (factory != null)
+				super.setItemMeta(itemMeta = factory.clone());
+		}
 
 		if (itemMeta != null) {
 			if (ListUtil.isEmpty(itemMeta.getLore())) {
@@ -119,11 +138,15 @@ public class ItemData extends ItemStack {
 			}
 		}
 
-		return itemMeta;
+		return (itemMeta != null ? itemMeta.clone() : null);
 	}
 
-	public Object getMetadata(String key) {
-		return this.metadata.get(key);
+	public final <T> T getNbt(String key) {
+		return this.root.get(key);
+	}
+
+	public final <T> T getNbtPath(String path) {
+		return this.root.getPath(path);
 	}
 
 	@Override
@@ -140,10 +163,6 @@ public class ItemData extends ItemStack {
 		return this.getItemMeta() != null;
 	}
 
-	public boolean hasMetadata(String key) {
-		return this.metadata.containsKey(key);
-	}
-
 	@Override
 	public boolean isSimilar(ItemStack stack) {
 		if (stack == null) return false;
@@ -152,6 +171,9 @@ public class ItemData extends ItemStack {
 		if (this.getTypeId() == data.getTypeId()) {
 			if (this.getDurability() == data.getDurability()) {
 				if (this.getData().getData() == data.getData().getData()) {
+					if (!this.hasItemMeta())
+						return true;
+
 					if (this.getItemMeta().hasDisplayName() && this.getItemMeta().getDisplayName().equals(data.getItemMeta().getDisplayName())) {
 						if (this.getItemMeta().getLore().equals(data.getItemMeta().getLore()))
 							return true;
@@ -200,8 +222,12 @@ public class ItemData extends ItemStack {
 		} catch (Exception ignore) { }
 	}
 
-	public void removeMetadata(String key) {
-		this.metadata.remove(key);
+	public final Object putNbt(String key, Object value) {
+		return this.root.put(key, value);
+	}
+
+	public final NbtCompound putNbtPath(String key, Object value) {
+		return this.root.putPath(key, value);
 	}
 
 	@Override
@@ -219,10 +245,6 @@ public class ItemData extends ItemStack {
 
 		itemMeta.setLore(lore);
 		return super.setItemMeta(itemMeta);
-	}
-
-	public void setMetadata(String key, Object obj) {
-		this.metadata.put(key, obj);
 	}
 
 	@Override
