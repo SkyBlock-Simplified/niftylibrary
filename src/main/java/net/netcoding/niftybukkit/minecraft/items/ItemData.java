@@ -39,7 +39,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(ItemStack stack) {
-		this(stack, (CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : null));
+		this(stack, (stack != null && CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : null));
 	}
 
 	private ItemData(ItemStack stack, NbtCompound root) {
