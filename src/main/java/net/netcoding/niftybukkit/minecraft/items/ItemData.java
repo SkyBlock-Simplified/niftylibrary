@@ -39,7 +39,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(ItemStack stack) {
-		this(stack, (CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : NbtFactory.createCompound()));
+		this(stack, (CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : null));
 	}
 
 	private ItemData(ItemStack stack, NbtCompound root) {
@@ -48,10 +48,10 @@ public class ItemData extends ItemStack {
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		this.root = root;
+		this.root = (root == null ? NbtFactory.createCompound() : root);
 	}
 
-	public void addGlow() {
+	public void addGlow() { // TODO: Modifying it's own NBT
 		if (this.hasGlow())
 			return;
 
