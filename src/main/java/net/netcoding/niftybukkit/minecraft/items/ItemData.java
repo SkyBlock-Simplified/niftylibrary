@@ -43,7 +43,7 @@ public class ItemData extends ItemStack {
 	}
 
 	private ItemData(ItemStack stack, NbtCompound root) {
-		super(stack);
+		super(stack == null ? new ItemStack(Material.AIR) : stack);
 
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
