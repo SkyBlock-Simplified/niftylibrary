@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -24,6 +25,12 @@ public class InventoryWorkaround {
 
 	// Returns what it couldnt store
 	// This will will abort if it couldn't store all items
+	public static Map<Integer, ItemStack> addAllItems(Inventory inventory, ItemData... items) {
+		return addAllItems(inventory, (ItemStack[])items);
+	}
+
+	// Returns what it couldnt store
+	// This will will abort if it couldn't store all items
 	public static Map<Integer, ItemStack> addAllItems(Inventory inventory, ItemStack... items) {
 		Inventory fakeInventory = Bukkit.getServer().createInventory(null, inventory.getType());
 		fakeInventory.setContents(inventory.getContents());
@@ -38,8 +45,19 @@ public class InventoryWorkaround {
 	}
 
 	// Returns what it couldnt store
+	public static Map<Integer, ItemStack> addItems(Inventory inventory, ItemData... items) {
+		return addOversizedItems(inventory, 0, (ItemStack[])items);
+	}
+
+	// Returns what it couldnt store
 	public static Map<Integer, ItemStack> addItems(Inventory inventory, ItemStack... items) {
 		return addOversizedItems(inventory, 0, items);
+	}
+
+	// Returns what it couldnt store
+	// Set oversizedStack to below normal stack size to disable oversized stacks
+	public static Map<Integer, ItemStack> addOversizedItems(Inventory inventory, int oversizedStacks, ItemData... items) {
+		return addOversizedItems(inventory, oversizedStacks, (ItemStack[])items);
 	}
 
 	// Returns what it couldnt store
