@@ -170,17 +170,11 @@ public class ItemData extends ItemStack {
 		if (stack == null) return false;
 		ItemData data = new ItemData(stack);
 
-		System.out.println("Made it x1: " + this.getType().toString() + ":" + stack.getType().toString() + " " + this.getTypeId() + ":" + stack.getTypeId());
 		if (this.getTypeId() == data.getTypeId()) {
-			System.out.println("Made it x2");
 			if (this.getDurability() == data.getDurability()) {
-				System.out.println("Made it x3");
 				if (this.getData().getData() == data.getData().getData()) {
-					System.out.println("Made it x4");
-					if (this.hasItemMeta() == data.hasItemMeta()) {
-						System.out.println("Made it x5");
+					if (this.hasItemMeta() == data.hasItemMeta())
 						return !this.hasItemMeta() || Bukkit.getItemFactory().equals(this.getItemMeta(), data.getItemMeta());
-					}
 				}
 			}
 		}
