@@ -11,12 +11,12 @@ import java.util.Map;
 
 public class InventoryWorkaround {
 
-	private static int nextPartial(Inventory inventory, ItemStack item, int maxAmount, int slotNumber) {
+	private static int nextPartial(Inventory inventory, ItemData item, int maxAmount, int slotNumber) {
 		if (item == null) return -1;
 		ItemStack[] stacks = inventory.getContents();
 
 		for (int i = slotNumber; i < stacks.length; i++) {
-			if (stacks[i] != null && stacks[i].getAmount() < maxAmount && stacks[i].isSimilar(item))
+			if (stacks[i] != null && stacks[i].getAmount() < maxAmount && item.isSimilar(stacks[i]))
 				return i;
 		}
 
@@ -65,14 +65,14 @@ public class InventoryWorkaround {
 	public static Map<Integer, ItemStack> addOversizedItems(Inventory inventory, int oversizedStacks, ItemStack... items) {
 		Map<Integer, ItemStack> leftover = new HashMap<>();
 		Map<Material, Integer> lastPartial = new HashMap<>();
-		ItemStack[] combined = new ItemStack[items.length];
+		ItemData[] combined = new ItemData[items.length];
 
 		for (ItemStack item : items) {
 			if (item == null || item.getAmount() < 1) continue;
 
 			for (int j = 0; j < combined.length; j++) {
 				if (combined[j] == null) {
-					combined[j] = item.clone();
+					combined[j] = new ItemData(item.clone());
 					break;
 				}
 
@@ -85,7 +85,7 @@ public class InventoryWorkaround {
 
 
 		for (int i = 0; i < combined.length; i++) {
-			ItemStack item = combined[i];
+			ItemData item = combined[i];
 			if (item == null || item.getType() == Material.AIR) continue;
 
 			while (true) {
