@@ -198,7 +198,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.tradingEnabled = value;
 	}
 
-	protected final boolean verifySignature() {
+	protected final boolean verifySignature(ItemStack[] items) {
 		boolean verified = false;
 		byte[] signatureBytes = this.getMetadata(FakeInventory.SIGNATURE_KEY);
 
@@ -208,8 +208,9 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 				signature.initVerify(this.publicKey);
 				JsonArray json = new JsonArray();
 
-				for (ItemData itemData : this.items) {
-					Map<String, Object> serialized = itemData.asCraftCopy().serialize();
+				for (ItemStack itemStack : items) {
+					if (itemStack == null) continue;
+					Map<String, Object> serialized = itemStack.serialize();
 					JsonObject itemJson = new JsonObject();
 
 					for (String key : serialized.keySet())
