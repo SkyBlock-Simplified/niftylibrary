@@ -7,6 +7,7 @@ import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -101,6 +102,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public final ItemStack asCraftCopy() {
+		if (Material.AIR == this.getType()) return this;
 		ItemStack craftStack = NbtFactory.getCraftItemStack(this);
 		NbtCompound c = NbtFactory.fromItemTag(craftStack);
 
@@ -168,15 +170,16 @@ public class ItemData extends ItemStack {
 		if (stack == null) return false;
 		ItemData data = new ItemData(stack);
 
+		System.out.println("Made it x1: " + this.getType().toString() + ":" + stack.getType().toString() + " " + this.getTypeId() + ":" + stack.getTypeId());
 		if (this.getTypeId() == data.getTypeId()) {
+			System.out.println("Made it x2");
 			if (this.getDurability() == data.getDurability()) {
+				System.out.println("Made it x3");
 				if (this.getData().getData() == data.getData().getData()) {
-					if (!this.hasItemMeta())
-						return true;
-
-					if (this.getItemMeta().hasDisplayName() && this.getItemMeta().getDisplayName().equals(data.getItemMeta().getDisplayName())) {
-						if (this.getItemMeta().getLore().equals(data.getItemMeta().getLore()))
-							return true;
+					System.out.println("Made it x4");
+					if (this.hasItemMeta() == data.hasItemMeta()) {
+						System.out.println("Made it x5");
+						return !this.hasItemMeta() || Bukkit.getItemFactory().equals(this.getItemMeta(), data.getItemMeta());
 					}
 				}
 			}
