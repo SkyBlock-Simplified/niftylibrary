@@ -1,32 +1,39 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
-import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
 
 	private ConcurrentList<ItemData> items = new ConcurrentList<>();
 	private ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+	private final PrivateKey privateKey;
+	private final PublicKey publicKey;
 	private int totalSlots = -1;
 	private boolean centered = false;
 	private boolean autoCancel = false;
 	private boolean tradingEnabled = false;
 	private String title = "";
 
-	FakeInventoryFrame(JavaPlugin plugin) {
-		super(plugin);
-	}
-
 	FakeInventoryFrame(FakeInventoryFrame frame) {
-		super(frame.getPlugin());
+		this(frame.getPlugin());
 		this.items = frame.items;
 		this.metadata = frame.metadata;
 		this.totalSlots = frame.totalSlots;
@@ -34,6 +41,24 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.autoCancel = frame.autoCancel;
 		this.tradingEnabled = frame.tradingEnabled;
 		this.title = frame.title;
+	}
+
+	FakeInventoryFrame(JavaPlugin plugin) {
+		super(plugin);
+
+		PrivateKey privateKey = null;
+		PublicKey publicKey = null;
+
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(512);
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+			privateKey = keyPair.getPrivate();
+			publicKey = keyPair.getPublic();
+		} catch (Exception ignore) { }
+
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
 	}
 
 	public void add(int index, ItemData item) {
@@ -68,12 +93,40 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.metadata.clear();
 	}
 
+	protected final void createSignature() {
+		byte[] signatureBytes = new byte[] {};
+
+		if (this.privateKey != null && this.publicKey != null) {
+			try {
+				Signature signature = Signature.getInstance("SHA256withRSA");
+				signature.initSign(this.privateKey);
+				JsonArray json = new JsonArray();
+
+				for (ItemData itemData : this.items) {
+					Map<String, Object> serialized = itemData.asCraftCopy().serialize();
+					JsonObject itemJson = new JsonObject();
+
+					for (String key : serialized.keySet())
+						itemJson.addProperty(key, serialized.get(key).toString());
+
+					json.add(itemJson);
+				}
+
+				signature.update(ByteUtil.toByteArray(json.toString()));
+				signatureBytes = signature.sign();
+			} catch (Exception ignore) { }
+		}
+
+		this.putMetadata(FakeInventory.SIGNATURE_KEY, signatureBytes);
+	}
+
 	ConcurrentList<ItemData> getItems() {
 		return this.items;
 	}
 
-	public Object getMetadata(String key) {
-		return this.metadata.get(key);
+	@SuppressWarnings("unchecked")
+	public <T> T getMetadata(String key) {
+		return (T)this.metadata.get(key);
 	}
 
 	public String getTitle() {
@@ -125,8 +178,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.centered = value;
 	}
 
-	public void setMetadata(String key, Object obj) {
-		this.metadata.put(key, obj);
+	public Object putMetadata(String key, Object obj) {
+		return this.metadata.put(key, obj);
 	}
 
 	public void setTitle(String value) {
@@ -143,6 +196,34 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public void setTradingEnabled(boolean value) {
 		this.tradingEnabled = value;
+	}
+
+	protected final boolean verifySignature() {
+		boolean verified = false;
+		byte[] signatureBytes = this.getMetadata(FakeInventory.SIGNATURE_KEY);
+
+		if (this.privateKey != null && this.publicKey != null) {
+			try {
+				Signature signature = Signature.getInstance("SHA256withRSA");
+				signature.initVerify(this.publicKey);
+				JsonArray json = new JsonArray();
+
+				for (ItemData itemData : this.items) {
+					Map<String, Object> serialized = itemData.asCraftCopy().serialize();
+					JsonObject itemJson = new JsonObject();
+
+					for (String key : serialized.keySet())
+						itemJson.addProperty(key, serialized.get(key).toString());
+
+					json.add(itemJson);
+				}
+
+				signature.update(ByteUtil.toByteArray(json.toString()));
+				verified = signature.verify(signatureBytes);
+			} catch (Exception ignore) { }
+		}
+
+		return verified;
 	}
 
 }
