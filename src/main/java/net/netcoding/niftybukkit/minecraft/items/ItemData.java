@@ -49,7 +49,7 @@ public class ItemData extends ItemStack {
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		this.root = (root == null ? NbtFactory.createCompound() : root);
+		this.root = (root == null ? ((stack instanceof ItemData) ? ((ItemData)stack).root.clone() : NbtFactory.createCompound()) : root);
 	}
 
 	public void addGlow() { // TODO: Modifying it's own NBT
@@ -104,10 +104,10 @@ public class ItemData extends ItemStack {
 	public final ItemStack asCraftCopy() {
 		if (Material.AIR == this.getType()) return this;
 		ItemStack craftStack = NbtFactory.getCraftItemStack(this);
-		NbtCompound c = NbtFactory.fromItemTag(craftStack);
+		NbtCompound compound = NbtFactory.fromItemTag(craftStack);
 
 		for (String key : this.root.keySet())
-			c.put(key, this.root.get(key));
+			compound.put(key, this.root.get(key));
 
 		return craftStack;
 	}
