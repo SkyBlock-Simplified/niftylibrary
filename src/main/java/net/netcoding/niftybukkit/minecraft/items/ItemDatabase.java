@@ -252,17 +252,22 @@ public class ItemDatabase extends BukkitHelper {
 
 			final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
 			if (numeric < 0 || data < 0) continue;
-			ItemData itemData = new ItemData(numeric, data);
-			if (numeric > 0 && Material.AIR == Material.getMaterial(numeric)) continue;
-			this.durabilities.put(itemName, data);
-			this.items.put(itemName, numeric);
 
-			if (!this.names.containsKey(itemData)) {
-				this.names.put(itemData, new ArrayList<>(Collections.singletonList(itemName)));
-				this.primaryName.put(itemData, itemName);
-			} else {
-				this.names.get(itemData).add(itemName);
-				Collections.sort(this.names.get(itemData), compare);
+			try {
+				ItemData itemData = new ItemData(numeric, data);
+				if (numeric > 0 && Material.AIR == Material.getMaterial(numeric)) continue;
+				this.durabilities.put(itemName, data);
+				this.items.put(itemName, numeric);
+
+				if (!this.names.containsKey(itemData)) {
+					this.names.put(itemData, new ArrayList<>(Collections.singletonList(itemName)));
+					this.primaryName.put(itemData, itemName);
+				} else {
+					this.names.get(itemData).add(itemName);
+					Collections.sort(this.names.get(itemData), compare);
+				}
+			} catch (Exception ignore) {
+				this.getLog().console("Failed to parse line: {0}", line);
 			}
 		}
 	}
