@@ -5,12 +5,16 @@ import net.netcoding.niftycore.util.StringUtil;
 
 public class BukkitReflection extends Reflection {
 
-	public BukkitReflection(String className, MinecraftPackage minecraftPackage) {
-		this(className, "", minecraftPackage);
+	public BukkitReflection(Class<?> clazz) {
+		this(clazz.getSimpleName(), clazz.getPackage().getName());
 	}
 
-	public BukkitReflection(String className, String subPackage, MinecraftPackage minecraftPackage) {
-		super(className, subPackage, minecraftPackage.toString());
+	public BukkitReflection(String className, String packagePath) {
+		this(className, "", packagePath);
+	}
+
+	public BukkitReflection(String className, String subPackage, String packagePath) {
+		super(className, subPackage, packagePath);
 	}
 
 	public static Reflection getCompatibleReflection(String className, String classEnum) {
