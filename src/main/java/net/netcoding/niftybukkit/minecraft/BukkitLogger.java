@@ -22,7 +22,7 @@ public class BukkitLogger extends MinecraftLogger {
 		if (exception != null)
 			this.console(exception);
 
-		Bukkit.broadcastMessage(message);
+		Bukkit.broadcastMessage(this.parse(message, args));
 	}
 
 	public void error(CommandSender sender, Object... args) {
