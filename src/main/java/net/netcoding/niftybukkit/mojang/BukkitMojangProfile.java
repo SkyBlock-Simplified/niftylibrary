@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.mojang;
 
 import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
@@ -270,7 +271,7 @@ public class BukkitMojangProfile extends MojangProfile {
 			Object handle = this.getHandle();
 			Object chatMessageObj = chatMessage.newInstance(title, new Object[] { });
 			Object containerObj = entityPlayer.getValue("activeContainer", handle);
-			Object packetOpenWindowObj = packetOpenWindow.newInstance(container.getValue("windowId", containerObj), "minecraft:chest", chatMessageObj, totalSlots);
+			Object packetOpenWindowObj = packetOpenWindow.newInstance(container.getValue("windowId", containerObj), "minecraft:chest", chatMessageObj, FakeInventory.calculateTotalSlots(totalSlots));
 			this.sendPacket(packetOpenWindowObj);
 			entityPlayer.invokeMethod("updateInventory", handle, containerObj);
 		}
