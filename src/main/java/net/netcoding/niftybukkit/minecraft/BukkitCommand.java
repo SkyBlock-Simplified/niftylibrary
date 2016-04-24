@@ -453,7 +453,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 				args = StringUtil.split(" ", StringUtil.implode(" ", args, 0, args.length - 1));
 		}
 
-		this.getLog().message(sender, this.getLog().getPrefix("Usage") + " " + usage);
+		this.getLog().message(sender, this.getLog().getPrefix("Usage") + usage);
 	}
 
 	private class BukkitCommandExecutor implements CommandExecutor {
