@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftycore.util.ByteUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,6 +14,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,23 +22,23 @@ import java.util.Map;
 
 public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
 
-	private ConcurrentList<ItemData> items = new ConcurrentList<>();
-	private ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+	private final ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>();
+	private final ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
 	private final PrivateKey privateKey;
 	private final PublicKey publicKey;
 	private int totalSlots = -1;
+	private boolean allowEmpty = false;
 	private boolean centered = false;
-	private boolean autoCancel = false;
 	private boolean tradingEnabled = false;
 	private String title = "";
 
 	FakeInventoryFrame(FakeInventoryFrame frame) {
 		this(frame.getPlugin());
-		this.items = frame.items;
-		this.metadata = frame.metadata;
+		this.items.putAll(frame.items);
+		this.metadata.putAll(frame.metadata);
 		this.totalSlots = frame.totalSlots;
 		this.centered = frame.centered;
-		this.autoCancel = frame.autoCancel;
+		this.allowEmpty = frame.allowEmpty;
 		this.tradingEnabled = frame.tradingEnabled;
 		this.title = frame.title;
 	}
@@ -61,32 +61,57 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.publicKey = publicKey;
 	}
 
-	public void add(int index, ItemData item) {
-		this.items.add(index, item);
+	private int getMax() {
+		return this.items.isEmpty() ? 0 : Collections.max(this.items.keySet()) + 1;
 	}
 
-	public void add(int index, ItemStack item) {
-		this.add(index, new ItemData(item));
+	public void add(int index, ItemData itemData) {
+		this.items.put(index, itemData.clone());
 	}
 
-	public void add(ItemData item) {
-		this.items.add(item);
+	public void add(int index, ItemStack itemStack) {
+		this.add(index, new ItemData(itemStack.clone()));
 	}
 
-	public void add(ItemStack item) {
-		this.add(new ItemData(item));
+	public void add(ItemData itemData) {
+		this.items.put(getMax(), itemData.clone());
 	}
 
-	public void addAll(Collection<? extends ItemData> collection) {
-		this.items.addAll(collection);
+	public void add(ItemStack itemStack) {
+		this.add(new ItemData(itemStack.clone()));
 	}
 
-	public void addAll(int index, Collection<? extends ItemData> collection) {
-		this.items.addAll(index, collection);
+	public <T extends ItemStack> void addAll(T[] items) {
+		for (ItemStack itemStack : items) {
+			if (itemStack == null) continue;
+			this.items.put(getMax(), new ItemData(itemStack.clone()));
+		}
+	}
+
+	public void addAll(Collection<? extends ItemStack> items) {
+		for (ItemStack itemStack : items) {
+			if (itemStack == null) continue;
+			this.items.put(getMax(), new ItemData(itemStack.clone()));
+		}
+	}
+
+	public <T extends ItemStack> void addAll(int index, T[] items) {
+		this.addAll(index, Arrays.asList(items));
+	}
+
+	public void addAll(int index, Collection<? extends ItemStack> items) {
+		int i = index;
+
+		for (ItemStack itemStack : items)
+			this.items.put(i++, new ItemData(itemStack.clone()));
 	}
 
 	protected int calculateTotalSlots(int value) {
 		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
+	}
+
+	public void clearItems() {
+		this.items.clear();
 	}
 
 	public void clearMetadata() {
@@ -102,8 +127,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 				signature.initSign(this.privateKey);
 				JsonArray json = new JsonArray();
 
-				for (ItemData itemData : this.items) {
-					Map<String, Object> serialized = itemData.asCraftCopy().serialize();
+				for (ItemData itemData : this.items.values()) {
+					Map<String, Object> serialized = itemData.serialize();
 					JsonObject itemJson = new JsonObject();
 
 					for (String key : serialized.keySet())
@@ -120,8 +145,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.putMetadata(FakeInventory.SIGNATURE_KEY, signatureBytes);
 	}
 
-	ConcurrentList<ItemData> getItems() {
-		return this.items;
+	public final Map<Integer, ItemData> getItems() {
+		ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>();
+		items.putAll(this.items);
+		return Collections.unmodifiableMap(items);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -141,12 +168,12 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return this.metadata.containsKey(key);
 	}
 
-	public boolean isAutoCancelled() {
-		return this.autoCancel;
-	}
-
 	public boolean isAutoCentered() {
 		return this.centered;
+	}
+
+	public boolean isAllowEmpty() {
+		return this.allowEmpty;
 	}
 
 	public boolean isTradingEnabled() {
@@ -155,19 +182,23 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	@Override
 	public Iterator<ItemData> iterator() {
-		return Collections.unmodifiableList(this.items).iterator();
+		return Collections.unmodifiableCollection(this.items.values()).iterator();
+	}
+
+	public void putAll(Map<Integer, ItemData> items) {
+		this.items.putAll(items);
 	}
 
 	public void removeMetadata(String key) {
 		this.metadata.remove(key);
 	}
 
-	public void setAutoCancelled() {
-		this.setAutoCancelled(true);
+	public void setAllowEmpty() {
+		this.setAllowEmpty(true);
 	}
 
-	public void setAutoCancelled(boolean value) {
-		this.autoCancel = value;
+	public void setAllowEmpty(boolean value) {
+		this.allowEmpty = value;
 	}
 
 	public void setAutoCenter() {
