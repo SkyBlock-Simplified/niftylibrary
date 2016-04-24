@@ -1,10 +1,9 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.MinecraftLogger;
-import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,13 +15,11 @@ public class BukkitLogger extends MinecraftLogger {
 
 	@Override
 	public void broadcast(String message, Throwable exception, Object... args) {
-		message = StringUtil.isEmpty(message) ? "null" : message;
-		message = StringUtil.format(RegexUtil.replace(message, RegexUtil.LOG_PATTERN), args);
-
 		if (exception != null)
 			this.console(exception);
 
-		Bukkit.broadcastMessage(this.parse(message, args));
+		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList())
+			this.message(profile.getOfflinePlayer().getPlayer(), message, args);
 	}
 
 	public void error(CommandSender sender, Object... args) {
