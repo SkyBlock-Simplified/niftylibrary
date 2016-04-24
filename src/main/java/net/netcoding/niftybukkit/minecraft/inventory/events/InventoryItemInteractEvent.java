@@ -9,7 +9,7 @@ public class InventoryItemInteractEvent extends InventoryCancellableEvent {
 	private final transient PlayerInteractEvent event;
 
 	public InventoryItemInteractEvent(BukkitMojangProfile profile, PlayerInteractEvent event) {
-		super(profile, profile);
+		super(profile);
 		this.event = event;
 	}
 

@@ -8,8 +8,8 @@ import org.bukkit.event.inventory.InventoryType.SlotType;
 
 public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 
-	public InventoryClickEvent(BukkitMojangProfile profile, BukkitMojangProfile target, org.bukkit.event.inventory.InventoryEvent event) {
-		super(profile, target, event);
+	public InventoryClickEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
+		super(profile, event);
 	}
 
 	private org.bukkit.event.inventory.InventoryClickEvent getClickEvent() {
