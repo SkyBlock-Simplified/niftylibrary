@@ -15,11 +15,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("deprecation")
 public class ItemData extends ItemStack {
 
 	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
+	private static Reflection NMS_ITEM_STACK = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
+	private final Object nmsItem;
 	private final NbtCompound root;
 	private boolean glow = false;
 
@@ -49,10 +52,11 @@ public class ItemData extends ItemStack {
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		this.root = (root == null ? ((stack instanceof ItemData) ? ((ItemData)stack).root.clone() : NbtFactory.createCompound()) : root);
+		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
+		this.root = (root == null ? ((stack instanceof ItemData) ? ((ItemData)stack).root.clone() : NbtFactory.createRootCompound("tag")) : root);
 	}
 
-	public void addGlow() { // TODO: Modifying it's own NBT
+	public void addGlow() {
 		if (this.hasGlow())
 			return;
 
@@ -60,27 +64,15 @@ public class ItemData extends ItemStack {
 			if (!MinecraftPackage.IS_PRE_1_8)
 				this.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
 
-			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection tagCompound = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
-			Object nmsItem = craftItemStack.invokeMethod("asNMSCopy", null, this);
-			Object tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
-
-			if (tagObj == null) {
-				tagObj = tagCompound.newInstance();
-				nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
-				tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
-			}
-
 			if (MinecraftPackage.IS_PRE_1_8)
-				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
+				this.putNbt("ench", NbtFactory.createList());
 			else {
 				int enchants = 1;
 
-				if ((boolean)tagCompound.invokeMethod("hasKey", tagObj, "HideFlags"))
-					enchants |= (int)tagCompound.invokeMethod("getInt", tagObj, "HideFlags");
+				if (this.hasNbt("HideFlags"))
+					enchants |= this.<Integer>getNbt("HideFlags");
 
-				tagCompound.invokeMethod("setInt", tagObj, "HideFlags", enchants);
+				this.putNbt("HideFlags", enchants);
 				ItemMeta meta = this.getItemMeta();
 
 				if (!meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
@@ -89,7 +81,7 @@ public class ItemData extends ItemStack {
 				this.setItemMeta(meta);
 			}
 
-			nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+			this.setNbtCompound();
 			this.glow = true;
 		} catch (Exception ignore) { }
 	}
@@ -99,17 +91,6 @@ public class ItemData extends ItemStack {
 		ItemData data = new ItemData(stack);
 		data.addGlow();
 		return data;
-	}
-
-	public final ItemStack asCraftCopy() {
-		if (Material.AIR == this.getType()) return this;
-		ItemStack craftStack = NbtFactory.getCraftItemStack(this);
-		NbtCompound compound = NbtFactory.fromItemTag(craftStack);
-
-		for (String key : this.root.keySet())
-			compound.put(key, this.root.get(key));
-
-		return craftStack;
 	}
 
 	@Override
@@ -165,6 +146,10 @@ public class ItemData extends ItemStack {
 		return this.getItemMeta() != null;
 	}
 
+	public final boolean hasNbt(String key) {
+		return this.root.containsKey(key);
+	}
+
 	@Override
 	public boolean isSimilar(ItemStack stack) {
 		if (stack == null) return false;
@@ -182,6 +167,23 @@ public class ItemData extends ItemStack {
 		return false;
 	}
 
+	public final void putAllNbt(Map<? extends String, ?> m) {
+		this.root.putAll(m);
+		this.setNbtCompound();
+	}
+
+	public final Object putNbt(String key, Object value) {
+		Object obj = this.root.put(key, value);
+		this.setNbtCompound();
+		return obj;
+	}
+
+	public final NbtCompound putNbtPath(String key, Object value) {
+		NbtCompound compound = this.root.putPath(key, value);
+		this.setNbtCompound();
+		return compound;
+	}
+
 	public void removeGlow() {
 		if (!this.hasGlow())
 			return;
@@ -190,22 +192,10 @@ public class ItemData extends ItemStack {
 			if (!MinecraftPackage.IS_PRE_1_8)
 				this.removeEnchantment(Enchantment.DURABILITY);
 
-			Reflection craftItemStack = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection tagCompound = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
-			Object nmsItem = craftItemStack.invokeMethod("asNMSCopy", null, this);
-			Object tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
-
-			if (tagObj == null) {
-				tagObj = tagCompound.newInstance();
-				nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
-				tagObj = nmsItemStack.invokeMethod("getTag", nmsItem);
-			}
-
 			if (MinecraftPackage.IS_PRE_1_8)
-				tagCompound.invokeMethod("set", tagObj, "ench", new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER).newInstance());
+				this.root.remove("ench");
 			else {
-				tagCompound.invokeMethod("remove", tagObj, "HideFlags");
+				this.root.remove("HideFlags");
 				ItemMeta meta = this.getItemMeta();
 
 				if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
@@ -214,17 +204,21 @@ public class ItemData extends ItemStack {
 				this.setItemMeta(meta);
 			}
 
-			nmsItemStack.invokeMethod("setTag", nmsItem, tagObj);
+			this.setNbtCompound();
 			this.glow = false;
 		} catch (Exception ignore) { }
 	}
 
-	public final Object putNbt(String key, Object value) {
-		return this.root.put(key, value);
+	public final Object removeNbt(String key) {
+		Object obj = this.root.remove(key);
+		this.setNbtCompound();
+		return obj;
 	}
 
-	public final NbtCompound putNbtPath(String key, Object value) {
-		return this.root.putPath(key, value);
+	public final NbtCompound removeNbtPath(String key) {
+		NbtCompound compund = this.root.removePath(key);
+		this.setNbtCompound();
+		return compund;
 	}
 
 	@Override
@@ -242,6 +236,27 @@ public class ItemData extends ItemStack {
 
 		itemMeta.setLore(lore);
 		return super.setItemMeta(itemMeta);
+	}
+
+	private void setNbtCompound() {
+		NMS_ITEM_STACK.invokeMethod("setTag", this.nmsItem, this.root.getHandle());
+		ItemMeta nmsMeta = (ItemMeta)CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
+
+		if (this.hasItemMeta()) {
+			ItemMeta meta = this.getItemMeta();
+
+			if (!MinecraftPackage.IS_PRE_1_8)
+				nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
+
+			nmsMeta.setDisplayName(meta.getDisplayName());
+			nmsMeta.setLore(meta.getLore());
+			Map<Enchantment, Integer> enchantments = meta.getEnchants();
+
+			for (Enchantment enchantment : enchantments.keySet())
+				nmsMeta.addEnchant(enchantment, enchantments.get(enchantment), true);
+		}
+
+		super.setItemMeta(nmsMeta);
 	}
 
 	@Override
