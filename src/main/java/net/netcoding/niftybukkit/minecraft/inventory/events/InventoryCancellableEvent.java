@@ -8,8 +8,8 @@ abstract class InventoryCancellableEvent extends InventoryEvent implements Cance
 
 	private boolean cancelled = false;
 
-	InventoryCancellableEvent(BukkitMojangProfile profile) {
-		super(profile);
+	InventoryCancellableEvent(BukkitMojangProfile profile, BukkitMojangProfile target) {
+		super(profile, target);
 	}
 
 	/**

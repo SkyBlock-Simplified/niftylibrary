@@ -8,8 +8,8 @@ abstract class InventoryCancellableBukkitEvent extends InventoryBukkitEvent impl
 
 	private boolean cancelled = false;
 
-	InventoryCancellableBukkitEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
-		super(profile, event);
+	InventoryCancellableBukkitEvent(BukkitMojangProfile profile, BukkitMojangProfile target, org.bukkit.event.inventory.InventoryEvent event) {
+		super(profile, target, event);
 	}
 
 	/**

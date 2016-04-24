@@ -7,10 +7,6 @@ abstract class InventoryEvent {
 	private final BukkitMojangProfile profile;
 	private final BukkitMojangProfile target;
 
-	InventoryEvent(BukkitMojangProfile profile) {
-		this(profile, profile);
-	}
-
 	InventoryEvent(BukkitMojangProfile profile, BukkitMojangProfile target) {
 		this.profile = profile;
 		this.target = target;
@@ -21,7 +17,7 @@ abstract class InventoryEvent {
 	 *
 	 * @return Profile of who performed the event.
 	 */
-	public BukkitMojangProfile getProfile() {
+	public final BukkitMojangProfile getProfile() {
 		return this.profile;
 	}
 
@@ -30,7 +26,7 @@ abstract class InventoryEvent {
 	 *
 	 * @return Profile being viewed by the event.
 	 */
-	public BukkitMojangProfile getTarget() {
+	public final BukkitMojangProfile getTarget() {
 		return this.target;
 	}
 

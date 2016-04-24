@@ -1,19 +1,18 @@
 package net.netcoding.niftybukkit.minecraft.inventory.events;
 
-import java.util.List;
-
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+
+import java.util.List;
 
 abstract class InventoryBukkitEvent extends InventoryEvent {
 
 	protected final transient org.bukkit.event.inventory.InventoryEvent event;
 
-	InventoryBukkitEvent(BukkitMojangProfile profile, org.bukkit.event.inventory.InventoryEvent event) {
-		super(profile);
+	InventoryBukkitEvent(BukkitMojangProfile profile, BukkitMojangProfile target, org.bukkit.event.inventory.InventoryEvent event) {
+		super(profile, target);
 		this.event = event;
 	}
 
