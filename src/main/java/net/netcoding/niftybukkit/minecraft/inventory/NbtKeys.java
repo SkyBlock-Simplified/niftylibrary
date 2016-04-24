@@ -5,8 +5,7 @@ import net.netcoding.niftycore.util.StringUtil;
 enum NbtKeys {
 
 	ITEM_OPENER,
-	PAGE_LEFT,
-	PAGE_RIGHT,
+	PAGING,
 	SIGNATURE;
 
 	private final String key;
