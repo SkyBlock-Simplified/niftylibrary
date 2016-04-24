@@ -2,14 +2,12 @@ package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import net.netcoding.niftycore.util.ListUtil;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
 
@@ -36,6 +34,10 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 		return this.profile;
 	}
 
+	public BukkitMojangProfile getTarget() {
+		return this.inventory.getTarget(this.getProfile());
+	}
+
 	public boolean isOpen() {
 		return this.inventory.isOpen(this.getProfile());
 	}
@@ -49,38 +51,23 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 	}
 
 	public void update() {
-		this.update(this.inventory.getOpened().keySet());
+		this.update(this.inventory.getItems().values());
 	}
 
-	public void update(BukkitMojangProfile profile) {
-		this.update(Collections.singletonList(profile));
+	public <T extends ItemStack> void update(T[] items) {
+		this.update(Arrays.asList(items));
 	}
 
-	public void update(Collection<BukkitMojangProfile> profiles) {
-		this.inventory.update(profiles, this);
+	public <T extends ItemStack> void update(Collection<T> items) {
+		this.clearItems();
+		this.addAll(items);
+		this.inventory.update(this.getProfile(), this);
 	}
 
-	public <T extends ItemData> void update(T[] items) {
-		this.update(this.inventory.getOpened().keySet(), Arrays.asList(items));
-	}
-
-	public <T extends ItemData> void update(BukkitMojangProfile profile, T[] items) {
-		this.update(Collections.singletonList(profile), Arrays.asList(items));
-	}
-
-	public <T extends ItemData> void update(Collection<BukkitMojangProfile> profiles, T[] items) {
-		this.update(profiles, Arrays.asList(items));
-	}
-
-	public <T extends ItemData> void update(BukkitMojangProfile profile, Collection<? extends T> items) {
-		this.update(Collections.singletonList(profile), items);
-	}
-
-	public <T extends ItemData> void update(Collection<BukkitMojangProfile> profiles, Collection<? extends T> items) {
-		for (BukkitMojangProfile profile : profiles) {
-			Player player = profile.getOfflinePlayer().getPlayer();
-			player.getOpenInventory().getTopInventory().setContents(ListUtil.toArray(items, ItemStack.class));
-		}
+	public void update(Map<Integer, ItemData> items) {
+		this.clearItems();
+		this.putAll(items);
+		this.inventory.update(this.getProfile(), this);
 	}
 
 }
