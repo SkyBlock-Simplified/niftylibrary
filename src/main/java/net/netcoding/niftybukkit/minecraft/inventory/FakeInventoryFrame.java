@@ -34,13 +34,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	FakeInventoryFrame(FakeInventoryFrame frame) {
 		this(frame.getPlugin());
-		this.items.putAll(frame.items);
-		this.metadata.putAll(frame.metadata);
-		this.totalSlots = frame.totalSlots;
-		this.centered = frame.centered;
-		this.allowEmpty = frame.allowEmpty;
-		this.tradingEnabled = frame.tradingEnabled;
-		this.title = frame.title;
+		this.update(frame);
 	}
 
 	FakeInventoryFrame(JavaPlugin plugin) {
@@ -110,11 +104,11 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
 	}
 
-	public void clearItems() {
+	public final void clearItems() {
 		this.items.clear();
 	}
 
-	public void clearMetadata() {
+	public final void clearMetadata() {
 		this.metadata.clear();
 	}
 
@@ -145,6 +139,12 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.putMetadata(FakeInventory.SIGNATURE_KEY, signatureBytes);
 	}
 
+	public final Map<String, Object> getAllMetadata() {
+		ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+		metadata.putAll(this.metadata);
+		return Collections.unmodifiableMap(metadata);
+	}
+
 	public final Map<Integer, ItemData> getItems() {
 		ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>();
 		items.putAll(this.items);
@@ -152,7 +152,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getMetadata(String key) {
+	public final <T> T getMetadata(String key) {
 		return (T)this.metadata.get(key);
 	}
 
@@ -164,7 +164,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return this.totalSlots >= this.getItems().size() ? this.totalSlots : this.calculateTotalSlots(this.getItems().size());
 	}
 
-	public boolean hasMetadata(String key) {
+	public final boolean hasMetadata(String key) {
 		return this.metadata.containsKey(key);
 	}
 
@@ -189,7 +189,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.items.putAll(items);
 	}
 
-	public void removeMetadata(String key) {
+	public final void removeMetadata(String key) {
 		this.metadata.remove(key);
 	}
 
@@ -209,7 +209,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.centered = value;
 	}
 
-	public Object putMetadata(String key, Object obj) {
+	public final Object putMetadata(String key, Object obj) {
 		return this.metadata.put(key, obj);
 	}
 
@@ -227,6 +227,16 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public void setTradingEnabled(boolean value) {
 		this.tradingEnabled = value;
+	}
+
+	void update(FakeInventoryFrame frame) {
+		this.items.putAll(frame.items);
+		this.metadata.putAll(frame.metadata);
+		this.totalSlots = frame.totalSlots;
+		this.centered = frame.centered;
+		this.allowEmpty = frame.allowEmpty;
+		this.tradingEnabled = frame.tradingEnabled;
+		this.title = frame.title;
 	}
 
 	protected final boolean verifySignature(ItemStack[] items) {
