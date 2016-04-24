@@ -62,7 +62,7 @@ public class ItemData extends ItemStack {
 
 		try {
 			if (!MinecraftPackage.IS_PRE_1_8)
-				this.addUnsafeEnchantment(Enchantment.DURABILITY, -1);
+				this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
 			if (MinecraftPackage.IS_PRE_1_8)
 				this.putNbt("ench", NbtFactory.createList());
