@@ -249,7 +249,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	*
 	* @param target The target to spectate.
 	*/
-	private final void spectate(Entity target) {
+	private void spectate(Entity target) {
 		if (!this.isOnlineLocally()) return;
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
 		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
