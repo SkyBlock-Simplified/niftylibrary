@@ -150,6 +150,10 @@ public class ItemData extends ItemStack {
 		return this.root.containsKey(key);
 	}
 
+	public final boolean hasNbtPath(String path) {
+		return this.root.containsPath(path);
+	}
+
 	@Override
 	public boolean isSimilar(ItemStack stack) {
 		if (stack == null) return false;
@@ -178,8 +182,8 @@ public class ItemData extends ItemStack {
 		return obj;
 	}
 
-	public final NbtCompound putNbtPath(String key, Object value) {
-		NbtCompound compound = this.root.putPath(key, value);
+	public final NbtCompound putNbtPath(String path, Object value) {
+		NbtCompound compound = this.root.putPath(path, value);
 		this.setNbtCompound();
 		return compound;
 	}
@@ -215,8 +219,8 @@ public class ItemData extends ItemStack {
 		return obj;
 	}
 
-	public final NbtCompound removeNbtPath(String key) {
-		NbtCompound compund = this.root.removePath(key);
+	public final NbtCompound removeNbtPath(String path) {
+		NbtCompound compund = this.root.removePath(path);
 		this.setNbtCompound();
 		return compund;
 	}

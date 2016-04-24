@@ -38,6 +38,22 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 		return compound;
 	}
 
+	public boolean containsPath(String path) {
+		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
+		NbtCompound current = this;
+
+		for (String entry : entries) {
+			NbtCompound child = current.get(entry);
+
+			if (child == null)
+				return false;
+
+			current = child;
+		}
+
+		return true;
+	}
+
 	public <T> T get(String key) {
 		Object value = super.get(key);
 
