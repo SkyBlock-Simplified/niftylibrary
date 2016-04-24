@@ -41,7 +41,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Connection of the client.
 	 */
-	public Object getConnection() throws Exception {
+	public Object getConnection() {
 		return this.isOnlineLocally() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
 	}
 
@@ -64,7 +64,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Handle of the client.
 	 */
-	public Object getHandle() throws Exception {
+	public Object getHandle() {
 		if (!this.isOnlineLocally()) return null;
 		Reflection craftPlayer = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
@@ -217,7 +217,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	@Override
-	public void sendMessage(JsonMessage message) throws Exception {
+	public void sendMessage(JsonMessage message) {
 		if (!this.isOnlineLocally()) return;
 
 		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
@@ -239,7 +239,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @param packet Packet to send.
 	 */
-	public final void sendPacket(Object packet) throws Exception {
+	public final void sendPacket(Object packet) {
 		if (!this.isOnlineLocally()) return;
 
 		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
@@ -252,7 +252,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	*
 	* @param target The target to spectate.
 	*/
-	private void spectate(Entity target) throws Exception {
+	private void spectate(Entity target) {
 		if (!this.isOnlineLocally()) return;
 
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
