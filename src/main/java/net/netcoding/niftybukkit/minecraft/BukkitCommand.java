@@ -2,7 +2,6 @@ package net.netcoding.niftybukkit.minecraft;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -223,22 +222,14 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 		if (this.isCheckingHelp() && this.isHelp(args)) {
 			this.showUsage(sender, label);
-			this.removeArgs(sender);
 			return;
 		}
 
-		MinecraftScheduler.schedule(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					onCommand(sender, label, args);
-				} catch (Exception ex) {
-					getLog().console(ex);
-				}
-
-				removeArgs(sender);
-			}
-		});
+		try {
+			this.onCommand(sender, label, args);
+		} catch (Exception ex) {
+			this.getLog().console(ex);
+		}
 	}
 
 	public static List<String> getMatchingPlayers(String lookup) {
@@ -287,7 +278,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 
 	private void removeArgs(CommandSender sender) {
 		if (this.argCache.containsKey(sender.getName()))
-		this.argCache.remove(sender.getName());
+			this.argCache.remove(sender.getName());
 	}
 
 	/**
@@ -447,7 +438,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		String usage = this.getCommand().getUsage().replace("<command>", StringUtil.notEmpty(label) ? label : this.getCommand().getName());
 		String[] args = ListUtil.toArray(this.getProperArgs(this.argCache.get(sender.getName())), String.class);
 
-		for (int i = args.length; i > 0; i--) {
+		for (int i = args.length; i >= 0; i--) {
 			if (this.usages.containsKey(i)) {
 				ConcurrentMap<String, String> usageMap = this.usages.get(i);
 				String lastArg = (i == 0 ? label : this.getLastArg(args));
@@ -458,7 +449,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 				}
 
 				break;
-			} else
+			} else if (ListUtil.notEmpty(args))
 				args = StringUtil.split(" ", StringUtil.implode(" ", args, 0, args.length - 1));
 		}
 
@@ -480,7 +471,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 			this.getCommand().processCommand(sender, label, args);
-			//this.getCommand().removeArgs(sender);
+			this.getCommand().removeArgs(sender);
 			return true;
 		}
 
