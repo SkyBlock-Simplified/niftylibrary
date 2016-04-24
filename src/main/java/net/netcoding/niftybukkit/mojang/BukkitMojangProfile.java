@@ -41,7 +41,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Connection of the client.
 	 */
-	public Object getConnection() {
+	public final Object getConnection() {
 		return this.isOnlineLocally() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
 	}
 
@@ -64,7 +64,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Handle of the client.
 	 */
-	public Object getHandle() {
+	public final Object getHandle() {
 		if (!this.isOnlineLocally()) return null;
 		Reflection craftPlayer = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
@@ -76,7 +76,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Clients locale.
 	 */
-	public String getLocale() {
+	public final String getLocale() {
 		String locale = "en_EN";
 
 		if (this.isOnlineLocally()) {
@@ -127,7 +127,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 *
 	 * @return Client latency with the server.
 	 */
-	public int getPing() {
+	public final int getPing() {
 		int ping = 0;
 
 		if (this.isOnlineLocally()) {
@@ -204,7 +204,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	/**
 	 * Respawns the player if they are online.
 	 */
-	public void respawn() {
+	public final void respawn() {
 		if (!this.isOnlineLocally()) return;
 
 		try {
@@ -219,7 +219,6 @@ public class BukkitMojangProfile extends MojangProfile {
 	@Override
 	public void sendMessage(JsonMessage message) {
 		if (!this.isOnlineLocally()) return;
-
 		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
 		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 		Object chatJson = chatSerializer.invokeMethod("a", null, message.toJSONString());
@@ -230,7 +229,6 @@ public class BukkitMojangProfile extends MojangProfile {
 	@Override
 	public void sendMessage(String message) {
 		if (!this.isOnlineLocally()) return;
-
 		this.getOfflinePlayer().getPlayer().sendMessage(message);
 	}
 
@@ -241,7 +239,6 @@ public class BukkitMojangProfile extends MojangProfile {
 	 */
 	public final void sendPacket(Object packet) {
 		if (!this.isOnlineLocally()) return;
-
 		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 		Object playerConnectionObj = this.getConnection();
 		playerConnObj.invokeMethod("sendPacket", playerConnectionObj, packet);
@@ -252,13 +249,31 @@ public class BukkitMojangProfile extends MojangProfile {
 	*
 	* @param target The target to spectate.
 	*/
-	private void spectate(Entity target) {
+	private final void spectate(Entity target) {
 		if (!this.isOnlineLocally()) return;
-
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
 		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 		Object targetHandle = entityTarget.invokeMethod("getHandle", target);
 		entityPlayer.invokeMethod("e", this.getHandle(), targetHandle);
+	}
+
+	public final void updateOpenInventory(String title, int totalSlots) {
+		if (!this.isOnlineLocally()) return;
+		Player player = this.getOfflinePlayer().getPlayer();
+
+		if (player.getOpenInventory() != null) {
+			Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection packetOpenWindow = new Reflection("PacketPlayOutOpenWindow", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection container = new Reflection("Container", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection chatMessage = new Reflection("ChatMessage", MinecraftPackage.MINECRAFT_SERVER);
+
+			Object handle = this.getHandle();
+			Object chatMessageObj = chatMessage.newInstance(title, new Object[] { });
+			Object containerObj = entityPlayer.getValue("activeContainer", handle);
+			Object packetOpenWindowObj = packetOpenWindow.newInstance(container.getValue("windowId", containerObj), "minecraft:chest", chatMessageObj, totalSlots);
+			this.sendPacket(packetOpenWindowObj);
+			entityPlayer.invokeMethod("updateInventory", handle, containerObj);
+		}
 	}
 
 }
