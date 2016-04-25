@@ -11,7 +11,6 @@ import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftybukkit.util.LocationUtil;
 import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.reflection.FieldEntry;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.json.JsonMessage;
@@ -279,10 +278,10 @@ public class BukkitMojangProfile extends MojangProfile {
 
 			// Update Server
 			Object inventoryObj = craftInventory.getValue(iInventory.getClazz(), topInventory);
-			Object[] oldNmsStack = (Object[])minecraftInventory.getValue(nmsItemStack.getClazz(), inventoryObj);
 			Object[] nmsStack = (Object[]) Array.newInstance(nmsItemStack.getClazz(), totalSlots);
+			Object[] oldNmsStack = (Object[])minecraftInventory.getValue(nmsStack.getClass(), inventoryObj);
 			System.arraycopy(oldNmsStack, 0, nmsStack, 0, Math.min(oldNmsStack.length, nmsStack.length));
-			minecraftInventory.setValue(inventoryObj, new FieldEntry(nmsStack.getClass(), nmsStack));
+			minecraftInventory.setValue(nmsStack.getClass(), inventoryObj, nmsStack);
 
 			// Update Client
 			Object handle = this.getHandle();
