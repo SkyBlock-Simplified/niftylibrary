@@ -11,6 +11,7 @@ import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftybukkit.util.LocationUtil;
 import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftycore.reflection.FieldEntry;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.json.JsonMessage;
@@ -20,8 +21,11 @@ import org.bukkit.SkullType;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+
+import java.lang.reflect.Array;
 
 public class BukkitMojangProfile extends MojangProfile {
 
@@ -263,11 +267,24 @@ public class BukkitMojangProfile extends MojangProfile {
 		Player player = this.getOfflinePlayer().getPlayer();
 
 		if (player.getOpenInventory() != null) {
+			Inventory topInventory = player.getOpenInventory().getTopInventory();
 			Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection packetOpenWindow = new Reflection("PacketPlayOutOpenWindow", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection container = new Reflection("Container", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection chatMessage = new Reflection("ChatMessage", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection iInventory = new Reflection("IInventory", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
+			Reflection minecraftInventory = new Reflection("CraftInventoryCustom$MinecraftInventory", "inventory", MinecraftPackage.CRAFTBUKKIT);
+			Reflection craftInventory = new Reflection(topInventory.getClass());
 
+			// Update Server
+			Object inventoryObj = craftInventory.getValue(iInventory.getClazz(), topInventory);
+			Object[] oldNmsStack = (Object[])minecraftInventory.getValue(nmsItemStack.getClazz(), inventoryObj);
+			Object[] nmsStack = (Object[]) Array.newInstance(nmsItemStack.getClazz(), totalSlots);
+			System.arraycopy(oldNmsStack, 0, nmsStack, 0, Math.min(oldNmsStack.length, nmsStack.length));
+			minecraftInventory.setValue(inventoryObj, new FieldEntry(nmsStack.getClass(), nmsStack));
+
+			// Update Client
 			Object handle = this.getHandle();
 			Object chatMessageObj = chatMessage.newInstance(title, new Object[] { });
 			Object containerObj = entityPlayer.getValue("activeContainer", handle);
