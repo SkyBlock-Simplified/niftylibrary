@@ -69,7 +69,7 @@ public class ItemData extends ItemStack {
 			else {
 				int enchants = 1;
 
-				if (this.hasNbt("HideFlags"))
+				if (this.containsNbtKey("HideFlags"))
 					enchants |= this.<Integer>getNbt("HideFlags");
 
 				this.putNbt("HideFlags", enchants);
@@ -101,6 +101,14 @@ public class ItemData extends ItemStack {
 			itemData.addGlow();
 
 		return itemData;
+	}
+
+	public final boolean containsNbtKey(String key) {
+		return this.root.containsKey(key);
+	}
+
+	public final boolean containsNbtPath(String path) {
+		return this.root.containsPath(path);
 	}
 
 	@Override
@@ -144,14 +152,6 @@ public class ItemData extends ItemStack {
 	@Override
 	public boolean hasItemMeta() {
 		return this.getItemMeta() != null;
-	}
-
-	public final boolean hasNbt(String key) {
-		return this.root.containsKey(key);
-	}
-
-	public final boolean hasNbtPath(String path) {
-		return this.root.containsPath(path);
 	}
 
 	@Override
