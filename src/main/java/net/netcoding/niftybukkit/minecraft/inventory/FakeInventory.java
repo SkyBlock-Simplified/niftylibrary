@@ -281,6 +281,10 @@ public class FakeInventory extends FakeInventoryFrame {
 				this.getLog().console("First: {0}", firstClickItem);
 				this.getLog().console("Place: {0}", placeClickItem);
 
+				for (ItemStack itemStack : player.getOpenInventory().getTopInventory().getContents()) {
+					this.getLog().console("Item: {0}", itemStack);
+				}
+
 				if (Material.AIR != firstClickItem.getType() && !frame.isTradingEnabled()) {
 					this.getLog().broadcast("Made it x1");
 					if (firstClickItem.hasNbt(NbtKeys.PAGING.getKey())) {
