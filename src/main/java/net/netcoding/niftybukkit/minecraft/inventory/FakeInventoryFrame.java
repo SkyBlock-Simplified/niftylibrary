@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,6 +31,11 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	private boolean allowEmpty = false;
 	private boolean centered = false;
 	private boolean tradingEnabled = false;
+	private ItemData pageLeft;
+	private int pageLeftIndex = -1;
+	private ItemData pageRight;
+	private int pageRightIndex = -1;
+	private int currentPage = 1;
 	private String title = "";
 
 	FakeInventoryFrame(FakeInventoryFrame frame) {
@@ -100,8 +106,9 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 			this.items.put(i++, new ItemData(itemStack.clone()));
 	}
 
-	protected int calculateTotalSlots(int value) {
-		return value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9;
+	public static int calculateTotalSlots(int value) {
+		int calc = (value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9);
+		return calc > 54 ? 54 : calc;
 	}
 
 	public final void clearItems() {
@@ -112,7 +119,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.metadata.clear();
 	}
 
-	protected final void createSignature() {
+	protected final void generateSignature(ItemStack[] items) {
 		byte[] signatureBytes = new byte[] {};
 
 		if (this.privateKey != null && this.publicKey != null) {
@@ -121,8 +128,9 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 				signature.initSign(this.privateKey);
 				JsonArray json = new JsonArray();
 
-				for (ItemData itemData : this.items.values()) {
-					Map<String, Object> serialized = itemData.serialize();
+				for (ItemStack itemStack : items) {
+					if (itemStack == null) continue;
+					Map<String, Object> serialized = itemStack.serialize();
 					JsonObject itemJson = new JsonObject();
 
 					for (String key : serialized.keySet())
@@ -136,7 +144,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 			} catch (Exception ignore) { }
 		}
 
-		this.putMetadata(FakeInventory.SIGNATURE_KEY, signatureBytes);
+
+		this.putMetadata(NbtKeys.SIGNATURE.getKey(), signatureBytes);
 	}
 
 	public final Map<String, Object> getAllMetadata() {
@@ -151,9 +160,29 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return Collections.unmodifiableMap(items);
 	}
 
+	public int getCurrentPage() {
+		return this.currentPage;
+	}
+
 	@SuppressWarnings("unchecked")
 	public final <T> T getMetadata(String key) {
 		return (T)this.metadata.get(key);
+	}
+
+	public ItemData getPageLeft() {
+		return this.pageLeft;
+	}
+
+	public int getPageLeftIndex() {
+		return this.pageLeftIndex;
+	}
+
+	public ItemData getPageRight() {
+		return this.pageRight;
+	}
+
+	public int getPageRightIndex() {
+		return this.pageRightIndex;
 	}
 
 	public String getTitle() {
@@ -161,7 +190,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	}
 
 	public int getTotalSlots() {
-		return this.totalSlots >= this.getItems().size() ? this.totalSlots : this.calculateTotalSlots(this.getItems().size());
+		return this.totalSlots > 0 ? this.totalSlots : calculateTotalSlots(this.getItems().size());
 	}
 
 	public final boolean hasMetadata(String key) {
@@ -189,6 +218,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.items.putAll(items);
 	}
 
+	public final Object putMetadata(String key, Object obj) {
+		return this.metadata.put(key, obj);
+	}
+
 	public final void removeMetadata(String key) {
 		this.metadata.remove(key);
 	}
@@ -209,8 +242,27 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.centered = value;
 	}
 
-	public final Object putMetadata(String key, Object obj) {
-		return this.metadata.put(key, obj);
+	void setCurrentPage(int value) {
+		this.currentPage = value;
+
+		if (this.pageLeft != null && this.pageRight != null) {
+			this.pageLeft.putNbt(NbtKeys.PAGING.getKey(), value - 1);
+			this.pageLeft.putNbt(NbtKeys.PAGING.getKey(), value + 1);
+		}
+	}
+
+	public void setPaging(ItemData pageLeft, ItemData pageRight) {
+		this.setPaging(-1, pageLeft, -1, pageRight);
+	}
+
+	public void setPaging(int pageLeftIndex, ItemData pageLeft, int pageRightIndex, ItemData pageRight) {
+		if (pageLeft != null && Material.AIR != pageLeft.getType() && pageRight != null && Material.AIR != pageRight.getType()) {
+			this.pageLeftIndex = pageLeftIndex;
+			this.pageRightIndex = pageRightIndex;
+			this.pageLeft = pageLeft.clone();
+			this.pageRight = pageRight.clone();
+			this.setCurrentPage(this.getCurrentPage());
+		}
 	}
 
 	public void setTitle(String value) {
@@ -218,7 +270,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	}
 
 	public void setTotalSlots(int value) {
-		this.totalSlots = this.calculateTotalSlots(value);
+		this.totalSlots = calculateTotalSlots(value);
 	}
 
 	public void setTradingEnabled() {
@@ -230,18 +282,22 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	}
 
 	void update(FakeInventoryFrame frame) {
-		this.items.putAll(frame.items);
+		this.putAll(frame.items);
 		this.metadata.putAll(frame.metadata);
-		this.totalSlots = frame.totalSlots;
-		this.centered = frame.centered;
-		this.allowEmpty = frame.allowEmpty;
-		this.tradingEnabled = frame.tradingEnabled;
-		this.title = frame.title;
+		this.setTotalSlots(frame.totalSlots);
+		this.setAllowEmpty(frame.allowEmpty);
+		this.setAutoCenter(frame.centered);
+		this.setTradingEnabled(frame.tradingEnabled);
+		this.setTitle(frame.title);
+		this.currentPage = frame.currentPage;
+
+		if (frame.pageLeft != null && frame.pageRight != null)
+			this.setPaging(frame.pageLeftIndex, frame.pageLeft, frame.pageRightIndex, frame.pageRight);
 	}
 
 	protected final boolean verifySignature(ItemStack[] items) {
 		boolean verified = false;
-		byte[] signatureBytes = this.getMetadata(FakeInventory.SIGNATURE_KEY);
+		byte[] signatureBytes = this.getMetadata(NbtKeys.SIGNATURE.getKey());
 
 		if (this.privateKey != null && this.publicKey != null) {
 			try {
