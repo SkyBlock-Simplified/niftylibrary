@@ -1,18 +1,15 @@
 package net.netcoding.niftybukkit.minecraft.libraries;
 
+import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftycore.reflection.FieldEntry;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-
-import com.google.gson.JsonObject;
 
 public class TitleManager {
 
@@ -120,7 +117,7 @@ public class TitleManager {
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
 		if (MinecraftPackage.IS_PRE_1_8)
-			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumClear));
+			packetTitle.setValue("a", packetTitleObj, enumClear);
 		else
 			packetTitleObj = packetTitle.newInstance(enumClear, null);
 
@@ -136,7 +133,7 @@ public class TitleManager {
 		Object enumReset = titleAction.getValue("RESET", null);
 
 		if (MinecraftPackage.IS_PRE_1_8)
-			packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumReset));
+			packetTitle.setValue("a", packetTitleObj, enumReset);
 		else
 			packetTitleObj = packetTitle.newInstance(enumReset, null);
 
@@ -153,13 +150,13 @@ public class TitleManager {
 		JsonObject json = new JsonObject();
 		json.addProperty("text", RegexUtil.replaceColor(header, RegexUtil.REPLACE_ALL_PATTERN));
 		Object headerJson = chatSerializer.invokeMethod("a", null, json.toString());
-		packetList.setValue(packetListObj, new FieldEntry("a", headerJson));
+		packetList.setValue("a", packetListObj, headerJson);
 
 		// Footer
 		json = new JsonObject();
 		json.addProperty("text", RegexUtil.replaceColor(footer, RegexUtil.REPLACE_ALL_PATTERN));
 		Object footerJson = chatSerializer.invokeMethod("a", null, json.toString());
-		packetList.setValue(packetListObj, new FieldEntry("b", footerJson));
+		packetList.setValue("b", packetListObj, footerJson);
 		profile.sendPacket(packetListObj);
 	}
 
@@ -179,10 +176,10 @@ public class TitleManager {
 			Object packetTimingsObj = packetTitle.newInstance();
 
 			if (MinecraftPackage.IS_PRE_1_8) {
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("a", enumTimes));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("c", this.getFadeIn()));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("d", this.getStay()));
-				packetTitle.setValue(packetTimingsObj, new FieldEntry("e", this.getFadeOut()));
+				packetTitle.setValue("a", packetTimingsObj, enumTimes);
+				packetTitle.setValue("c", packetTimingsObj, this.getFadeIn());
+				packetTitle.setValue("d", packetTimingsObj, this.getStay());
+				packetTitle.setValue("e", packetTimingsObj, this.getFadeOut());
 			} else
 				packetTimingsObj = packetTitle.newInstance(enumTimes, null, this.getFadeIn(), this.getStay(), this.getFadeOut());
 
@@ -196,8 +193,8 @@ public class TitleManager {
 			Object packetTitleObj = packetTitle.newInstance();
 
 			if (MinecraftPackage.IS_PRE_1_8) {
-				packetTitle.setValue(packetTitleObj, new FieldEntry("a", enumTitle));
-				packetTitle.setValue(packetTitleObj, new FieldEntry("b", title));
+				packetTitle.setValue("a", packetTitleObj, enumTitle);
+				packetTitle.setValue("b", packetTitleObj, title);
 			} else
 				packetTitleObj = packetTitle.newInstance(enumTitle, title);
 
@@ -212,8 +209,8 @@ public class TitleManager {
 				Object packetSubtitleObj = packetTitle.newInstance();
 
 				if (MinecraftPackage.IS_PRE_1_8) {
-					packetTitle.setValue(packetSubtitleObj, new FieldEntry("a", enumSubtitle));
-					packetTitle.setValue(packetSubtitleObj, new FieldEntry("b", subtitle));
+					packetTitle.setValue("a", packetSubtitleObj, enumSubtitle);
+					packetTitle.setValue("b", packetSubtitleObj, subtitle);
 				} else
 					packetSubtitleObj = packetTitle.newInstance(enumSubtitle, subtitle);
 
