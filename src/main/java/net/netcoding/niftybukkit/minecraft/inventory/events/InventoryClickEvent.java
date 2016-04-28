@@ -21,15 +21,15 @@ public class InventoryClickEvent extends InventoryCancellableBukkitEvent {
 	}
 
 	public ItemData getClickedItem() {
-		return this.getClickedItem(true);
-	}
-
-	public ItemData getClickedItem(boolean firstClick) {
-		return FakeInventory.getClickedItem(this.getClickEvent(), firstClick);
+		return FakeInventory.getClickedItem(this.getClickEvent(), true);
 	}
 
 	public int getHotbarButton() {
 		return this.getClickEvent().getHotbarButton();
+	}
+
+	public ItemData getPlacedItem() {
+		return FakeInventory.getClickedItem(this.getClickEvent(), false);
 	}
 
 	public int getRawSlot() {
