@@ -3,10 +3,11 @@ package net.netcoding.niftybukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.EnderCrystalPlaceEvent;
+import net.netcoding.niftybukkit.minecraft.events.InventoryCreativeNbtEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -18,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -29,6 +31,23 @@ final class NiftyListener extends BukkitListener {
 
 	NiftyListener(JavaPlugin plugin) {
 		super(plugin);
+	}
+
+	/**
+	 * Sends out an InventoryCreativeNbtEvent
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onInventoryCreative(InventoryCreativeEvent event) {
+		if (event.getWhoClicked() instanceof Player) {
+			BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
+			ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+
+			if (itemData.containsNbt()) {
+				InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
+				this.getPlugin().getServer().getPluginManager().callEvent(myEvent);
+				event.setCancelled(myEvent.isCancelled());
+			}
+		}
 	}
 
 	/**
@@ -56,7 +75,7 @@ final class NiftyListener extends BukkitListener {
 									if (block.equals(belowCrystal)) {
 										BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
 										EnderCrystalPlaceEvent event = new EnderCrystalPlaceEvent(profile, crystal);
-										Bukkit.getPluginManager().callEvent(event);
+										getPlugin().getServer().getPluginManager().callEvent(event);
 										if (event.isCancelled()) crystal.remove();
 										break;
 									}
