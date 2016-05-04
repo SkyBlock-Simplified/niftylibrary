@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("deprecation")
 public class NbtItemStack extends ItemStack {
 
 	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
