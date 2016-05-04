@@ -1,9 +1,7 @@
 package net.netcoding.niftybukkit.mojang;
 
 import com.google.gson.JsonObject;
-import net.minecraft.server.v1_9_R1.PacketPlayOutWindowItems;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
@@ -19,16 +17,10 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BukkitMojangProfile extends MojangProfile {
 
@@ -263,56 +255,6 @@ public class BukkitMojangProfile extends MojangProfile {
 		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 		Object targetHandle = entityTarget.invokeMethod("getHandle", target);
 		entityPlayer.invokeMethod("e", this.getHandle(), targetHandle);
-	}
-
-	public final <T extends ItemStack> void updateOpenInventory(String title, int totalSlots, T[] items) {
-		if (!this.isOnlineLocally()) return;
-		Player player = this.getOfflinePlayer().getPlayer();
-
-		if (player.getOpenInventory() != null) {
-			Inventory topInventory = player.getOpenInventory().getTopInventory();
-			Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection packetOpenWindow = new Reflection("PacketPlayOutOpenWindow", MinecraftPackage.MINECRAFT_SERVER);
-			//Reflection packetWindowItems = new Reflection("PacketPlayOutWindowItems", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection container = new Reflection("Container", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection chatMessage = new Reflection("ChatMessage", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection iInventory = new Reflection("IInventory", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection nmsItemStack = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection minecraftInventory = new Reflection("CraftInventoryCustom$MinecraftInventory", "inventory", MinecraftPackage.CRAFTBUKKIT);
-			Reflection craftInventory = new Reflection(topInventory.getClass());
-
-			// Update Server
-			Object inventoryObj = craftInventory.getValue(iInventory.getClazz(), topInventory);
-			Object[] nmsStack = (Object[]) Array.newInstance(nmsItemStack.getClazz(), totalSlots);
-
-			for (int i = 0; i < Math.min(nmsStack.length, items.length); i++) {
-				net.minecraft.server.v1_9_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(items[i]);
-				nmsStack[i] = nmsItem;
-			}
-
-			Object[] oldNmsStack = (Object[])minecraftInventory.getValue(nmsStack.getClass(), inventoryObj);
-			System.arraycopy(oldNmsStack, 0, nmsStack, 0, Math.min(oldNmsStack.length, nmsStack.length));
-			minecraftInventory.setValue(nmsStack.getClass(), inventoryObj, nmsStack);
-			craftInventory.setValue(iInventory.getClazz(), topInventory, inventoryObj);
-
-			// Update Client
-			Object handle = this.getHandle();
-			Object chatMessageObj = chatMessage.newInstance(title, new Object[] { });
-			Object containerObj = entityPlayer.getValue("activeContainer", handle);
-			Object packetOpenWindowObj = packetOpenWindow.newInstance(container.getValue("windowId", containerObj), "minecraft:chest", chatMessageObj, FakeInventory.calculateTotalSlots(totalSlots));
-			this.sendPacket(packetOpenWindowObj);
-			List<net.minecraft.server.v1_9_R1.ItemStack> nmsItems = new ArrayList<>();
-
-			for (ItemStack itemStack : items) {
-				net.minecraft.server.v1_9_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-				nmsItems.add(nmsItem);
-			}
-
-			System.out.println("Size: " + totalSlots + ":" + items.length + ":" + nmsStack.length + ":" + oldNmsStack.length + ":" + nmsItems.size());
-			PacketPlayOutWindowItems windowItems = new PacketPlayOutWindowItems(nmsItems.size(), nmsItems);
-			this.sendPacket(windowItems);
-			entityPlayer.invokeMethod("updateInventory", handle, containerObj);
-		}
 	}
 
 }
