@@ -37,6 +37,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	private int pageRightIndex = -1;
 	private int currentPage = 1;
 	private String title = "";
+	// http://www.planetminecraft.com/banner/arrow-pointing-right/
+	// http://www.planetminecraft.com/banner/arrow-pointing-left-35059/
 
 	FakeInventoryFrame(FakeInventoryFrame frame) {
 		this(frame.getPlugin());
@@ -139,7 +141,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 					json.add(itemJson);
 				}
 
-				signature.update(ByteUtil.toByteArray(json.toString()));
+				byte[] bytes = ByteUtil.toByteArray(json.toString());
+				signature.update(bytes);
 				signatureBytes = signature.sign();
 			} catch (Exception ignore) { }
 		}
@@ -162,6 +165,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public int getCurrentPage() {
 		return this.currentPage;
+	}
+
+	final <T> T getMetadata(NbtKeys key) {
+		return this.getMetadata(key.getKey());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -193,6 +200,10 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return this.totalSlots > 0 ? this.totalSlots : calculateTotalSlots(this.getItems().size());
 	}
 
+	final boolean hasMetadata(NbtKeys key) {
+		return this.hasMetadata(key.getKey());
+	}
+
 	public final boolean hasMetadata(String key) {
 		return this.metadata.containsKey(key);
 	}
@@ -218,8 +229,16 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.items.putAll(items);
 	}
 
+	final Object putMetadata(NbtKeys key, Object obj) {
+		return this.putMetadata(key.getKey(), obj);
+	}
+
 	public final Object putMetadata(String key, Object obj) {
 		return this.metadata.put(key, obj);
+	}
+
+	final void removeMetadata(NbtKeys key) {
+		this.removeMetadata(key.getKey());
 	}
 
 	public final void removeMetadata(String key) {
@@ -282,7 +301,9 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	}
 
 	void update(FakeInventoryFrame frame) {
+		this.items.clear();
 		this.putAll(frame.items);
+		this.metadata.clear();
 		this.metadata.putAll(frame.metadata);
 		this.setTotalSlots(frame.totalSlots);
 		this.setAllowEmpty(frame.allowEmpty);
@@ -316,7 +337,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 					json.add(itemJson);
 				}
 
-				signature.update(ByteUtil.toByteArray(json.toString()));
+				byte[] bytes = ByteUtil.toByteArray(json.toString());
+				signature.update(bytes);
 				verified = signature.verify(signatureBytes);
 			} catch (Exception ignore) { }
 		}

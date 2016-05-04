@@ -7,7 +7,8 @@ enum NbtKeys {
 	ITEM_OPENER,
 	PAGING,
 	SIGNATURE,
-	TOTAL_SLOTS,
+	TRADE_COMPLETE,
+	TRADE_ITEM,
 	TRADE_SLOT;
 
 	private final String key;
