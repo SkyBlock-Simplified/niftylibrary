@@ -43,30 +43,27 @@ public class ItemData extends NbtItemStack {
 		if (this.hasGlow())
 			return;
 
-		try {
-			if (!MinecraftPackage.IS_PRE_1_8)
-				this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
+		if (!MinecraftPackage.IS_PRE_1_8)
+			this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
-			if (MinecraftPackage.IS_PRE_1_8)
-				this.putNbt("ench", NbtFactory.createList());
-			else {
-				int enchants = 1;
+		if (MinecraftPackage.IS_PRE_1_8)
+			this.putNbt("ench", NbtFactory.createList());
+		else {
+			int enchants = 1;
 
-				if (this.containsNbtKey("HideFlags"))
-					enchants |= this.<Integer>getNbt("HideFlags");
+			if (this.containsNbtKey("HideFlags"))
+				enchants |= this.<Integer>getNbt("HideFlags");
 
-				this.putNbt("HideFlags", enchants);
-				ItemMeta meta = this.getItemMeta();
+			this.putNbt("HideFlags", enchants);
+			ItemMeta meta = this.getItemMeta();
 
-				if (!meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
-					meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+			if (!meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+				meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
 
-				this.setItemMeta(meta);
-			}
+			this.setItemMeta(meta);
+		}
 
-			//this.setNbtCompound();
-			this.glow = true;
-		} catch (Exception ignore) { }
+		this.glow = true;
 	}
 
 	@Deprecated
@@ -160,25 +157,22 @@ public class ItemData extends NbtItemStack {
 		if (!this.hasGlow())
 			return;
 
-		try {
-			if (!MinecraftPackage.IS_PRE_1_8)
-				this.removeEnchantment(Enchantment.DURABILITY);
+		if (!MinecraftPackage.IS_PRE_1_8)
+			this.removeEnchantment(Enchantment.DURABILITY);
 
-			if (MinecraftPackage.IS_PRE_1_8)
-				this.removeNbt("ench");
-			else {
-				this.removeNbt("HideFlags");
-				ItemMeta meta = this.getItemMeta();
+		if (MinecraftPackage.IS_PRE_1_8)
+			this.removeNbt("ench");
+		else {
+			this.removeNbt("HideFlags");
+			ItemMeta meta = this.getItemMeta();
 
-				if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
-					meta.removeItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+			if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+				meta.removeItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
 
-				this.setItemMeta(meta);
-			}
+			this.setItemMeta(meta);
+		}
 
-			//this.setNbtCompound();
-			this.glow = false;
-		} catch (Exception ignore) { }
+		this.glow = false;
 	}
 
 	@Override
