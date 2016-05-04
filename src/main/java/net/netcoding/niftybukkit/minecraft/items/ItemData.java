@@ -1,10 +1,8 @@
 package net.netcoding.niftybukkit.minecraft.items;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
-import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
 import org.bukkit.Bukkit;
@@ -15,15 +13,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("deprecation")
-public class ItemData extends ItemStack {
+public class ItemData extends NbtItemStack {
 
-	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-	private static Reflection NMS_ITEM_STACK = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-	private final Object nmsItem;
-	private final NbtCompound root;
 	private boolean glow = false;
 
 	public ItemData(int id) {
@@ -43,17 +36,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public ItemData(ItemStack stack) {
-		this(stack, (stack != null && CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : null));
-	}
-
-	private ItemData(ItemStack stack, NbtCompound root) {
-		super(stack == null ? new ItemStack(Material.AIR) : stack);
-
-		if (this.getAmount() <= 0)
-			this.setAmount(1);
-
-		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
-		this.root = (root == null ? ((stack instanceof ItemData) ? ((ItemData)stack).root.clone() : NbtFactory.createRootCompound("tag")) : root);
+		super(stack);
 	}
 
 	public void addGlow() {
@@ -81,7 +64,7 @@ public class ItemData extends ItemStack {
 				this.setItemMeta(meta);
 			}
 
-			this.setNbtCompound();
+			//this.setNbtCompound();
 			this.glow = true;
 		} catch (Exception ignore) { }
 	}
@@ -95,7 +78,7 @@ public class ItemData extends ItemStack {
 
 	@Override
 	public ItemData clone() {
-		ItemData itemData = new ItemData(super.clone(), this.root.clone());
+		ItemData itemData = new ItemData(super.clone());
 
 		if (this.hasGlow())
 			itemData.addGlow();
@@ -103,16 +86,12 @@ public class ItemData extends ItemStack {
 		return itemData;
 	}
 
-	public final boolean containsNbtKey(String key) {
-		return this.root.containsKey(key);
-	}
-
-	public final boolean containsNbtPath(String path) {
-		return this.root.containsPath(path);
-	}
-
 	@Override
 	public ItemMeta getItemMeta() {
+		return this.getItemMeta(false);
+	}
+
+	public ItemMeta getItemMeta(boolean unformatted) {
 		ItemMeta itemMeta = super.getItemMeta();
 
 		if (itemMeta == null) {
@@ -123,21 +102,27 @@ public class ItemData extends ItemStack {
 		}
 
 		if (itemMeta != null) {
-			if (ListUtil.isEmpty(itemMeta.getLore())) {
-				itemMeta.setLore(new ArrayList<String>());
-				super.setItemMeta(itemMeta);
+			if (unformatted) {
+				if (itemMeta.hasDisplayName())
+					itemMeta.setDisplayName(RegexUtil.replace(itemMeta.getDisplayName(), RegexUtil.VANILLA_PATTERN, "&$1"));
 			}
+
+			List<String> lore = itemMeta.getLore();
+
+			if (ListUtil.isEmpty(lore))
+				lore = new ArrayList<>();
+			else {
+				if (unformatted) {
+					for (int i = 0; i < lore.size(); i++)
+						lore.set(i, RegexUtil.replace(lore.get(i), RegexUtil.VANILLA_PATTERN, "&$1"));
+				}
+			}
+
+			itemMeta.setLore(lore);
+			super.setItemMeta(itemMeta);
 		}
 
 		return (itemMeta != null ? itemMeta.clone() : null);
-	}
-
-	public final <T> T getNbt(String key) {
-		return this.root.get(key);
-	}
-
-	public final <T> T getNbtPath(String path) {
-		return this.root.getPath(path);
 	}
 
 	@Override
@@ -171,23 +156,6 @@ public class ItemData extends ItemStack {
 		return false;
 	}
 
-	public final void putAllNbt(Map<? extends String, ?> m) {
-		this.root.putAll(m);
-		this.setNbtCompound();
-	}
-
-	public final Object putNbt(String key, Object value) {
-		Object obj = this.root.put(key, value);
-		this.setNbtCompound();
-		return obj;
-	}
-
-	public final NbtCompound putNbtPath(String path, Object value) {
-		NbtCompound compound = this.root.putPath(path, value);
-		this.setNbtCompound();
-		return compound;
-	}
-
 	public void removeGlow() {
 		if (!this.hasGlow())
 			return;
@@ -197,9 +165,9 @@ public class ItemData extends ItemStack {
 				this.removeEnchantment(Enchantment.DURABILITY);
 
 			if (MinecraftPackage.IS_PRE_1_8)
-				this.root.remove("ench");
+				this.removeNbt("ench");
 			else {
-				this.root.remove("HideFlags");
+				this.removeNbt("HideFlags");
 				ItemMeta meta = this.getItemMeta();
 
 				if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
@@ -208,21 +176,9 @@ public class ItemData extends ItemStack {
 				this.setItemMeta(meta);
 			}
 
-			this.setNbtCompound();
+			//this.setNbtCompound();
 			this.glow = false;
 		} catch (Exception ignore) { }
-	}
-
-	public final Object removeNbt(String key) {
-		Object obj = this.root.remove(key);
-		this.setNbtCompound();
-		return obj;
-	}
-
-	public final NbtCompound removeNbtPath(String path) {
-		NbtCompound compund = this.root.removePath(path);
-		this.setNbtCompound();
-		return compund;
 	}
 
 	@Override
@@ -240,27 +196,6 @@ public class ItemData extends ItemStack {
 
 		itemMeta.setLore(lore);
 		return super.setItemMeta(itemMeta);
-	}
-
-	private void setNbtCompound() {
-		NMS_ITEM_STACK.invokeMethod("setTag", this.nmsItem, this.root.getHandle());
-		ItemMeta nmsMeta = (ItemMeta)CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
-
-		if (this.hasItemMeta()) {
-			ItemMeta meta = this.getItemMeta();
-
-			if (!MinecraftPackage.IS_PRE_1_8)
-				nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
-
-			nmsMeta.setDisplayName(meta.getDisplayName());
-			nmsMeta.setLore(meta.getLore());
-			Map<Enchantment, Integer> enchantments = meta.getEnchants();
-
-			for (Enchantment enchantment : enchantments.keySet())
-				nmsMeta.addEnchant(enchantment, enchantments.get(enchantment), true);
-		}
-
-		super.setItemMeta(nmsMeta);
 	}
 
 	@Override
