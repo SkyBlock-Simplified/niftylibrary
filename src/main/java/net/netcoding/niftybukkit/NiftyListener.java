@@ -5,6 +5,7 @@ import net.netcoding.niftybukkit.minecraft.events.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.EnderCrystalPlaceEvent;
 import net.netcoding.niftybukkit.minecraft.events.InventoryCreativeNbtEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
@@ -40,12 +41,17 @@ final class NiftyListener extends BukkitListener {
 	public void onInventoryCreative(InventoryCreativeEvent event) {
 		if (event.getWhoClicked() instanceof Player) {
 			BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
-			ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
 
-			if (itemData.containsNbt()) {
-				InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
-				this.getPlugin().getServer().getPluginManager().callEvent(myEvent);
-				event.setCancelled(myEvent.isCancelled());
+			if (!FakeInventory.isOpenAnywhere(profile)) {
+				ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+
+				if (!FakeInventory.isAnyItemOpener(itemData) && itemData.containsNbt()) {
+					InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
+					this.getPlugin().getServer().getPluginManager().callEvent(myEvent);
+
+					if (myEvent.isCancelled())
+						event.setCancelled(true);
+				}
 			}
 		}
 	}
