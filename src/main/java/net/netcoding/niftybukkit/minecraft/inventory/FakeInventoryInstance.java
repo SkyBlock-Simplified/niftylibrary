@@ -1,13 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
-import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
 
@@ -43,31 +37,11 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 	}
 
 	public void open() {
-		this.open(this.getProfile());
+		this.open(this.isOpen() ? this.getTarget() : this.getProfile());
 	}
 
 	public void open(BukkitMojangProfile target) {
 		this.inventory.open(this.getProfile(), target, this);
-	}
-
-	public void update() {
-		this.update(this.inventory.getItems().values());
-	}
-
-	public <T extends ItemStack> void update(T[] items) {
-		this.update(Arrays.asList(items));
-	}
-
-	public <T extends ItemStack> void update(Collection<T> items) {
-		this.clearItems();
-		this.addAll(items);
-		this.inventory.update(this.getProfile(), this);
-	}
-
-	public void update(Map<Integer, ItemData> items) {
-		this.clearItems();
-		this.putAll(items);
-		this.inventory.update(this.getProfile(), this);
 	}
 
 }
