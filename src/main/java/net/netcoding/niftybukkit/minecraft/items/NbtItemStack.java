@@ -40,7 +40,7 @@ public class NbtItemStack extends ItemStack {
 	}
 
 	public NbtItemStack(ItemStack stack) {
-		this(stack, (stack != null && CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) && Material.AIR != stack.getType() ? NbtFactory.fromItemTag(stack) : null));
+		this(stack, (stack != null && Material.AIR != stack.getType() && CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) ? NbtFactory.fromItemTag(stack) : null));
 	}
 
 	private NbtItemStack(ItemStack stack, NbtCompound root) {
@@ -50,7 +50,7 @@ public class NbtItemStack extends ItemStack {
 			this.setAmount(1);
 
 		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
-		this.root = (root == null ? ((stack instanceof ItemData) ? ((NbtItemStack)stack).root.clone() : NbtFactory.createRootCompound("tag")) : root);
+		this.root = (root == null ? ((stack instanceof NbtItemStack) ? ((NbtItemStack)stack).root.clone() : NbtFactory.createRootCompound("tag")) : root);
 	}
 
 	@Override
@@ -122,24 +122,26 @@ public class NbtItemStack extends ItemStack {
 	}
 
 	private void setNbtCompound() {
-		NMS_ITEM_STACK.invokeMethod("setTag", this.nmsItem, this.root.getHandle());
-		ItemMeta nmsMeta = (ItemMeta)CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
+		if (Material.AIR != this.getType()) {
+			NMS_ITEM_STACK.invokeMethod("setTag", this.nmsItem, this.root.getHandle());
+			ItemMeta nmsMeta = (ItemMeta)CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
 
-		if (this.hasItemMeta()) {
-			ItemMeta meta = super.getItemMeta();
+			if (this.hasItemMeta()) {
+				ItemMeta meta = super.getItemMeta();
 
-			if (!MinecraftPackage.IS_PRE_1_8)
-				nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
+				if (!MinecraftPackage.IS_PRE_1_8)
+					nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
 
-			nmsMeta.setDisplayName(meta.getDisplayName());
-			nmsMeta.setLore(meta.getLore());
-			Map<Enchantment, Integer> enchantments = meta.getEnchants();
+				nmsMeta.setDisplayName(meta.getDisplayName());
+				nmsMeta.setLore(meta.getLore());
+				Map<Enchantment, Integer> enchantments = meta.getEnchants();
 
-			for (Enchantment enchantment : enchantments.keySet())
-				nmsMeta.addEnchant(enchantment, enchantments.get(enchantment), true);
+				for (Enchantment enchantment : enchantments.keySet())
+					nmsMeta.addEnchant(enchantment, enchantments.get(enchantment), true);
+			}
+
+			super.setItemMeta(nmsMeta);
 		}
-
-		super.setItemMeta(nmsMeta);
 	}
 
 }
