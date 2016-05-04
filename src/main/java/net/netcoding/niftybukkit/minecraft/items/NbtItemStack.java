@@ -10,9 +10,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
-@SuppressWarnings("deprecation")
 public class NbtItemStack extends ItemStack {
 
 	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
@@ -57,6 +59,10 @@ public class NbtItemStack extends ItemStack {
 		return nbtStack;
 	}
 
+	public final boolean containsNbt() {
+		return !this.root.isEmpty();
+	}
+
 	public final boolean containsNbtKey(String key) {
 		return this.root.containsKey(key);
 	}
@@ -69,8 +75,20 @@ public class NbtItemStack extends ItemStack {
 		return this.root.get(key);
 	}
 
+	public final Set<Map.Entry<String, Object>> getNbtEntrySet() {
+		return Collections.unmodifiableSet(this.root.entrySet());
+	}
+
+	public final Set<String> getNbtKeys() {
+		return Collections.unmodifiableSet(this.root.keySet());
+	}
+
 	public final <T> T getNbtPath(String path) {
 		return this.root.getPath(path);
+	}
+
+	public final Collection<Object> getNbtValues() {
+		return Collections.unmodifiableCollection(this.root.values());
 	}
 
 	public final void putAllNbt(Map<? extends String, ?> m) {
@@ -107,7 +125,7 @@ public class NbtItemStack extends ItemStack {
 		ItemMeta nmsMeta = (ItemMeta)CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
 
 		if (this.hasItemMeta()) {
-			ItemMeta meta = this.getItemMeta();
+			ItemMeta meta = super.getItemMeta();
 
 			if (!MinecraftPackage.IS_PRE_1_8)
 				nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
