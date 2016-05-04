@@ -32,9 +32,9 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	private boolean centered = false;
 	private boolean tradingEnabled = false;
 	private ItemData pageLeft;
-	private int pageLeftIndex = -1;
+	private int pageLeftSlot = -1;
 	private ItemData pageRight;
-	private int pageRightIndex = -1;
+	private int pageRightSlot = -1;
 	private int currentPage = 1;
 	private String title = "";
 	// http://www.planetminecraft.com/banner/arrow-pointing-right/
@@ -180,16 +180,16 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		return this.pageLeft;
 	}
 
-	public int getPageLeftIndex() {
-		return this.pageLeftIndex;
+	public int getPageLeftSlot() {
+		return this.pageLeftSlot;
 	}
 
 	public ItemData getPageRight() {
 		return this.pageRight;
 	}
 
-	public int getPageRightIndex() {
-		return this.pageRightIndex;
+	public int getPageRightSlot() {
+		return this.pageRightSlot;
 	}
 
 	public String getTitle() {
@@ -276,8 +276,8 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 	public void setPaging(int pageLeftIndex, ItemData pageLeft, int pageRightIndex, ItemData pageRight) {
 		if (pageLeft != null && Material.AIR != pageLeft.getType() && pageRight != null && Material.AIR != pageRight.getType()) {
-			this.pageLeftIndex = pageLeftIndex;
-			this.pageRightIndex = pageRightIndex;
+			this.pageLeftSlot = pageLeftIndex;
+			this.pageRightSlot = pageRightIndex;
 			this.pageLeft = pageLeft.clone();
 			this.pageRight = pageRight.clone();
 			this.setCurrentPage(this.getCurrentPage());
@@ -313,7 +313,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 		this.currentPage = frame.currentPage;
 
 		if (frame.pageLeft != null && frame.pageRight != null)
-			this.setPaging(frame.pageLeftIndex, frame.pageLeft, frame.pageRightIndex, frame.pageRight);
+			this.setPaging(frame.pageLeftSlot, frame.pageLeft, frame.pageRightSlot, frame.pageRight);
 	}
 
 	protected final boolean verifySignature(ItemStack[] items) {
