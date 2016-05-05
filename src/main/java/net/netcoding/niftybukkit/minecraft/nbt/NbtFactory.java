@@ -28,11 +28,10 @@ public class NbtFactory {
 	// Reflection
 	static final Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
 	static final Reflection NMS_ITEM_STACK = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-	static final Reflection NBT_TAG_COMPOUND = new Reflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER);
+	static final Reflection NBT_TAG_LIST = new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER);
 	static final Reflection NBT_BASE = new Reflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER);
 
 	// The NBT base class
-	static Field NBT_LIST_TYPE;
 	static final Field[] DATA_FIELD = new Field[12];
 
 	/**
