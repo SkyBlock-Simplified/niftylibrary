@@ -43,8 +43,8 @@ public class ItemData extends NbtItemStack {
 		this(stack, true);
 	}
 
-	private ItemData(ItemStack stack, boolean create) {
-		super(stack, null, create);
+	private ItemData(ItemStack stack, boolean load) {
+		super(stack, null, load);
 	}
 
 	public void addGlow() {

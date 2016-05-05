@@ -43,7 +43,7 @@ public class NbtItemStack extends ItemStack {
 		this(itemStack, null, true);
 	}
 
-	NbtItemStack(ItemStack itemStack, NbtCompound root, boolean create) {
+	NbtItemStack(ItemStack itemStack, NbtCompound root, boolean load) {
 		super(itemStack == null ? new ItemStack(Material.AIR) : itemStack);
 		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
 
@@ -57,17 +57,16 @@ public class NbtItemStack extends ItemStack {
 				this.root = ((NbtItemStack)itemStack).root.clone();
 			else {
 				ItemStack checkStack = itemStack;
-				NbtCompound nbt;
+				NbtCompound nbt = null;
 
-				if (create && !CRAFT_ITEM_STACK.getClazz().isAssignableFrom(checkStack.getClass()))
+				if (load) {
 					checkStack = NbtFactory.getCraftItemStack(checkStack);
 
-				if (create && Material.AIR != checkStack.getType())
-					nbt = NbtFactory.fromItemTag(checkStack).clone();
-				else
-					nbt = NbtFactory.createRootCompound("tag");
+					if (Material.AIR != checkStack.getType())
+						nbt = NbtFactory.fromItemTag(checkStack).clone();
+				}
 
-				this.root = nbt;
+				this.root = (nbt != null ? nbt : NbtFactory.createRootCompound("tag"));
 			}
 		}
 	}
