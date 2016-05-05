@@ -243,19 +243,16 @@ public class ItemDatabase extends BukkitHelper {
 			final String[] parts = line.split("[^a-zA-Z0-9]");
 			if (parts.length < 2) continue;
 			String itemName = parts[0].toLowerCase(Locale.ENGLISH);
-
 			if (!NumberUtil.isInt(parts[1])) continue;
 			final int numeric = Integer.parseInt(parts[1]);
-
-			if (parts.length > 2)
-				parts[2] = NumberUtil.isInt(parts[2]) ? parts[2] : "0";
-
+			if (parts.length > 2) parts[2] = NumberUtil.isInt(parts[2]) ? parts[2] : "0";
 			final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
 			if (numeric < 0 || data < 0) continue;
 
 			try {
-				ItemData itemData = new ItemData(numeric, data);
-				if (numeric > 0 && Material.AIR == Material.getMaterial(numeric)) continue;
+				Material material = Material.getMaterial(numeric);
+				if (numeric > 0 && Material.AIR == material) continue;
+				ItemData itemData = new ItemData(material, data, false);
 				this.durabilities.put(itemName, data);
 				this.items.put(itemName, numeric);
 
