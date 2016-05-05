@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit;
 
 import net.netcoding.niftybukkit.minecraft.BukkitCommand;
-import net.netcoding.niftybukkit.minecraft.BukkitHelper;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
@@ -11,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,15 +28,9 @@ final class NiftyCommand extends BukkitCommand {
 		this.editUsage(1, "lookup", "<player|uuid>");
 	}
 
-	private List<String> getNameCache() {
-		List<String> cache = new ArrayList<>(BukkitPlugin.getPluginCache());
-		cache.addAll(BukkitHelper.getPluginCache());
-		return cache;
-	}
-
 	@Override
 	protected void onCommand(CommandSender sender, String alias, String[] args) throws Exception {
-		List<String> nameCache = this.getNameCache();
+		List<String> nameCache = BukkitPlugin.getPluginCache();
 
 		if (ListUtil.isEmpty(args) || NumberUtil.isInt(args[0])) {
 			int rounded = NumberUtil.roundUp(nameCache.size(), 5);
@@ -103,13 +97,15 @@ final class NiftyCommand extends BukkitCommand {
 
 	@Override
 	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) throws Exception {
-		List<String> nameCache = this.getNameCache();
+		Plugin[] plugins = this.getPlugin().getServer().getPluginManager().getPlugins();
 		final String arg = args[0].toLowerCase();
 		List<String> names = new ArrayList<>();
 
-		for (String name : nameCache) {
-			if (name.toLowerCase().startsWith(arg) || name.toLowerCase().contains(arg))
-				names.add(name);
+		for (Plugin plugin : plugins) {
+			String pluginName = plugin.getName();
+
+			if (pluginName.toLowerCase().startsWith(arg) || pluginName.toLowerCase().contains(arg))
+				names.add(pluginName);
 		}
 
 		return names;
