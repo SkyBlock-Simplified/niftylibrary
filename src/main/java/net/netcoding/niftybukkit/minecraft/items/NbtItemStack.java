@@ -39,23 +39,42 @@ public class NbtItemStack extends ItemStack {
 		this(new ItemStack(material, 1, durability));
 	}
 
-	public NbtItemStack(ItemStack stack) {
-		this(stack, (stack != null && Material.AIR != stack.getType() && CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()) ? NbtFactory.fromItemTag(stack) : null));
+	public NbtItemStack(ItemStack itemStack) {
+		this(itemStack, null, true);
 	}
 
-	private NbtItemStack(ItemStack stack, NbtCompound root) {
-		super(stack == null ? new ItemStack(Material.AIR) : stack);
+	NbtItemStack(ItemStack itemStack, NbtCompound root, boolean create) {
+		super(itemStack == null ? new ItemStack(Material.AIR) : itemStack);
+		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
 
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		this.nmsItem = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, this);
-		this.root = (root == null ? ((stack instanceof NbtItemStack) ? ((NbtItemStack)stack).root.clone() : NbtFactory.createRootCompound("tag")) : root);
+		if (root != null)
+			this.root = root;
+		else {
+			if (NbtItemStack.class.isAssignableFrom(itemStack.getClass()))
+				this.root = ((NbtItemStack)itemStack).root.clone();
+			else {
+				ItemStack checkStack = itemStack;
+				NbtCompound nbt;
+
+				if (create && !CRAFT_ITEM_STACK.getClazz().isAssignableFrom(checkStack.getClass()))
+					checkStack = NbtFactory.getCraftItemStack(checkStack);
+
+				if (create && Material.AIR != checkStack.getType())
+					nbt = NbtFactory.fromItemTag(checkStack).clone();
+				else
+					nbt = NbtFactory.createRootCompound("tag");
+
+				this.root = nbt;
+			}
+		}
 	}
 
 	@Override
 	public NbtItemStack clone() {
-		NbtItemStack nbtStack = new NbtItemStack(super.clone(), this.root.clone());
+		NbtItemStack nbtStack = new NbtItemStack(super.clone(), this.root.clone(), true);
 		nbtStack.setNbtCompound();
 		return nbtStack;
 	}

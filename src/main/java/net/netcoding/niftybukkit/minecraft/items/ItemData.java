@@ -35,8 +35,16 @@ public class ItemData extends NbtItemStack {
 		this(new ItemStack(material, 1, durability));
 	}
 
+	ItemData(Material material, short durability, boolean create) {
+		this(new ItemStack(material, 1, durability), create);
+	}
+
 	public ItemData(ItemStack stack) {
-		super(stack);
+		this(stack, true);
+	}
+
+	private ItemData(ItemStack stack, boolean create) {
+		super(stack, null, create);
 	}
 
 	public void addGlow() {
