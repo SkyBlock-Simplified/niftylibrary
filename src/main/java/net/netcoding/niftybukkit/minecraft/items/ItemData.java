@@ -59,7 +59,7 @@ public class ItemData extends NbtItemStack {
 		else {
 			int enchants = 1;
 
-			if (this.containsNbtKey("HideFlags"))
+			if (this.containsNbt("HideFlags"))
 				enchants |= this.<Integer>getNbt("HideFlags");
 
 			this.putNbt("HideFlags", enchants);
