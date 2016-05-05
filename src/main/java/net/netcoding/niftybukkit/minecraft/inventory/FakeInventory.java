@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryClickEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.events.InventoryCloseEvent;
@@ -13,13 +14,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -27,13 +28,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("deprecation")
 public class FakeInventory extends FakeInventoryFrame {
 
 	private static final transient ConcurrentMap<UUID, ConcurrentMap<BukkitMojangProfile, FakeInventoryFrame>> OPENED = new ConcurrentMap<>();
@@ -41,13 +40,14 @@ public class FakeInventory extends FakeInventoryFrame {
 	private final UUID uniqueId = UUID.randomUUID();
 	private final transient FakeInventoryListener listener;
 	private ItemData itemOpener;
-	private int itemOpenerIndex = -1;
+	private int itemOpenerSlot = -1;
 	private boolean itemOpenerDestructable = false;
 
 	public FakeInventory(JavaPlugin plugin, FakeInventoryListener listener) {
-		super(plugin);
+		super();
 		this.create();
 		this.listener = listener;
+		new FakeBukkitListener(plugin);
 	}
 
 	public final void close(BukkitMojangProfile profile) {
@@ -73,20 +73,12 @@ public class FakeInventory extends FakeInventoryFrame {
 		int currentPage = frame.getCurrentPage();
 		int start = (currentPage - 1) * frame.getTotalSlots();
 
-		for (int h = 0; h < start; h++) {
+		for (int h = 0; h < start; h++)
 			iterator.next();
-		}
 
-		//this.getLog().console("Page: {0}", currentPage);
-		//this.getLog().console("Items Size: {0}", items.size());
-		//this.getLog().console("Start: {0}", start);
-		//this.getLog().console("Calculate: {0}", calculateTotalSlots(items.size() - start));
-		//this.getLog().console("Min: {0}", Math.min(calculateTotalSlots(items.size() - start), 54));
-		//this.getLog().console("Total Slots 1: {0}", frame.getTotalSlots());
-		int calcTotalSlots = Math.min(frame.getTotalSlots(), Math.min(54, calculateTotalSlots(items.size() - start)));
-		//this.getLog().console("Total Slots 2: {0}", calcTotalSlots);
-		int pageLeftIndex = frame.getPageLeftIndex() < 0 ? (calcTotalSlots - 2) : frame.getPageLeftIndex();
-		int pageRightIndex = frame.getPageRightIndex() < 0 ? (calcTotalSlots - 1) : frame.getPageRightIndex();
+		int calcTotalSlots = Math.max(frame.getTotalSlots(), Math.min(54, calculateTotalSlots(items.size() - start)));
+		int pageLeftIndex = frame.getPageLeftSlot() < 0 ? (calcTotalSlots - 2) : frame.getPageLeftSlot();
+		int pageRightIndex = frame.getPageRightSlot() < 0 ? (calcTotalSlots - 1) : frame.getPageRightSlot();
 		Inventory inventory = Bukkit.createInventory(targetPlayer, calcTotalSlots, frame.getTitle());
 
 		if (frame.isAutoCentered()) {
@@ -152,15 +144,15 @@ public class FakeInventory extends FakeInventoryFrame {
 		return this.itemOpener;
 	}
 
-	public int getItemOpenerIndex() {
-		return this.itemOpenerIndex > 0 ? this.itemOpenerIndex : 0;
+	public int getItemOpenerSlot() {
+		return this.itemOpenerSlot > 0 ? this.itemOpenerSlot : 0;
 	}
 
-	public BukkitMojangProfile getTarget(BukkitMojangProfile profile) {
+	public final BukkitMojangProfile getTarget(BukkitMojangProfile profile) {
 		return HOLDERS.get(this.getUniqueId()).get(profile);
 	}
 
-	public BukkitMojangProfile getTargeter(BukkitMojangProfile profile) {
+	public final BukkitMojangProfile getTargeter(BukkitMojangProfile profile) {
 		ConcurrentMap<BukkitMojangProfile, BukkitMojangProfile> targets = HOLDERS.get(this.getUniqueId());
 
 		for (BukkitMojangProfile opener : targets.keySet()) {
@@ -176,22 +168,17 @@ public class FakeInventory extends FakeInventoryFrame {
 	}
 
 	public FakeInventoryInstance getInstance(BukkitMojangProfile profile) {
-		this.create();
-		FakeInventoryInstance instance;
-
 		if (this.isOpen(profile))
-			instance = new FakeInventoryInstance(this.getOpened().get(profile), this, profile);
+			return new FakeInventoryInstance(this.getOpened().get(profile), this, profile);
 		else
-			instance = this.newInstance(profile);
-
-		return instance;
+			return this.newInstance(profile);
 	}
 
 	public void giveItemOpener(BukkitMojangProfile profile) {
 		if (this.exists()) {
 			if (this.getItemOpener() != null) {
 				if (profile.getOfflinePlayer().isOnline())
-					profile.getOfflinePlayer().getPlayer().getInventory().setItem(this.getItemOpenerIndex(), this.getItemOpener());
+					profile.getOfflinePlayer().getPlayer().getInventory().setItem(this.getItemOpenerSlot(), this.getItemOpener());
 			}
 		}
 	}
@@ -206,10 +193,10 @@ public class FakeInventory extends FakeInventoryFrame {
 	}
 
 	public static boolean isAnyItemOpener(ItemData itemData) {
-		return itemData.hasNbt(NbtKeys.ITEM_OPENER.getKey());
+		return itemData.containsNbtKey(NbtKeys.ITEM_OPENER.getKey());
 	}
 
-	public boolean isOpen(BukkitMojangProfile profile) {
+	public final boolean isOpen(BukkitMojangProfile profile) {
 		if (this.exists()) {
 			if (profile.getOfflinePlayer().isOnline())
 				return OPENED.get(this.getUniqueId()).keySet().contains(profile);
@@ -228,14 +215,14 @@ public class FakeInventory extends FakeInventoryFrame {
 	}
 
 	private boolean isItemOpener(ItemData itemData) {
-		return this.getUniqueId().toString().equals(itemData.getNbt(NbtKeys.ITEM_OPENER.getKey()));
+		return isAnyItemOpener(itemData) && this.getUniqueId().toString().equals(itemData.<String>getNbt(NbtKeys.ITEM_OPENER.getKey()));
 	}
 
 	public boolean isItemOpenerDestructable() {
 		return this.itemOpenerDestructable;
 	}
 
-	public boolean isTargeted(BukkitMojangProfile profile) {
+	public final boolean isTargeted(BukkitMojangProfile profile) {
 		if (this.exists()) {
 			if (profile.getOfflinePlayer().isOnline())
 				return HOLDERS.get(this.getUniqueId()).values().contains(profile);
@@ -245,7 +232,7 @@ public class FakeInventory extends FakeInventoryFrame {
 	}
 
 	public FakeInventoryInstance newInstance(BukkitMojangProfile profile) {
-		FakeInventoryInstance instance = new FakeInventoryInstance(this.getPlugin(), this, profile);
+		FakeInventoryInstance instance = new FakeInventoryInstance(this, profile);
 		instance.setAllowEmpty(this.isAllowEmpty());
 		instance.setAutoCenter(this.isAutoCentered());
 		instance.setTradingEnabled(this.isTradingEnabled());
@@ -253,197 +240,10 @@ public class FakeInventory extends FakeInventoryFrame {
 		return instance;
 	}
 
-	@SuppressWarnings("deprecation")
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
-	public void onInventoryClick(final org.bukkit.event.inventory.InventoryClickEvent event) {
-		if (!(event.getWhoClicked() instanceof Player)) return;
-		if (SlotType.OUTSIDE == event.getSlotType()) return;
-		final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
-		final ItemData firstClickItem = FakeInventory.getClickedItem(event);
-		final ItemData placeClickItem = FakeInventory.getClickedItem(event, false);
-		final Player player = profile.getOfflinePlayer().getPlayer();
-		boolean doSkip = false;
 
-		if (this.getItemOpener() != null) {
-			if (this.isItemOpener(firstClickItem) || this.isItemOpener(placeClickItem))
-				event.setCancelled(doSkip = true);
-		}
-
-		if (this.isOpen(profile) && !doSkip) {
-			this.getLog().message(player, "{{0}} is viewing fake inv!", profile.getName());
-			this.getLog().broadcast("{{0}} is viewing fake inv!", profile.getName());
-			FakeInventoryFrame frame = this.getOpened().get(profile);
-			boolean verified = frame.verifySignature(player.getOpenInventory().getTopInventory().getContents());
-			this.getLog().broadcast("Verified: {{0}}", verified);
-
-			if (verified /*|| frame.isTradingEnabled()*/) {
-				this.getLog().broadcast("Trading: {{0}}", frame.isTradingEnabled());
-				this.getLog().console("First: {0}", firstClickItem);
-				this.getLog().console("Place: {0}", placeClickItem);
-
-				for (ItemStack itemStack : player.getOpenInventory().getTopInventory().getContents()) {
-					this.getLog().console("Item: {0}", itemStack);
-				}
-
-				if (Material.AIR != firstClickItem.getType() && !frame.isTradingEnabled()) {
-					this.getLog().broadcast("Made it x1");
-					if (firstClickItem.hasNbt(NbtKeys.PAGING.getKey())) {
-						this.getLog().broadcast("Made it x1.1");
-						frame.setCurrentPage(firstClickItem.<Integer>getNbt(NbtKeys.PAGING.getKey()));
-						this.update(profile, frame);
-					} else {
-						this.getLog().broadcast("Made it x1.2");
-						if (event.getRawSlot() < event.getInventory().getSize()) {
-							this.getLog().broadcast("Made it x1.3");
-							InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
-							this.listener.onInventoryClick(myEvent);
-							event.setCancelled(!frame.isTradingEnabled() || myEvent.isCancelled());
-						}
-
-						if (!frame.isTradingEnabled() && event.isShiftClick())
-							event.setCancelled(true);
-					}
-				} else if (Material.AIR != placeClickItem.getType()) {
-					this.getLog().broadcast("Made it x2");
-					if (placeClickItem.hasNbt(NbtKeys.PAGING.getKey())) {
-						this.getLog().broadcast("Made it x2.1");
-						frame.setCurrentPage(placeClickItem.<Integer>getNbt(NbtKeys.PAGING.getKey()));
-						this.update(profile, frame);
-					} else {
-						this.getLog().broadcast("Made it x2.2");
-						if (frame.isTradingEnabled()) {
-							this.getLog().broadcast("Made it x2.3");
-							InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
-							this.listener.onInventoryClick(myEvent);
-							event.setCancelled(!frame.isTradingEnabled() || myEvent.isCancelled());
-						}
-
-						if (!frame.isTradingEnabled() || event.isShiftClick())
-							event.setCancelled(true);
-
-						if (event.isCancelled() || (!frame.isTradingEnabled() && event.getRawSlot() < event.getInventory().getSize())) {
-							event.setCursor(new ItemStack(Material.AIR));
-							event.setCancelled(true);
-						}
-
-						// TODO: Adjust contents for verification to remove isTradingEnabled() workaround
-						if (frame.isTradingEnabled() && !event.isCancelled())
-							frame.generateSignature(player.getOpenInventory().getTopInventory().getContents());
-					}
-				}
-			} else
-				event.setCancelled(true);
-		}
-
-		if (event.isCancelled()) {
-			event.setResult(Result.DENY);
-			player.updateInventory();
-		}
-	}
-
-	@EventHandler
-	public void onInventoryClose(org.bukkit.event.inventory.InventoryCloseEvent event) {
-		HumanEntity entity = event.getPlayer();
-
-		if (entity instanceof Player) {
-			final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
-
-			if (this.isOpen(profile)) {
-				OPENED.get(this.getUniqueId()).remove(profile);
-				HOLDERS.get(this.getUniqueId()).remove(profile);
-				this.listener.onInventoryClose(new InventoryCloseEvent(profile, event));
-			}
-		}
-	}
-
-	@EventHandler(ignoreCancelled = true)
-	public void onInventoryCreative(InventoryCreativeEvent event) {
-		if (this.getItemOpener() != null) {
-			ItemData clickItem = new ItemData(event.getCursor());
-
-			if (this.isItemOpener(clickItem)) {
-				event.setCursor(new ItemStack(Material.AIR));
-				event.setCancelled(true);
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
-	public void onInventoryOpen(org.bukkit.event.inventory.InventoryOpenEvent event) {
-		HumanEntity entity = event.getPlayer();
-
-		if (entity instanceof Player) {
-			final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
-
-			if (this.isOpen(profile)) {
-				InventoryOpenEvent myEvent = new InventoryOpenEvent(profile, event);
-				this.listener.onInventoryOpen(myEvent);
-				event.setCancelled(myEvent.isCancelled());
-			}
-		}
-	}
-
-	@EventHandler(ignoreCancelled = false)
-	public void onPlayerDeath(PlayerDeathEvent e) {
-		if (this.getItemOpener() != null) {
-			for (ItemStack itemStack : e.getDrops()) {
-				ItemData itemData = new ItemData(itemStack);
-
-				if (this.isItemOpener(itemData))
-					itemStack.setAmount(0);
-			}
-		}
-	}
-
-	@EventHandler(ignoreCancelled = false)
-	public void onPlayerDropItem(PlayerDropItemEvent event) {
-		if (this.getItemOpener() != null) {
-			ItemStack itemStack = event.getItemDrop().getItemStack();
-
-			if (this.isItemOpener(new ItemData(itemStack))) {
-				event.setCancelled(true);
-
-				if (this.isItemOpenerDestructable()) {
-					event.getItemDrop().remove();
-					itemStack.setAmount(0);
-				}
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
-	public void onPlayerInteract(PlayerInteractEvent event) {
-		final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-
-		if (!this.isOpen(profile)) {
-			if (Action.PHYSICAL != event.getAction()) {
-				ItemData handItem = new ItemData(event.getItem());
-
-				if (handItem != null && this.getItemOpener() != null) {
-					if (Material.AIR != handItem.getType()) {
-						if (this.isItemOpener(handItem)) {
-							InventoryItemInteractEvent myEvent = new InventoryItemInteractEvent(profile, event);
-							this.listener.onInventoryItemInteract(myEvent);
-							event.setCancelled(myEvent.isCancelled());
-						}
-					}
-				}
-			}
-		}
-	}
-
-	@EventHandler
-	public void onPlayerPostLogin(PlayerPostLoginEvent event) {
-		this.giveItemOpener(event.getProfile());
-	}
-
-	@EventHandler
-	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		this.giveItemOpener(NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer()));
-	}
 
 	public void open(BukkitMojangProfile profile) {
-		this.open(profile, profile);
+		this.open(profile, (this.isOpen(profile) ? this.getTarget(profile) : profile));
 	}
 
 	public void open(BukkitMojangProfile profile, BukkitMojangProfile target) {
@@ -455,12 +255,34 @@ public class FakeInventory extends FakeInventoryFrame {
 			if (profile.isOnlineLocally() && target.isOnlineLocally()) {
 				Player viewerPlayer = profile.getOfflinePlayer().getPlayer();
 				Player targetPlayer = target.getOfflinePlayer().getPlayer();
-				Inventory inventory = this.createInventory(targetPlayer, frame);
-				viewerPlayer.closeInventory();
-				OPENED.get(this.getUniqueId()).put(profile, frame);
-				HOLDERS.get(this.getUniqueId()).put(profile, target);
+				FakeInventoryFrame updated = frame;
+
+				if (this.isOpen(profile)) {
+					FakeInventoryFrame current = this.getOpened().get(profile);
+					current.update(updated);
+					updated = current;
+				}
+
+				Inventory inventory = this.createInventory(targetPlayer, updated);
 				viewerPlayer.openInventory(inventory);
+				OPENED.get(this.getUniqueId()).put(profile, updated);
+				HOLDERS.get(this.getUniqueId()).put(profile, target);
 			}
+		}
+	}
+
+	public final void reopenAll() {
+		for (BukkitMojangProfile profile : this.getOpened().keySet()) {
+			BukkitMojangProfile target = this.getTarget(profile);
+			FakeInventoryFrame frame = this.getOpened().get(profile);
+			this.open(profile, target, frame);
+		}
+	}
+
+	public final void reopenAll(FakeInventoryFrame frame) {
+		for (BukkitMojangProfile profile : this.getOpened().keySet()) {
+			BukkitMojangProfile target = this.getTarget(profile);
+			this.open(profile, target, frame);
 		}
 	}
 
@@ -478,112 +300,233 @@ public class FakeInventory extends FakeInventoryFrame {
 
 	public void setItemOpener(int index, ItemData itemData) {
 		if (itemData != null && Material.AIR != itemData.getType()) {
-			this.itemOpenerIndex = index;
+			this.itemOpenerSlot = index;
 			ItemData itemOpener = itemData.clone();
 			itemOpener.putNbt(NbtKeys.ITEM_OPENER.getKey(), this.getUniqueId().toString());
 			this.itemOpener = itemOpener;
 		}
 	}
 
-	public void update(ItemData[] items) {
-		this.update(this.getOpened().keySet(), Arrays.asList(items));
-	}
+	private class FakeBukkitListener extends BukkitListener {
 
-	public void update(Collection<ItemData> items) {
-		this.update(this.getOpened().keySet(), items);
-	}
-
-	public void update(ConcurrentMap<Integer, ItemData> items) {
-		this.update(this.getOpened().keySet(), items);
-	}
-
-	public void update(BukkitMojangProfile profile, ItemData[] items) {
-		this.update(Collections.singletonList(profile), Arrays.asList(items));
-	}
-
-	public void update(BukkitMojangProfile profile, Collection<ItemData> items) {
-		this.update(Collections.singletonList(profile), items);
-	}
-
-	public void update(Collection<BukkitMojangProfile> profiles, ItemData[] items) {
-		this.update(profiles, Arrays.asList(items));
-	}
-
-	public void update(Collection<BukkitMojangProfile> profiles, Collection<ItemData> items) {
-		for (BukkitMojangProfile profile : profiles) {
-			FakeInventoryFrame current = this.getOpened().get(profile);
-			current.clearItems();
-			current.addAll(items);
-			this.update(profile, current.getItems());
-		}
-	}
-
-	public void update(Collection<BukkitMojangProfile> profiles, Map<Integer, ItemData> items) {
-		for (BukkitMojangProfile profile : profiles)
-			this.update(profile, items);
-	}
-
-	public void update(FakeInventoryFrame updated) {
-		this.update(this.getOpened().keySet(), updated);
-	}
-
-	public void update(Collection<BukkitMojangProfile> profiles, FakeInventoryFrame updated) {
-		for (BukkitMojangProfile profile : profiles)
-			this.update(profile, updated);
-	}
-
-	public void update(BukkitMojangProfile profile, FakeInventoryFrame updated) {
-		this.updateHandle(profile, updated);
-	}
-
-	public void update(BukkitMojangProfile profile, Map<Integer, ItemData> items) {
-		FakeInventoryFrame current = this.getOpened().get(profile);
-		current.clearItems();
-		current.putAll(items);
-		this.updateHandle(profile, current);
-	}
-
-	private void updateHandle(BukkitMojangProfile profile, FakeInventoryFrame updated) {
-		FakeInventoryFrame current = this.getOpened().get(profile);
-		boolean requiresPacket = !current.getTitle().equals(updated.getTitle());
-		Player player = profile.getOfflinePlayer().getPlayer();
-		requiresPacket = requiresPacket || current.getTotalSlots() != updated.getTotalSlots();
-		this.getLog().console("Total Items Before: {{0}}:{{1}}", current.getItems().size(), updated.getItems().size());
-
-		// TODO: TESTING
-		int totalSlots = updated.getTotalSlots();
-		this.getLog().console("Total Slots Before: {{0}}:{{1}}:{{2}}", current.getTotalSlots(), updated.getTotalSlots(), totalSlots);
-
-		if (updated.getTotalSlots() < updated.getItems().size()) {
-			updated.putMetadata(NbtKeys.TOTAL_SLOTS.getKey(), updated.getTotalSlots());
-			totalSlots = calculateTotalSlots(updated.getItems().size());
-		} else if (updated.getTotalSlots() > updated.getItems().size() && updated.hasMetadata(NbtKeys.TOTAL_SLOTS.getKey())) {
-			totalSlots = updated.getMetadata(NbtKeys.TOTAL_SLOTS.getKey());
-			updated.removeMetadata(NbtKeys.TOTAL_SLOTS.getKey());
+		public FakeBukkitListener(JavaPlugin plugin) {
+			super(plugin);
 		}
 
-		this.getLog().console("Total Slots After 1: {{0}}:{{1}}:{{2}}", current.getTotalSlots(), updated.getTotalSlots(), totalSlots);
-		// TODO: TESTING
+		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+		public void onInventoryClick(final org.bukkit.event.inventory.InventoryClickEvent event) {
+			if (!(event.getWhoClicked() instanceof Player)) return;
+			if (InventoryType.SlotType.OUTSIDE == event.getSlotType()) return;
+			final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
+			final BukkitMojangProfile target = FakeInventory.this.getTarget(profile);
+			ItemData firstClickItem = getClickedItem(event);
+			ItemData placeClickItem = getClickedItem(event, false);
+			final Player player = profile.getOfflinePlayer().getPlayer();
 
-		BukkitMojangProfile target = HOLDERS.get(this.getUniqueId()).get(profile);
-		updated.setTotalSlots(totalSlots);
-		current.update(updated);
-		this.getLog().console("Total Slots After 2: {{0}}:{{1}}:{{2}}", current.getTotalSlots(), updated.getTotalSlots(), totalSlots);
-		this.getLog().console("Total Items After: {{0}}:{{1}}", current.getItems().size(), updated.getItems().size());
-		Inventory inventory = this.createInventory(target.getOfflinePlayer().getPlayer(), current);
+			if (getItemOpener() != null) {
+				if (FakeInventory.this.isItemOpener(firstClickItem) || FakeInventory.this.isItemOpener(placeClickItem))
+					event.setCancelled(true);
+			}
 
-		if (requiresPacket) {
-			player.getOpenInventory().getTopInventory().clear();
-			profile.updateOpenInventory(current.getTitle(), current.getTotalSlots(), inventory.getContents());
-			player.getOpenInventory().getTopInventory().clear();
+			if (FakeInventory.this.isOpen(profile)) {
+				if (!event.isCancelled()) {
+					FakeInventoryFrame frame = FakeInventory.this.getOpened().get(profile);
+					ItemStack[] original = player.getOpenInventory().getTopInventory().getContents().clone();
+					ItemStack[] contents = original.clone();
+					boolean verified = frame.verifySignature(contents);
+
+					if (frame.isTradingEnabled()) {
+						if (!frame.hasMetadata(NbtKeys.TRADE_SLOT)) {
+							frame.putMetadata(NbtKeys.TRADE_SLOT, event.getRawSlot());
+
+							if (event.getRawSlot() < event.getInventory().getSize())
+								frame.putMetadata(NbtKeys.TRADE_ITEM, firstClickItem);
+						} else {
+							int rawSlot = frame.getMetadata(NbtKeys.TRADE_SLOT);
+
+							if (Math.max(rawSlot, event.getRawSlot()) < event.getInventory().getSize())
+								verified = true;
+							else if (Math.min(rawSlot, event.getRawSlot()) >= event.getInventory().getSize())
+								verified = true;
+							else {
+								ItemStack itemStack = (rawSlot >= event.getInventory().getSize() ? placeClickItem : frame.<ItemStack>getMetadata(NbtKeys.TRADE_ITEM));
+								rawSlot = (rawSlot >= event.getInventory().getSize() ? event.getRawSlot() : rawSlot);
+								frame.putMetadata(NbtKeys.TRADE_SLOT, rawSlot);
+								frame.putMetadata(NbtKeys.TRADE_COMPLETE, true);
+								contents[rawSlot] = itemStack;
+
+								if (!verified)
+									verified = frame.verifySignature(contents);
+							}
+						}
+					}
+
+					if (verified && !event.isShiftClick()) {
+						if (!frame.isTradingEnabled()) { // Non-Trading Event
+							if (firstClickItem.containsNbtKey(NbtKeys.PAGING.getKey())) {
+								frame.setCurrentPage(firstClickItem.<Integer>getNbt(NbtKeys.PAGING.getKey()));
+								FakeInventory.this.open(profile, target, frame);
+							} else {
+								if (event.getRawSlot() < event.getInventory().getSize()) {
+									if (!event.isShiftClick()) {
+										if (Material.AIR == placeClickItem.getType()) {
+											InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
+											FakeInventory.this.listener.onInventoryClick(myEvent);
+										}
+									}
+
+									event.setCancelled(true);
+								}
+							}
+						} else { // Trading Event
+							boolean clearCurrent = false;
+
+							if (placeClickItem.containsNbtKey(NbtKeys.PAGING.getKey())) {
+								frame.setCurrentPage(placeClickItem.<Integer>getNbt(NbtKeys.PAGING.getKey()));
+								FakeInventory.this.open(profile, target, frame);
+							} else {
+								if (frame.hasMetadata(NbtKeys.TRADE_COMPLETE)) {
+									InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
+									FakeInventory.this.listener.onInventoryClick(myEvent);
+									event.setCancelled(myEvent.isCancelled());
+									this.getLog().console("Cancelled: {0}", event.isCancelled());
+
+									if (!event.isCancelled()) {
+										if (event.getRawSlot() < event.getInventory().getSize()) {
+											int rawSlot = frame.getMetadata(NbtKeys.TRADE_SLOT);
+											contents[rawSlot] = myEvent.getPlacedItem().clone();
+										}
+
+										player.getOpenInventory().setItem(event.getRawSlot(), myEvent.getPlacedItem());
+										clearCurrent = true;
+									}
+								}
+							}
+
+							if (!event.isCancelled()) {
+								frame.generateSignature(player.getOpenInventory().getTopInventory().getContents());
+
+								if (clearCurrent)
+									event.setCurrentItem(new ItemStack(Material.AIR));
+							}
+						}
+					} else
+						event.setCancelled(true);
+
+					if (event.isCancelled() || frame.hasMetadata(NbtKeys.TRADE_COMPLETE)) {
+						frame.removeMetadata(NbtKeys.TRADE_SLOT);
+						frame.removeMetadata(NbtKeys.TRADE_ITEM);
+						frame.removeMetadata(NbtKeys.TRADE_COMPLETE);
+					}
+				}
+
+				if (event.isCancelled()) {
+					event.setResult(Event.Result.DENY);
+					player.updateInventory();
+				}
+			}
 		}
 
+		@EventHandler
+		public void onInventoryClose(final org.bukkit.event.inventory.InventoryCloseEvent event) {
+			HumanEntity entity = event.getPlayer();
 
-		//CraftPlayer cp;
-		//CraftInventoryPlayer cip;
+			if (entity instanceof Player) {
+				final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
+				profile.getOfflinePlayer().getPlayer().updateInventory();
 
-		player.getOpenInventory().getTopInventory().clear();
-		player.getOpenInventory().getTopInventory().setContents(inventory.getContents());
+				if (FakeInventory.this.isOpen(profile)) {
+					OPENED.get(FakeInventory.this.getUniqueId()).remove(profile);
+					HOLDERS.get(FakeInventory.this.getUniqueId()).remove(profile);
+					FakeInventory.this.listener.onInventoryClose(new InventoryCloseEvent(profile, event));
+				}
+			}
+		}
+
+		@EventHandler
+		public void onInventoryCreative(InventoryCreativeEvent event) {
+			if (FakeInventory.this.getItemOpener() != null) {
+				ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+
+				if (FakeInventory.this.isItemOpener(itemData)) {
+					event.setCancelled(true);
+					event.setResult(Event.Result.DENY);
+				}
+			}
+		}
+
+		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
+		public void onInventoryOpen(final org.bukkit.event.inventory.InventoryOpenEvent event) {
+			HumanEntity entity = event.getPlayer();
+
+			if (entity instanceof Player) {
+				final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer((Player)event.getPlayer());
+
+				if (FakeInventory.this.isOpen(profile)) {
+					InventoryOpenEvent myEvent = new InventoryOpenEvent(profile, event);
+					FakeInventory.this.listener.onInventoryOpen(myEvent);
+					event.setCancelled(myEvent.isCancelled());
+				}
+			}
+		}
+
+		@EventHandler(ignoreCancelled = false)
+		public void onPlayerDeath(PlayerDeathEvent e) {
+			if (FakeInventory.this.getItemOpener() != null) {
+				for (ItemStack itemStack : e.getDrops()) {
+					ItemData itemData = new ItemData(itemStack);
+
+					if (FakeInventory.this.isItemOpener(itemData))
+						itemStack.setAmount(0);
+				}
+			}
+		}
+
+		@EventHandler(ignoreCancelled = false)
+		public void onPlayerDropItem(PlayerDropItemEvent event) {
+			if (FakeInventory.this.getItemOpener() != null) {
+				ItemStack itemStack = event.getItemDrop().getItemStack();
+
+				if (FakeInventory.this.isItemOpener(new ItemData(itemStack))) {
+					event.setCancelled(true);
+
+					if (FakeInventory.this.isItemOpenerDestructable()) {
+						event.getItemDrop().remove();
+						itemStack.setAmount(0);
+					}
+				}
+			}
+		}
+
+		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
+		public void onPlayerInteract(PlayerInteractEvent event) {
+			final BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+
+			if (!FakeInventory.this.isOpen(profile)) {
+				if (Action.PHYSICAL != event.getAction()) {
+					ItemData handItem = new ItemData(event.getItem());
+
+					if (Material.AIR != handItem.getType() && FakeInventory.this.getItemOpener() != null) {
+						if (FakeInventory.this.isItemOpener(handItem)) {
+							InventoryItemInteractEvent myEvent = new InventoryItemInteractEvent(profile, event);
+							FakeInventory.this.listener.onInventoryItemInteract(myEvent);
+							event.setCancelled(myEvent.isCancelled());
+						}
+					}
+				}
+			}
+		}
+
+		@EventHandler
+		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+			FakeInventory.this.giveItemOpener(event.getProfile());
+		}
+
+		@EventHandler
+		public void onPlayerRespawn(PlayerRespawnEvent event) {
+			FakeInventory.this.giveItemOpener(NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer()));
+		}
+
 	}
 
 }
