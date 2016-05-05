@@ -82,7 +82,7 @@ public class NbtItemStack extends ItemStack {
 		return !this.root.isEmpty();
 	}
 
-	public final boolean containsNbtKey(String key) {
+	public final boolean containsNbt(String key) {
 		return this.root.containsKey(key);
 	}
 
