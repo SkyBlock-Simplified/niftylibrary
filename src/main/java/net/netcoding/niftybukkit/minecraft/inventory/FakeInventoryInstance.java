@@ -1,15 +1,14 @@
 package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
 
 	private final transient FakeInventory inventory;
 	private final transient BukkitMojangProfile profile;
 
-	FakeInventoryInstance(JavaPlugin plugin, FakeInventory inventory, BukkitMojangProfile profile) {
-		super(plugin);
+	FakeInventoryInstance(FakeInventory inventory, BukkitMojangProfile profile) {
+		super();
 		this.inventory = inventory;
 		this.profile = profile;
 	}

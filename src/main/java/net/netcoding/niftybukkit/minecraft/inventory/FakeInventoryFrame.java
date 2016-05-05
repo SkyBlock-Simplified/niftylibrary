@@ -2,13 +2,11 @@ package net.netcoding.niftybukkit.minecraft.inventory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -21,7 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-public abstract class FakeInventoryFrame extends BukkitListener implements Iterable<ItemData> {
+public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 
 	private final ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>();
 	private final ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
@@ -40,14 +38,7 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 	// http://www.planetminecraft.com/banner/arrow-pointing-right/
 	// http://www.planetminecraft.com/banner/arrow-pointing-left-35059/
 
-	FakeInventoryFrame(FakeInventoryFrame frame) {
-		this(frame.getPlugin());
-		this.update(frame);
-	}
-
-	FakeInventoryFrame(JavaPlugin plugin) {
-		super(plugin);
-
+	FakeInventoryFrame() {
 		PrivateKey privateKey = null;
 		PublicKey publicKey = null;
 
@@ -61,6 +52,11 @@ public abstract class FakeInventoryFrame extends BukkitListener implements Itera
 
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
+	}
+
+	FakeInventoryFrame(FakeInventoryFrame frame) {
+		this();
+		this.update(frame);
 	}
 
 	private int getMax() {
