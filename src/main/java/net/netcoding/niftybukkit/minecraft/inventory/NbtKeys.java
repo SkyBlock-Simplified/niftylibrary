@@ -9,7 +9,8 @@ enum NbtKeys {
 	SIGNATURE,
 	TRADE_COMPLETE,
 	TRADE_ITEM,
-	TRADE_SLOT;
+	TRADE_SLOT,
+	TRADE_SWITCH;
 
 	private final String key;
 
