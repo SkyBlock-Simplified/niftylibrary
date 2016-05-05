@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,9 @@ public class InventoryWorkaround {
 		ItemStack[] stacks = inventory.getContents();
 
 		for (int i = slotNumber; i < stacks.length; i++) {
+			if ((inventory instanceof PlayerInventory) && (i >= 36 && i <= 39))
+				continue;
+
 			if (stacks[i] != null && stacks[i].getAmount() < maxAmount && item.isSimilar(stacks[i]))
 				return i;
 		}
