@@ -51,7 +51,7 @@ public class NbtItemStack extends ItemStack {
 			this.setAmount(1);
 
 		if (root != null)
-			this.root = root;
+			this.root = root.clone();
 		else {
 			if (NbtItemStack.class.isAssignableFrom(itemStack.getClass()))
 				this.root = ((NbtItemStack)itemStack).root.clone();
@@ -73,7 +73,7 @@ public class NbtItemStack extends ItemStack {
 
 	@Override
 	public NbtItemStack clone() {
-		NbtItemStack nbtStack = new NbtItemStack(super.clone(), this.root.clone(), true);
+		NbtItemStack nbtStack = new NbtItemStack(super.clone(), this.root, false);
 		nbtStack.setNbtCompound();
 		return nbtStack;
 	}
@@ -104,6 +104,10 @@ public class NbtItemStack extends ItemStack {
 
 	public final <T> T getNbtPath(String path) {
 		return this.root.getPath(path);
+	}
+
+	public final String getNbtString() {
+		return this.root.toString();
 	}
 
 	public final Collection<Object> getNbtValues() {
@@ -160,6 +164,11 @@ public class NbtItemStack extends ItemStack {
 
 			super.setItemMeta(nmsMeta);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString();
 	}
 
 }
