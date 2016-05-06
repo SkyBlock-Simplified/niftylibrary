@@ -14,4 +14,12 @@ public final class NbtList extends ConvertedList {
 		super(handle, NbtFactory.getDataList(handle));
 	}
 
+	@SuppressWarnings("CloneDoesntCallSuperClone")
+	@Override
+	public NbtList clone() {
+		NbtList list = NbtFactory.createList();
+		list.addAll(this);
+		return list;
+	}
+
 }

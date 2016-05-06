@@ -33,7 +33,7 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 	@SuppressWarnings("CloneDoesntCallSuperClone")
 	@Override
 	public NbtCompound clone() {
-		NbtCompound compound = new NbtCompound(this.getHandle());
+		NbtCompound compound = NbtFactory.createRootCompound("tag");
 		compound.putAll(this);
 		return compound;
 	}
@@ -74,24 +74,36 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 
 	/**
 	 * Retrieve the list by the given name.
+	 *
+	 * @param key - the name of the list.
+	 * @return An existing list or NULL.
+	 */
+	/*public NbtList getList(String key) {
+		return this.getList(key, false);
+	}*/
+
+	/**
+	 * Retrieve the list by the given name.
+	 *
 	 * @param key - the name of the list.
 	 * @param createNew - whether or not to create a new list if its missing.
 	 * @return An existing list, a new list or NULL.
 	 */
-	public NbtList getList(String key, boolean createNew) {
+	/*public NbtList getList(String key, boolean createNew) {
 		NbtList list = this.get(key);
 
 		if (list == null && createNew)
 			this.put(key, list = NbtFactory.createList());
 
 		return list;
-	}
+	}*/
 
 	/**
 	 * Retrieve the value of a given entry in the tree.
 	 * <p>
 	 * Every element of the path (except the end) are assumed to be compounds. The
 	 * retrieval operation will be cancelled if any of them are missing.
+	 *
 	 * @param path - path to the entry.
 	 * @return The value, or NULL if not found.
 	 */
