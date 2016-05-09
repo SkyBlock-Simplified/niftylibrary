@@ -13,7 +13,9 @@ import java.net.URL;
 
 public enum MinecraftProtocol {
 
-	//http://wiki.vg/Protocol_version_numbers
+	// http://wiki.vg/Protocol_version_numbers
+	v1_9_3_pre2(110),
+	v1_9_3_pre1(110),
 	v16w15b(109),
 	v16w15a(109),
 	v16w14a(109),
@@ -275,7 +277,7 @@ public enum MinecraftProtocol {
 	private static int getFetchedProtocol(String version) {
 		try {
 			HttpBody body = new HttpBody(StringUtil.format("ver={0}", version));
-			HttpResponse response = new HttpClient().post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
+			HttpResponse response = HttpClient.post(new URL("https://api.netcoding.net/minecraft/protocol/search.php"), body);
 			return Integer.valueOf(response.getBody().toString());
 		} catch (Exception ex) {
 			return values()[0].getProtocol();
