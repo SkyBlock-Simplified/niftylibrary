@@ -2,17 +2,22 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
+import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class ItemStack extends Converter {
@@ -24,33 +29,56 @@ public class ItemStack extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		Map<String, Object> itemMap = (section instanceof Map ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
-		Map<String, Object> metaMap = (Map<String, Object>)(itemMap.get("meta") instanceof Map ? itemMap.get("meta") : ((ConfigSection)itemMap.get("meta")).getRawMap());
+		Map<String, Object> metaMap = (itemMap.get("meta") instanceof Map ? (Map<String, Object>)itemMap.get("meta") : (Map<String, Object>)((ConfigSection)itemMap.get("meta")).getRawMap());
+		Map<String, Integer> enchMap = (itemMap.get("enchantments") instanceof Map ? (Map<String, Integer>)itemMap.get("enchantments") : (Map<String, Integer>)((ConfigSection)itemMap.get("enchantments")).getRawMap());
 		ItemData itemData = new ItemData(NiftyBukkit.getItemDatabase().get((String)itemMap.get("id")));
 		itemData.setAmount((int)itemMap.get("amount"));
-		ItemMeta meta = itemData.getItemMeta();
+		ItemMeta itemMeta = itemData.getItemMeta();
 
 		if (metaMap != null) {
-			meta.setDisplayName(metaMap.get("name") != null ? (String)metaMap.get("name") : meta.getDisplayName());
-			meta.setLore(metaMap.get("lore") != null ? (List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null) : meta.getLore());
+			if (metaMap.containsKey("name"))
+				itemMeta.setDisplayName((String)metaMap.get("name"));
+
+			if (metaMap.containsKey("lore"))
+				itemMeta.setLore((List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null));
+
+			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_8_pre1.getProtocol()) {
+				if (metaMap.containsKey("flags")) {
+					Converter setConverter = this.getConverter(Set.class);
+					ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
+					Set<org.bukkit.inventory.ItemFlag> itemFlags = (Set<org.bukkit.inventory.ItemFlag>)setConverter.fromConfig(Set.class, metaMap.get("flags"), flagType);
+					itemMeta.addItemFlags(ListUtil.toArray(itemFlags, org.bukkit.inventory.ItemFlag.class));
+				}
+			}
 		}
 
-		itemData.setItemMeta(meta);
+		for (Map.Entry<String, Integer> enchantment : enchMap.entrySet())
+			itemData.addUnsafeEnchantment(Enchantment.getByName(enchantment.getKey()), enchantment.getValue());
+
+		if (itemMap.containsKey("nbt")) {
+			Converter mapConverter = this.getConverter(Map.class);
+			itemData.putAllNbt((Map<String, Object>)mapConverter.fromConfig(Map.class, itemMap.get("nbt"), null));
+		}
+
+		itemData.setItemMeta(itemMeta);
 		return itemData;
 	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		org.bukkit.inventory.ItemStack itemStack = (org.bukkit.inventory.ItemStack)obj;
-		Map<String, Object> saveMap = new HashMap<>();
-		saveMap.put("id", itemStack.getType() + ((itemStack.getDurability() > 0) ? ":" + itemStack.getDurability() : ""));
-		saveMap.put("amount", itemStack.getAmount());
+		ItemData itemData = new ItemData((org.bukkit.inventory.ItemStack)obj);
+		ItemMeta itemMeta = itemData.getItemMeta();
 		Converter listConverter = this.getConverter(List.class);
-		Map<String, Object> meta = new HashMap<>();
-		meta.put("name", itemStack.getItemMeta().hasDisplayName() ? RegexUtil.replace(itemStack.getItemMeta().getDisplayName(), RegexUtil.VANILLA_PATTERN, "&$1") : "");
+		LinkedHashMap<String, Object> saveMap = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> meta = new LinkedHashMap<>();
+		LinkedHashMap<String, Integer> enchantments = new LinkedHashMap<>();
 		List<String> lore = new ArrayList<>();
+		saveMap.put("id", itemData.getType() + ((itemData.getDurability() > 0) ? ":" + itemData.getDurability() : ""));
+		saveMap.put("amount", itemData.getAmount());
+		meta.put("name", itemMeta.hasDisplayName() ? RegexUtil.replace(itemMeta.getDisplayName(), RegexUtil.VANILLA_PATTERN, "&$1") : "");
 
-		if (itemStack.getItemMeta().hasLore()) {
-			lore.addAll(itemStack.getItemMeta().getLore());
+		if (itemMeta.hasLore()) {
+			lore.addAll(itemMeta.getLore());
 
 			for (int i = 0; i < lore.size(); i++)
 				lore.set(i, RegexUtil.replace(lore.get(i), RegexUtil.VANILLA_PATTERN, "&$1"));
@@ -58,7 +86,21 @@ public class ItemStack extends Converter {
 
 		meta.put("lore", listConverter.toConfig(List.class, lore, null));
 
+		for (Map.Entry<Enchantment, Integer> enchantment : itemData.getEnchantments().entrySet())
+			enchantments.put(enchantment.getKey().getName(), enchantment.getValue());
+
+		if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_8_pre1.getProtocol()) {
+			Converter setConverter = this.getConverter(Set.class);
+			ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
+			meta.put("flags", setConverter.toConfig(Set.class, itemMeta.getItemFlags(), flagType));
+		}
+
 		saveMap.put("meta", meta);
+		saveMap.put("enchantments", enchantments);
+
+		if (itemData.containsNbt())
+			saveMap.put("nbt", NbtFactory.fromItemTag(itemData));
+
 		return saveMap;
 	}
 
