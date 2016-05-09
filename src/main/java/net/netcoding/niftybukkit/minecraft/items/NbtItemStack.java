@@ -71,6 +71,10 @@ public class NbtItemStack extends ItemStack {
 		}
 	}
 
+	public final void clearNbt() {
+		this.root.clear();
+	}
+
 	@Override
 	public NbtItemStack clone() {
 		NbtItemStack nbtStack = new NbtItemStack(super.clone(), this.root, false);
