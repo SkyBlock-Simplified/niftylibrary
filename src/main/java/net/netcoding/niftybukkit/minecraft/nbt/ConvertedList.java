@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
 import java.util.AbstractList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 
 	@Override
 	public Object get(int index) {
-		return wrapOutgoing(this.original.get(index));
+		return this.wrapOutgoing(this.original.get(index));
 	}
 
 	@Override
@@ -51,13 +52,37 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 	}
 
 	@Override
+	public Iterator<Object> iterator() {
+		final Iterator<Object> proxy = this.original.iterator();
+
+		return new Iterator<Object>() {
+
+			@Override
+			public boolean hasNext() {
+				return proxy.hasNext();
+			}
+
+			@Override
+			public Object next() {
+				return wrapOutgoing(proxy.next());
+			}
+
+			@Override
+			public void remove() {
+				proxy.remove();
+			}
+
+		};
+	}
+
+	@Override
 	public Object remove(int index) {
-		return wrapOutgoing(this.original.remove(index));
+		return this.wrapOutgoing(this.original.remove(index));
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		return this.original.remove(unwrapIncoming(o));
+		return this.original.remove(this.unwrapIncoming(o));
 	}
 
 	@Override
@@ -67,7 +92,7 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 
 	@Override
 	public Object set(int index, Object element) {
-		return wrapOutgoing(this.original.set(index, this.unwrapIncoming(element)));
+		return this.wrapOutgoing(this.original.set(index, this.unwrapIncoming(element)));
 	}
 
 	protected Object wrapOutgoing(Object value) {
