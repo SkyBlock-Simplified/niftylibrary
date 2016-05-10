@@ -55,17 +55,7 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 	}
 
 	public <T> T get(String key) {
-		Object value = super.get(key);
-
-		if (value instanceof Integer) {
-			Integer intValue = (Integer)value;
-			intValue -= NbtType.TAG_BOOLEAN.getId();
-
-			if (intValue == 0 || intValue == 1)
-				value = intValue == 1;
-		}
-
-		return (T)value;
+		return (T)NbtFactory.adjustValue(super.get(key));
 	}
 
 	public <T> T get(String key, T defaultValue) {
@@ -113,16 +103,7 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 
 		if (map != null) {
 			Object value = map.get(entries.get(entries.size() - 1));
-
-			if (value instanceof Integer) {
-				Integer intValue = (Integer)value;
-				intValue -= NbtType.TAG_BOOLEAN.getId();
-
-				if (intValue == 0 || intValue == 1)
-					value = intValue == 1;
-			}
-
-			return (T)value;
+			return (T)NbtFactory.adjustValue(value);
 		}
 
 		return null;

@@ -24,17 +24,7 @@ public final class NbtList extends ConvertedList {
 	}
 
 	public <T> T get(Integer index) {
-		Object value = super.get(index);
-
-		if (value instanceof Integer) {
-			Integer intValue = (Integer)value;
-			intValue -= NbtType.TAG_BOOLEAN.getId();
-
-			if (intValue == 0 || intValue == 1)
-				value = intValue == 1;
-		}
-
-		return (T)value;
+		return (T)NbtFactory.adjustValue(super.get(index));
 	}
 
 }

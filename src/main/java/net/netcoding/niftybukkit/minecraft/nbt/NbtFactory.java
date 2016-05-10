@@ -36,6 +36,18 @@ public class NbtFactory {
 	// The NBT base class
 	static final Field[] DATA_FIELD = new Field[12];
 
+	static Object adjustValue(Object value) {
+		if (value instanceof Integer) {
+			Integer intValue = (Integer)value;
+			intValue -= NbtType.TAG_BOOLEAN.getId();
+
+			if (intValue == 0 || intValue == 1)
+				return intValue == 1;
+		}
+
+		return value;
+	}
+
 	/**
 	 * Ensure that the given stack can store arbitrary NBT information.
 	 * @param stack - the stack to check.
