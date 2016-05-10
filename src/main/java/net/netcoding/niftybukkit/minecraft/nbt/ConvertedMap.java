@@ -29,6 +29,7 @@ class ConvertedMap extends AbstractMap<String, Object> implements Wrapper {
 	@Override
 	public Set<Entry<String, Object>> entrySet() {
 		return new AbstractSet<Entry<String, Object>>() {
+
 			@Override
 			public boolean add(Entry<String, Object> e) {
 				String key = e.getKey();
@@ -46,6 +47,7 @@ class ConvertedMap extends AbstractMap<String, Object> implements Wrapper {
 			public Iterator<Entry<String, Object>> iterator() {
 				return ConvertedMap.this.iterator();
 			}
+
 		};
 	}
 
@@ -61,9 +63,10 @@ class ConvertedMap extends AbstractMap<String, Object> implements Wrapper {
 	}
 
 	private Iterator<Entry<String, Object>> iterator() {
-		final Iterator<Entry<String, Object>> proxy = original.entrySet().iterator();
+		final Iterator<Entry<String, Object>> proxy = this.original.entrySet().iterator();
 
 		return new Iterator<Entry<String, Object>>() {
+
 			@Override
 			public boolean hasNext() {
 				return proxy.hasNext();
@@ -79,6 +82,7 @@ class ConvertedMap extends AbstractMap<String, Object> implements Wrapper {
 			public void remove() {
 				proxy.remove();
 			}
+
 		};
 	}
 
