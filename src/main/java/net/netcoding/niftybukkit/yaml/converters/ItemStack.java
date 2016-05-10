@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
+import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
@@ -14,7 +15,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,9 +69,9 @@ public class ItemStack extends Converter {
 		ItemData itemData = new ItemData((org.bukkit.inventory.ItemStack)obj);
 		ItemMeta itemMeta = itemData.getItemMeta();
 		Converter listConverter = this.getConverter(List.class);
-		LinkedHashMap<String, Object> saveMap = new LinkedHashMap<>();
-		LinkedHashMap<String, Object> meta = new LinkedHashMap<>();
-		LinkedHashMap<String, Integer> enchantments = new LinkedHashMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Object> meta = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Integer> enchantments = new ConcurrentLinkedMap<>();
 		List<String> lore = new ArrayList<>();
 		saveMap.put("id", itemData.getType() + ((itemData.getDurability() > 0) ? ":" + itemData.getDurability() : ""));
 		saveMap.put("amount", itemData.getAmount());

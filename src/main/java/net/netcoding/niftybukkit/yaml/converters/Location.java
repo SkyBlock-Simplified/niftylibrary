@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
@@ -8,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -39,7 +39,7 @@ public class Location extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		org.bukkit.Location location = (org.bukkit.Location)obj;
-		Map<String, Object> saveMap = new HashMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
 		saveMap.put("world", (WILDCARDS.contains(location) ? "%world%" : location.getWorld().getName()));
 		saveMap.put("x", location.getX());
 		saveMap.put("y", location.getY());
