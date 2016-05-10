@@ -17,7 +17,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class ItemData extends NbtItemStack {
 
-	private boolean glow = false;
+	private static final String GLOWING = "ITEMDATA_GLOW";
 
 	public ItemData(int id) {
 		this(id, (short)0);
@@ -47,6 +47,7 @@ public class ItemData extends NbtItemStack {
 		super(stack, null, load);
 	}
 
+	@Deprecated
 	public void addGlow() {
 		if (this.hasGlow())
 			return;
@@ -71,7 +72,7 @@ public class ItemData extends NbtItemStack {
 			this.setItemMeta(meta);
 		}
 
-		this.glow = true;
+		this.putNbt(GLOWING, true);
 	}
 
 	@Deprecated
@@ -136,7 +137,7 @@ public class ItemData extends NbtItemStack {
 	}
 
 	public boolean hasGlow() {
-		return this.glow;
+		return this.containsNbt(GLOWING) && this.<Boolean>getNbt("ITEMDATA_GLOW");
 	}
 
 	@Override
@@ -161,6 +162,7 @@ public class ItemData extends NbtItemStack {
 		return false;
 	}
 
+	@Deprecated
 	public void removeGlow() {
 		if (!this.hasGlow())
 			return;
@@ -180,7 +182,18 @@ public class ItemData extends NbtItemStack {
 			this.setItemMeta(meta);
 		}
 
-		this.glow = false;
+		this.removeNbt(GLOWING);
+	}
+
+	public void setGlowing() {
+		this.setGlowing(true);
+	}
+
+	public void setGlowing(boolean value) {
+		if (value)
+			this.addGlow();
+		else
+			this.removeGlow();
 	}
 
 	@Override
