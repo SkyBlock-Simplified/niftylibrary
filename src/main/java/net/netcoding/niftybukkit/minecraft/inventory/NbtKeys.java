@@ -5,6 +5,7 @@ import net.netcoding.niftycore.util.StringUtil;
 enum NbtKeys {
 
 	ITEM_OPENER,
+	ITEM_OPENER_DESTRUCTABLE,
 	PAGING,
 	SIGNATURE,
 	TRADE_COMPLETE,
