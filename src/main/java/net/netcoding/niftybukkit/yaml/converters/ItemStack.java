@@ -92,11 +92,16 @@ public class ItemStack extends Converter {
 		if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_8_pre1.getProtocol()) {
 			Converter setConverter = this.getConverter(Set.class);
 			ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
-			meta.put("flags", setConverter.toConfig(Set.class, itemMeta.getItemFlags(), flagType));
+			Set<org.bukkit.inventory.ItemFlag> itemFlags = (Set<org.bukkit.inventory.ItemFlag>)setConverter.toConfig(Set.class, itemMeta.getItemFlags(), flagType);
+
+			if (!itemFlags.isEmpty())
+				meta.put("flags", itemFlags);
 		}
 
 		saveMap.put("meta", meta);
-		saveMap.put("enchantments", enchantments);
+
+		if (!enchantments.isEmpty())
+			saveMap.put("enchantments", enchantments);
 
 		if (itemData.containsNbt())
 			saveMap.put("nbt", NbtFactory.fromItemTag(itemData));
