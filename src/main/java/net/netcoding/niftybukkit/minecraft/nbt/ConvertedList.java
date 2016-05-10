@@ -31,7 +31,7 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 
 	@Override
 	public void add(int index, Object element) {
-		Object nbt = unwrapIncoming(element);
+		Object nbt = this.unwrapIncoming(element);
 
 		// Set the list type if its the first element
 		if (size() == 0)
@@ -67,7 +67,7 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 
 	@Override
 	public Object set(int index, Object element) {
-		return wrapOutgoing(this.original.set(index, unwrapIncoming(element)));
+		return wrapOutgoing(this.original.set(index, this.unwrapIncoming(element)));
 	}
 
 	protected Object wrapOutgoing(Object value) {
