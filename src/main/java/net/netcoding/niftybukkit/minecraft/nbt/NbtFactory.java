@@ -13,8 +13,10 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class NbtFactory {
 
@@ -99,7 +101,11 @@ public class NbtFactory {
 		Object tag = NBT_BASE.invokeMethod("createTag", null, ListUtil.toArray(params, Object.class));
 
 		if (value != null) {
+			// Handles Unsupported Types
 			Object newValue = (NbtType.TAG_BOOLEAN == type ? (type.getId() + ((boolean)value ? 1 : 0)) : value);
+			newValue = (NbtType.TAG_ARRAY == type ? NbtFactory.createList((Object[])newValue) : newValue);
+			newValue = (NbtType.TAG_COLLECTION == type ? NbtFactory.createList((Collection<?>)newValue) : newValue);
+			newValue = (NbtType.TAG_SET == type ? NbtFactory.createList((Set<?>)newValue) : newValue);
 			setFieldValue(getDataField(newType, tag), tag, newValue);
 		}
 
@@ -201,10 +207,7 @@ public class NbtFactory {
 	 * @return The CraftItemStack version.
 	 */
 	public static ItemStack getCraftItemStack(ItemStack stack) {
-		if (stack == null || CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()))
-			return stack;
-
-		return (ItemStack)CRAFT_ITEM_STACK.invokeMethod("asCraftCopy", null, stack);
+		return (stack == null || CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass())) ? stack : (ItemStack)CRAFT_ITEM_STACK.invokeMethod("asCraftCopy", null, stack);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -283,16 +286,16 @@ public class NbtFactory {
 	static void setFieldValue(Field field, Object target, Object value) {
 		try {
 			field.set(target, value);
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to set " + field + " for " + target, e);
+		} catch (Exception ex) {
+			throw new RuntimeException(StringUtil.format("Unable to set {0} for {1}!", field, target), ex);
 		}
 	}
 
 	static Object getFieldValue(Field field, Object target) {
 		try {
 			return field.get(target);
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to retrieve " + field + " for " + target, e);
+		} catch (Exception ex) {
+			throw new RuntimeException(StringUtil.format("Unable to get {0} for {1}!", field, target), ex);
 		}
 	}
 
