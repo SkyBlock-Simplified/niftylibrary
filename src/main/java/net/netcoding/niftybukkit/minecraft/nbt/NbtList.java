@@ -8,6 +8,7 @@ package net.netcoding.niftybukkit.minecraft.nbt;
  *   <li>{@link NbtFactory#fromList}</li>
  * </ul>
  */
+@SuppressWarnings("unchecked")
 public final class NbtList extends ConvertedList {
 
 	NbtList(Object handle) {
@@ -20,6 +21,20 @@ public final class NbtList extends ConvertedList {
 		NbtList list = NbtFactory.createList();
 		list.addAll(this);
 		return list;
+	}
+
+	public <T> T get(Integer index) {
+		Object value = super.get(index);
+
+		if (value instanceof Integer) {
+			Integer intValue = (Integer)value;
+			intValue -= NbtType.TAG_BOOLEAN.getId();
+
+			if (intValue == 0 || intValue == 1)
+				value = intValue == 1;
+		}
+
+		return (T)value;
 	}
 
 }

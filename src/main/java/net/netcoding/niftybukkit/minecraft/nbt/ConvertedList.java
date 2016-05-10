@@ -50,7 +50,6 @@ class ConvertedList extends AbstractList<Object> implements Wrapper {
 		return this.handle;
 	}
 
-
 	@Override
 	public Object remove(int index) {
 		return wrapOutgoing(this.original.remove(index));
