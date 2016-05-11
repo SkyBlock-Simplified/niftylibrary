@@ -28,26 +28,26 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	private final Object minecraftServer;
 	private final Object networkManager;
 
-	public BukkitServerPingEvent(ServerListPingEvent event) throws Exception {
+	public BukkitServerPingEvent(ServerListPingEvent event) {
 		super(event.getAddress(), event.getMotd(), event.getNumPlayers(), event.getMaxPlayers());
 		Object packetListener = SERVER_LIST_PING.getValue(PACKET_LISTENER.getClazz(), event);
 		this.minecraftServer = PACKET_LISTENER.getValue(MINECRAFT_SERVER.getClazz(), packetListener);
 		this.networkManager = PACKET_LISTENER.getValue(NETWORK_MANAGER.getClazz(), packetListener);
 	}
 
-	public final String getServerModName() throws Exception {
+	public final String getServerModName() {
 		return (String)MINECRAFT_SERVER.invokeMethod("getServerModName", this.minecraftServer);
 	}
 
-	public final SocketAddress getSocketAddress() throws Exception {
+	public final SocketAddress getSocketAddress() {
 		return this.getSocketAddress(SocketAddress.class);
 	}
 
-	public final <T extends SocketAddress> T getSocketAddress(Class<T> socket) throws Exception {
+	public final <T extends SocketAddress> T getSocketAddress(Class<T> socket) {
 		return socket.cast(NETWORK_MANAGER.invokeMethod("getSocketAddress", this.networkManager));
 	}
 
-	public final String getVersion() throws Exception {
+	public final String getVersion() {
 		return (String)MINECRAFT_SERVER.invokeMethod("getVersion", this.minecraftServer);
 	}
 
@@ -59,7 +59,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 *
 	 * @param name Server mod name.
 	 */
-	public final void sendSpoofedVersion(String name) throws Exception {
+	public final void sendSpoofedVersion(String name) {
 		this.sendSpoofedVersion(name, PROTOCOL, false);
 	}
 
@@ -73,7 +73,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * @param name  Server mod name.
 	 * @param merge True to merge the previous name, otherwise false.
 	 */
-	public final void sendSpoofedVersion(String name, boolean merge) throws Exception {
+	public final void sendSpoofedVersion(String name, boolean merge) {
 		this.sendSpoofedVersion(name, PROTOCOL, merge);
 	}
 
@@ -86,7 +86,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * @param name     Server mod name.
 	 * @param protocol Server protocol version.
 	 */
-	public final void sendSpoofedVersion(String name, int protocol) throws Exception {
+	public final void sendSpoofedVersion(String name, int protocol) {
 		this.sendSpoofedVersion(name, protocol, false);
 	}
 
@@ -101,7 +101,7 @@ public class BukkitServerPingEvent extends ServerListPingEvent {
 	 * @param protocol Server protocol version.
 	 * @param merge    True to merge the previous name, otherwise false.
 	 */
-	public final void sendSpoofedVersion(String name, int protocol, boolean merge) throws Exception {
+	public final void sendSpoofedVersion(String name, int protocol, boolean merge) {
 		Object pingObj = SERVER_PING.newInstance();
 		SERVER_PING.invokeMethod("setPlayerSample", pingObj, SERVER_PING_SAMPLE.newInstance(Bukkit.getMaxPlayers(), 0));
 		String mergedName = name;
