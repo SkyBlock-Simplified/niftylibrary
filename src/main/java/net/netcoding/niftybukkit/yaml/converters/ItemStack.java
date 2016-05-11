@@ -30,7 +30,6 @@ public class ItemStack extends Converter {
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		Map<String, Object> itemMap = (section instanceof Map ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
 		Map<String, Object> metaMap = (itemMap.get("meta") instanceof Map ? (Map<String, Object>)itemMap.get("meta") : (Map<String, Object>)((ConfigSection)itemMap.get("meta")).getRawMap());
-		Map<String, Integer> enchMap = (itemMap.get("enchantments") instanceof Map ? (Map<String, Integer>)itemMap.get("enchantments") : (Map<String, Integer>)((ConfigSection)itemMap.get("enchantments")).getRawMap());
 		ItemData itemData = new ItemData(NiftyBukkit.getItemDatabase().get((String)itemMap.get("id")));
 		itemData.setAmount((int)itemMap.get("amount"));
 		ItemMeta itemMeta = itemData.getItemMeta();
@@ -52,8 +51,12 @@ public class ItemStack extends Converter {
 			}
 		}
 
-		for (Map.Entry<String, Integer> enchantment : enchMap.entrySet())
-			itemData.addUnsafeEnchantment(Enchantment.getByName(enchantment.getKey()), enchantment.getValue());
+		if (itemMap.containsKey("enchantments")) {
+			Map<String, Integer> enchMap = (itemMap.get("enchantments") instanceof Map ? (Map<String, Integer>)itemMap.get("enchantments") : (Map<String, Integer>)((ConfigSection)itemMap.get("enchantments")).getRawMap());
+
+			for (Map.Entry<String, Integer> enchantment : enchMap.entrySet())
+				itemData.addUnsafeEnchantment(Enchantment.getByName(enchantment.getKey()), enchantment.getValue());
+		}
 
 		if (itemMap.containsKey("nbt")) {
 			Converter mapConverter = this.getConverter(Map.class);
