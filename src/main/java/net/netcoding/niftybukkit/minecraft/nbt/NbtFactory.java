@@ -2,7 +2,12 @@ package net.netcoding.niftybukkit.minecraft.nbt;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.io.Files;
+import com.google.common.io.InputSupplier;
+import com.google.common.io.OutputSupplier;
 import com.google.common.primitives.Primitives;
+import net.minecraft.server.v1_9_R1.NBTBase;
+import net.minecraft.server.v1_9_R1.NBTTagCompound;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
@@ -10,13 +15,18 @@ import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Field;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class NbtFactory {
 
@@ -32,24 +42,12 @@ public class NbtFactory {
 	static final Reflection NMS_ITEM_STACK = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
 	static final Reflection NBT_TAG_LIST = new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER);
 	static final Reflection NBT_BASE = new Reflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER);
-
-	// The NBT base class
-	static final Field[] DATA_FIELD = new Field[12];
-
-	static Object adjustValue(Object value) {
-		if (value instanceof Integer) {
-			Integer intValue = (Integer)value;
-			intValue -= NbtType.TAG_BOOLEAN.getId();
-
-			if (intValue == 0 || intValue == 1)
-				return intValue == 1;
-		}
-
-		return value;
-	}
+	static final Reflection NBT_READ_LIMITER = new Reflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER);
+	static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
 	/**
 	 * Ensure that the given stack can store arbitrary NBT information.
+	 *
 	 * @param stack - the stack to check.
 	 */
 	private static void checkItemStack(ItemStack stack) {
@@ -65,21 +63,24 @@ public class NbtFactory {
 
 	/**
 	 * Construct a new NBT list of an unspecified type.
+	 *
 	 * @return The NBT list.
 	 */
-	public static NbtList createList(Object... content) {
+	@SafeVarargs
+	public static <T> NbtList<T> createList(T... content) {
 		return createList(Arrays.asList(content));
 	}
 
 	/**
 	 * Construct a new NBT list of an unspecified type.
+	 *
 	 * @return The NBT list.
 	 */
-	public static NbtList createList(Iterable<?> iterable) {
-		NbtList list = new NbtList(createNbtTag(NbtType.TAG_LIST, "", null));
+	public static <T> NbtList<T> createList(Iterable<T> iterable) {
+		NbtList<T> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, "", null));
 
 		// Add the content as well
-		for (Object obj : iterable)
+		for (T obj : iterable)
 			list.add(obj);
 
 		return list;
@@ -87,8 +88,7 @@ public class NbtFactory {
 
 	/**
 	 * Construct a new NBT compound.
-	 * <p>
-	 * Use {@link NbtCompound#getMap} to modify it.
+	 *
 	 * @return The NBT compound.
 	 */
 	public static NbtCompound createCompound() {
@@ -97,6 +97,7 @@ public class NbtFactory {
 
 	/**
 	 * Construct a new NMS NBT tag initialized with the given value.
+	 *
 	 * @param type - the NBT type.
 	 * @param name - the name of the NBT tag.
 	 * @param value - the value, or NULL to keep the original value.
@@ -104,22 +105,16 @@ public class NbtFactory {
 	 */
 	static Object createNbtTag(NbtType type, String name, Object value) {
 		List<Object> params = new ArrayList<>();
-		NbtType newType = (NbtType.TAG_BOOLEAN == type ? NbtType.TAG_INT : type);
-		params.add((byte)newType.getId());
+		params.add((byte)type.getId());
+		NBTTagCompound c;
+		NBTBase b;
 
 		if (MinecraftPackage.IS_PRE_1_8)
 			params.add(name);
 
 		Object tag = NBT_BASE.invokeMethod("createTag", null, ListUtil.toArray(params, Object.class));
-
-		if (value != null) {
-			// Handles Unsupported Types
-			Object newValue = (NbtType.TAG_BOOLEAN == type ? (type.getId() + ((boolean)value ? 1 : 0)) : value);
-			newValue = (NbtType.TAG_ARRAY == type ? NbtFactory.createList((Object[])newValue) : newValue);
-			newValue = (NbtType.TAG_COLLECTION == type ? NbtFactory.createList((Collection<?>)newValue) : newValue);
-			newValue = (NbtType.TAG_SET == type ? NbtFactory.createList((Set<?>)newValue) : newValue);
-			setFieldValue(getDataField(newType, tag), tag, newValue);
-		}
+		if (value != null)
+			new Reflection(tag.getClass()).setValue(type.getFieldName(), tag, value);
 
 		return tag;
 	}
@@ -128,6 +123,7 @@ public class NbtFactory {
 	 * Construct a new NBT root compound.
 	 * <p>
 	 * This compound must be given a name, as it is the root object.
+	 *
 	 * @param name - the name of the compound.
 	 * @return The NBT compound.
 	 */
@@ -137,6 +133,7 @@ public class NbtFactory {
 
 	/**
 	 * Construct a new NBT wrapper from a compound.
+	 *
 	 * @param nmsCompound - the NBT compund.
 	 * @return The wrapper.
 	 */
@@ -150,6 +147,7 @@ public class NbtFactory {
 	 * material, damage value or count.
 	 * <p>
 	 * The item stack must be a wrapper for a CraftItemStack.
+	 *
 	 * @param stack - the item stack.
 	 * @return A wrapper for its NBT tag.
 	 */
@@ -169,6 +167,7 @@ public class NbtFactory {
 
 	/**
 	 * Construct a new NBT wrapper from a list.
+	 *
 	 * @param nmsList - the NBT list.
 	 * @return The wrapper.
 	 */
@@ -177,20 +176,49 @@ public class NbtFactory {
 	}
 
 	/**
-	 * Retrieve the field where the NBT class stores its value.
+	 * Load the content of a file from a stream.
+	 * <p>
+	 * Use {@link Files#newInputStreamSupplier(java.io.File)} to provide a stream from a file.
+	 *
+	 * @param stream - the stream supplier.
+	 * @param option - whether or not to decompress the input stream.
+	 * @return The decoded NBT compound.
+	 */
+	public static NbtCompound fromStream(InputSupplier<? extends InputStream> stream, StreamOptions option) throws IOException {
+		try (InputStream inputStream = stream.getInput()) {
+			try (BufferedInputStream bufferedInput = new BufferedInputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPInputStream(inputStream) : inputStream)) {
+				try (DataInputStream dataInput = new DataInputStream(bufferedInput)) {
+					NbtCompound compound = createRootCompound("tag");
+
+					List<Object> params = new ArrayList<>();
+					params.add(dataInput);
+
+					if (!MinecraftPackage.IS_PRE_1_8) {
+						params.add(512);
+						params.add(NBT_READ_NOLIMIT);
+					}
+
+					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftPackage.IS_PRE_1_8 ? null : compound.getHandle()), ListUtil.toArray(params, Object.class)));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieve the NBT class value.
+	 *
 	 * @param type - the NBT type.
 	/* @param base - the NBT class instance.
-	 * @return The corresponding field.
+	 * @return The corresponding value.
 	 */
-	static Field getDataField(NbtType type, Object base) {
-		if (DATA_FIELD[type.getId()] == null)
-			DATA_FIELD[type.getId()] = new Reflection(base.getClass()).getField(type.getFieldName());
-
-		return DATA_FIELD[type.getId()];
+	@SuppressWarnings("unchecked")
+	static <T> T getDataField(NbtType type, Object base) {
+		return (T)new Reflection(base.getClass()).getValue(type.getFieldName(), base);
 	}
 
 	/**
 	 * Retrieve the NBT type from a given NMS NBT tag.
+	 *
 	 * @param nms - the native NBT tag.
 	 * @return The corresponding type.
 	 */
@@ -200,13 +228,13 @@ public class NbtFactory {
 
 	/**
 	 * Retrieve the nearest NBT type for a given primitive type.
+	 *
 	 * @param primitive - the primitive type.
 	 * @return The corresponding type.
 	 */
 	static NbtType getPrimitiveType(Object primitive) {
 		NbtType type = NBT_ENUM.get(NBT_CLASS.inverse().get(Primitives.unwrap(primitive.getClass())));
 
-		// Display the illegal value at least
 		if (type == null)
 			throw new IllegalArgumentException(StringUtil.format("Illegal type: {0} ({1})", primitive.getClass(), primitive));
 
@@ -215,6 +243,7 @@ public class NbtFactory {
 
 	/**
 	 * Retrieve a CraftItemStack version of the stack.
+	 *
 	 * @param stack - the stack to convert.
 	 * @return The CraftItemStack version.
 	 */
@@ -222,14 +251,36 @@ public class NbtFactory {
 		return (stack == null || CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass())) ? stack : (ItemStack)CRAFT_ITEM_STACK.invokeMethod("asCraftCopy", null, stack);
 	}
 
-	@SuppressWarnings("unchecked")
 	static Map<String, Object> getDataMap(Object handle) {
-		return (Map<String, Object>)getFieldValue(getDataField(NbtType.TAG_COMPOUND, handle), handle);
+		return getDataField(NbtType.TAG_COMPOUND, handle);
 	}
 
-	@SuppressWarnings("unchecked")
-	static List<Object> getDataList(Object handle) {
-		return (List<Object>)getFieldValue(getDataField(NbtType.TAG_LIST, handle), handle);
+	static <T> List<T> getDataList(Object handle) {
+		return getDataField(NbtType.TAG_LIST, handle);
+	}
+
+	/**
+	 * Save the content of a NBT compound to a stream.
+	 * <p>
+	 * Use {@link Files#newOutputStreamSupplier(java.io.File)} to provide a stream supplier to a file.
+	 *
+	 * @param source - the NBT compound to save.
+	 * @param stream - the stream.
+	 * @param option - whether or not to compress the output.
+	 */
+	public static void saveStream(NbtCompound source, OutputSupplier<? extends OutputStream> stream, StreamOptions option) throws IOException {
+		try (OutputStream outputStream = stream.getOutput()) {
+			try (DataOutputStream dataOutput = new DataOutputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPOutputStream(outputStream) : outputStream)) {
+				List<Object> params = new ArrayList<>();
+
+				if (MinecraftPackage.IS_PRE_1_8)
+					params.add(source.getHandle());
+
+				params.add(dataOutput);
+
+				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftPackage.IS_PRE_1_8 ? null : source.getHandle()), ListUtil.toArray(params, Object.class));
+			}
+		}
 	}
 
 	/**
@@ -237,6 +288,7 @@ public class NbtFactory {
 	 * <p>
 	 * The item stack must be a wrapper for a CraftItemStack. Use
 	 * {@link NbtFactory#getCraftItemStack(ItemStack)} if not.
+	 *
 	 * @param stack - the item stack, cannot be air.
 	 * @param compound - the new NBT compound, or NULL to remove it.
 	 * @throws IllegalArgumentException If the stack is not a CraftItemStack, or it represents air.
@@ -249,6 +301,7 @@ public class NbtFactory {
 
 	/**
 	 * Convert wrapped List and Map objects into their respective NBT counterparts.
+	 *
 	 * @param name - the name of the NBT element to create.
 	 * @param value - the value of the element to create. Can be a List or a Map.
 	 * @return The NBT element.
@@ -258,11 +311,7 @@ public class NbtFactory {
 			return null;
 
 		if (value instanceof Wrapper)
-			return ((Wrapper) value).getHandle();
-		else if (value instanceof List)
-			throw new IllegalArgumentException("Can only insert a WrappedList.");
-		else if (value instanceof Map)
-			throw new IllegalArgumentException("Can only insert a WrappedCompound.");
+			return ((Wrapper)value).getHandle();
 		else
 			return createNbtTag(getPrimitiveType(value), name, value);
 	}
@@ -271,6 +320,7 @@ public class NbtFactory {
 	 * Convert a given NBT element to a primitive wrapper or List/Map equivalent.
 	 * <p>
 	 * All changes to any mutable objects will be reflected in the underlying NBT element(s).
+	 *
 	 * @param nms - the NBT element.
 	 * @return The wrapper equivalent.
 	 */
@@ -281,34 +331,22 @@ public class NbtFactory {
 		if (NBT_BASE.getClazz().isAssignableFrom(nms.getClass())) {
 			final NbtType type = getNbtType(nms);
 
-			// Handle the different types
 			switch (type) {
 				case TAG_COMPOUND:
 					return new NbtCompound(nms);
 				case TAG_LIST:
 					return new NbtList(nms);
 				default:
-					return getFieldValue(getDataField(type, nms), nms);
+					return getDataField(type, nms);
 			}
 		}
 
 		throw new IllegalArgumentException(StringUtil.format("Unexpected type: {0}", nms));
 	}
 
-	static void setFieldValue(Field field, Object target, Object value) {
-		try {
-			field.set(target, value);
-		} catch (Exception ex) {
-			throw new RuntimeException(StringUtil.format("Unable to set {0} for {1}!", field, target), ex);
-		}
-	}
-
-	static Object getFieldValue(Field field, Object target) {
-		try {
-			return field.get(target);
-		} catch (Exception ex) {
-			throw new RuntimeException(StringUtil.format("Unable to get {0} for {1}!", field, target), ex);
-		}
+	public enum StreamOptions {
+		NO_COMPRESSION,
+		GZIP_COMPRESSION,
 	}
 
 }

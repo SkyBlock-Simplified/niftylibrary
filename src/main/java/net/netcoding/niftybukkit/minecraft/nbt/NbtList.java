@@ -9,22 +9,16 @@ package net.netcoding.niftybukkit.minecraft.nbt;
  * </ul>
  */
 @SuppressWarnings("unchecked")
-public final class NbtList extends ConvertedList {
+public final class NbtList<T> extends WrappedList<T> {
 
 	NbtList(Object handle) {
-		super(handle, NbtFactory.getDataList(handle));
+		super(handle, NbtFactory.<T>getDataList(handle));
 	}
 
 	@SuppressWarnings("CloneDoesntCallSuperClone")
 	@Override
-	public NbtList clone() {
-		NbtList list = NbtFactory.createList();
-		list.addAll(this);
-		return list;
-	}
-
-	public <T> T get(Integer index) {
-		return (T)NbtFactory.adjustValue(super.get(index));
+	public NbtList<T> clone() {
+		return NbtFactory.createList(this);
 	}
 
 }

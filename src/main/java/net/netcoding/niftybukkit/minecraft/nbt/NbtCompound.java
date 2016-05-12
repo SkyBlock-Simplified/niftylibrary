@@ -1,7 +1,11 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
+import com.google.common.io.Files;
+import com.google.common.io.OutputSupplier;
 import net.netcoding.niftycore.util.StringUtil;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +28,7 @@ import java.util.Map;
  * </ul>
  */
 @SuppressWarnings("unchecked")
-public final class NbtCompound extends ConvertedMap implements Cloneable {
+public final class NbtCompound extends WrappedMap implements Cloneable {
 
 	NbtCompound(Object handle) {
 		super(handle, NbtFactory.getDataMap(handle));
@@ -35,9 +39,19 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 	public NbtCompound clone() {
 		NbtCompound compound = NbtFactory.createRootCompound("tag");
 		compound.putAll(this);
+		compound.unsupported.putAll(this.unsupported);
 		return compound;
 	}
 
+	/**
+	 * Checks if the path exists in the tree.
+	 * <p>
+	 * Every element of the path (except the end) are assumed to be compounds. The
+	 * retrieval operation will return false if any of them are missing.
+	 *
+	 * @param path - path to the entry.
+	 * @return True, or false if not found.
+	 */
 	public boolean containsPath(String path) {
 		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
 		NbtCompound current = this;
@@ -54,39 +68,26 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 		return true;
 	}
 
+	/**
+	 * Retrieve the value by the given key.
+	 *
+	 * @param key The name of the value.
+	 * @return An existing or null value.
+	 */
 	public <T> T get(String key) {
-		return (T)NbtFactory.adjustValue(super.get(key));
+		return this.get(key, null);
 	}
 
+	/**
+	 * Retrieve the value by the given key.
+	 *
+	 * @param key The name of the value.
+	 * @param defaultValue The default value if key doesn't exist.
+	 * @return An existing or default value.
+	 */
 	public <T> T get(String key, T defaultValue) {
-		return containsKey(key) ? this.<T>get(key) : defaultValue;
+		return this.containsKey(key) ? (T)super.get(key) : defaultValue;
 	}
-
-	/**
-	 * Retrieve the list by the given name.
-	 *
-	 * @param key - the name of the list.
-	 * @return An existing list or NULL.
-	 */
-	/*public NbtList getList(String key) {
-		return this.getList(key, false);
-	}*/
-
-	/**
-	 * Retrieve the list by the given name.
-	 *
-	 * @param key - the name of the list.
-	 * @param createNew - whether or not to create a new list if its missing.
-	 * @return An existing list, a new list or NULL.
-	 */
-	/*public NbtList getList(String key, boolean createNew) {
-		NbtList list = this.get(key);
-
-		if (list == null && createNew)
-			this.put(key, list = NbtFactory.createList());
-
-		return list;
-	}*/
 
 	/**
 	 * Retrieve the value of a given entry in the tree.
@@ -98,15 +99,15 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 	 * @return The value, or NULL if not found.
 	 */
 	public <T> T getPath(String path) {
-		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
-		NbtCompound map = this.getMap(entries.subList(0, entries.size() - 1), false);
+		T value = null;
 
-		if (map != null) {
-			Object value = map.get(entries.get(entries.size() - 1));
-			return (T)NbtFactory.adjustValue(value);
+		if (this.containsPath(path)) {
+			List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
+			NbtCompound map = this.getMap(entries.subList(0, entries.size() - 1), false);
+			value = map.get(entries.get(entries.size() - 1));
 		}
 
-		return null;
+		return value;
 	}
 
 	/**
@@ -136,7 +137,8 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 
 	/**
 	 * Retrieve the map by the given name.
-	 * @param key - the name of the map.
+	 *
+	 * @param key The name of the map.
 	 * @return An existing or new map.
 	 */
 	public NbtCompound getMap(String key) {
@@ -145,6 +147,7 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 
 	/**
 	 * Retrieve the map by the given name.
+	 *
 	 * @param key - the name of the map.
 	 * @param createNew - whether or not to create a new map if its missing.
 	 * @return An existing map, a new map or NULL.
@@ -158,6 +161,7 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 	 * <p>
 	 * Every element of the path (except the end) are assumed to be compounds, and will
 	 * be created if they are missing.
+	 *
 	 * @param path - the path to the entry.
 	 * @param value - the new value of this entry.
 	 * @return This compound, for chaining.
@@ -169,6 +173,25 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Remove the value of a given entry.
+	 *
+	 * @param key The name of the value.
+	 * @return The previous value, or NULL if not found.
+	 */
+	public <T> T remove(String key) {
+		return (T)super.remove(key);
+	}
+
+	/**
+	 * Remove the value of a given entry in the tree.
+	 * <p>
+	 * Every element of the path (except the end) are assumed to be compounds. The
+	 * retrieval operation will return the last most compound.
+	 *
+	 * @param path - path to the entry.
+	 * @return The last most compound, or this compound if not found..
+	 */
 	public NbtCompound removePath(String path) {
 		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
 		NbtCompound current = this;
@@ -183,6 +206,18 @@ public final class NbtCompound extends ConvertedMap implements Cloneable {
 		}
 
 		return current;
+	}
+
+	/**
+	 * Save the content of a NBT compound to a stream.
+	 * <p>
+	 * Use {@link Files#newOutputStreamSupplier(java.io.File)} to provide a stream supplier to a file.
+	 *
+	 * @param stream - the output stream.
+	 * @param option - whether or not to compress the output.
+	 */
+	public void saveTo(OutputSupplier<? extends OutputStream> stream, NbtFactory.StreamOptions option) throws IOException {
+		NbtFactory.saveStream(this, stream, option);
 	}
 
 }

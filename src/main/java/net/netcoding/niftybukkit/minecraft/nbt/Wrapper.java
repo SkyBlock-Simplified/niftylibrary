@@ -7,6 +7,7 @@ interface Wrapper {
 
 	/**
 	 * Retrieve the underlying native NBT tag.
+	 *
 	 * @return The underlying NBT.
 	 */
 	Object getHandle();
