@@ -53,10 +53,10 @@ public class NbtItemStack extends ItemStack {
 		if (root != null)
 			this.root = root.clone();
 		else {
-			if (NbtItemStack.class.isAssignableFrom(itemStack.getClass()))
+			if (itemStack != null && NbtItemStack.class.isAssignableFrom(itemStack.getClass()))
 				this.root = ((NbtItemStack)itemStack).root.clone();
 			else {
-				ItemStack checkStack = itemStack;
+				ItemStack checkStack = this;
 				NbtCompound nbt = null;
 
 				if (load) {
