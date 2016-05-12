@@ -84,7 +84,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 	 *
 	 * @return Command associated to this class
 	 */
-	public PluginCommand getCommand() {
+	private PluginCommand getCommand() {
 		return this.command;
 	}
 
