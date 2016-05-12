@@ -129,6 +129,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	}
 
 	@Override
+	public void clear() {
+		this.original.clear();
+	}
+
+	@Override
 	public boolean containsKey(Object key) {
 		return this.original.containsKey(key);
 	}
@@ -145,7 +150,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 			@Override
 			public int size() {
-				return WrappedMap.this.original.size();
+				return WrappedMap.this.size();
 			}
 
 			@Override
@@ -169,6 +174,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	@Override
 	public final Object getHandle() {
 		return this.handle;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.original.isEmpty();
 	}
 
 	private Iterator<Entry<String, Object>> iterator() {
@@ -217,6 +227,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	@Override
 	public Object remove(Object key) {
 		return this.wrapOutgoing(key, this.original.remove(key));
+	}
+
+	@Override
+	public int size() {
+		return this.original.size();
 	}
 
 	@Override
