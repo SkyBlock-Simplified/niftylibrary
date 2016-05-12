@@ -39,7 +39,7 @@ public final class NbtCompound extends WrappedMap implements Cloneable {
 	public NbtCompound clone() {
 		NbtCompound compound = NbtFactory.createRootCompound("tag");
 		compound.putAll(this);
-		compound.unsupported.putAll(this.unsupported);
+		compound.supported.putAll(this.supported);
 		return compound;
 	}
 
