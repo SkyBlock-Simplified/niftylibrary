@@ -328,6 +328,28 @@ public class NbtFactory {
 	}
 
 	/**
+	 * Set the NBT compound tag of a given block.
+	 * <p>
+	 * The item stack must be a wrapper for a CraftBlock.
+	 *
+	 * @param block - the block, must be a TileEntity.
+	 * @param compound - the updated NBT compound.
+	 * @throws IllegalArgumentException If the stack is not a CraftBlock.
+	 */
+	public static void setBlockTag(Block block, NbtCompound compound) {
+		checkBlock(block);
+
+		if ((boolean)NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
+			compound.put("x", block.getX());
+			compound.put("y", block.getY());
+			compound.put("z", block.getZ());
+			Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
+			Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
+			NMS_TILE_ENTITY.invokeMethod("a", tileEntity, compound.getHandle());
+		}
+	}
+
+	/**
 	 * Convert wrapped List and Map objects into their respective NBT counterparts.
 	 *
 	 * @param name - the name of the NBT element to create.
