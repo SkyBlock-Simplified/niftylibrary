@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "unchecked" })
 public class NbtItemStack extends ItemStack {
 
 	private static Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
@@ -123,8 +123,8 @@ public class NbtItemStack extends ItemStack {
 		this.setNbtCompound();
 	}
 
-	public final Object putNbt(String key, Object value) {
-		Object obj = this.root.put(key, value);
+	public final <T> T putNbt(String key, Object value) {
+		T obj = (T)this.root.put(key, value);
 		this.setNbtCompound();
 		return obj;
 	}
@@ -135,8 +135,8 @@ public class NbtItemStack extends ItemStack {
 		return compound;
 	}
 
-	public final Object removeNbt(String key) {
-		Object obj = this.root.remove(key);
+	public final <T> T removeNbt(String key) {
+		T obj = this.root.remove(key);
 		this.setNbtCompound();
 		return obj;
 	}
