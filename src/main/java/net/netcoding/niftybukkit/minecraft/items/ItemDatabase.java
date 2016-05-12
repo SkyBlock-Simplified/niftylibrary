@@ -5,6 +5,7 @@ import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.NumberUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.comparator.LengthCompare;
+import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,8 +30,8 @@ public class ItemDatabase extends BukkitHelper {
 
 	private final transient File itemsFile;
 	private final transient Map<String, Integer> items = new HashMap<>();
-	private final transient Map<ItemData, List<String>> names = new HashMap<>();
-	private final transient Map<ItemData, String> primaryName = new HashMap<>();
+	private final transient ConcurrentLinkedMap<ItemData, List<String>> names = new ConcurrentLinkedMap<>();
+	private final transient ConcurrentLinkedMap<ItemData, String> primaryName = new ConcurrentLinkedMap<>();
 	private final transient Map<String, Short> durabilities = new HashMap<>();
 	private final static transient Pattern splitPattern = Pattern.compile("((.*)[:+',;.](\\d+))");
 
