@@ -6,11 +6,13 @@ import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.OutputSupplier;
 import com.google.common.primitives.Primitives;
+import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.BufferedInputStream;
@@ -37,12 +39,16 @@ public class NbtFactory {
 	static final BiMap<Integer, NbtType> NBT_ENUM = HashBiMap.create();
 
 	// Reflection
-	static final Reflection CRAFT_ITEM_STACK = new Reflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-	static final Reflection NMS_ITEM_STACK = new Reflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER);
-	static final Reflection NBT_TAG_LIST = new Reflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER);
-	static final Reflection NBT_BASE = new Reflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER);
-	static final Reflection NBT_READ_LIMITER = new Reflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER);
-	static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
+	private static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
+	private static final Reflection CRAFT_WORLD = new BukkitReflection("CraftWorld", MinecraftPackage.CRAFTBUKKIT);
+	private static final Reflection CRAFT_BLOCK = new BukkitReflection("CraftBlock", "block", MinecraftPackage.CRAFTBUKKIT);
+	private static final Reflection NMS_ITEM_STACK = BukkitReflection.getCompatibleForgeReflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER, "item");
+	private static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
+	private static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
+	private static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	private static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", "nbt", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	private static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
 	/**
 	 * Ensure that the given stack can store arbitrary NBT information.
@@ -58,6 +64,11 @@ public class NbtFactory {
 
 		if (stack.getType() == Material.AIR)
 			throw new IllegalArgumentException("ItemStacks representing air cannot store NMS information!");
+	}
+
+	private static void checkBlock(Block block) {
+		if (!CRAFT_BLOCK.getClazz().isAssignableFrom(block.getClass()))
+			throw new IllegalArgumentException("Block must be a CraftBlock!");
 	}
 
 	/**
@@ -136,6 +147,26 @@ public class NbtFactory {
 	 */
 	public static NbtCompound fromCompound(Object nmsCompound) {
 		return new NbtCompound(nmsCompound);
+	}
+
+	/**
+	 * Construct a wrapper for an NBT tag stored (in memory) in a block. This is where
+	 * auxillary data such as block data and coordinates are stored.
+	 *
+	 * @param block - the block.
+	 * @return A copy of its NBT tag.
+	 */
+	public static NbtCompound fromBlockTag(Block block) {
+		checkBlock(block);
+		NbtCompound compound = createRootCompound("tag");
+
+		if ((boolean)NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
+			Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
+			Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
+			NMS_TILE_ENTITY.invokeMethod("save", tileEntity, compound.getHandle());
+		}
+
+		return compound;
 	}
 
 	/**
