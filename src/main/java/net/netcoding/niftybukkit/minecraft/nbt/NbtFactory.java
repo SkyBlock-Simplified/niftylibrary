@@ -46,7 +46,7 @@ public class NbtFactory {
 	private static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
 	private static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
 	private static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	private static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", "nbt", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	private static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	private static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
