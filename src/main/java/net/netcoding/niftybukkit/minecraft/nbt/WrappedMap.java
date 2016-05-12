@@ -51,9 +51,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 					value = NbtFactory.createList((Object[])value);
 				}
 			} else {
-				this.supported.put(key, clazz);
+				this.supported.put(key, Reflection.getPrimitiveType(clazz));
 
-				if (CharSequence.class.isAssignableFrom(clazz))
+				if (value instanceof Boolean)
+					value = (byte) ((boolean) value ? 1 : 0);
+				else if (CharSequence.class.isAssignableFrom(clazz))
 					value = value.toString();
 				else if (UUID.class.isAssignableFrom(clazz))
 					value = value.toString();
@@ -70,9 +72,6 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				} else
 					this.supported.remove(key);
 			}
-		} else if (value instanceof Boolean) {
-			this.supported.put(key, boolean.class);
-			value = (byte) ((boolean) value ? 1 : 0);
 		}
 
 		return value;
@@ -87,44 +86,42 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 			if (boolean.class.equals(clazz))
 				value = (byte)value > 0;
-			else {
-				if (UUID.class.equals(clazz))
-					value = UUID.fromString(value.toString());
-				else if (BigDecimal.class.equals(clazz))
-					value = BigDecimal.valueOf((double)value);
-				else if (BigInteger.class.equals(clazz))
-					value = BigInteger.valueOf((long)value);
-				else if (Map.class.isAssignableFrom(clazz)) {
-					NbtCompound compound = (NbtCompound)value;
+			else if (UUID.class.equals(clazz))
+				value = UUID.fromString(value.toString());
+			else if (BigDecimal.class.equals(clazz))
+				value = BigDecimal.valueOf((double)value);
+			else if (BigInteger.class.equals(clazz))
+				value = BigInteger.valueOf((long)value);
+			else if (Map.class.isAssignableFrom(clazz)) {
+				NbtCompound compound = (NbtCompound)value;
+				boolean adjusted = false;
+
+				if (!Map.class.equals(clazz)) {
+					Reflection refCollection = new Reflection(clazz);
+					Map<String, Object> map = (Map<String, Object>)refCollection.newInstance();
+					refCollection.invokeMethod("putAll", map, compound);
+					adjusted = true;
+				}
+
+				if (!adjusted)
+					value = compound;
+			} else if (Collection.class.isAssignableFrom(clazz) || clazz.isArray()) {
+				NbtList nbtList = (NbtList)value;
+
+				if (!clazz.isArray()) {
 					boolean adjusted = false;
 
-					if (!Map.class.equals(clazz)) {
+					if (!Collection.class.equals(clazz)) {
 						Reflection refCollection = new Reflection(clazz);
-						Map<String, Object> map = (Map<String, Object>)refCollection.newInstance();
-						refCollection.invokeMethod("putAll", map, compound);
+						Object collection = refCollection.newInstance();
+						refCollection.invokeMethod("addAll", collection, nbtList);
 						adjusted = true;
 					}
 
 					if (!adjusted)
-						value = compound;
-				} else if (Collection.class.isAssignableFrom(clazz) || clazz.isArray()) {
-					NbtList nbtList = (NbtList)value;
-
-					if (!clazz.isArray()) {
-						boolean adjusted = false;
-
-						if (!Collection.class.equals(clazz)) {
-							Reflection refCollection = new Reflection(clazz);
-							Object collection = refCollection.newInstance();
-							refCollection.invokeMethod("addAll", collection, nbtList);
-							adjusted = true;
-						}
-
-						if (!adjusted)
-							value = nbtList;
-					} else
-						value = ListUtil.toArray(nbtList, clazz.getComponentType());
-				}
+						value = nbtList;
+				} else
+					value = ListUtil.toArray(nbtList, clazz.getComponentType());
 			}
 		}
 
