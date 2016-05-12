@@ -6,8 +6,6 @@ import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.OutputSupplier;
 import com.google.common.primitives.Primitives;
-import net.minecraft.server.v1_9_R1.NBTBase;
-import net.minecraft.server.v1_9_R1.NBTTagCompound;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
@@ -28,6 +26,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+@SuppressWarnings("deprecation")
 public class NbtFactory {
 
 	// https://bukkit.org/threads/library-edit-or-create-nbt-tags-with-a-compact-class-no-obc-nms.178464/
@@ -106,8 +105,6 @@ public class NbtFactory {
 	static Object createNbtTag(NbtType type, String name, Object value) {
 		List<Object> params = new ArrayList<>();
 		params.add((byte)type.getId());
-		NBTTagCompound c;
-		NBTBase b;
 
 		if (MinecraftPackage.IS_PRE_1_8)
 			params.add(name);

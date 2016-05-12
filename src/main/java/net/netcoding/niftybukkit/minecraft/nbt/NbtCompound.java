@@ -27,7 +27,7 @@ import java.util.Map;
  *   <li>{@link NbtFactory#fromCompound(Object)}</li>
  * </ul>
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "deprecation", "unchecked" })
 public final class NbtCompound extends WrappedMap implements Cloneable {
 
 	NbtCompound(Object handle) {
@@ -57,12 +57,15 @@ public final class NbtCompound extends WrappedMap implements Cloneable {
 		NbtCompound current = this;
 
 		for (String entry : entries) {
-			NbtCompound child = current.get(entry);
+			Object child = current.get(entry);
 
 			if (child == null)
 				return false;
 
-			current = child;
+			if (child instanceof String)
+				return true;
+			else
+				current = (NbtCompound)child;
 		}
 
 		return true;
@@ -215,6 +218,7 @@ public final class NbtCompound extends WrappedMap implements Cloneable {
 	 *
 	 * @param stream - the output stream.
 	 * @param option - whether or not to compress the output.
+	 * @throws IOException If anything went wrong.
 	 */
 	public void saveTo(OutputSupplier<? extends OutputStream> stream, NbtFactory.StreamOptions option) throws IOException {
 		NbtFactory.saveStream(this, stream, option);
