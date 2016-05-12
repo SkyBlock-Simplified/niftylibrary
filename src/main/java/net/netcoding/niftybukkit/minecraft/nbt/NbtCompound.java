@@ -28,7 +28,7 @@ import java.util.Map;
  * </ul>
  */
 @SuppressWarnings({ "deprecation", "unchecked" })
-public final class NbtCompound extends WrappedMap implements Cloneable {
+public class NbtCompound extends WrappedMap implements Cloneable {
 
 	NbtCompound(Object handle) {
 		super(handle, NbtFactory.getDataMap(handle));
