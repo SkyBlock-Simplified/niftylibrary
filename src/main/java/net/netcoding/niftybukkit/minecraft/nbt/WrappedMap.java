@@ -5,6 +5,8 @@ import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a map that wraps another map and automatically
@@ -22,7 +25,7 @@ import java.util.Set;
 @SuppressWarnings("unchecked")
 abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper {
 
-	protected final ConcurrentMap<String, Class<?>> unsupported = new ConcurrentMap<>();
+	protected final ConcurrentMap<String, Class<?>> supported = new ConcurrentMap<>();
 	private final WrappedNativeCache cache = new WrappedNativeCache();
 	private final Map<String, Object> original;
 	private final Object handle;
@@ -39,22 +42,37 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (WrappedList.class.isAssignableFrom(value.getClass()) || WrappedMap.class.isAssignableFrom(value.getClass()))
 			return value;
 
-		if (value instanceof Boolean) {
-			this.unsupported.put(key, boolean.class);
-			value = (byte)((boolean)value ? 1 : 0);
-		} else if (Map.class.isAssignableFrom(value.getClass())) {
-			this.unsupported.put(key, value.getClass());
-			NbtCompound compound = NbtFactory.createCompound();
-			compound.putAll((Map<String, Object>)value);
-			value = compound;
-		} else if (Collection.class.isAssignableFrom(value.getClass())) {
-			this.unsupported.put(key, value.getClass());
-			value = NbtFactory.createList((Collection<?>)value);
-		} else if (value.getClass().isArray()) {
-			if (!int[].class.equals(value.getClass()) && !byte[].class.equals(value.getClass())) {
-				this.unsupported.put(key, value.getClass());
-				value = NbtFactory.createList((Object[])value);
+		Class<?> clazz = value.getClass();
+
+		if (!clazz.isPrimitive()) {
+			if (clazz.isArray()) {
+				if (!int[].class.equals(clazz) && !byte[].class.equals(clazz)) {
+					this.supported.put(key, clazz);
+					value = NbtFactory.createList((Object[])value);
+				}
+			} else {
+				this.supported.put(key, clazz);
+
+				if (CharSequence.class.isAssignableFrom(clazz))
+					value = value.toString();
+				else if (UUID.class.isAssignableFrom(clazz))
+					value = value.toString();
+				else if (BigDecimal.class.isAssignableFrom(clazz))
+					value = ((BigDecimal)value).doubleValue();
+				else if (BigInteger.class.isAssignableFrom(clazz))
+					value = ((BigInteger)value).longValue();
+				else if (Collection.class.isAssignableFrom(clazz))
+					value = NbtFactory.createList((Collection<?>)value);
+				else if (Map.class.isAssignableFrom(clazz)) {
+					NbtCompound compound = NbtFactory.createCompound();
+					compound.putAll((Map<String, Object>)value);
+					value = compound;
+				} else
+					this.supported.remove(key);
 			}
+		} else if (value instanceof Boolean) {
+			this.supported.put(key, boolean.class);
+			value = (byte) ((boolean) value ? 1 : 0);
 		}
 
 		return value;
@@ -64,14 +82,19 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (value == null)
 			return null;
 
-		if (this.unsupported.containsKey(key)) {
-			Class<?> clazz = this.unsupported.get(key);
+		if (this.supported.containsKey(key)) {
+			Class<?> clazz = this.supported.get(key);
 
 			if (boolean.class.equals(clazz))
 				value = (byte)value > 0;
 			else {
-
-				if (Map.class.isAssignableFrom(clazz)) {
+				if (UUID.class.equals(clazz))
+					value = UUID.fromString(value.toString());
+				else if (BigDecimal.class.equals(clazz))
+					value = BigDecimal.valueOf((double)value);
+				else if (BigInteger.class.equals(clazz))
+					value = BigInteger.valueOf((long)value);
+				else if (Map.class.isAssignableFrom(clazz)) {
 					NbtCompound compound = (NbtCompound)value;
 					boolean adjusted = false;
 
@@ -84,7 +107,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 					if (!adjusted)
 						value = compound;
-				} else {
+				} else if (Collection.class.isAssignableFrom(clazz) || clazz.isArray()) {
 					NbtList nbtList = (NbtList)value;
 
 					if (!clazz.isArray()) {
@@ -173,7 +196,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 			@Override
 			public void remove() {
 				if (this.current != null) {
-					WrappedMap.this.unsupported.remove(this.current.getKey());
+					WrappedMap.this.supported.remove(this.current.getKey());
 					this.current = null;
 				}
 
