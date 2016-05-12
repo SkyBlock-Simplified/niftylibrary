@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.items.enchantments.EnchantmentData;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
@@ -49,18 +50,21 @@ public class ItemStack extends Converter {
 					itemMeta.addItemFlags(ListUtil.toArray(itemFlags, org.bukkit.inventory.ItemFlag.class));
 				}
 			}
-		}
 
-		if (itemMap.containsKey("enchantments")) {
-			Map<String, Integer> enchMap = (itemMap.get("enchantments") instanceof Map ? (Map<String, Integer>)itemMap.get("enchantments") : (Map<String, Integer>)((ConfigSection)itemMap.get("enchantments")).getRawMap());
+			if (metaMap.containsKey("enchantments")) {
+				Map<String, Integer> enchMap = (metaMap.get("enchantments") instanceof Map ? (Map<String, Integer>)metaMap.get("enchantments") : (Map<String, Integer>)((ConfigSection)metaMap.get("enchantments")).getRawMap());
 
-			for (Map.Entry<String, Integer> enchantment : enchMap.entrySet())
-				itemData.addUnsafeEnchantment(Enchantment.getByName(enchantment.getKey()), enchantment.getValue());
+				for (Map.Entry<String, Integer> enchantment : enchMap.entrySet()) {
+					EnchantmentData enchantmentData = new EnchantmentData(Enchantment.getByName(enchantment.getKey()));
+					enchantmentData.setUserLevel(enchantment.getValue());
+					itemMeta.addEnchant(enchantmentData.getEnchantment(), enchantmentData.getUserLevel(), true);
+				}
+			}
 		}
 
 		if (itemMap.containsKey("nbt")) {
-			Converter mapConverter = this.getConverter(Map.class);
-			itemData.putAllNbt((Map<String, Object>)mapConverter.fromConfig(Map.class, itemMap.get("nbt"), null));
+			Map<String, Object> nbtMap = (itemMap.get("nbt") instanceof Map ? (Map<String, Object>)itemMap.get("nbt") : (Map<String, Object>)((ConfigSection)itemMap.get("nbt")).getRawMap());
+			itemData.putAllNbt(nbtMap);
 		}
 
 		itemData.setItemMeta(itemMeta);
@@ -101,10 +105,10 @@ public class ItemStack extends Converter {
 				meta.put("flags", itemFlags);
 		}
 
-		saveMap.put("meta", meta);
-
 		if (!enchantments.isEmpty())
-			saveMap.put("enchantments", enchantments);
+			meta.put("enchantments", enchantments);
+
+		saveMap.put("meta", meta);
 
 		if (itemData.containsNbt())
 			saveMap.put("nbt", NbtFactory.fromItemTag(itemData));
