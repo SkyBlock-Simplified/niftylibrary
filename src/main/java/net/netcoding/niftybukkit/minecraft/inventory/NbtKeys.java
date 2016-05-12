@@ -4,7 +4,7 @@ import net.netcoding.niftycore.util.StringUtil;
 
 enum NbtKeys {
 
-	ITEMOPENER,
+	ITEMOPENER_UUID,
 	ITEMOPENER_DESTRUCTABLE,
 	PAGING,
 	SIGNATURE,
