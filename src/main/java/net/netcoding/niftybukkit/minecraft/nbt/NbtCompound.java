@@ -62,10 +62,10 @@ public final class NbtCompound extends WrappedMap implements Cloneable {
 			if (child == null)
 				return false;
 
-			if (child instanceof String)
+			if (!(child instanceof NbtCompound))
 				return true;
-			else
-				current = (NbtCompound)child;
+
+			current = (NbtCompound)child;
 		}
 
 		return true;
