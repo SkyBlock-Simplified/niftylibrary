@@ -42,7 +42,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 * @return Connection of the client.
 	 */
 	public final Object getConnection() {
-		return this.isOnlineLocally() ? new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("playerConnection", this.getHandle()) : null;
+		return this.isOnlineLocally() ? BukkitReflection.NMS_ENTITY_PLAYER.getValue("playerConnection", this.getHandle()) : null;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 */
 	public final Object getHandle() {
 		if (!this.isOnlineLocally()) return null;
-		Reflection craftPlayer = new Reflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
+		Reflection craftPlayer = new BukkitReflection("CraftPlayer", "entity", MinecraftPackage.CRAFTBUKKIT);
 		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
 		return craftPlayer.invokeMethod("getHandle", craftPlayerObj);
 	}
@@ -81,7 +81,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 		if (this.isOnlineLocally()) {
 			try {
-				locale = (String)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("locale", this.getHandle());
+				locale = (String)BukkitReflection.NMS_ENTITY_PLAYER.getValue("locale", this.getHandle());
 			} catch (Exception ignore) { }
 		}
 
@@ -132,7 +132,7 @@ public class BukkitMojangProfile extends MojangProfile {
 
 		if (this.isOnlineLocally()) {
 			try {
-				ping = (int)new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER).getValue("ping", this.getHandle());
+				ping = (int)BukkitReflection.NMS_ENTITY_PLAYER.getValue("ping", this.getHandle());
 			} catch (Exception ignore) { }
 		}
 
@@ -252,9 +252,8 @@ public class BukkitMojangProfile extends MojangProfile {
 	private void spectate(Entity target) {
 		if (!this.isOnlineLocally()) return;
 		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
-		Reflection entityPlayer = new Reflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER);
 		Object targetHandle = entityTarget.invokeMethod("getHandle", target);
-		entityPlayer.invokeMethod("e", this.getHandle(), targetHandle);
+		BukkitReflection.NMS_ENTITY_PLAYER.invokeMethod("e", this.getHandle(), targetHandle);
 	}
 
 }
