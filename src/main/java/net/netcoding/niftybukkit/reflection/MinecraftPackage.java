@@ -3,7 +3,6 @@ package net.netcoding.niftybukkit.reflection;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.VersionUtil;
-
 import org.bukkit.Bukkit;
 
 public class MinecraftPackage {
@@ -20,7 +19,7 @@ public class MinecraftPackage {
 		boolean spigot = false;
 
 		try {
-			Reflection spigotPlayerRef = new Reflection("Spigot", "Player", "org.bukkit.entity");
+			Reflection spigotPlayerRef = new Reflection("Player$Spigot", "org.bukkit.entity");
 			spigotPlayerRef.getClazz();
 			spigot = true;
 		} catch (Exception ignore) { }
