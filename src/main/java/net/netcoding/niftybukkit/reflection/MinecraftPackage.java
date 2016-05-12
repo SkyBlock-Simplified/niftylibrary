@@ -13,6 +13,7 @@ public class MinecraftPackage {
 	private static final String MINECRAFT_VERSION_NUMBER = MINECRAFT_VERSION.replaceAll("^v", "").replaceAll("R", "").replace("_", ".");
 	public static final boolean IS_PRE_1_8 = new VersionUtil(MINECRAFT_VERSION_NUMBER).compareTo(new VersionUtil("1.8.0")) < 0;
 	public static final boolean IS_PRE_1_8_3 = new VersionUtil(MINECRAFT_VERSION_NUMBER).compareTo(new VersionUtil("1.8.2")) < 0;
+	public static final boolean IS_FORGE;
 	public static final boolean IS_SPIGOT;
 
 	static {
@@ -24,6 +25,8 @@ public class MinecraftPackage {
 			spigot = true;
 		} catch (Exception ignore) { }
 
+		String version = Bukkit.getVersion();
+		IS_FORGE = (version.contains("MCPC") || version.contains("Forge") || version.contains("Cauldron"));
 		IS_SPIGOT = spigot;
 	}
 
