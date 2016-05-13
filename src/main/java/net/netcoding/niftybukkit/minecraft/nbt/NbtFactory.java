@@ -60,8 +60,8 @@ public class NbtFactory {
 		if (stack == null)
 			throw new IllegalArgumentException("Stack cannot be NULL!");
 
-		if (stack.getType() == Material.AIR)
-			throw new IllegalArgumentException("ItemStacks representing air cannot store NMS information!");
+		if (getCraftItemStack(stack).getType() == Material.AIR)
+			throw new IllegalArgumentException(StringUtil.format("ItemStack type {0} cannot store NMS information!", stack.getType()));
 	}
 
 	private static void checkBlock(Block block) {
