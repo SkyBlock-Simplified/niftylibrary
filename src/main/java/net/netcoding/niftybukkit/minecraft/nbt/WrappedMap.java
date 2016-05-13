@@ -213,6 +213,10 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		};
 	}
 
+	public boolean notEmpty() {
+		return !this.isEmpty();
+	}
+
 	@Override
 	public Object put(String key, Object value) {
 		return this.wrapOutgoing(key, this.original.put(key, this.unwrapIncoming(key, value)));
