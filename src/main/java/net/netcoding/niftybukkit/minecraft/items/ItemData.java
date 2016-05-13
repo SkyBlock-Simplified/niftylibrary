@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.items;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
 import net.netcoding.niftycore.util.ListUtil;
@@ -15,7 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class ItemData extends NbtItemStack {
+public class ItemData extends ItemStack {
+
+	private final NbtCompound root;
 
 	private static final String GLOWING = "ITEMDATA_GLOW";
 
@@ -36,15 +39,27 @@ public class ItemData extends NbtItemStack {
 	}
 
 	ItemData(Material material, short durability, boolean create) {
-		this(new ItemStack(material, 1, durability), create);
+		this(new ItemStack(material, 1, durability), null, create);
 	}
 
 	public ItemData(ItemStack stack) {
-		this(stack, true);
+		this(stack, null, true);
 	}
 
-	private ItemData(ItemStack stack, boolean load) {
-		super(stack, null, load);
+	ItemData(ItemStack itemStack, NbtCompound root, boolean create) {
+		super(itemStack == null ? new ItemStack(Material.AIR) : itemStack);
+
+		if (this.getAmount() <= 0)
+			this.setAmount(1);
+
+		if (root != null)
+			this.root = root;
+		else {
+			if (Material.AIR != this.getType() && create)
+				this.root = NbtFactory.fromItemTag(this);
+			else
+				this.root = NbtFactory.createRootCompound("tag");
+		}
 	}
 
 	@Deprecated
@@ -56,14 +71,14 @@ public class ItemData extends NbtItemStack {
 			this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
 		if (MinecraftPackage.IS_PRE_1_8)
-			this.putNbt("ench", NbtFactory.createList());
+			this.getNbt().put("ench", NbtFactory.createList());
 		else {
 			int enchants = 1;
 
-			if (this.containsNbt("HideFlags"))
-				enchants |= this.<Integer>getNbt("HideFlags");
+			if (this.getNbt().containsKey("HideFlags"))
+				enchants |= this.getNbt().<Integer>get("HideFlags");
 
-			this.putNbt("HideFlags", enchants);
+			this.getNbt().put("HideFlags", enchants);
 			ItemMeta meta = this.getItemMeta();
 
 			if (!meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
@@ -72,23 +87,21 @@ public class ItemData extends NbtItemStack {
 			this.setItemMeta(meta);
 		}
 
-		this.putNbt(GLOWING, true);
+		this.getNbt().put(GLOWING, true);
 	}
 
 	@Deprecated
 	public static ItemData addGlow(ItemStack stack) {
-		ItemData data = new ItemData(stack);
-		data.addGlow();
-		return data;
+		ItemData itemData = new ItemData(stack);
+		itemData.setGlowing(true);
+		return itemData;
 	}
 
 	@Override
 	public ItemData clone() {
 		ItemData itemData = new ItemData(super.clone());
-
-		if (this.hasGlow())
-			itemData.addGlow();
-
+		itemData.setGlowing(this.hasGlow());
+		itemData.getNbt().putAll(this.root);
 		return itemData;
 	}
 
@@ -131,13 +144,17 @@ public class ItemData extends NbtItemStack {
 		return (itemMeta != null ? itemMeta.clone() : null);
 	}
 
+	public final NbtCompound getNbt() {
+		return this.root;
+	}
+
 	@Override
 	public int getTypeId() {
 		return super.getTypeId();
 	}
 
 	public boolean hasGlow() {
-		return this.containsNbt(GLOWING) && this.<Boolean>getNbt("ITEMDATA_GLOW");
+		return this.getNbt().containsKey(GLOWING) && this.getNbt().<Boolean>get("ITEMDATA_GLOW");
 	}
 
 	@Override
@@ -148,7 +165,7 @@ public class ItemData extends NbtItemStack {
 	@Override
 	public boolean isSimilar(ItemStack stack) {
 		if (stack == null) return false;
-		ItemData data = new ItemData(stack);
+		ItemData data = new ItemData(stack, null, false);
 
 		if (this.getTypeId() == data.getTypeId()) {
 			if (this.getDurability() == data.getDurability()) {
@@ -171,9 +188,9 @@ public class ItemData extends NbtItemStack {
 			this.removeEnchantment(Enchantment.DURABILITY);
 
 		if (MinecraftPackage.IS_PRE_1_8)
-			this.removeNbt("ench");
+			this.getNbt().remove("ench");
 		else {
-			this.removeNbt("HideFlags");
+			this.getNbt().remove("HideFlags");
 			ItemMeta meta = this.getItemMeta();
 
 			if (meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
@@ -182,7 +199,7 @@ public class ItemData extends NbtItemStack {
 			this.setItemMeta(meta);
 		}
 
-		this.removeNbt(GLOWING);
+		this.getNbt().remove(GLOWING);
 	}
 
 	public void setGlowing() {
@@ -216,6 +233,11 @@ public class ItemData extends NbtItemStack {
 	@Override
 	public void setTypeId(int type) {
 		super.setTypeId(type);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString(); // TODO: Nbt Output
 	}
 
 }
