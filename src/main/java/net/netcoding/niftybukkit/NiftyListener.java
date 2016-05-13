@@ -45,7 +45,7 @@ final class NiftyListener extends BukkitListener {
 			if (!FakeInventory.isOpenAnywhere(profile)) {
 				ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
 
-				if (!FakeInventory.isAnyItemOpener(itemData) && itemData.containsNbt()) {
+				if (!FakeInventory.isAnyItemOpener(itemData) && itemData.getNbt().notEmpty()) {
 					InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
 					this.getPlugin().getServer().getPluginManager().callEvent(myEvent);
 

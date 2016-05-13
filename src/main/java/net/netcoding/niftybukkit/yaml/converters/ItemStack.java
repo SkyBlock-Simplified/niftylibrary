@@ -63,7 +63,7 @@ public class ItemStack extends Converter {
 
 		if (itemMap.containsKey("nbt")) {
 			Map<String, Object> nbtMap = (itemMap.get("nbt") instanceof Map ? (Map<String, Object>)itemMap.get("nbt") : (Map<String, Object>)((ConfigSection)itemMap.get("nbt")).getRawMap());
-			itemData.putAllNbt(nbtMap);
+			itemData.getNbt().putAll(nbtMap);
 		}
 
 		itemData.setItemMeta(itemMeta);
@@ -109,7 +109,7 @@ public class ItemStack extends Converter {
 
 		saveMap.put("meta", meta);
 
-		if (itemData.containsNbt())
+		if (itemData.getNbt().notEmpty())
 			saveMap.put("nbt", itemData.getNbt());
 
 		return saveMap;
