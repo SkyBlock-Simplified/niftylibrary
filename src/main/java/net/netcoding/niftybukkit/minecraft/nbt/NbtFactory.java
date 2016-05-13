@@ -13,6 +13,7 @@ import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.BufferedInputStream;
@@ -39,16 +40,16 @@ public class NbtFactory {
 	static final BiMap<Integer, NbtType> NBT_ENUM = HashBiMap.create();
 
 	// Reflection
-	private static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-	private static final Reflection CRAFT_WORLD = new BukkitReflection("CraftWorld", MinecraftPackage.CRAFTBUKKIT);
-	private static final Reflection CRAFT_BLOCK = new BukkitReflection("CraftBlock", "block", MinecraftPackage.CRAFTBUKKIT);
-	private static final Reflection NMS_ITEM_STACK = BukkitReflection.getCompatibleForgeReflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER, "item");
-	private static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
-	private static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
-	private static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	private static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
+	static final Reflection CRAFT_WORLD = new BukkitReflection("CraftWorld", MinecraftPackage.CRAFTBUKKIT);
+	static final Reflection CRAFT_BLOCK = new BukkitReflection("CraftBlock", "block", MinecraftPackage.CRAFTBUKKIT);
+	static final Reflection NMS_ITEM_STACK = BukkitReflection.getCompatibleForgeReflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER, "item");
+	static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
+	static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
+	static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	private static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
+	static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
 	/**
 	 * Ensure that the given stack can store arbitrary NBT information.
@@ -59,16 +60,23 @@ public class NbtFactory {
 		if (stack == null)
 			throw new IllegalArgumentException("Stack cannot be NULL!");
 
-		if (!CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass()))
-			throw new IllegalArgumentException("Stack must be a CraftItemStack!");
-
 		if (stack.getType() == Material.AIR)
 			throw new IllegalArgumentException("ItemStacks representing air cannot store NMS information!");
 	}
 
 	private static void checkBlock(Block block) {
+		if (block == null)
+			throw new IllegalArgumentException("Block cannot be NULL!");
+
 		if (!CRAFT_BLOCK.getClazz().isAssignableFrom(block.getClass()))
 			throw new IllegalArgumentException("Block must be a CraftBlock!");
+	}
+
+	private static void checkEntity(Entity entity) {
+		if (entity == null)
+			throw new IllegalArgumentException("Entity cannot be NULL!");
+
+		// TODO: Other Checks
 	}
 
 	/**
@@ -89,7 +97,6 @@ public class NbtFactory {
 	public static <T> NbtList<T> createList(Iterable<T> iterable) {
 		NbtList<T> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, "", null));
 
-		// Add the content as well
 		for (T obj : iterable)
 			list.add(obj);
 
@@ -136,7 +143,11 @@ public class NbtFactory {
 	 * @return The NBT compound.
 	 */
 	public static NbtCompound createRootCompound(String name) {
-		return new NbtCompound(createNbtTag(NbtType.TAG_COMPOUND, name, null));
+		return new NbtCompound(createRootNativeCompound(name));
+	}
+
+	static Object createRootNativeCompound(String name) {
+		return createNbtTag(NbtType.TAG_COMPOUND, name, null);
 	}
 
 	/**
@@ -158,39 +169,31 @@ public class NbtFactory {
 	 */
 	public static NbtCompound fromBlockTag(Block block) {
 		checkBlock(block);
-		NbtCompound compound = createRootCompound("tag");
+		return new NbtBlockCompound(block, createRootNativeCompound("tag"));
+	}
 
-		if ((boolean)NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
-			Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
-			Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
-			NMS_TILE_ENTITY.invokeMethod("save", tileEntity, compound.getHandle());
-		}
-
-		return compound;
+	private static NbtCompound fromEntityTag(Entity entity) {
+		checkEntity(entity);
+		return new NbtEntityCompound(entity, createRootNativeCompound("tag"));
 	}
 
 	/**
 	 * Construct a wrapper for an NBT tag stored (in memory) in an item stack. This is where
 	 * auxillary data such as enchanting, name and lore is stored. It does not include items
 	 * material, damage value or count.
-	 * <p>
-	 * The item stack must be a wrapper for a CraftItemStack.
 	 *
 	 * @param stack - the item stack.
 	 * @return A wrapper for its NBT tag.
 	 */
 	public static NbtCompound fromItemTag(ItemStack stack) {
 		checkItemStack(stack);
-		Object nms = CRAFT_ITEM_STACK.getValue(NMS_ITEM_STACK.getClazz(), stack);
-		Object tag = NMS_ITEM_STACK.invokeMethod("getTag", nms);
+		final Object nms = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, stack);
+		Object handle = NMS_ITEM_STACK.invokeMethod("getTag", nms);
 
-		if (tag == null) {
-			NbtCompound compound = createRootCompound("tag");
-			setItemTag(stack, compound);
-			return compound;
-		}
+		if (handle == null)
+			handle = createRootNativeCompound("tag");
 
-		return fromCompound(tag);
+		return new NbtItemCompound(stack, nms, handle);
 	}
 
 	/**
