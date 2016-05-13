@@ -3,7 +3,6 @@ package net.netcoding.niftybukkit.yaml.converters;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.items.enchantments.EnchantmentData;
-import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
@@ -111,7 +110,7 @@ public class ItemStack extends Converter {
 		saveMap.put("meta", meta);
 
 		if (itemData.containsNbt())
-			saveMap.put("nbt", NbtFactory.fromItemTag(itemData));
+			saveMap.put("nbt", itemData.getNbt());
 
 		return saveMap;
 	}
