@@ -34,15 +34,6 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 		super(handle, NbtFactory.getDataMap(handle));
 	}
 
-	@SuppressWarnings("CloneDoesntCallSuperClone")
-	@Override
-	public NbtCompound clone() {
-		NbtCompound compound = NbtFactory.createRootCompound("tag");
-		compound.putAll(this);
-		compound.supported.putAll(this.supported);
-		return compound;
-	}
-
 	/**
 	 * Checks if the path exists in the tree.
 	 * <p>
@@ -173,6 +164,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
 		Map<String, Object> map = this.getMap(entries.subList(0, entries.size() - 1), true);
 		map.put(entries.get(entries.size() - 1), value);
+		this.save();
 		return this;
 	}
 
@@ -208,6 +200,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 				current = current.get(entry);
 		}
 
+		this.save();
 		return current;
 	}
 

@@ -131,6 +131,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	@Override
 	public void clear() {
 		this.original.clear();
+		this.save();
 	}
 
 	@Override
@@ -208,10 +209,13 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				}
 
 				proxy.remove();
+				WrappedMap.this.save();
 			}
 
 		};
 	}
+
+	protected void save() { }
 
 	public boolean notEmpty() {
 		return !this.isEmpty();
@@ -219,18 +223,29 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public Object put(String key, Object value) {
-		return this.wrapOutgoing(key, this.original.put(key, this.unwrapIncoming(key, value)));
+		Object oldValue = this.wrapOutgoing(key, this.original.put(key, this.unwrapIncoming(key, value)));
+		this.save();
+		return oldValue;
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet())
-			this.put(entry.getKey(), entry.getValue());
+			this.wrapOutgoing(entry.getKey(), this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue())));
+		this.save();
+	}
+
+	public void putAll(WrappedMap map) {
+		this.putAll((Map<? extends String, ?>)map);
+		this.supported.putAll(map.supported);
+		this.save();
 	}
 
 	@Override
 	public Object remove(Object key) {
-		return this.wrapOutgoing(key, this.original.remove(key));
+		Object oldValue = this.wrapOutgoing(key, this.original.remove(key));
+		this.save();
+		return oldValue;
 	}
 
 	@Override
