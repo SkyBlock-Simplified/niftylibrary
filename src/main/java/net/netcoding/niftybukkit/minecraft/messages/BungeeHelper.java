@@ -17,7 +17,6 @@ import net.netcoding.niftybukkit.minecraft.events.PlayerDisconnectEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerNameChangeEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -166,7 +165,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public int getMaxPlayers(String serverName) {
 		if (this.isDetected()) {
-			if (serverName.equalsIgnoreCase("ALL")) {
+			if ("ALL".equalsIgnoreCase(serverName)) {
 				int maxCount = 0;
 
 				for (BungeeServer server : SERVERS.values())
@@ -189,7 +188,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public int getPlayerCount(String serverName) {
 		if (this.isDetected()) {
-			if (serverName.equalsIgnoreCase("ALL")) {
+			if ("ALL".equalsIgnoreCase(serverName)) {
 				int playerCount = 0;
 
 				for (BungeeServer server : SERVERS.values())
@@ -217,7 +216,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 
 	public Collection<BukkitMojangProfile> getPlayerList(String serverName) {
 		if (this.isDetected()) {
-			if (serverName.equalsIgnoreCase("ALL")) {
+			if ("ALL".equalsIgnoreCase(serverName)) {
 				Set<BukkitMojangProfile> playerNames = new HashSet<>();
 
 				for (BungeeServer server : SERVERS.values())
@@ -233,10 +232,13 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			throw new RuntimeException(StringUtil.format("The server name {0} does not exist!", serverName));
 		}
 
+		if ("ALL".equalsIgnoreCase(serverName))
+			return this.getPlayerList();
+
 		throw new UnsupportedOperationException(StringUtil.format("No {0} listener available to query!", BUNGEE_CHANNEL));
 	}
 
-	public BungeeServer getPlayerServer(MojangProfile profile) {
+	public BungeeServer getPlayerServer(BukkitMojangProfile profile) {
 		if (this.isDetected()) {
 			for (BungeeServer server : this.getServers()) {
 				if (server.getPlayerList().contains(profile))
@@ -330,7 +332,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 						if (!this.isDetected()) return;
 						final BungeeServer server = this.getServer(input.readUTF());
 
-						if (subChannel.equals("ServerInfo")) {
+						if ("ServerInfo".equals(subChannel)) {
 							server.setOnline(input.readBoolean());
 
 							if (server.isOnline()) {
@@ -384,12 +386,12 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 			if (channel.equals(BUNGEE_CHANNEL)) {
 				if (subChannel.matches("^GetServers?|Player(?:Count|List)|UUID(?:Other)?|(?:Server)?IP$"))
 					return;
-				else if (subChannel.equals("PlayerUpdate")) {
+				else if ("PlayerUpdate".equals(subChannel)) {
 					JsonObject json = new JsonParser().parse(input.readUTF()).getAsJsonObject();
 					BukkitMojangProfile updatedProfile = GSON.fromJson(json.toString(), BukkitMojangProfile.class);
 					BungeeServer server = SERVERS.get(input.readUTF());
 
-					for (MojangProfile profile : server.getPlayerList()) {
+					for (BukkitMojangProfile profile : server.getPlayerList()) {
 						if (profile.equals(updatedProfile)) {
 							server.getUnsafePlayerList().remove(profile);
 							server.getUnsafePlayerList().add(updatedProfile);
@@ -500,7 +502,7 @@ public class BungeeHelper extends BukkitHelper implements PluginMessageListener 
 	private void write(BukkitMojangProfile profile, String channel, String subChannel, Object... data) {
 		if (!this.isDetected()) return;
 		if (StringUtil.isEmpty(subChannel)) throw new IllegalArgumentException("Sub channel cannot be null!");
-		if (channel.equals("Forward")) return;
+		if ("Forward".equals(channel)) return;
 		List<Object> dataList = new ArrayList<>(Arrays.asList(data));
 		dataList.add(0, subChannel);
 		this.write(profile, channel, ByteUtil.toByteArray(dataList));
