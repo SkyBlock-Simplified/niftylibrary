@@ -39,27 +39,23 @@ public class ItemData extends ItemStack {
 	}
 
 	ItemData(Material material, short durability, boolean create) {
-		this(new ItemStack(material, 1, durability), null, create);
+		this(new ItemStack(material, 1, durability), create);
 	}
 
 	public ItemData(ItemStack stack) {
-		this(stack, null, true);
+		this(stack, true);
 	}
 
-	ItemData(ItemStack itemStack, NbtCompound root, boolean create) {
+	ItemData(ItemStack itemStack, boolean create) {
 		super(itemStack == null ? new ItemStack(Material.AIR) : itemStack);
 
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		if (root != null)
-			this.root = root;
-		else {
-			if (Material.AIR != this.getType() && create)
-				this.root = NbtFactory.fromItemTag(this);
-			else
-				this.root = NbtFactory.createRootCompound("tag");
-		}
+		if (Material.AIR != this.getType() && create)
+			this.root = NbtFactory.fromItemTag(this);
+		else
+			this.root = NbtFactory.createRootCompound("tag");
 	}
 
 	@Deprecated
@@ -165,7 +161,7 @@ public class ItemData extends ItemStack {
 	@Override
 	public boolean isSimilar(ItemStack stack) {
 		if (stack == null) return false;
-		ItemData data = new ItemData(stack, null, false);
+		ItemData data = new ItemData(stack, false);
 
 		if (this.getTypeId() == data.getTypeId()) {
 			if (this.getDurability() == data.getDurability()) {
