@@ -63,6 +63,8 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 					value = ((BigDecimal)value).doubleValue();
 				else if (BigInteger.class.isAssignableFrom(clazz))
 					value = ((BigInteger)value).longValue();
+				else if (clazz.isEnum())
+					value = ((Enum)value).name();
 				else if (Collection.class.isAssignableFrom(clazz))
 					value = NbtFactory.createList((Collection<?>)value);
 				else if (Map.class.isAssignableFrom(clazz)) {
@@ -82,7 +84,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 			return null;
 
 		if (this.supported.containsKey(key)) {
-			Class<?> clazz = this.supported.get(key);
+			Class clazz = this.supported.get(key);
 
 			if (boolean.class.equals(clazz))
 				value = (byte)value > 0;
@@ -92,6 +94,8 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				value = BigDecimal.valueOf((double)value);
 			else if (BigInteger.class.equals(clazz))
 				value = BigInteger.valueOf((long)value);
+			else if (clazz.isEnum())
+				value = Enum.valueOf(clazz, value.toString());
 			else if (Map.class.isAssignableFrom(clazz)) {
 				NbtCompound compound = (NbtCompound)value;
 				boolean adjusted = false;
