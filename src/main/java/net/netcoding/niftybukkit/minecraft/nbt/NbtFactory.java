@@ -167,12 +167,12 @@ public class NbtFactory {
 	 * @param block - the block.
 	 * @return A copy of its NBT tag.
 	 */
-	public static NbtCompound fromBlockTag(Block block) {
+	public static NbtBlockCompound fromBlockTag(Block block) {
 		checkBlock(block);
 		return new NbtBlockCompound(block, createRootNativeCompound("tag"));
 	}
 
-	private static NbtCompound fromEntityTag(Entity entity) {
+	private static NbtEntityCompound fromEntityTag(Entity entity) {
 		checkEntity(entity);
 		return new NbtEntityCompound(entity, createRootNativeCompound("tag"));
 	}
@@ -185,7 +185,7 @@ public class NbtFactory {
 	 * @param stack - the item stack.
 	 * @return A wrapper for its NBT tag.
 	 */
-	public static NbtCompound fromItemTag(ItemStack stack) {
+	public static NbtItemCompound fromItemTag(ItemStack stack) {
 		checkItemStack(stack);
 		final Object nms = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, stack);
 		Object handle = NMS_ITEM_STACK.invokeMethod("getTag", nms);
