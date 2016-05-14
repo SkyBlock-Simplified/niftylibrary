@@ -24,11 +24,6 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 	}
 
 	@Override
-	public NbtItemCompound clone() {
-		return new NbtItemCompound(this.getWrapped().clone(), super.clone().getHandle());
-	}
-
-	@Override
 	protected final void load() {
 		if (Material.AIR != this.getWrapped().getType()) {
 			Object tag = NbtFactory.NMS_ITEM_STACK.invokeMethod("getTag", this.nmsItem);

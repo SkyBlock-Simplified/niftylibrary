@@ -12,21 +12,6 @@ public final class NbtBlockCompound extends WrappedCompound<Block> {
 		this.load();
 	}
 
-	@Override
-	public void clear() {
-		super.clear();
-		this.save();
-	}
-
-	@SuppressWarnings("CloneDoesntCallSuperClone")
-	@Override
-	public NbtBlockCompound clone() {
-		NbtBlockCompound compound = new NbtBlockCompound(this.getWrapped(), NbtFactory.createRootNativeCompound("tag"));
-		compound.putAll(this);
-		compound.supported.putAll(this.supported);
-		return compound;
-	}
-
 	public final boolean isTileEntity() {
 		return this.isTileEntity;
 	}
