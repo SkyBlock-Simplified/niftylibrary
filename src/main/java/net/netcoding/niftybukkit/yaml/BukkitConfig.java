@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.yaml;
 import net.netcoding.niftybukkit.yaml.converters.Block;
 import net.netcoding.niftybukkit.yaml.converters.ItemStack;
 import net.netcoding.niftybukkit.yaml.converters.Location;
+import net.netcoding.niftybukkit.yaml.converters.PotionEffect;
 import net.netcoding.niftycore.yaml.YamlConfig;
 
 import java.io.File;
@@ -18,6 +19,7 @@ public class BukkitConfig extends YamlConfig {
 		this.addCustomConverter(Block.class);
 		this.addCustomConverter(ItemStack.class);
 		this.addCustomConverter(Location.class);
+		this.addCustomConverter(PotionEffect.class);
 	}
 
 }
