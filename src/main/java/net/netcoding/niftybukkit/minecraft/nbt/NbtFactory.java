@@ -8,6 +8,7 @@ import com.google.common.io.OutputSupplier;
 import com.google.common.primitives.Primitives;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -124,7 +125,7 @@ public class NbtFactory {
 		List<Object> params = new ArrayList<>();
 		params.add((byte)type.getId());
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			params.add(name);
 
 		Object tag = NBT_BASE.invokeMethod("createTag", null, ListUtil.toArray(params, Object.class));
@@ -224,12 +225,12 @@ public class NbtFactory {
 					List<Object> params = new ArrayList<>();
 					params.add(dataInput);
 
-					if (!MinecraftPackage.IS_PRE_1_8) {
+					if (!MinecraftProtocol.isPre1_8()) {
 						params.add(512);
 						params.add(NBT_READ_NOLIMIT);
 					}
 
-					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftPackage.IS_PRE_1_8 ? null : compound.getHandle()), ListUtil.toArray(params, Object.class)));
+					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftProtocol.isPre1_8() ? null : compound.getHandle()), ListUtil.toArray(params, Object.class)));
 				}
 			}
 		}
@@ -304,12 +305,12 @@ public class NbtFactory {
 			try (DataOutputStream dataOutput = new DataOutputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPOutputStream(outputStream) : outputStream)) {
 				List<Object> params = new ArrayList<>();
 
-				if (MinecraftPackage.IS_PRE_1_8)
+				if (MinecraftProtocol.isPre1_8())
 					params.add(source.getHandle());
 
 				params.add(dataOutput);
 
-				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftPackage.IS_PRE_1_8 ? null : source.getHandle()), ListUtil.toArray(params, Object.class));
+				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftProtocol.isPre1_8() ? null : source.getHandle()), ListUtil.toArray(params, Object.class));
 			}
 		}
 	}

@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit.minecraft.items;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
-import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.RegexUtil;
 import org.bukkit.Bukkit;
@@ -63,10 +63,10 @@ public class ItemData extends ItemStack {
 		if (this.hasGlow())
 			return;
 
-		if (!MinecraftPackage.IS_PRE_1_8)
+		if (!MinecraftProtocol.isPre1_8())
 			this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			this.getNbt().put("ench", NbtFactory.createList());
 		else {
 			int enchants = 1;
@@ -180,10 +180,10 @@ public class ItemData extends ItemStack {
 		if (!this.hasGlow())
 			return;
 
-		if (!MinecraftPackage.IS_PRE_1_8)
+		if (!MinecraftProtocol.isPre1_8())
 			this.removeEnchantment(Enchantment.DURABILITY);
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			this.getNbt().remove("ench");
 		else {
 			this.getNbt().remove("HideFlags");

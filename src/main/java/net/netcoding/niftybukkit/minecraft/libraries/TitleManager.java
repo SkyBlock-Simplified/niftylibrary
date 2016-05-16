@@ -5,6 +5,7 @@ import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -116,7 +117,7 @@ public class TitleManager {
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			packetTitle.setValue("a", packetTitleObj, enumClear);
 		else
 			packetTitleObj = packetTitle.newInstance(enumClear, null);
@@ -132,7 +133,7 @@ public class TitleManager {
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumReset = titleAction.getValue("RESET", null);
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			packetTitle.setValue("a", packetTitleObj, enumReset);
 		else
 			packetTitleObj = packetTitle.newInstance(enumReset, null);
@@ -175,7 +176,7 @@ public class TitleManager {
 			// Timings
 			Object packetTimingsObj = packetTitle.newInstance();
 
-			if (MinecraftPackage.IS_PRE_1_8) {
+			if (MinecraftProtocol.isPre1_8()) {
 				packetTitle.setValue("a", packetTimingsObj, enumTimes);
 				packetTitle.setValue("c", packetTimingsObj, this.getFadeIn());
 				packetTitle.setValue("d", packetTimingsObj, this.getStay());
@@ -192,7 +193,7 @@ public class TitleManager {
 			Object title = chatSerializer.invokeMethod("a", null, json.toString());
 			Object packetTitleObj = packetTitle.newInstance();
 
-			if (MinecraftPackage.IS_PRE_1_8) {
+			if (MinecraftProtocol.isPre1_8()) {
 				packetTitle.setValue("a", packetTitleObj, enumTitle);
 				packetTitle.setValue("b", packetTitleObj, title);
 			} else
@@ -208,7 +209,7 @@ public class TitleManager {
 				Object subtitle = chatSerializer.invokeMethod("a", null, json.toString());
 				Object packetSubtitleObj = packetTitle.newInstance();
 
-				if (MinecraftPackage.IS_PRE_1_8) {
+				if (MinecraftProtocol.isPre1_8()) {
 					packetTitle.setValue("a", packetSubtitleObj, enumSubtitle);
 					packetTitle.setValue("b", packetSubtitleObj, subtitle);
 				} else

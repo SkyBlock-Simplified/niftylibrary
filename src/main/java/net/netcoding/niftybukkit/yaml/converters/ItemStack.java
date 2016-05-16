@@ -41,7 +41,7 @@ public class ItemStack extends Converter {
 			if (metaMap.containsKey("lore"))
 				itemMeta.setLore((List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null));
 
-			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_8_pre1.getProtocol()) {
+			if (MinecraftProtocol.isPost1_8()) {
 				if (metaMap.containsKey("flags")) {
 					Converter setConverter = this.getConverter(Set.class);
 					ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
@@ -95,7 +95,7 @@ public class ItemStack extends Converter {
 		for (Map.Entry<Enchantment, Integer> enchantment : itemData.getEnchantments().entrySet())
 			enchantments.put(enchantment.getKey().getName(), enchantment.getValue());
 
-		if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_8_pre1.getProtocol()) {
+		if (MinecraftProtocol.isPost1_8()) {
 			Converter setConverter = this.getConverter(Set.class);
 			ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
 			Set<org.bukkit.inventory.ItemFlag> itemFlags = (Set<org.bukkit.inventory.ItemFlag>)setConverter.toConfig(Set.class, itemMeta.getItemFlags(), flagType);

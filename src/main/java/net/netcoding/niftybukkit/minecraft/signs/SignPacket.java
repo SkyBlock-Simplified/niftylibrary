@@ -5,7 +5,7 @@ import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.gson.Gson;
-import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.util.Vector;
@@ -35,7 +35,7 @@ class SignPacket {
 		int y;
 		int z;
 
-		if (MinecraftPackage.IS_PRE_1_8) {
+		if (MinecraftProtocol.isPre1_8()) {
 			x = this.getCoord(0);
 			y = this.getCoord(1);
 			z = this.getCoord(1);
@@ -57,7 +57,7 @@ class SignPacket {
 	}
 
 	public String[] getLines() {
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			return this.getPacket().getStringArrays().read(0);
 
 		String[] lines = new String[4];
@@ -93,7 +93,7 @@ class SignPacket {
 			lines = newLines;
 		}
 
-		if (MinecraftPackage.IS_PRE_1_8)
+		if (MinecraftProtocol.isPre1_8())
 			this.getPacket().getStringArrays().write(0, lines);
 		else {
 			WrappedChatComponent[] chat = this.getPacket().getChatComponentArrays().read(0);
@@ -107,7 +107,7 @@ class SignPacket {
 	}
 
 	void setPosition(Vector position) {
-		if (MinecraftPackage.IS_PRE_1_8) {
+		if (MinecraftProtocol.isPre1_8()) {
 			this.setCoord(0, position.getBlockX());
 			this.setCoord(1, position.getBlockY());
 			this.setCoord(2, position.getBlockZ());

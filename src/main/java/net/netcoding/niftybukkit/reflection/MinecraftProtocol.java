@@ -7,6 +7,7 @@ import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpResponse;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.VersionUtil;
 import org.bukkit.Bukkit;
 
 import java.net.URL;
@@ -218,6 +219,24 @@ public enum MinecraftProtocol {
 	v1_1(23),
 	v1_0_0(22);
 
+	private static final boolean IS_PRE_1_8_3 = new VersionUtil(MinecraftPackage.MINECRAFT_VERSION_NUMBER).compareTo(new VersionUtil("1.8.2")) < 0;
+	private static final boolean IS_FORGE;
+	private static final boolean IS_SPIGOT;
+
+	static {
+		boolean spigot = false;
+
+		try {
+			Reflection spigotPlayerRef = new Reflection("Player$Spigot", "org.bukkit.entity");
+			spigotPlayerRef.getClazz();
+			spigot = true;
+		} catch (Exception ignore) { }
+
+		String version = Bukkit.getVersion();
+		IS_FORGE = (version.contains("MCPC") || version.contains("Forge") || version.contains("Cauldron"));
+		IS_SPIGOT = spigot;
+	}
+
 	private final int protocol;
 	private final String version;
 
@@ -284,6 +303,26 @@ public enum MinecraftProtocol {
 		} catch (Exception ex) {
 			return values()[0].getProtocol();
 		}
+	}
+
+	public static boolean isForge() {
+		return IS_FORGE;
+	}
+
+	public static boolean isPost1_8() {
+		return !isPre1_8();
+	}
+
+	public static boolean isPre1_8() {
+		return getCurrentProtocol() < v1_7_10.getProtocol();
+	}
+
+	public static boolean isPre1_8_3() {
+		return IS_PRE_1_8_3;
+	}
+
+	public static boolean isSpigot() {
+		return IS_SPIGOT;
 	}
 
 }
