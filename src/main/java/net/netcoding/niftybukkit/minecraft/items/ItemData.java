@@ -63,7 +63,7 @@ public class ItemData extends ItemStack {
 		if (this.hasGlow())
 			return;
 
-		if (!MinecraftProtocol.isPre1_8())
+		if (MinecraftProtocol.isPost1_8())
 			this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
 		if (MinecraftProtocol.isPre1_8())
@@ -150,7 +150,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public boolean hasGlow() {
-		return this.getNbt().containsKey(GLOWING) && this.getNbt().<Boolean>get("ITEMDATA_GLOW");
+		return this.getNbt().containsKey(GLOWING) && this.getNbt().<Boolean>get(GLOWING);
 	}
 
 	@Override
@@ -180,7 +180,7 @@ public class ItemData extends ItemStack {
 		if (!this.hasGlow())
 			return;
 
-		if (!MinecraftProtocol.isPre1_8())
+		if (MinecraftProtocol.isPost1_8())
 			this.removeEnchantment(Enchantment.DURABILITY);
 
 		if (MinecraftProtocol.isPre1_8())
