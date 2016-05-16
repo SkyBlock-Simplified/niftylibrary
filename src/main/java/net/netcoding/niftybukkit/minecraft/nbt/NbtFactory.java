@@ -49,6 +49,7 @@ public class NbtFactory {
 	static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
 	static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	static final Reflection NBT_TAG_COMPOUND = BukkitReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
@@ -188,8 +189,8 @@ public class NbtFactory {
 	 */
 	public static NbtItemCompound fromItemTag(ItemStack stack) {
 		checkItemStack(stack);
-		final Object nms = CRAFT_ITEM_STACK.invokeMethod("asNMSCopy", null, stack);
-		Object handle = NMS_ITEM_STACK.invokeMethod("getTag", nms);
+		final Object nms = CRAFT_ITEM_STACK.invokeMethod(NMS_ITEM_STACK.getClazz(), null, stack);
+		Object handle = NMS_ITEM_STACK.invokeMethod(NBT_TAG_COMPOUND.getClazz(), nms);
 
 		if (handle == null)
 			handle = createRootNativeCompound("tag");
@@ -327,8 +328,11 @@ public class NbtFactory {
 	 */
 	public static void setItemTag(ItemStack stack, NbtCompound compound) {
 		checkItemStack(stack);
-		Object nms = CRAFT_ITEM_STACK.getValue(NMS_ITEM_STACK.getClazz(), stack);
-		NMS_ITEM_STACK.invokeMethod("setTag", nms, compound.getHandle());
+
+		if (!(compound instanceof NbtItemCompound)) {
+			Object nms = CRAFT_ITEM_STACK.getValue(NMS_ITEM_STACK.getClazz(), stack);
+			NMS_ITEM_STACK.invokeMethod("setTag", nms, compound.getHandle());
+		}
 	}
 
 	/**
@@ -343,13 +347,15 @@ public class NbtFactory {
 	public static void setBlockTag(Block block, NbtCompound compound) {
 		checkBlock(block);
 
-		if ((boolean)NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
-			compound.put("x", block.getX());
-			compound.put("y", block.getY());
-			compound.put("z", block.getZ());
-			Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
-			Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
-			NMS_TILE_ENTITY.invokeMethod("a", tileEntity, compound.getHandle());
+		if (!(compound instanceof NbtBlockCompound)) {
+			if ((boolean) NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
+				compound.put("x", block.getX());
+				compound.put("y", block.getY());
+				compound.put("z", block.getZ());
+				Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
+				Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
+				NMS_TILE_ENTITY.invokeMethod("a", tileEntity, compound.getHandle());
+			}
 		}
 	}
 
