@@ -1,6 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
-import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -31,9 +31,8 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 			if (tag != null) {
 				NbtCompound compound = NbtFactory.fromCompound(tag);
 				this.putAll(compound);
-			}
-
-			this.save();
+			} else
+				this.save();
 		}
 	}
 
@@ -46,12 +45,12 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 			if (this.getWrapped().hasItemMeta()) {
 				ItemMeta meta = this.getWrapped().getItemMeta();
 
-				if (!MinecraftPackage.IS_PRE_1_8)
-					nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
-
 				nmsMeta.setDisplayName(meta.getDisplayName());
 				nmsMeta.setLore(meta.getLore());
 				Map<Enchantment, Integer> enchantments = meta.getEnchants();
+
+				if (MinecraftProtocol.isPost1_8())
+					nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
 
 				for (Enchantment enchantment : enchantments.keySet())
 					nmsMeta.addEnchant(enchantment, enchantments.get(enchantment), true);
