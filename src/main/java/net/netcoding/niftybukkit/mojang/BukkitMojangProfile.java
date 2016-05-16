@@ -68,7 +68,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	 */
 	public final boolean isGliding() {
 		if (this.isOnlineLocally()) {
-			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_3_pre1.getProtocol())
+			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_2.getProtocol())
 				return this.getOfflinePlayer().getPlayer().isGliding();
 			else if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_1_pre1.getProtocol())
 				return (boolean)BukkitReflection.NMS_ENTITY_PLAYER.invokeMethod("cB", this.getHandle());
