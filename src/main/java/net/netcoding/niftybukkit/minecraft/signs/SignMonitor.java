@@ -6,14 +6,14 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.minecraft.inventory.InventoryWorkaround;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
-import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftybukkit.minecraft.inventory.InventoryWorkaround;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignUpdateEvent;
+import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.GameMode;
@@ -48,12 +48,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Monitor and update signs by tracking sign update packets.
  */
-public class SignMonitor extends BukkitListener {
+public class SignMonitor {
 
 	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<Location, SignInfo> signLocations = new ConcurrentHashMap<>();
+	private final transient BukkitSignListener signListener;
 	private transient PacketAdapter adapter;
-	private boolean listening = false;
+	private transient boolean listening = false;
 
 	private static final transient List<Material> GRAVITY_ITEMS = new ArrayList<>(
 		Arrays.asList(
@@ -83,7 +84,7 @@ public class SignMonitor extends BukkitListener {
 	 * @param plugin Java plugin to run it for.
 	 */
 	public SignMonitor(JavaPlugin plugin) {
-		super(plugin);
+		signListener = new BukkitSignListener(plugin);
 	}
 
 	/**
@@ -181,182 +182,6 @@ public class SignMonitor extends BukkitListener {
 		return this.listening;
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onEntityBreakEvent(EntityExplodeEvent event) {
-		if (EntityType.PLAYER != event.getEntityType()) {
-			for (Block block : event.blockList()) {
-				Set<Location> fallingSigns = getSignsThatWouldFall(block);
-
-				if (!fallingSigns.isEmpty()) {
-					event.setCancelled(true);
-					break;
-				}
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGH)
-	public void onBlockBreak(BlockBreakEvent event) {
-		BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-		Block block = event.getBlock();
-		Set<Location> fallingSigns = getSignsThatWouldFall(block);
-		Set<Location> removeSigns = new HashSet<>();
-
-		if (this.isListening()) {
-			for (Location location : fallingSigns) {
-				if (this.signLocations.containsKey(location)) {
-					SignInfo signInfo = this.signLocations.get(location);
-
-					for (SignListener listener : this.listeners.keySet()) {
-						List<String> keys = this.listeners.get(listener);
-
-						for (String line : signInfo.getLines()) {
-							for (String key : keys) {
-								if (line.toLowerCase().contains(key)) {
-									SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
-									listener.onSignBreak(breakEvent);
-
-									if (breakEvent.isCancelled()) {
-										event.setCancelled(true);
-										Sign sign = (Sign)location.getBlock().getState();
-
-										for (int j = 0; j < 4; j++)
-											sign.setLine(j, signInfo.getLine(j));
-
-										return;
-									}
-
-									removeSigns.add(location);
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			for (Location signLocation : removeSigns)
-				this.signLocations.remove(signLocation);
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockPistonExtend(BlockPistonExtendEvent event) {
-		for (Block block : event.getBlocks()) {
-			Set<Location> fallingSigns = getSignsThatWouldFall(block);
-
-			if (!fallingSigns.isEmpty()) {
-				event.setCancelled(true);
-				break;
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockPistonRetract(BlockPistonRetractEvent event) {
-		for (Block block : event.getBlocks()) {
-			Set<Location> fallingSigns = getSignsThatWouldFall(block);
-
-			if (!fallingSigns.isEmpty()) {
-				event.setCancelled(true);
-				break;
-			}
-		}
-	}
-
-	@EventHandler(ignoreCancelled = true)
-	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (!(GameMode.CREATIVE == event.getPlayer().getGameMode() && Action.LEFT_CLICK_BLOCK == event.getAction())) {
-			if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK == event.getAction() || Action.RIGHT_CLICK_BLOCK == event.getAction())) {
-				Block block = event.getClickedBlock();
-
-				if (this.isListening()) {
-					if (this.signLocations.containsKey(block.getLocation())) {
-						if (SIGN_ITEMS.contains(block.getType())) {
-							SignInfo signInfo = this.signLocations.get(block.getLocation());
-
-							for (SignListener listener : this.listeners.keySet()) {
-								List<String> keys = this.listeners.get(listener);
-
-								for (String line : signInfo.getLines()) {
-									for (String key : keys) {
-										if (line.toLowerCase().contains(key)) {
-											BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-											SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
-											listener.onSignInteract(interactEvent);
-											Sign sign = (Sign)block.getState();
-
-											for (int j = 0; j < 4; j++)
-												sign.setLine(j, signInfo.getLine(j));
-
-											if (interactEvent.isCancelled()) {
-												event.setCancelled(true);
-												return;
-											} else
-												this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
-										}
-									}
-								}
-							}
-						} else
-							this.signLocations.remove(block.getLocation());
-					}
-				}
-			}
-		}
-	}
-
-	@EventHandler
-	public void onPlayerPostLogin(PlayerPostLoginEvent event) {
-		this.sendSignUpdate(event.getProfile());
-	}
-
-	@EventHandler(priority = EventPriority.LOW)
-	public void onSignChange(SignChangeEvent event) {
-		Block block = event.getBlock();
-
-		if (this.isListening()) {
-			if (!this.signLocations.containsKey(block.getLocation())) {
-				Sign sign = (Sign)block.getState();
-
-				for (int i = 0; i < 4; i++)
-					sign.setLine(i, event.getLine(i));
-
-				SignInfo signInfo = new SignInfo(sign);
-
-				for (SignListener listener : this.listeners.keySet()) {
-					List<String> keys = this.listeners.get(listener);
-
-					for (String line : signInfo.getLines()) {
-						for (String key : keys) {
-							if (line.toLowerCase().contains(key)) {
-								Player player = event.getPlayer();
-								BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
-								SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
-								listener.onSignCreate(createEvent);
-
-								if (createEvent.isCancelled()) {
-									event.setCancelled(true);
-									block.setType(Material.AIR);
-
-									if (GameMode.CREATIVE != player.getGameMode())
-										InventoryWorkaround.addItems(player.getInventory(), new ItemStack(Material.SIGN));
-
-									return;
-								} else {
-									for (int j = 0; j < 4; j++)
-										sign.setLine(j, signInfo.getLine(j));
-
-									this.signLocations.put(block.getLocation(), signInfo);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	/**
 	 * Remove listener from monitor.
 	 *
@@ -440,7 +265,7 @@ public class SignMonitor extends BukkitListener {
 					outgoing.setLines(signInfo.getLines());
 					NiftyBukkit.getProtocolManager().sendServerPacket(player, outgoing.getPacket());
 				} catch (Exception ex) {
-					this.getLog().console("Unable to send sign update packet!", ex);
+					this.signListener.getLog().console("Unable to send sign update packet!", ex);
 				}
 
 				break;
@@ -454,7 +279,7 @@ public class SignMonitor extends BukkitListener {
 	public void start() {
 		if (!this.isListening()) {
 			this.listening = true;
-			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
+			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.signListener.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
 				@Override
 				public void onPacketSending(PacketEvent event) {
 					PacketContainer signUpdatePacket = event.getPacket();
@@ -500,6 +325,196 @@ public class SignMonitor extends BukkitListener {
 			NiftyBukkit.getProtocolManager().removePacketListener(this.adapter);
 			this.adapter = null;
 		}
+	}
+
+	private class BukkitSignListener extends BukkitListener {
+
+		public BukkitSignListener(JavaPlugin plugin) {
+			super(plugin);
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST)
+		public void onEntityBreakEvent(EntityExplodeEvent event) {
+			if (EntityType.PLAYER != event.getEntityType()) {
+				for (Block block : event.blockList()) {
+					Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+					for (Location fallingSign : fallingSigns) {
+						if (SignMonitor.this.signLocations.containsKey(fallingSign)) {
+							event.setCancelled(true);
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		@EventHandler(priority = EventPriority.HIGH)
+		public void onBlockBreak(BlockBreakEvent event) {
+			BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+			Block block = event.getBlock();
+			Set<Location> fallingSigns = getSignsThatWouldFall(block);
+			Set<Location> removeSigns = new HashSet<>();
+
+			if (SignMonitor.this.isListening()) {
+				for (Location location : fallingSigns) {
+					if (SignMonitor.this.signLocations.containsKey(location)) {
+						SignInfo signInfo = SignMonitor.this.signLocations.get(location);
+
+						for (SignListener listener : SignMonitor.this.listeners.keySet()) {
+							List<String> keys = SignMonitor.this.listeners.get(listener);
+
+							for (String line : signInfo.getLines()) {
+								for (String key : keys) {
+									if (line.toLowerCase().contains(key)) {
+										SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
+										listener.onSignBreak(breakEvent);
+
+										if (breakEvent.isCancelled()) {
+											event.setCancelled(true);
+											Sign sign = (Sign)location.getBlock().getState();
+
+											for (int j = 0; j < 4; j++)
+												sign.setLine(j, signInfo.getLine(j));
+
+											return;
+										}
+
+										removeSigns.add(location);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+
+				for (Location signLocation : removeSigns)
+					SignMonitor.this.signLocations.remove(signLocation);
+			}
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST)
+		public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+			for (Block block : event.getBlocks()) {
+				Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+				for (Location fallingSign : fallingSigns) {
+					if (SignMonitor.this.signLocations.containsKey(fallingSign)) {
+						event.setCancelled(true);
+						return;
+					}
+				}
+			}
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST)
+		public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+			for (Block block : event.getBlocks()) {
+				Set<Location> fallingSigns = getSignsThatWouldFall(block);
+
+				for (Location fallingSign : fallingSigns) {
+					if (SignMonitor.this.signLocations.containsKey(fallingSign)) {
+						event.setCancelled(true);
+						return;
+					}
+				}
+			}
+		}
+
+		@EventHandler(ignoreCancelled = true)
+		public void onPlayerInteract(PlayerInteractEvent event) {
+			if (!(GameMode.CREATIVE == event.getPlayer().getGameMode() && Action.LEFT_CLICK_BLOCK == event.getAction())) {
+				if (event.hasBlock() && (Action.LEFT_CLICK_BLOCK == event.getAction() || Action.RIGHT_CLICK_BLOCK == event.getAction())) {
+					Block block = event.getClickedBlock();
+
+					if (SignMonitor.this.isListening()) {
+						if (SignMonitor.this.signLocations.containsKey(block.getLocation())) {
+							if (SIGN_ITEMS.contains(block.getType())) {
+								SignInfo signInfo = SignMonitor.this.signLocations.get(block.getLocation());
+
+								for (SignListener listener : SignMonitor.this.listeners.keySet()) {
+									List<String> keys = SignMonitor.this.listeners.get(listener);
+
+									for (String line : signInfo.getLines()) {
+										for (String key : keys) {
+											if (line.toLowerCase().contains(key)) {
+												BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+												SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
+												listener.onSignInteract(interactEvent);
+												Sign sign = (Sign)block.getState();
+
+												for (int j = 0; j < 4; j++)
+													sign.setLine(j, signInfo.getLine(j));
+
+												if (interactEvent.isCancelled()) {
+													event.setCancelled(true);
+													return;
+												} else
+													SignMonitor.this.sendSignUpdate(profile.getOfflinePlayer().getPlayer(), key, signInfo);
+											}
+										}
+									}
+								}
+							} else
+								SignMonitor.this.signLocations.remove(block.getLocation());
+						}
+					}
+				}
+			}
+		}
+
+		@EventHandler
+		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+			SignMonitor.this.sendSignUpdate(event.getProfile());
+		}
+
+		@EventHandler(priority = EventPriority.LOW)
+		public void onSignChange(SignChangeEvent event) {
+			Block block = event.getBlock();
+
+			if (SignMonitor.this.isListening()) {
+				if (!SignMonitor.this.signLocations.containsKey(block.getLocation())) {
+					Sign sign = (Sign)block.getState();
+
+					for (int i = 0; i < 4; i++)
+						sign.setLine(i, event.getLine(i));
+
+					SignInfo signInfo = new SignInfo(sign);
+
+					for (SignListener listener : SignMonitor.this.listeners.keySet()) {
+						List<String> keys = SignMonitor.this.listeners.get(listener);
+
+						for (String line : signInfo.getLines()) {
+							for (String key : keys) {
+								if (line.toLowerCase().contains(key)) {
+									Player player = event.getPlayer();
+									BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(player);
+									SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
+									listener.onSignCreate(createEvent);
+
+									if (createEvent.isCancelled()) {
+										event.setCancelled(true);
+										block.setType(Material.AIR);
+
+										if (GameMode.CREATIVE != player.getGameMode())
+											InventoryWorkaround.addItems(player.getInventory(), new ItemStack(Material.SIGN));
+
+										return;
+									} else {
+										for (int j = 0; j < 4; j++)
+											sign.setLine(j, signInfo.getLine(j));
+
+										SignMonitor.this.signLocations.put(block.getLocation(), signInfo);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 }
