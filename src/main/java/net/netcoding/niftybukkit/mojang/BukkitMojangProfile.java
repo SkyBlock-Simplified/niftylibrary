@@ -46,9 +46,9 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	/**
-	 * Gets the direction a player is looking
+	 * Gets the direction the client is looking
 	 *
-	 * @return The direction the player is looking
+	 * @return The direction the client is looking
 	 */
 	public BlockFace getFacing() {
 		if (this.isOnlineLocally()) {
@@ -57,6 +57,24 @@ public class BukkitMojangProfile extends MojangProfile {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Gets if the client is gliding.
+	 * <p>
+	 * Returns false before 1.9.
+	 *
+	 * @return True if gliding, otherwise false.
+	 */
+	public final boolean isGliding() {
+		if (this.isOnlineLocally()) {
+			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_3_pre1.getProtocol())
+				return this.getOfflinePlayer().getPlayer().isGliding();
+			else if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_1_pre1.getProtocol())
+				return (boolean)BukkitReflection.NMS_ENTITY_PLAYER.invokeMethod("cB", this.getHandle());
+		}
+
+		return false;
 	}
 
 	/**
@@ -89,9 +107,9 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	/**
-	 * Gets the players name associated to this UUID.
+	 * Gets the clients name associated to this UUID.
 	 *
-	 * @return Current player name.
+	 * @return Current clients name.
 	 */
 	public String getName() {
 		Player player = NiftyBukkit.getPlugin().getServer().getPlayer(this.getUniqueId());
@@ -114,9 +132,9 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	/**
-	 * Gets the players offline player object associated to this profile.
+	 * Gets the clients offline player object associated to this profile.
 	 *
-	 * @return Offline Offline player object.
+	 * @return Offline client object.
 	 */
 	public OfflinePlayer getOfflinePlayer() {
 		return NiftyBukkit.getPlugin().getServer().getOfflinePlayer(this.getUniqueId());
@@ -202,7 +220,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	/**
-	 * Respawns the player if they are online.
+	 * Respawns the client if they are online.
 	 */
 	public final void respawn() {
 		if (!this.isOnlineLocally()) return;
@@ -216,6 +234,11 @@ public class BukkitMojangProfile extends MojangProfile {
 		} catch (Exception ignore) { }
 	}
 
+	/**
+	 * Send the client a json chat message.
+	 *
+	 * @param message Json message to send.
+	 */
 	@Override
 	public void sendMessage(JsonMessage message) {
 		if (!this.isOnlineLocally()) return;
@@ -226,6 +249,11 @@ public class BukkitMojangProfile extends MojangProfile {
 		this.sendPacket(packetChatObj);
 	}
 
+	/**
+	 * Send the client a regular chat message.
+	 *
+	 * @param message Message to send.
+	 */
 	@Override
 	public void sendMessage(String message) {
 		if (!this.isOnlineLocally()) return;
@@ -245,7 +273,7 @@ public class BukkitMojangProfile extends MojangProfile {
 	}
 
 	/**
-	* Sets this player as a spectator of a target entity.
+	* Sets this client as a spectator of a target entity.
 	*
 	* @param target The target to spectate.
 	*/
