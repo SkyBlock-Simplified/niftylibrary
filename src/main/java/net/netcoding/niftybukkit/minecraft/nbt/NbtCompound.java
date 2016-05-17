@@ -34,10 +34,6 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 		super(handle, NbtFactory.getDataMap(handle));
 	}
 
-	public final NbtCompound cleanClone() {
-		return cleanClone(this);
-	}
-
 	/**
 	 * This will not be attached to anything.
 	 * <p>

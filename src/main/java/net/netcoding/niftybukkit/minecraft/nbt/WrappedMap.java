@@ -14,6 +14,7 @@ import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,41 +37,6 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	WrappedMap(Object handle, Map<String, Object> original) {
 		this.handle = handle;
 		this.original = original;
-	}
-
-	private static WrappedList cleanClone(WrappedList list) {
-		NbtList cleanList = NbtFactory.createList();
-
-		for (Object value : list) {
-			Object newValue = value;
-
-			if (WrappedMap.class.isAssignableFrom(value.getClass()))
-				newValue = cleanClone((WrappedMap)value);
-
-			cleanList.add(newValue);
-		}
-
-		return cleanList;
-	}
-
-	protected static NbtCompound cleanClone(WrappedMap map) {
-		NbtCompound cleanMap = NbtFactory.createCompound();
-
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-			if (DO_NOT_SHOW.contains(entry.getKey())) continue;
-			Object value = entry.getValue();
-			value = (value.getClass().isArray() ? Arrays.deepToString((Object[])value) : value);
-
-			if (WrappedMap.class.isAssignableFrom(value.getClass()))
-				value = cleanClone((WrappedMap)value);
-
-			if (WrappedList.class.isAssignableFrom(value.getClass()))
-				value = cleanClone((WrappedList)value);
-
-			cleanMap.put(entry.getKey(), value);
-		}
-
-		return cleanMap;
 	}
 
 	private void addSupportKey(String key, Class<?> clazz) {
@@ -295,7 +261,17 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		};
 	}
 
-	protected void save() { }
+	@Override
+	public Set<String> keySet() {
+		Set<String> keySet = new HashSet<>();
+
+		for (String key : this.original.keySet()) {
+			if (!DO_NOT_SHOW.contains(key))
+				keySet.add(key);
+		}
+
+		return keySet;
+	}
 
 	public boolean notEmpty() {
 		return !this.isEmpty();
@@ -336,23 +312,17 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		NbtFactory.fromCompound(this.original.get(SUPPORT)).remove(key);
 	}
 
+	protected void save() { }
+
 	@Override
 	public int size() {
-		int size = this.original.size();
-
-		for (String key : this.keySet()) {
-			if (DO_NOT_SHOW.contains(key))
-				size--;
-		}
-
-		return size;
+		return this.keySet().size();
 	}
 
 	public final String serialize() {
 		List<String> output = new ArrayList<>();
-		WrappedMap clean = cleanClone(this);
 
-		for (Map.Entry<String, Object> entry : clean.entrySet()) {
+		for (Map.Entry<String, Object> entry : this.entrySet()) {
 			Object value = entry.getValue();
 			value = (value.getClass().isArray() ? Arrays.deepToString((Object[])value) : value);
 
