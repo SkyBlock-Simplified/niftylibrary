@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -117,6 +118,26 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	@Override
 	public T set(int index, T element) {
 		return this.wrapOutgoing(this.original.set(index, this.unwrapIncoming(element)));
+	}
+
+	public String serialize() {
+		List<Object> output = new ArrayList<>();
+
+		for (Object value : this) {
+			Object newValue = value;
+
+			if (WrappedMap.class.isAssignableFrom(value.getClass()))
+				newValue = ((WrappedMap)newValue).serialize();
+
+			output.add(newValue);
+		}
+
+		return output.toString();
+	}
+
+	@Override
+	public String toString() {
+		return this.serialize();
 	}
 
 	protected T wrapOutgoing(Object value) {
