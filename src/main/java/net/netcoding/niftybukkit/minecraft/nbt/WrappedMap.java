@@ -92,9 +92,6 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (value == null)
 			return null;
 
-		if (DO_NOT_SHOW.contains(key))
-			return null;
-
 		Class<?> clazz = Primitives.unwrap(value.getClass());
 
 		if (WrappedList.class.isAssignableFrom(clazz) || WrappedMap.class.isAssignableFrom(clazz))
@@ -316,8 +313,14 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		for (Map.Entry<? extends String, ?> entry : map.entrySet())
+		this.putAll(map, this.isEmpty());
+	}
+
+	private void putAll(Map<? extends String, ?> map, boolean bypass) {
+		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
+			if (SUPPORT.equals(entry.getKey()) && !bypass) continue;
 			this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue()));
+		}
 
 		this.save();
 	}

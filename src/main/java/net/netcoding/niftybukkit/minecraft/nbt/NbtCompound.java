@@ -34,6 +34,10 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 		super(handle, NbtFactory.getDataMap(handle));
 	}
 
+	public final NbtCompound cleanClone() {
+		return cleanClone(this);
+	}
+
 	/**
 	 * This will not be attached to anything.
 	 * <p>
@@ -46,7 +50,6 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	public NbtCompound clone() {
 		NbtCompound compound = NbtFactory.createRootCompound("tag");
 		compound.putAll(this);
-		compound.supported.putAll(this.supported);
 		return compound;
 	}
 
