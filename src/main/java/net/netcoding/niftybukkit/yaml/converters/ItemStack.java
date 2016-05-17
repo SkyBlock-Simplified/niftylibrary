@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +30,8 @@ public class ItemStack extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		Converter mapConverter = this.getConverter(Map.class);
-		Map<String, Object> itemMap = (Map<String, Object>)mapConverter.fromConfig(Map.class, section, null);
-		Map<String, Object> metaMap = (Map<String, Object>)mapConverter.fromConfig(Map.class, itemMap.get("meta"), null);
+		Map<String, Object> itemMap = (Map<String, Object>)mapConverter.fromConfig(HashMap.class, section, null);
+		Map<String, Object> metaMap = (Map<String, Object>)mapConverter.fromConfig(HashMap.class, itemMap.get("meta"), null);
 		ItemData itemData = NiftyBukkit.getItemDatabase().get((String)itemMap.get("id"));
 		itemData.setAmount((int)itemMap.get("amount"));
 		ItemMeta itemMeta = itemData.getItemMeta();
@@ -51,7 +52,7 @@ public class ItemStack extends Converter {
 			}
 
 			if (metaMap.containsKey("enchantments")) {
-				Map<String, Integer> enchMap = (Map<String, Integer>)mapConverter.fromConfig(Map.class, metaMap.get("enchantments"), null);
+				Map<String, Integer> enchMap = (Map<String, Integer>)mapConverter.fromConfig(HashMap.class, metaMap.get("enchantments"), null);
 
 				for (Map.Entry<String, Integer> enchantment : enchMap.entrySet()) {
 					EnchantmentData enchantmentData = new EnchantmentData(Enchantment.getByName(enchantment.getKey()));
@@ -62,7 +63,7 @@ public class ItemStack extends Converter {
 		}
 
 		if (itemMap.containsKey("nbt")) {
-			Map<String, Object> nbtMap = (Map<String, Object>)mapConverter.fromConfig(Map.class, itemMap.get("nbt"), null);
+			Map<String, Object> nbtMap = (Map<String, Object>)mapConverter.fromConfig(HashMap.class, itemMap.get("nbt"), null);
 			itemData.getNbt().putAll(nbtMap);
 		}
 

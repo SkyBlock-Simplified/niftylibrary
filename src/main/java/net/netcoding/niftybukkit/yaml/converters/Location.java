@@ -2,13 +2,13 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
-import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -22,7 +22,7 @@ public class Location extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> map = ((section instanceof Map) ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
+		Map<String, Object> map = (Map<String, Object>)this.getConverter(Map.class).fromConfig(HashMap.class, section, null);
 		float yaw = (map.get("yaw") instanceof Double) ? ((Double)map.get("yaw")).floatValue() : (Float)map.get("yaw");
 		float pitch = (map.get("pitch") instanceof Double) ? ((Double)map.get("pitch")).floatValue() : (Float)map.get("pitch");
 		String mapName = (String)map.get("world");

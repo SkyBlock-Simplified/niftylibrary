@@ -2,12 +2,12 @@ package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
-import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings({ "unchecked", "deprecation" })
@@ -19,7 +19,7 @@ public class Block extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> blockMap = (section instanceof Map ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection)section).getRawMap());
+		Map<String, Object> blockMap = (Map<String, Object>)this.getConverter(Map.class).fromConfig(HashMap.class, section, null);
 		org.bukkit.Location location = (org.bukkit.Location)this.getConverter(org.bukkit.Location.class).fromConfig(org.bukkit.Location.class, blockMap.get("location"), null);
 		org.bukkit.block.Block block = location.getBlock();
 		ItemStack stack = NiftyBukkit.getItemDatabase().get((String)blockMap.get("id"));

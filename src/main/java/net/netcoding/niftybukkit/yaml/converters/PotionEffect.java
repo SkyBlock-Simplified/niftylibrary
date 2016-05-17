@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit.yaml.converters;
 
 import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
 import org.bukkit.potion.PotionEffectType;
@@ -19,7 +18,7 @@ public class PotionEffect extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		Map<String, Object> map = ((section instanceof Map) ? (Map<String, Object>)section : (Map<String, Object>)((ConfigSection) section).getRawMap());
+		Map<String, Object> map = (Map<String, Object>)this.getConverter(Map.class).fromConfig(HashMap.class, section, null);
 		String name = (String)map.get("name");
 		int duration = NumberUtil.isInt((String)map.get("duration")) ? (Integer)map.get("duration") : 1;
 		int amplifier = NumberUtil.isInt((String)map.get("amplifier")) ? (Integer)map.get("amplifier") : 0;
