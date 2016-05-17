@@ -313,12 +313,8 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		this.putAll(map, this.isEmpty());
-	}
-
-	private void putAll(Map<? extends String, ?> map, boolean bypass) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
-			if (SUPPORT.equals(entry.getKey()) && !bypass) continue;
+			if (DO_NOT_SHOW.contains(entry.getKey())) continue;
 			this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue()));
 		}
 
