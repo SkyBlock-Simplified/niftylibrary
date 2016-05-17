@@ -46,8 +46,8 @@ public class ItemData extends ItemStack {
 		this(stack, true);
 	}
 
-	ItemData(ItemStack itemStack, boolean create) {
-		super(itemStack == null ? new ItemStack(Material.AIR) : itemStack);
+	ItemData(ItemStack stack, boolean create) {
+		super(stack == null ? new ItemStack(Material.AIR) : stack);
 
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
@@ -84,6 +84,7 @@ public class ItemData extends ItemStack {
 		}
 
 		this.getNbt().put(GLOWING, true);
+		//System.out.println("GLOWING: " + this.getNbt().supported);
 	}
 
 	@Deprecated
@@ -96,8 +97,8 @@ public class ItemData extends ItemStack {
 	@Override
 	public ItemData clone() {
 		ItemData itemData = new ItemData(super.clone());
-		itemData.setGlowing(this.hasGlow());
 		itemData.getNbt().putAll(this.root);
+		itemData.setGlowing(this.hasGlow());
 		return itemData;
 	}
 
