@@ -35,6 +35,22 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	}
 
 	/**
+	 * This will not be attached to anything.
+	 * <p>
+	 * Will only contain a copy of the current compound.
+	 *
+	 * @return Copy of current compound
+	 */
+	@SuppressWarnings("CloneDoesntCallSuperClone")
+	@Override
+	public NbtCompound clone() {
+		NbtCompound compound = NbtFactory.createRootCompound("tag");
+		compound.putAll(this);
+		compound.supported.putAll(this.supported);
+		return compound;
+	}
+
+	/**
 	 * Checks if the path exists in the tree.
 	 * <p>
 	 * Every element of the path (except the end) are assumed to be compounds. The
