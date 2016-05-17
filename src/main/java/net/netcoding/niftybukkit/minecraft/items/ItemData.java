@@ -20,8 +20,6 @@ public class ItemData extends ItemStack {
 
 	private final NbtCompound root;
 
-	private static final String GLOWING = "ITEMDATA_GLOW";
-
 	public ItemData(int id) {
 		this(id, (short)0);
 	}
@@ -83,7 +81,7 @@ public class ItemData extends ItemStack {
 			this.setItemMeta(meta);
 		}
 
-		this.getNbt().put(GLOWING, true);
+		//this.getNbt().put(GLOWING, true);
 		//System.out.println("GLOWING: " + this.getNbt().supported);
 	}
 
@@ -151,7 +149,21 @@ public class ItemData extends ItemStack {
 	}
 
 	public boolean hasGlow() {
-		return this.getNbt().containsKey(GLOWING) && this.getNbt().<Boolean>get(GLOWING);
+		if (MinecraftProtocol.isPost1_8()) {
+			if (this.getEnchantments().containsKey(Enchantment.DURABILITY)) {
+				if (this.getEnchantments().get(Enchantment.DURABILITY) == 0) {
+					if (this.getNbt().containsKey("HideFlags")) {
+						if (this.getItemMeta().hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS))
+							return true;
+					}
+				}
+			}
+		} else {
+			if (this.getNbt().containsKey("ench"))
+				return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -195,8 +207,6 @@ public class ItemData extends ItemStack {
 
 			this.setItemMeta(meta);
 		}
-
-		this.getNbt().remove(GLOWING);
 	}
 
 	public void setGlowing() {
