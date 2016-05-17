@@ -1,12 +1,14 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
+import com.google.common.primitives.Primitives;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -25,7 +27,8 @@ import java.util.UUID;
 @SuppressWarnings("unchecked")
 abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper {
 
-	protected final ConcurrentMap<String, Class<?>> supported = new ConcurrentMap<>();
+	private static final String SUPPORT = "support";
+	private static final List<String> DO_NOT_SHOW = Arrays.asList("display", "ench", "HideFlags", SUPPORT);
 	private final WrappedNativeCache cache = new WrappedNativeCache();
 	private final Map<String, Object> original;
 	private final Object handle;
@@ -35,23 +38,74 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		this.original = original;
 	}
 
+	private static WrappedList cleanClone(WrappedList list) {
+		NbtList cleanList = NbtFactory.createList();
+
+		for (Object value : list) {
+			Object newValue = value;
+
+			if (WrappedMap.class.isAssignableFrom(value.getClass()))
+				newValue = cleanClone((WrappedMap)value);
+
+			cleanList.add(newValue);
+		}
+
+		return cleanList;
+	}
+
+	protected static NbtCompound cleanClone(WrappedMap map) {
+		NbtCompound cleanMap = NbtFactory.createCompound();
+
+		for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (DO_NOT_SHOW.contains(entry.getKey())) continue;
+			Object value = entry.getValue();
+			value = (value.getClass().isArray() ? Arrays.deepToString((Object[])value) : value);
+
+			if (WrappedMap.class.isAssignableFrom(value.getClass()))
+				value = cleanClone((WrappedMap)value);
+
+			if (WrappedList.class.isAssignableFrom(value.getClass()))
+				value = cleanClone((WrappedList)value);
+
+			cleanMap.put(entry.getKey(), value);
+		}
+
+		return cleanMap;
+	}
+
+	private void addSupportKey(String key, Class<?> clazz) {
+		if (!this.original.containsKey(SUPPORT))
+			this.original.put(SUPPORT, NbtFactory.createCompound().getHandle());
+
+		NbtCompound support = NbtFactory.fromCompound(this.original.get(SUPPORT));
+
+		if (!support.containsKey(key))
+			support.put(key, NbtFactory.createCompound());
+
+		clazz = Primitives.wrap(clazz);
+		NbtCompound keyCompound = support.get(key);
+		keyCompound.put("package", clazz.getPackage().getName());
+		keyCompound.put("class", clazz.getSimpleName());
+	}
+
 	private Object adjustIncoming(String key, Object value) {
 		if (value == null)
 			return null;
 
-		if (WrappedList.class.isAssignableFrom(value.getClass()) || WrappedMap.class.isAssignableFrom(value.getClass()))
+		if (DO_NOT_SHOW.contains(key))
+			return null;
+
+		Class<?> clazz = Primitives.unwrap(value.getClass());
+
+		if (WrappedList.class.isAssignableFrom(clazz) || WrappedMap.class.isAssignableFrom(clazz))
 			return value;
 
-		Class<?> clazz = value.getClass();
-
-		if (!clazz.isPrimitive()) {
+		if (!NbtFactory.NBT_CLASS.inverse().containsKey(clazz)) {
 			if (clazz.isArray()) {
-				if (!int[].class.equals(clazz) && !byte[].class.equals(clazz)) {
-					this.supported.put(key, clazz);
-					value = NbtFactory.createList((Object[])value);
-				}
+				this.addSupportKey(key, clazz);
+				value = NbtFactory.createList((Object[])value);
 			} else {
-				this.supported.put(key, Reflection.getPrimitiveType(clazz));
+				this.addSupportKey(key, clazz);
 
 				if (value instanceof Boolean)
 					value = (byte) ((boolean) value ? 1 : 0);
@@ -72,7 +126,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 					compound.putAll((Map<String, Object>)value);
 					value = compound;
 				} else
-					this.supported.remove(key);
+					this.removeSupportKey(key);
 			}
 		}
 
@@ -83,8 +137,17 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (value == null)
 			return null;
 
-		if (this.supported.containsKey(key)) {
-			Class clazz = this.supported.get(key);
+		if (DO_NOT_SHOW.contains(key))
+			return null;
+
+		if (!this.original.containsKey(SUPPORT))
+			return value;
+
+		NbtCompound support = NbtFactory.fromCompound(this.original.get(SUPPORT));
+
+		if (support.containsKey(key)) {
+			NbtCompound keyCompound = (NbtCompound)support.get(key);
+			Class clazz = Primitives.unwrap(new Reflection(keyCompound.<String>get("class"), keyCompound.<String>get("package")).getClazz());
 
 			if (boolean.class.equals(clazz))
 				value = (byte)value > 0;
@@ -103,7 +166,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				if (!Map.class.equals(clazz)) {
 					Reflection refCollection = new Reflection(clazz);
 					Map<String, Object> map = (Map<String, Object>)refCollection.newInstance();
-					refCollection.invokeMethod("putAll", map, compound);
+					refCollection.invokeMethod("putAll", map, (Map)compound);
 					adjusted = true;
 				}
 
@@ -118,7 +181,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 					if (!Collection.class.equals(clazz)) {
 						Reflection refCollection = new Reflection(clazz);
 						Object collection = refCollection.newInstance();
-						refCollection.invokeMethod("addAll", collection, nbtList);
+						refCollection.invokeMethod("addAll", collection, (Collection)nbtList);
 						adjusted = true;
 					}
 
@@ -140,7 +203,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public boolean containsKey(Object key) {
-		return this.original.containsKey(key);
+		return !DO_NOT_SHOW.contains(key) && this.original.containsKey(key);
 	}
 
 	@Override
@@ -168,6 +231,16 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				return WrappedMap.this.remove(obj) != null;
 			}
 
+			@Override
+			public boolean removeAll(Collection<?> coll) {
+				int size = this.size();
+
+				for (Object item : coll)
+					WrappedMap.this.remove(item);
+
+				return this.size() < size;
+			}
+
 		};
 	}
 
@@ -183,11 +256,19 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public boolean isEmpty() {
-		return this.original.isEmpty();
+		return this.size() == 0;
 	}
 
 	private Iterator<Entry<String, Object>> iterator() {
-		final Iterator<Entry<String, Object>> proxy = this.original.entrySet().iterator();
+		ConcurrentSet<Entry<String, Object>> entrySet = new ConcurrentSet(this.original.entrySet());
+
+		for (Entry<String, Object> entry : entrySet) {
+			if (DO_NOT_SHOW.contains(entry.getKey()))
+				entrySet.remove(entry);
+
+		}
+
+		final Iterator<Entry<String, Object>> proxy = entrySet.iterator();
 
 		return new Iterator<Entry<String, Object>>() {
 
@@ -208,12 +289,10 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 			@Override
 			public void remove() {
 				if (this.current != null) {
-					WrappedMap.this.supported.remove(this.current.getKey());
+					WrappedMap.this.remove(this.current.getKey());
 					this.current = null;
+					WrappedMap.this.save();
 				}
-
-				proxy.remove();
-				WrappedMap.this.save();
 			}
 
 		};
@@ -227,6 +306,9 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public Object put(String key, Object value) {
+		if (DO_NOT_SHOW.contains(key))
+			return null;
+
 		Object oldValue = this.wrapOutgoing(key, this.original.put(key, this.unwrapIncoming(key, value)));
 		this.save();
 		return oldValue;
@@ -235,39 +317,61 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet())
-			this.wrapOutgoing(entry.getKey(), this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue())));
-		this.save();
-	}
+			this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue()));
 
-	public void putAll(WrappedMap map) {
-		this.putAll((Map<? extends String, ?>)map);
-		this.supported.putAll(map.supported);
 		this.save();
 	}
 
 	@Override
 	public Object remove(Object key) {
+		if (DO_NOT_SHOW.contains(key))
+			return null;
+
 		Object oldValue = this.wrapOutgoing(key, this.original.remove(key));
+		this.removeSupportKey(key);
 		this.save();
 		return oldValue;
 	}
 
-	@Override
-	public int size() {
-		return this.original.size();
+	private void removeSupportKey(Object key) {
+		NbtFactory.fromCompound(this.original.get(SUPPORT)).remove(key);
 	}
 
 	@Override
-	public String toString() {
-		List<String> output = new ArrayList<>();
+	public int size() {
+		int size = this.original.size();
 
-		for (Map.Entry<String, Object> entry : this.entrySet()) {
+		for (String key : this.keySet()) {
+			if (DO_NOT_SHOW.contains(key))
+				size--;
+		}
+
+		return size;
+	}
+
+	public final String serialize() {
+		List<String> output = new ArrayList<>();
+		WrappedMap clean = cleanClone(this);
+
+		for (Map.Entry<String, Object> entry : clean.entrySet()) {
 			Object value = entry.getValue();
 			value = (value.getClass().isArray() ? Arrays.deepToString((Object[])value) : value);
+
+			if (WrappedMap.class.isAssignableFrom(value.getClass()))
+				value = ((WrappedMap)value).serialize();
+
+			if (WrappedList.class.isAssignableFrom(value.getClass()))
+				value = ((WrappedList)value).serialize();
+
 			output.add(StringUtil.format("{0}:{1}", entry.getKey(), value));
 		}
 
 		return StringUtil.format("'{'{0}'}'", (output.isEmpty() ? "" : StringUtil.implode(", ", output)));
+	}
+
+	@Override
+	public String toString() {
+		return this.serialize();
 	}
 
 	/**
@@ -290,6 +394,49 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	 */
 	protected final Object unwrapIncoming(String key, Object wrapped) {
 		return NbtFactory.unwrapValue(key, this.adjustIncoming(key, wrapped));
+	}
+
+	@Override
+	public Collection<Object> values() {
+		return new AbstractCollection<Object>() {
+
+			public Iterator<Object> iterator() {
+				return new Iterator<Object>() {
+
+					private Iterator<Entry<String, Object>> i = WrappedMap.this.entrySet().iterator();
+
+					public boolean hasNext() {
+						return i.hasNext();
+					}
+
+					public Object next() {
+						return i.next().getValue();
+					}
+
+					public void remove() {
+						i.remove();
+					}
+
+				};
+			}
+
+			public int size() {
+				return WrappedMap.this.size();
+			}
+
+			public boolean isEmpty() {
+				return WrappedMap.this.isEmpty();
+			}
+
+			public void clear() {
+				WrappedMap.this.clear();
+			}
+
+			public boolean contains(Object value) {
+				return WrappedMap.this.containsValue(value);
+			}
+
+		};
 	}
 
 }
