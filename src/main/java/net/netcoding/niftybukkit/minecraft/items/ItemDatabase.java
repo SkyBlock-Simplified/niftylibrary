@@ -264,9 +264,7 @@ public class ItemDatabase extends BukkitHelper {
 					this.names.get(itemData).add(itemName);
 					Collections.sort(this.names.get(itemData), compare);
 				}
-			} catch (Exception ignore) {
-				this.getLog().console("Failed to parse line: {0}", line);
-			}
+			} catch (Exception ignore) { }
 		}
 	}
 
