@@ -3,10 +3,8 @@ package net.netcoding.niftybukkit.yaml.converters;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.minecraft.items.enchantments.EnchantmentData;
-import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
 import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
@@ -74,26 +72,18 @@ public class ItemStack extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		ItemData itemData = new ItemData((org.bukkit.inventory.ItemStack)obj);
-		ItemMeta itemMeta = itemData.getItemMeta();
+		ItemMeta itemMeta = itemData.getItemMeta(false);
 		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
 		ConcurrentLinkedMap<String, Object> meta = new ConcurrentLinkedMap<>();
-		ConcurrentLinkedMap<String, Integer> enchantments = new ConcurrentLinkedMap<>();
 		List<String> lore = new ArrayList<>();
 		saveMap.put("id", itemData.getType() + ((itemData.getDurability() > 0) ? ":" + itemData.getDurability() : ""));
 		saveMap.put("amount", itemData.getAmount());
-		meta.put("name", itemMeta.hasDisplayName() ? RegexUtil.replace(itemMeta.getDisplayName(), RegexUtil.VANILLA_PATTERN, "&$1") : "");
+		meta.put("name", itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "");
 
-		if (itemMeta.hasLore()) {
+		if (itemMeta.hasLore())
 			lore.addAll(itemMeta.getLore());
 
-			for (int i = 0; i < lore.size(); i++)
-				lore.set(i, RegexUtil.replace(lore.get(i), RegexUtil.VANILLA_PATTERN, "&$1"));
-		}
-
 		meta.put("lore", this.getConverter(List.class).toConfig(List.class, lore, null));
-
-		for (Map.Entry<Enchantment, Integer> enchantment : itemData.getEnchantments().entrySet())
-			enchantments.put(enchantment.getKey().getName(), enchantment.getValue());
 
 		if (MinecraftProtocol.isPost1_8()) {
 			ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
@@ -102,14 +92,19 @@ public class ItemStack extends Converter {
 				meta.put("flags", this.getConverter(Set.class).toConfig(Set.class, itemMeta.getItemFlags(), flagType));
 		}
 
-		if (!enchantments.isEmpty())
+		if (!itemMeta.getEnchants().isEmpty()) {
+			ConcurrentLinkedMap<String, Integer> enchantments = new ConcurrentLinkedMap<>();
+
+			for (Map.Entry<Enchantment, Integer> enchantment : itemMeta.getEnchants().entrySet())
+				enchantments.put(enchantment.getKey().getName(), enchantment.getValue());
+
 			meta.put("enchantments", this.getConverter(Map.class).toConfig(Map.class, enchantments, null));
+		}
 
 		saveMap.put("meta", meta);
-		NbtCompound clone = itemData.getNbt();
 
-		if (clone.notEmpty())
-			saveMap.put("nbt", this.getConverter(Map.class).toConfig(Map.class, clone, null));
+		if (itemData.getNbt().notEmpty())
+			saveMap.put("nbt", this.getConverter(Map.class).toConfig(Map.class, itemData.getNbt(), null));
 
 		return saveMap;
 	}
