@@ -8,10 +8,14 @@ import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -22,6 +26,10 @@ import java.util.UUID;
 import static net.netcoding.niftybukkit.minecraft.inventory.FakeInventory.getClickedItem;
 
 public class FakeItem {
+
+	static {
+		new ItemOpenerListener(NiftyBukkit.getPlugin());
+	}
 
 	private final UUID uniqueId = UUID.randomUUID();
 	private final transient FakeItemListener listener;
@@ -46,9 +54,13 @@ public class FakeItem {
 	}
 
 	public final void giveItemOpener(BukkitMojangProfile profile) {
+		this.giveItemOpener(profile, this.getItemOpenerSlot(), this.getItemOpener());
+	}
+
+	private void giveItemOpener(BukkitMojangProfile profile, int index, ItemData itemOpener) {
 		if (this.getItemOpener() != null) {
 			if (profile.getOfflinePlayer().isOnline())
-				profile.getOfflinePlayer().getPlayer().getInventory().setItem(this.getItemOpenerSlot(), this.getItemOpener());
+				profile.getOfflinePlayer().getPlayer().getInventory().setItem(index, itemOpener);
 		}
 	}
 
@@ -82,29 +94,50 @@ public class FakeItem {
 	public final void removeItemOpener(BukkitMojangProfile profile) {
 		if (profile.isOnlineLocally()) {
 			PlayerInventory inventory = profile.getOfflinePlayer().getPlayer().getInventory();
-			int slot = this.getItemOpenerSlot();
+			ItemStack[] contents = inventory.getContents();
 
-			if (this.isItemOpener(new ItemData(inventory.getItem(slot))))
-				inventory.setItem(slot, null);
+			for (int i = 0; i < 9; i++) {
+				if (contents[i] == null || Material.AIR == contents[i].getType())
+					continue;
+
+				if (this.isItemOpener(new ItemData(contents[i])))
+					inventory.setItem(i, null);
+			}
 		}
 	}
 
 	public void setItemOpener(ItemData itemData) {
-		this.setItemOpener(-1, itemData);
+		this.setItemOpener(itemData, null);
+	}
+
+	public void setItemOpener(ItemData itemData, BukkitMojangProfile profile) {
+		this.setItemOpener(-1, itemData, profile);
 	}
 
 	public void setItemOpener(int index, ItemData itemData) {
+		this.setItemOpener(index, itemData, null);
+	}
+
+	public void setItemOpener(int index, ItemData itemData, BukkitMojangProfile specific) {
+		ItemData itemOpener = null;
+
 		if (itemData != null && Material.AIR != itemData.getType()) {
-			this.itemOpenerSlot = index;
-			ItemData itemOpener = itemData.clone();
+			itemOpener = itemData.clone();
 			itemOpener.getNbt().putPath(NbtKeys.ITEMOPENER_UUID.getPath(), this.getUniqueId().toString());
 			itemOpener.getNbt().putPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath(), false);
-			this.itemOpener = itemOpener;
 		}
 
-		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
-			this.removeItemOpener(profile);
-			this.giveItemOpener(profile);
+		if (specific != null) {
+			this.removeItemOpener(specific);
+			this.giveItemOpener(specific, index, itemOpener);
+		} else {
+			this.itemOpenerSlot = index;
+			this.itemOpener = itemOpener;
+
+			for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
+				this.removeItemOpener(profile);
+				this.giveItemOpener(profile);
+			}
 		}
 	}
 
@@ -171,6 +204,52 @@ public class FakeItem {
 		}
 
 		@EventHandler
+		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+			FakeItem.this.giveItemOpener(event.getProfile());
+		}
+
+	}
+
+	private static class ItemOpenerListener extends BukkitListener {
+
+		public ItemOpenerListener(JavaPlugin plugin) {
+			super(plugin);
+		}
+
+		@EventHandler
+		public void onInventoryCreative(InventoryCreativeEvent event) {
+			ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+
+			if (isAnyItemOpener(itemData)) {
+				event.setCancelled(true);
+				event.setResult(Event.Result.DENY);
+			}
+		}
+
+		@EventHandler
+		public void onPlayerDeath(PlayerDeathEvent event) {
+			for (ItemStack itemStack : event.getDrops()) {
+				ItemData itemData = new ItemData(itemStack);
+
+				if (isAnyItemOpener(itemData))
+					itemStack.setAmount(0);
+			}
+		}
+
+		@EventHandler
+		public void onPlayerDropItem(PlayerDropItemEvent event) {
+			ItemData itemData = new ItemData(event.getItemDrop().getItemStack());
+
+			if (isAnyItemOpener(itemData)) {
+				if (itemData.getNbt().<Boolean>getPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath())) {
+					event.getItemDrop().remove();
+					itemData.setAmount(0);
+				} else
+					event.setCancelled(true);
+			}
+		}
+
+		@EventHandler(priority = EventPriority.LOWEST)
 		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
 			FakeItem.removeAllItemOpeners(event.getProfile());
 		}
