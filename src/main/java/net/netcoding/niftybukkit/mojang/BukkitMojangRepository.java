@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile> {
+public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile, OfflinePlayer> {
 
 	static {
 		new RepositoryListener();
@@ -34,6 +34,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 		return Bukkit.getServer().getOnlineMode() || NiftyBukkit.getBungeeHelper().isOnlineMode();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected final void processOfflineUsernames(List<BukkitMojangProfile> profiles, ConcurrentList<String> userList) {
 		for (String name : userList) {
@@ -127,6 +128,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	 * @return Profile associated with the given player.
 	 * @throws ProfileNotFoundException If unable to locate the players profile.
 	 */
+	@Override
 	public BukkitMojangProfile searchByPlayer(OfflinePlayer oplayer) throws ProfileNotFoundException {
 		try {
 			return this.searchByPlayer(Collections.singletonList(oplayer))[0];
@@ -149,6 +151,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
 	 */
+	@Override
 	public BukkitMojangProfile[] searchByPlayer(OfflinePlayer[] oplayers) throws ProfileNotFoundException {
 		return this.searchByPlayer(Arrays.asList(oplayers));
 	}
@@ -160,6 +163,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 	 * @return Profiles associated with the list of players.
 	 * @throws ProfileNotFoundException If unable to locate any players profile.
 	 */
+	@Override
 	public BukkitMojangProfile[] searchByPlayer(Collection<? extends OfflinePlayer> oplayers) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.OFFLINE_PLAYERS;
 		List<BukkitMojangProfile> profiles = new ArrayList<>();
