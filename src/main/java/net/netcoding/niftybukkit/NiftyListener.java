@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.minecraft.events.EnderCrystalPlaceEvent;
 import net.netcoding.niftybukkit.minecraft.events.InventoryCreativeNbtEvent;
 import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
+import net.netcoding.niftybukkit.minecraft.inventory.FakeItem;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
@@ -45,7 +46,7 @@ final class NiftyListener extends BukkitListener {
 			if (!FakeInventory.isOpenAnywhere(profile)) {
 				ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
 
-				if (!FakeInventory.isAnyItemOpener(itemData) && itemData.getNbt().notEmpty()) {
+				if (!FakeItem.isAnyItemOpener(itemData) && itemData.getNbt().notEmpty()) {
 					InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
 					this.getPlugin().getServer().getPluginManager().callEvent(myEvent);
 
