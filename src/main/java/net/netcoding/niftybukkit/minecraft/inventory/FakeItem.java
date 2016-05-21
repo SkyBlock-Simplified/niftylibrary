@@ -2,6 +2,7 @@ package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
+import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.events.ItemInteractEvent;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
@@ -12,6 +13,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
@@ -42,6 +45,13 @@ public class FakeItem {
 		return this.uniqueId;
 	}
 
+	public final void giveItemOpener(BukkitMojangProfile profile) {
+		if (this.getItemOpener() != null) {
+			if (profile.getOfflinePlayer().isOnline())
+				profile.getOfflinePlayer().getPlayer().getInventory().setItem(this.getItemOpenerSlot(), this.getItemOpener());
+		}
+	}
+
 	public static boolean isAnyItemOpener(ItemData itemData) {
 		return itemData.getNbt().containsPath(NbtKeys.ITEMOPENER_UUID.getPath());
 	}
@@ -52,6 +62,31 @@ public class FakeItem {
 
 	public final boolean isItemOpenerDestructable() {
 		return this.itemOpener != null && this.itemOpener.getNbt().<Boolean>getPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath());
+	}
+
+	public static void removeAllItemOpeners(BukkitMojangProfile profile) {
+		if (profile.isOnlineLocally()) {
+			PlayerInventory inventory = profile.getOfflinePlayer().getPlayer().getInventory();
+			ItemStack[] contents = inventory.getContents();
+
+			for (int i = 0; i < 9; i++) {
+				if (contents[i] == null || Material.AIR == contents[i].getType())
+					continue;
+
+				if (isAnyItemOpener(new ItemData(contents[i])))
+					inventory.setItem(i, null);
+			}
+		}
+	}
+
+	public final void removeItemOpener(BukkitMojangProfile profile) {
+		if (profile.isOnlineLocally()) {
+			PlayerInventory inventory = profile.getOfflinePlayer().getPlayer().getInventory();
+			int slot = this.getItemOpenerSlot();
+
+			if (this.isItemOpener(new ItemData(inventory.getItem(slot))))
+				inventory.setItem(slot, null);
+		}
 	}
 
 	public void setItemOpener(ItemData itemData) {
@@ -65,6 +100,11 @@ public class FakeItem {
 			itemOpener.getNbt().putPath(NbtKeys.ITEMOPENER_UUID.getPath(), this.getUniqueId().toString());
 			itemOpener.getNbt().putPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath(), false);
 			this.itemOpener = itemOpener;
+		}
+
+		for (BukkitMojangProfile profile : NiftyBukkit.getBungeeHelper().getPlayerList()) {
+			this.removeItemOpener(profile);
+			this.giveItemOpener(profile);
 		}
 	}
 
@@ -130,6 +170,10 @@ public class FakeItem {
 			}
 		}
 
+		@EventHandler
+		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+			FakeItem.removeAllItemOpeners(event.getProfile());
+		}
 
 	}
 
