@@ -4,8 +4,8 @@ import net.netcoding.niftycore.util.StringUtil;
 
 enum NbtKeys {
 
-	ITEMOPENER_UUID,
-	ITEMOPENER_DESTRUCTABLE,
+	ITEMOPENER_UUID("fakeitem"),
+	ITEMOPENER_DESTRUCTABLE("fakeitem"),
 	PAGING,
 	SIGNATURE,
 	TRADE_COMPLETE,
@@ -16,7 +16,12 @@ enum NbtKeys {
 	private final String path;
 
 	NbtKeys() {
-		this.path = StringUtil.format("fakeinv.{0}", name().toLowerCase().replaceAll("_", "."));
+		this("fakeinv");
+	}
+
+	NbtKeys(String key) {
+		this.path = StringUtil.format("{0}.{1}", key, name().toLowerCase().replaceAll("_", "."));
+
 	}
 
 	public String getPath() {
