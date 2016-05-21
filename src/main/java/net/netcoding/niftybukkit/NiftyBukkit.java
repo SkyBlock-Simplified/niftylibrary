@@ -1,11 +1,9 @@
 package net.netcoding.niftybukkit;
 
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
-import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
 import net.netcoding.niftybukkit.minecraft.items.ItemDatabase;
 import net.netcoding.niftybukkit.minecraft.items.enchantments.EnchantmentDatabase;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeHelper;
-import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import net.netcoding.niftybukkit.mojang.BukkitMojangRepository;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
@@ -51,9 +49,6 @@ public final class NiftyBukkit extends BukkitPlugin {
 
 	@Override
 	public void onDisable() {
-		for (BukkitMojangProfile profile : getBungeeHelper().getPlayerList())
-			FakeInventory.removeAllItemOpeners(profile);
-
 		bungeeHelper.unregister();
 	}
 
