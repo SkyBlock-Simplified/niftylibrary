@@ -72,7 +72,7 @@ public class ItemStack extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		ItemData itemData = new ItemData((org.bukkit.inventory.ItemStack)obj);
-		ItemMeta itemMeta = itemData.getItemMeta(false);
+		ItemMeta itemMeta = itemData.getItemMeta(true);
 		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
 		ConcurrentLinkedMap<String, Object> meta = new ConcurrentLinkedMap<>();
 		List<String> lore = new ArrayList<>();
