@@ -25,9 +25,10 @@ final class NiftyCommand extends BukkitCommand {
     NiftyCommand(JavaPlugin plugin) {
 		super(plugin, "nifty");
 		this.setMinimumArgsLength(0);
-	    this.setMaximumArgsLength(1);
+	    this.setMaximumArgsLength(2);
 		this.editUsage(1, "search", "<player|uuid>");
 		this.editUsage(1, "lookup", "<player|uuid>");
+	    this.editUsage(1, "uuid", "<player|uuid>");
 	}
 
 	@Override
