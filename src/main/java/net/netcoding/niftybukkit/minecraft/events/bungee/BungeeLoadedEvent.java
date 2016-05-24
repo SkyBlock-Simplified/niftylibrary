@@ -1,14 +1,13 @@
-package net.netcoding.niftybukkit.minecraft.events;
+package net.netcoding.niftybukkit.minecraft.events.bungee;
+
+import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
-
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 public class BungeeLoadedEvent extends Event {
 

@@ -1,4 +1,4 @@
-package net.netcoding.niftybukkit.minecraft.events;
+package net.netcoding.niftybukkit.minecraft.events.bungee;
 
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 
