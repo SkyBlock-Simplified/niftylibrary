@@ -149,7 +149,7 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public int getErrorCount() {
-			return NiftyBukkit.getPluginCache(this.getPlugin().getName()).size();
+			return NiftyBukkit.getPluginCache(this.pluginName).size();
 		}
 
 		public String getErrors() {
