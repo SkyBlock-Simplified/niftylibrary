@@ -4,6 +4,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitCommand;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.NumberUtil;
 import org.bukkit.ChatColor;
@@ -24,6 +25,7 @@ final class NiftyCommand extends BukkitCommand {
     NiftyCommand(JavaPlugin plugin) {
 		super(plugin, "nifty");
 		this.setMinimumArgsLength(0);
+	    this.setMaximumArgsLength(1);
 		this.editUsage(1, "search", "<player|uuid>");
 		this.editUsage(1, "lookup", "<player|uuid>");
 	}
@@ -35,7 +37,7 @@ final class NiftyCommand extends BukkitCommand {
 		if (ListUtil.isEmpty(args) || NumberUtil.isInt(args[0])) {
 			int rounded = NumberUtil.roundUp(nameCache.size(), 5);
 			int pages = rounded / 5;
-			int page = args.length > 1 ? NumberUtil.isInt(args[0]) ? nameCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0 : 0;
+			int page = args.length == 1 ? NumberUtil.isInt(args[0]) ? nameCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0 : 0;
 
 			if (page <= 0)
 				page = 1;
@@ -80,17 +82,23 @@ final class NiftyCommand extends BukkitCommand {
 
 				NiftyPluginInfo info = new NiftyPluginInfo(pluginName);
 
-				if (info.exists()) {
+				if ("Bukkit".equals(pluginName)) {
 					this.getLog().message(sender, "[{{0}} Information]", pluginName);
-					this.getLog().message(sender, "Version: {{0}}", info.getVersion());
-					this.getLog().message(sender, "Status: {{0}}", info.getStatus());
+					this.getLog().message(sender, "Version: {{0}}", MinecraftProtocol.getCurrentVersion());
 					this.getLog().message(sender, "Errors: {{0}}", info.getErrors());
-					this.getLog().message(sender, "Helpers:");
-					this.getLog().message(sender, "   BukkitPlugin: {{0}}", info.getUsingBukkitPlugin());
-					this.getLog().message(sender, "   Commands: {{0}}/{{1}}", info.getBukkitCommands(), info.getTotalCommands());
-					this.getLog().message(sender, "   Listeners: {{0}}/{{1}}", info.getBukkitListeners(), info.getTotalListeners());
-				} else
-					this.getLog().message(sender, "{{0}} is an invalid plugin name!", pluginName);
+				} else {
+					if (info.exists()) {
+						this.getLog().message(sender, "[{{0}} Information]", pluginName);
+						this.getLog().message(sender, "Version: {{0}}", info.getVersion());
+						this.getLog().message(sender, "Status: {{0}}", info.getStatus());
+						this.getLog().message(sender, "Errors: {{0}}", info.getErrors());
+						this.getLog().message(sender, "Helpers:");
+						this.getLog().message(sender, "   BukkitPlugin: {{0}}", info.getUsingBukkitPlugin());
+						this.getLog().message(sender, "   Commands: {{0}}/{{1}}", info.getBukkitCommands(), info.getTotalCommands());
+						this.getLog().message(sender, "   Listeners: {{0}}/{{1}}", info.getBukkitListeners(), info.getTotalListeners());
+					} else
+						this.getLog().message(sender, "{{0}} is an invalid plugin name!", pluginName);
+				}
 			}
 		}
 	}
@@ -113,10 +121,10 @@ final class NiftyCommand extends BukkitCommand {
 
 	private class NiftyPluginInfo {
 
-		private final transient JavaPlugin plugin;
+		private final transient String pluginName;
 
 		public NiftyPluginInfo(String pluginName) {
-			this.plugin = (JavaPlugin)NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(pluginName);
+			this.pluginName = pluginName;
 		}
 
 		public boolean exists() {
@@ -148,7 +156,7 @@ final class NiftyCommand extends BukkitCommand {
 		}
 
 		public JavaPlugin getPlugin() {
-			return this.plugin;
+			return (JavaPlugin)NiftyBukkit.getPlugin().getServer().getPluginManager().getPlugin(pluginName);
 		}
 
 		public String getStatus() {
