@@ -226,7 +226,7 @@ public class NbtFactory {
 					List<Object> params = new ArrayList<>();
 					params.add(dataInput);
 
-					if (!MinecraftProtocol.isPre1_8()) {
+					if (MinecraftProtocol.isPost1_8()) {
 						params.add(512);
 						params.add(NBT_READ_NOLIMIT);
 					}
