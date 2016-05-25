@@ -1,5 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.signs;
 
+import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import org.bukkit.Location;
@@ -27,6 +28,10 @@ public class SignInfo {
 		this.sign = sign;
 		this.lines = sign.getLines();
 		this.modified = sign.getLines().clone();
+	}
+
+	static SignInfo fromCompound(World world, NbtCompound compound) {
+		return new SignInfo((Sign)new Location(world, compound.<Integer>get("x"), compound.<Integer>get("y"), compound.<Integer>get("z")).getBlock().getState());
 	}
 
 	/**
