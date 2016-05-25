@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -337,17 +338,17 @@ public class SignMonitor {
 					if (SIGN_ITEMS.contains(block.getType())) {
 						Sign sign = (Sign)block.getState();
 
-						for (SignListener listener : SignMonitor.this.listeners.keySet()) {
-							for (int i = 0; i < 4; i++) {
-								for (String key : SignMonitor.this.listeners.get(listener)) {
-									if (sign.getLine(i).toLowerCase().contains(key)) {
+						for (Map.Entry<SignListener, List<String>> entry : SignMonitor.this.listeners.entrySet()) {
+							for (String line : sign.getLines()) {
+								for (String key : entry.getValue()) {
+									if (line.toLowerCase().contains(key)) {
 										SignInfo signInfo = SignMonitor.this.signLocations.get(location);
 
 										if (!SignMonitor.this.signLocations.containsKey(location))
 											SignMonitor.this.signLocations.put(location, signInfo = new SignInfo(sign));
 
 										SignUpdateEvent updateEvent = new SignUpdateEvent(profile, signInfo, key);
-										listener.onSignUpdate(updateEvent);
+										entry.getKey().onSignUpdate(updateEvent);
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
 											SignPacket outgoing = new SignPacket(signUpdatePacket.shallowClone());
@@ -410,14 +411,12 @@ public class SignMonitor {
 					if (SignMonitor.this.signLocations.containsKey(location)) {
 						SignInfo signInfo = SignMonitor.this.signLocations.get(location);
 
-						for (SignListener listener : SignMonitor.this.listeners.keySet()) {
-							List<String> keys = SignMonitor.this.listeners.get(listener);
-
+						for (Map.Entry<SignListener, List<String>> entry : SignMonitor.this.listeners.entrySet()) {
 							for (String line : signInfo.getLines()) {
-								for (String key : keys) {
+								for (String key : entry.getValue()) {
 									if (line.toLowerCase().contains(key)) {
 										SignBreakEvent breakEvent = new SignBreakEvent(profile, signInfo, key);
-										listener.onSignBreak(breakEvent);
+										entry.getKey().onSignBreak(breakEvent);
 
 										if (breakEvent.isCancelled()) {
 											event.setCancelled(true);
@@ -482,15 +481,13 @@ public class SignMonitor {
 							if (SIGN_ITEMS.contains(block.getType())) {
 								SignInfo signInfo = SignMonitor.this.signLocations.get(block.getLocation());
 
-								for (SignListener listener : SignMonitor.this.listeners.keySet()) {
-									List<String> keys = SignMonitor.this.listeners.get(listener);
-
+								for (Map.Entry<SignListener, List<String>> entry : SignMonitor.this.listeners.entrySet()) {
 									for (String line : signInfo.getLines()) {
-										for (String key : keys) {
+										for (String key : entry.getValue()) {
 											if (line.toLowerCase().contains(key)) {
 												BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 												SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
-												listener.onSignInteract(interactEvent);
+												entry.getKey().onSignInteract(interactEvent);
 												Sign sign = (Sign)block.getState();
 
 												for (int j = 0; j < 4; j++)
@@ -517,20 +514,19 @@ public class SignMonitor {
 		public void onProfileJoin(ProfileJoinEvent event) {
 			SignMonitor.this.sendSignUpdate(event.getProfile());
 
-			if (IS_PRE_1_9_3) {
+			if (IS_POST_1_9_3) {
 				Player player = event.getProfile().getOfflinePlayer().getPlayer();
 				List<NbtCompound> compounds = CHUNK_ADJUSTMENT.get(player.getUniqueId());
 
 				for (NbtCompound compound : compounds) {
 					SignInfo signInfo = SignInfo.fromCompound(player.getWorld(), compound);
 
-					for (SignListener listener : SignMonitor.this.listeners.keySet()) {
-						List<String> keys = SignMonitor.this.listeners.get(listener);
-
+					for (Map.Entry<SignListener, List<String>> entry : SignMonitor.this.listeners.entrySet()) {
 						for (String line : signInfo.getLines()) {
-							for (String key : keys) {
-								if (line.toLowerCase().contains(key))
+							for (String key : entry.getValue()) {
+								if (line.toLowerCase().contains(key)) {
 									SignMonitor.this.sendSignUpdate(player, key, signInfo);
+								}
 							}
 						}
 					}
