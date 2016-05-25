@@ -7,15 +7,22 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.InventoryWorkaround;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtCompound;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignBreakEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignCreateEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignInteractEvent;
 import net.netcoding.niftybukkit.minecraft.signs.events.SignUpdateEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftybukkit.reflection.MinecraftPackage;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
+import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -43,6 +50,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,6 +58,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SignMonitor {
 
+	private static final Reflection NMS_MAP_CHUNK = new Reflection("PacketPlayOutMapChunk", MinecraftPackage.MINECRAFT_SERVER);
+	private static final ConcurrentMap<UUID, ConcurrentList<NbtCompound>> CHUNK_ADJUSTMENT = new ConcurrentMap<>();
+	static final boolean IS_PRE_1_9_3 = MinecraftProtocol.getCurrentProtocol() < MinecraftProtocol.v1_9_3_pre1.getProtocol();
+	static final boolean IS_POST_1_9_3 = !IS_PRE_1_9_3;
 	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<Location, SignInfo> signLocations = new ConcurrentHashMap<>();
 	private final transient BukkitSignListener signListener;
@@ -78,13 +90,41 @@ public class SignMonitor {
 		Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)
 	);
 
+	static {
+		if (IS_POST_1_9_3) {
+			NiftyBukkit.getProtocolManager().addPacketListener(new PacketAdapter(NiftyBukkit.getPlugin(), PacketType.Play.Server.MAP_CHUNK) {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void onPacketSending(PacketEvent event) {
+					List<Object> handles = (List<Object>) NMS_MAP_CHUNK.getValue(List.class, event.getPacket().getHandle());
+
+					for (Object handle : handles) {
+						NbtCompound compound = NbtFactory.fromCompound(handle);
+
+						if ("Sign".equals(compound.get("id"))) {
+							UUID uniqueId = event.getPlayer().getUniqueId();
+							ConcurrentList<NbtCompound> list;
+
+							if (!CHUNK_ADJUSTMENT.containsKey(uniqueId))
+								CHUNK_ADJUSTMENT.put(uniqueId, list = new ConcurrentList<>());
+							else
+								list = CHUNK_ADJUSTMENT.get(uniqueId);
+
+							list.add(compound);
+						}
+					}
+				}
+			});
+		}
+	}
+
 	/**
 	 * Create new sign monitor instance.
 	 *
 	 * @param plugin Java plugin to run it for.
 	 */
 	public SignMonitor(JavaPlugin plugin) {
-		signListener = new BukkitSignListener(plugin);
+		this.signListener = new BukkitSignListener(plugin);
 	}
 
 	/**
@@ -130,16 +170,14 @@ public class SignMonitor {
 			Block sideBlock = block.getRelative(direction);
 			Material sideMaterial = sideBlock.getType();
 
-			if (isAttachable(sideBlock)) {
-				if (isAttachedTo(sideBlock, block)) {
-					if (SIGN_ITEMS.contains(sideMaterial))
-						locations.add(sideBlock.getLocation());
+			if (isAttachedTo(sideBlock, block)) {
+				if (SIGN_ITEMS.contains(sideMaterial))
+					locations.add(sideBlock.getLocation());
 
-					Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
+				Block sideUpBlock = sideBlock.getRelative(BlockFace.UP);
 
-					if (GRAVITY_ITEMS.contains(sideUpBlock.getType()))
-						locations.addAll(getSignsThatWouldFall(sideUpBlock));
-				}
+				if (GRAVITY_ITEMS.contains(sideUpBlock.getType()))
+					locations.addAll(getSignsThatWouldFall(sideUpBlock));
 			}
 		}
 
@@ -169,8 +207,12 @@ public class SignMonitor {
 	 * @return True if attached, otherwise false.
 	 */
 	public static boolean isAttachedTo(Block isThisAttached, Block toThisBlock) {
-		Attachable attachable = (Attachable)isThisAttached.getState().getData();
-		return isThisAttached.getRelative(attachable.getAttachedFace()).equals(toThisBlock);
+		if (isAttachable(isThisAttached)) {
+			Attachable attachable = (Attachable)isThisAttached.getState().getData();
+			return isThisAttached.getRelative(attachable.getAttachedFace()).equals(toThisBlock);
+		}
+
+		return false;
 	}
 
 	/**
@@ -258,8 +300,11 @@ public class SignMonitor {
 
 		for (String line : signInfo.getLines()) {
 			if (StringUtil.isEmpty(key) || line.toLowerCase().contains(key.toLowerCase())) {
-				SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(PacketType.Play.Server.UPDATE_SIGN));
-				outgoing.setPosition(new Vector(location.getX(), location.getY(), location.getZ()));
+				SignPacket outgoing = new SignPacket(NiftyBukkit.getProtocolManager().createPacket(IS_PRE_1_9_3 ? PacketType.Play.Server.UPDATE_SIGN : PacketType.Play.Server.TILE_ENTITY_DATA));
+				outgoing.setPosition(new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+
+				if (IS_POST_1_9_3)
+					outgoing.getPacket().getIntegers().write(0, 9);
 
 				try {
 					outgoing.setLines(signInfo.getLines());
@@ -279,25 +324,29 @@ public class SignMonitor {
 	public void start() {
 		if (!this.isListening()) {
 			this.listening = true;
-			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.signListener.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Server.UPDATE_SIGN) {
+
+			NiftyBukkit.getProtocolManager().addPacketListener(this.adapter = new PacketAdapter(this.signListener.getPlugin(), ListenerPriority.HIGH, (IS_PRE_1_9_3 ? PacketType.Play.Server.UPDATE_SIGN : PacketType.Play.Server.TILE_ENTITY_DATA)) {
 				@Override
 				public void onPacketSending(PacketEvent event) {
 					PacketContainer signUpdatePacket = event.getPacket();
 					SignPacket incoming = new SignPacket(signUpdatePacket);
-					BukkitMojangProfile bukkitProfile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
-					Location location = new Location(bukkitProfile.getOfflinePlayer().getPlayer().getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
+					BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
+					Location location = new Location(profile.getOfflinePlayer().getPlayer().getWorld(), incoming.getPosition().getBlockX(), incoming.getPosition().getBlockY(), incoming.getPosition().getBlockZ());
 					Block block = location.getBlock();
 
 					if (SIGN_ITEMS.contains(block.getType())) {
 						Sign sign = (Sign)block.getState();
 
-						for (SignListener listener : listeners.keySet()) {
+						for (SignListener listener : SignMonitor.this.listeners.keySet()) {
 							for (int i = 0; i < 4; i++) {
-								for (String key : listeners.get(listener)) {
+								for (String key : SignMonitor.this.listeners.get(listener)) {
 									if (sign.getLine(i).toLowerCase().contains(key)) {
-										SignInfo signInfo = signLocations.get(location);
-										if (!signLocations.containsKey(location)) signLocations.put(location, (signInfo = new SignInfo(sign)));
-										SignUpdateEvent updateEvent = new SignUpdateEvent(bukkitProfile, signInfo, key);
+										SignInfo signInfo = SignMonitor.this.signLocations.get(location);
+
+										if (!SignMonitor.this.signLocations.containsKey(location))
+											SignMonitor.this.signLocations.put(location, signInfo = new SignInfo(sign));
+
+										SignUpdateEvent updateEvent = new SignUpdateEvent(profile, signInfo, key);
 										listener.onSignUpdate(updateEvent);
 
 										if (!updateEvent.isCancelled() && updateEvent.isModified()) {
@@ -310,7 +359,7 @@ public class SignMonitor {
 							}
 						}
 					} else
-						signLocations.remove(location);
+						SignMonitor.this.signLocations.remove(location);
 				}
 			});
 		}
@@ -465,8 +514,28 @@ public class SignMonitor {
 		}
 
 		@EventHandler
-		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+		public void onProfileJoin(ProfileJoinEvent event) {
 			SignMonitor.this.sendSignUpdate(event.getProfile());
+
+			if (IS_PRE_1_9_3) {
+				Player player = event.getProfile().getOfflinePlayer().getPlayer();
+				List<NbtCompound> compounds = CHUNK_ADJUSTMENT.get(player.getUniqueId());
+
+				for (NbtCompound compound : compounds) {
+					SignInfo signInfo = SignInfo.fromCompound(player.getWorld(), compound);
+
+					for (SignListener listener : SignMonitor.this.listeners.keySet()) {
+						List<String> keys = SignMonitor.this.listeners.get(listener);
+
+						for (String line : signInfo.getLines()) {
+							for (String key : keys) {
+								if (line.toLowerCase().contains(key))
+									SignMonitor.this.sendSignUpdate(player, key, signInfo);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		@EventHandler(priority = EventPriority.LOW)
