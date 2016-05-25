@@ -1,6 +1,9 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
 import com.google.common.primitives.Primitives;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
@@ -207,6 +210,10 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		}
 
 		this.save();
+	}
+
+	public void putJson(JsonObject json) {
+		this.putAll(new Gson().<Map<String, Object>>fromJson(json.toString(), new TypeToken<Map<String, Object>>(){}.getType()));
 	}
 
 	@Override
