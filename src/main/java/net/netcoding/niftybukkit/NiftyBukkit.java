@@ -24,14 +24,12 @@ public final class NiftyBukkit extends BukkitPlugin {
 	private static transient ItemDatabase itemDatabase;
 	private static transient EnchantmentDatabase enchantmentDatabase;
 	private static transient BukkitMojangRepository repository;
-	private static transient BungeeHelper bungeeHelper;
 
 	@Override
 	public void onEnable() {
 		this.getLog().console("Registering Helpers");
 		plugin = this;
 		repository = new BukkitMojangRepository();
-		bungeeHelper = new BungeeHelper(this, BungeeHelper.NIFTY_CHANNEL, true);
 
 		PLUGINS.put("Bukkit", new ConcurrentList<String>());
 		Bukkit.getLogger().addHandler(new LogHandler());
@@ -47,13 +45,8 @@ public final class NiftyBukkit extends BukkitPlugin {
 		(enchantmentDatabase = new EnchantmentDatabase(this)).reload();
 	}
 
-	@Override
-	public void onDisable() {
-		bungeeHelper.unregister();
-	}
-
 	public static BungeeHelper getBungeeHelper() {
-		return bungeeHelper;
+		return BungeeHelper.getInstance();
 	}
 
 	public static EnchantmentDatabase getEnchantmentDatabase() {
