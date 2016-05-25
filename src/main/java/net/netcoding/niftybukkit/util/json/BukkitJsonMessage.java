@@ -1,6 +1,7 @@
 package net.netcoding.niftybukkit.util.json;
 
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import net.netcoding.niftybukkit.minecraft.nbt.NbtFactory;
 import net.netcoding.niftybukkit.minecraft.nbt.NbtItemCompound;
 import net.netcoding.niftybukkit.reflection.BukkitReflection;
 import net.netcoding.niftybukkit.reflection.MinecraftPackage;
@@ -19,7 +20,6 @@ public class BukkitJsonMessage extends JsonMessage<BukkitJsonMessage> {
 	private static final BukkitReflection NMS_ACHIEVEMENT = new BukkitReflection("Achievement", MinecraftPackage.MINECRAFT_SERVER);
 	private static final BukkitReflection NMS_STATISTIC = new BukkitReflection("Statistic", MinecraftPackage.MINECRAFT_SERVER);
 	private static final BukkitReflection CRAFT_STATISTIC = new BukkitReflection("CraftStatistic", MinecraftPackage.CRAFTBUKKIT);
-	private static final BukkitReflection NBT_TAG_COMPOUND = BukkitReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 
 	/**
 	 * Creates a JSON message without text.
@@ -155,7 +155,7 @@ public class BukkitJsonMessage extends JsonMessage<BukkitJsonMessage> {
 	 */
 	public BukkitJsonMessage itemTooltip(final ItemStack itemStack) {
 		NbtItemCompound itemCompound = (NbtItemCompound)new ItemData(itemStack).getNbt();
-		return itemTooltip(NBT_TAG_COMPOUND.invokeMethod(NBT_TAG_COMPOUND.getClazz(), itemCompound.getHandle(), itemCompound).toString());
+		return itemTooltip(NbtFactory.NBT_TAG_COMPOUND.invokeMethod(NbtFactory.NBT_TAG_COMPOUND.getClazz(), itemCompound.getHandle(), itemCompound).toString());
 	}
 
 }
