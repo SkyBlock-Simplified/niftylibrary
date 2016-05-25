@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit.mojang;
 import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.events.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.mojang.MojangRepository;
@@ -213,7 +213,7 @@ public class BukkitMojangRepository extends MojangRepository<BukkitMojangProfile
 		}
 
 		@EventHandler
-		public void onPlayerPostLogin(final PlayerPostLoginEvent event) {
+		public void onProfileJoin(final ProfileJoinEvent event) {
 			if (NiftyBukkit.getBungeeHelper().isDetected()) {
 				UUID uuid = event.getProfile().getUniqueId();
 				String name = event.getProfile().getName();
