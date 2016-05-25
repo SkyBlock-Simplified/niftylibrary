@@ -2,24 +2,10 @@ package net.netcoding.niftybukkit.minecraft.nbt;
 
 import com.google.common.primitives.Primitives;
 import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractCollection;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a map that wraps another map and automatically
@@ -55,45 +41,12 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	}
 
 	private Object adjustIncoming(String key, Object value) {
-		if (value == null)
-			return null;
+		Object adjusted = NbtFactory.adjustIncoming(value);
 
-		Class<?> clazz = Primitives.unwrap(value.getClass());
+		if (!Objects.equals(adjusted, value))
+			this.addSupportKey(key, Primitives.unwrap(value.getClass()));
 
-		if (WrappedList.class.isAssignableFrom(clazz) || WrappedMap.class.isAssignableFrom(clazz))
-			return value;
-
-		if (!NbtFactory.NBT_CLASS.inverse().containsKey(clazz)) {
-			if (clazz.isArray()) {
-				this.addSupportKey(key, clazz);
-				value = NbtFactory.createList((Object[])value);
-			} else {
-				this.addSupportKey(key, clazz);
-
-				if (value instanceof Boolean)
-					value = (byte) ((boolean) value ? 1 : 0);
-				else if (CharSequence.class.isAssignableFrom(clazz))
-					value = value.toString();
-				else if (UUID.class.isAssignableFrom(clazz))
-					value = value.toString();
-				else if (BigDecimal.class.isAssignableFrom(clazz))
-					value = ((BigDecimal)value).doubleValue();
-				else if (BigInteger.class.isAssignableFrom(clazz))
-					value = ((BigInteger)value).longValue();
-				else if (clazz.isEnum())
-					value = ((Enum)value).name();
-				else if (Collection.class.isAssignableFrom(clazz))
-					value = NbtFactory.createList((Collection<?>)value);
-				else if (Map.class.isAssignableFrom(clazz)) {
-					NbtCompound compound = NbtFactory.createCompound();
-					compound.putAll((Map<String, Object>)value);
-					value = compound;
-				} else
-					this.removeSupportKey(key);
-			}
-		}
-
-		return value;
+		return adjusted;
 	}
 
 	private Object adjustOutgoing(Object key, Object value) {
@@ -111,48 +64,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (support.containsKey(key)) {
 			NbtCompound keyCompound = (NbtCompound)support.get(key);
 			Class clazz = Primitives.unwrap(new Reflection(keyCompound.<String>get("class"), keyCompound.<String>get("package")).getClazz());
-
-			if (boolean.class.equals(clazz))
-				value = (byte)value > 0;
-			else if (UUID.class.equals(clazz))
-				value = UUID.fromString(value.toString());
-			else if (BigDecimal.class.equals(clazz))
-				value = BigDecimal.valueOf((double)value);
-			else if (BigInteger.class.equals(clazz))
-				value = BigInteger.valueOf((long)value);
-			else if (clazz.isEnum())
-				value = Enum.valueOf(clazz, value.toString());
-			else if (Map.class.isAssignableFrom(clazz)) {
-				NbtCompound compound = (NbtCompound)value;
-				boolean adjusted = false;
-
-				if (!Map.class.equals(clazz)) {
-					Reflection refCollection = new Reflection(clazz);
-					Map<String, Object> map = (Map<String, Object>)refCollection.newInstance();
-					refCollection.invokeMethod("putAll", map, (Map)compound);
-					adjusted = true;
-				}
-
-				if (!adjusted)
-					value = compound;
-			} else if (Collection.class.isAssignableFrom(clazz) || clazz.isArray()) {
-				NbtList nbtList = (NbtList)value;
-
-				if (!clazz.isArray()) {
-					boolean adjusted = false;
-
-					if (!Collection.class.equals(clazz)) {
-						Reflection refCollection = new Reflection(clazz);
-						Object collection = refCollection.newInstance();
-						refCollection.invokeMethod("addAll", collection, (Collection)nbtList);
-						adjusted = true;
-					}
-
-					if (!adjusted)
-						value = nbtList;
-				} else
-					value = ListUtil.toArray(nbtList, clazz.getComponentType());
-			}
+			value = NbtFactory.adjustOutgoing(value, clazz);
 		}
 
 		return value;

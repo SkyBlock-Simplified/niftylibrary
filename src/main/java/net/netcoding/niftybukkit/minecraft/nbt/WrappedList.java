@@ -1,10 +1,13 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
+import com.google.common.primitives.Primitives;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a list that wraps another list and converts elements
@@ -13,14 +16,23 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 
-	private boolean isBoolList = false;
 	private final WrappedNativeCache cache = new WrappedNativeCache();
 	private final List<T> original;
 	private final Object handle;
+	private Class<?> support;
 
 	public WrappedList(Object handle, List<T> original) {
 		this.handle = handle;
 		this.original = original;
+	}
+
+	private Object adjustIncoming(Object value) {
+		Object adjusted = NbtFactory.adjustIncoming(value);
+
+		if (!Objects.equals(adjusted, value))
+			this.support = Primitives.unwrap(value.getClass());
+
+		return adjusted;
 	}
 
 	@Override
@@ -141,14 +153,11 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	protected T wrapOutgoing(Object value) {
-		return (T)this.cache.wrap(this.isBoolList ? (byte)value > 0 : value);
+		return (T)NbtFactory.adjustOutgoing(this.cache.wrap(value), this.support);
 	}
 
 	protected T unwrapIncoming(Object wrapped) {
-		if ((wrapped instanceof Boolean) && !this.isBoolList)
-			this.isBoolList = true;
-
-		return (T)NbtFactory.unwrapValue("", (this.isBoolList ? (byte)((boolean)wrapped ? 1 : 0) : wrapped));
+		return (T)NbtFactory.unwrapValue("", this.adjustIncoming(wrapped));
 	}
 
 }
