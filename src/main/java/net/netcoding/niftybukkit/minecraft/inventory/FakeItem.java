@@ -2,7 +2,7 @@ package net.netcoding.niftybukkit.minecraft.inventory;
 
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.events.PlayerPostLoginEvent;
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.events.ItemInteractEvent;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -204,7 +205,18 @@ public class FakeItem {
 		}
 
 		@EventHandler
-		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+		public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+			if (FakeItem.this.getItemOpener() != null) {
+				ItemData mainHandItem = new ItemData(event.getMainHandItem());
+				ItemData offHandItem = new ItemData(event.getOffHandItem());
+
+				if (FakeItem.this.isItemOpener(mainHandItem) || FakeItem.this.isItemOpener(offHandItem))
+					event.setCancelled(true);
+			}
+		}
+
+		@EventHandler
+		public void onProfileJoin(ProfileJoinEvent event) {
 			FakeItem.this.giveItemOpener(event.getProfile());
 		}
 
@@ -250,7 +262,7 @@ public class FakeItem {
 		}
 
 		@EventHandler(priority = EventPriority.LOWEST)
-		public void onPlayerPostLogin(PlayerPostLoginEvent event) {
+		public void onProfileJoin(ProfileJoinEvent event) {
 			FakeItem.removeAllItemOpeners(event.getProfile());
 		}
 
