@@ -1,7 +1,6 @@
 package net.netcoding.niftybukkit.minecraft.messages;
 
-public interface BungeeListener {
-
-	void onMessageReceived(String channel, byte[] message) throws Exception;
+@Deprecated
+public interface BungeeListener extends ChannelListener {
 
 }
