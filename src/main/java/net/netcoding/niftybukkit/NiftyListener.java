@@ -4,7 +4,7 @@ import net.netcoding.niftybukkit.minecraft.BukkitListener;
 import net.netcoding.niftybukkit.minecraft.events.BukkitServerPingEvent;
 import net.netcoding.niftybukkit.minecraft.events.EnderCrystalPlaceEvent;
 import net.netcoding.niftybukkit.minecraft.events.InventoryCreativeNbtEvent;
-import net.netcoding.niftybukkit.minecraft.events.ProfileJoinEvent;
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.FakeInventory;
 import net.netcoding.niftybukkit.minecraft.inventory.FakeItem;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
