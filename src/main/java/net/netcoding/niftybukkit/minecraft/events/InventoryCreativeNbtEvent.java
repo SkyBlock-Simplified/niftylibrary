@@ -1,11 +1,12 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileEvent;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 
-public class InventoryCreativeNbtEvent extends PlayerEvent implements Cancellable {
+public class InventoryCreativeNbtEvent extends ProfileEvent implements Cancellable {
 
 	private final InventoryCreativeEvent event;
 	private final ItemData itemData;

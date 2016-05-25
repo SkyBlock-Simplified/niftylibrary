@@ -1,30 +1,13 @@
 package net.netcoding.niftybukkit.minecraft.events.bungee;
 
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileEvent;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
-class BungeeProfileEvent extends Event {
-
-	private static final transient HandlerList handlers = new HandlerList();
-	private final BukkitMojangProfile profile;
+abstract class BungeeProfileEvent extends ProfileEvent {
 
 	BungeeProfileEvent(BukkitMojangProfile profile) {
-		this.profile = profile;
-	}
-
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
-
-	public BukkitMojangProfile getProfile() {
-		return this.profile;
+		super(profile);
 	}
 
 	public BungeeServer getServer() {

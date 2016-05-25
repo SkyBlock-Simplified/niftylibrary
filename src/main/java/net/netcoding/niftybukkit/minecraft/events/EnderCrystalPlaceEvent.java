@@ -1,12 +1,13 @@
 package net.netcoding.niftybukkit.minecraft.events;
 
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileEvent;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.event.Cancellable;
 
-public class EnderCrystalPlaceEvent extends PlayerEvent implements Cancellable {
+public class EnderCrystalPlaceEvent extends ProfileEvent implements Cancellable {
 
 	private final EnderCrystal entity;
 	private boolean cancelled = false;
