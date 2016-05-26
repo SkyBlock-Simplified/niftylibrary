@@ -39,4 +39,8 @@ enum NbtType {
 			return "data";
 	}
 
+	public final Class<?> getFieldType() {
+		return NbtFactory.NBT_CLASS.get(this.getId());
+	}
+
 }
