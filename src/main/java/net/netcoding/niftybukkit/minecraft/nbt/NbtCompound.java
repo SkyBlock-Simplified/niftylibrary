@@ -44,7 +44,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	@SuppressWarnings("CloneDoesntCallSuperClone")
 	@Override
 	public NbtCompound clone() {
-		NbtCompound compound = NbtFactory.createRootCompound("tag");
+		NbtCompound compound = NbtFactory.createCompound();
 		compound.putAll(this);
 		return compound;
 	}

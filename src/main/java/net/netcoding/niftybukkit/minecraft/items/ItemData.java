@@ -53,7 +53,7 @@ public class ItemData extends ItemStack {
 		if (create && Material.AIR != NbtFactory.getCraftItemStack(this).getType())
 			this.root = NbtFactory.fromItemTag(this);
 		else
-			this.root = NbtFactory.createRootCompound("tag");
+			this.root = NbtFactory.createCompound();
 	}
 
 	@Deprecated

@@ -203,7 +203,7 @@ public class NbtFactory {
 	 * @return The NBT compound.
 	 */
 	public static NbtCompound createCompound() {
-		return createRootCompound();
+		return new NbtCompound(createRootNativeCompound());
 	}
 
 	/**
@@ -220,17 +220,6 @@ public class NbtFactory {
 			new Reflection(tag.getClass()).setValue(type.getFieldName(), tag, value);
 
 		return tag;
-	}
-
-	/**
-	 * Construct a new NBT root compound.
-	 * <p>
-	 * This compound must be given a name, as it is the root object.
-	 *
-	 * @return The NBT compound.
-	 */
-	public static NbtCompound createRootCompound() {
-		return new NbtCompound(createRootNativeCompound());
 	}
 
 	static Object createRootNativeCompound() {
@@ -306,7 +295,7 @@ public class NbtFactory {
 		try (InputStream inputStream = stream.getInput()) {
 			try (BufferedInputStream bufferedInput = new BufferedInputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPInputStream(inputStream) : inputStream)) {
 				try (DataInputStream dataInput = new DataInputStream(bufferedInput)) {
-					NbtCompound compound = createRootCompound();
+					NbtCompound compound = createCompound();
 					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftProtocol.isPre1_8() ? null : compound.getHandle()), dataInput, 512, NBT_READ_NOLIMIT));
 				}
 			}
