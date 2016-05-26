@@ -41,7 +41,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 
 		// Set the list type if its the first element
 		if (this.size() == 0)
-			NbtFactory.NBT_TAG_LIST.setValue(byte.class, this.handle, (byte)NbtFactory.getNbtType(nbt).getId());
+			NbtFactory.NBT_TAG_LIST.setValue(Byte.class, this.handle, NbtFactory.getNbtType(nbt).getId());
 
 		return this.original.add(nbt);
 	}
@@ -52,7 +52,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 
 		// Set the list type if its the first element
 		if (this.size() == 0)
-			NbtFactory.NBT_TAG_LIST.setValue(byte.class, this.handle, (byte)NbtFactory.getNbtType(nbt).getId());
+			NbtFactory.NBT_TAG_LIST.setValue(Byte.class, this.handle, NbtFactory.getNbtType(nbt).getId());
 
 		this.original.add(index, nbt);
 	}

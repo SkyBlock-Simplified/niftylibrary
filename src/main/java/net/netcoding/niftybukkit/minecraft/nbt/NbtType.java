@@ -18,19 +18,19 @@ enum NbtType {
 	TAG_COMPOUND(10, Map.class),
 	TAG_INT_ARRAY(11, int[].class);
 
-	private final int id;
+	private final byte id;
 
 	NbtType(int id, Class<?> type) {
-		this.id = id;
-		NbtFactory.NBT_CLASS.put(id, type);
-		NbtFactory.NBT_ENUM.put(id, this);
+		this.id = (byte)id;
+		NbtFactory.NBT_CLASS.put(this.id, type);
+		NbtFactory.NBT_ENUM.put(this.id, this);
 	}
 
-	final int getId() {
+	public final byte getId() {
 		return this.id;
 	}
 
-	String getFieldName() {
+	public final String getFieldName() {
 		if (this == TAG_COMPOUND)
 			return "map";
 		else if (this == TAG_LIST)
