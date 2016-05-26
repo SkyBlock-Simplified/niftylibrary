@@ -61,7 +61,7 @@ public class ItemData extends ItemStack {
 		if (this.hasGlow())
 			return;
 
-		if (MinecraftProtocol.isPost1_8())
+		if (MinecraftProtocol.isPost1_7())
 			this.addUnsafeEnchantment(Enchantment.DURABILITY, 0);
 
 		if (MinecraftProtocol.isPre1_8())
@@ -149,7 +149,7 @@ public class ItemData extends ItemStack {
 	}
 
 	public boolean hasGlow() {
-		if (MinecraftProtocol.isPost1_8()) {
+		if (MinecraftProtocol.isPost1_7()) {
 			if (this.getEnchantments().containsKey(Enchantment.DURABILITY)) {
 				if (this.getEnchantments().get(Enchantment.DURABILITY) == 0) {
 					if (this.getNbt().containsKey("HideFlags")) {
@@ -193,7 +193,7 @@ public class ItemData extends ItemStack {
 		if (!this.hasGlow())
 			return;
 
-		if (MinecraftProtocol.isPost1_8())
+		if (MinecraftProtocol.isPost1_7())
 			this.removeEnchantment(Enchantment.DURABILITY);
 
 		if (MinecraftProtocol.isPre1_8())

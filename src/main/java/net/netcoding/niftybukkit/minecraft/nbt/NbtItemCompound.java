@@ -49,7 +49,7 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 				nmsMeta.setLore(meta.getLore());
 				Map<Enchantment, Integer> enchantments = meta.getEnchants();
 
-				if (MinecraftProtocol.isPost1_8())
+				if (MinecraftProtocol.isPost1_7())
 					nmsMeta.addItemFlags(ListUtil.toArray(meta.getItemFlags(), org.bukkit.inventory.ItemFlag.class));
 
 				for (Enchantment enchantment : enchantments.keySet())

@@ -309,7 +309,7 @@ public enum MinecraftProtocol {
 		return IS_FORGE;
 	}
 
-	public static boolean isPost1_8() {
+	public static boolean isPost1_7() {
 		return !isPre1_8();
 	}
 

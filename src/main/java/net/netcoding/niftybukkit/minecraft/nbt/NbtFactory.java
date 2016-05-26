@@ -55,7 +55,7 @@ public class NbtFactory {
 	public static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	public static final Reflection NBT_TAG_COMPOUND = BukkitReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	public static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	static final Object NBT_READ_NOLIMIT = (MinecraftProtocol.isPost1_8() ? NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null) : null);
+	static final Object NBT_READ_NOLIMIT = (MinecraftProtocol.isPost1_7() ? NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null) : null);
 
 	static Object adjustIncoming(Object value) {
 		if (value == null)
@@ -319,7 +319,7 @@ public class NbtFactory {
 					List<Object> params = new ArrayList<>();
 					params.add(dataInput);
 
-					if (MinecraftProtocol.isPost1_8()) {
+					if (MinecraftProtocol.isPost1_7()) {
 						params.add(512);
 						params.add(NBT_READ_NOLIMIT);
 					}

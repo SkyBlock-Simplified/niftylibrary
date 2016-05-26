@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit.mojang;
 import com.google.gson.JsonObject;
 import net.netcoding.niftybukkit.NiftyBukkit;
 import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.events.ProfileJoinEvent;
+import net.netcoding.niftybukkit.minecraft.events.profile.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.mojang.MojangRepository;
