@@ -1,5 +1,7 @@
 package net.netcoding.niftybukkit.minecraft.nbt;
 
+import java.util.List;
+
 /**
  * Represents a root NBT list.
  * See also:
@@ -12,7 +14,7 @@ package net.netcoding.niftybukkit.minecraft.nbt;
 public final class NbtList<T> extends WrappedList<T> {
 
 	NbtList(Object handle) {
-		super(handle, NbtFactory.<T>getDataList(handle));
+		super(handle, NbtFactory.<List<T>>getDataField(NbtType.TAG_LIST, handle));
 	}
 
 	@SuppressWarnings("CloneDoesntCallSuperClone")

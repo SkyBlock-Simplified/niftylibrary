@@ -31,7 +31,7 @@ import java.util.Map;
 public class NbtCompound extends WrappedMap implements Cloneable {
 
 	NbtCompound(Object handle) {
-		super(handle, NbtFactory.getDataMap(handle));
+		super(handle, NbtFactory.<Map<String, Object>>getDataField(NbtType.TAG_COMPOUND, handle));
 	}
 
 	/**
