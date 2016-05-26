@@ -281,7 +281,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	 * @return nbt type of passed {@code wrapped} value.
 	 */
 	protected final Object unwrapIncoming(String key, Object wrapped) {
-		return NbtFactory.unwrapValue(key, this.adjustIncoming(key, wrapped));
+		return NbtFactory.unwrapValue(this.adjustIncoming(key, wrapped));
 	}
 
 	@Override

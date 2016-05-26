@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -41,8 +40,8 @@ public class NbtFactory {
 	// https://gist.github.com/aadnk/6753244 (Nov 3, 2013)
 
 	// Convert between NBT id and the equivalent class in java
-	static final BiMap<Integer, Class<?>> NBT_CLASS = HashBiMap.create();
-	static final BiMap<Integer, NbtType> NBT_ENUM = HashBiMap.create();
+	static final BiMap<Byte, Class<?>> NBT_CLASS = HashBiMap.create();
+	static final BiMap<Byte, NbtType> NBT_ENUM = HashBiMap.create();
 
 	// Reflection
 	static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
@@ -52,10 +51,10 @@ public class NbtFactory {
 	static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
 	static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
 	public static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	public static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection("NBTReadLimiter", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	public static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection((MinecraftProtocol.isForge() ? "NBTSizeTracker" : "NBTReadLimiter"), MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	public static final Reflection NBT_TAG_COMPOUND = BukkitReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
 	public static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	static final Object NBT_READ_NOLIMIT = (MinecraftProtocol.isPost1_7() ? NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null) : null);
+	static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
 
 	static Object adjustIncoming(Object value) {
 		if (value == null)
@@ -190,7 +189,7 @@ public class NbtFactory {
 	 * @return The NBT list.
 	 */
 	public static <T> NbtList<T> createList(Iterable<T> iterable) {
-		NbtList<T> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, "", null));
+		NbtList<T> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, null));
 
 		for (T obj : iterable)
 			list.add(obj);
@@ -204,25 +203,19 @@ public class NbtFactory {
 	 * @return The NBT compound.
 	 */
 	public static NbtCompound createCompound() {
-		return createRootCompound("");
+		return createRootCompound();
 	}
 
 	/**
 	 * Construct a new NMS NBT tag initialized with the given value.
 	 *
 	 * @param type - the NBT type.
-	 * @param name - the name of the NBT tag.
 	 * @param value - the value, or NULL to keep the original value.
 	 * @return The created tag.
 	 */
-	static Object createNbtTag(NbtType type, String name, Object value) {
-		List<Object> params = new ArrayList<>();
-		params.add((byte)type.getId());
+	static Object createNbtTag(NbtType type, Object value) {
+		Object tag = NBT_BASE.invokeMethod(NBT_BASE.getClazz()/*"createTag"*/, null, type.getId());
 
-		if (MinecraftProtocol.isPre1_8())
-			params.add(name);
-
-		Object tag = NBT_BASE.invokeMethod("createTag", null, ListUtil.toArray(params, Object.class));
 		if (value != null)
 			new Reflection(tag.getClass()).setValue(type.getFieldName(), tag, value);
 
@@ -234,15 +227,14 @@ public class NbtFactory {
 	 * <p>
 	 * This compound must be given a name, as it is the root object.
 	 *
-	 * @param name - the name of the compound.
 	 * @return The NBT compound.
 	 */
-	public static NbtCompound createRootCompound(String name) {
-		return new NbtCompound(createRootNativeCompound(name));
+	public static NbtCompound createRootCompound() {
+		return new NbtCompound(createRootNativeCompound());
 	}
 
-	static Object createRootNativeCompound(String name) {
-		return createNbtTag(NbtType.TAG_COMPOUND, name, null);
+	static Object createRootNativeCompound() {
+		return createNbtTag(NbtType.TAG_COMPOUND, null);
 	}
 
 	/**
@@ -264,12 +256,12 @@ public class NbtFactory {
 	 */
 	public static NbtBlockCompound fromBlockTag(Block block) {
 		checkBlock(block);
-		return new NbtBlockCompound(block, createRootNativeCompound("tag"));
+		return new NbtBlockCompound(block, createRootNativeCompound());
 	}
 
 	private static NbtEntityCompound fromEntityTag(Entity entity) {
 		checkEntity(entity);
-		return new NbtEntityCompound(entity, createRootNativeCompound("tag"));
+		return new NbtEntityCompound(entity, createRootNativeCompound());
 	}
 
 	/**
@@ -286,7 +278,7 @@ public class NbtFactory {
 		Object handle = NMS_ITEM_STACK.invokeMethod(NBT_TAG_COMPOUND.getClazz(), nms);
 
 		if (handle == null)
-			handle = createRootNativeCompound("tag");
+			handle = createRootNativeCompound();
 
 		return new NbtItemCompound(stack, nms, handle);
 	}
@@ -314,17 +306,8 @@ public class NbtFactory {
 		try (InputStream inputStream = stream.getInput()) {
 			try (BufferedInputStream bufferedInput = new BufferedInputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPInputStream(inputStream) : inputStream)) {
 				try (DataInputStream dataInput = new DataInputStream(bufferedInput)) {
-					NbtCompound compound = createRootCompound("tag");
-
-					List<Object> params = new ArrayList<>();
-					params.add(dataInput);
-
-					if (MinecraftProtocol.isPost1_7()) {
-						params.add(512);
-						params.add(NBT_READ_NOLIMIT);
-					}
-
-					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftProtocol.isPre1_8() ? null : compound.getHandle()), ListUtil.toArray(params, Object.class)));
+					NbtCompound compound = createRootCompound();
+					return fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftProtocol.isPre1_8() ? null : compound.getHandle()), dataInput, 512, NBT_READ_NOLIMIT));
 				}
 			}
 		}
@@ -349,7 +332,7 @@ public class NbtFactory {
 	 * @return The corresponding type.
 	 */
 	static NbtType getNbtType(Object nms) {
-		return NBT_ENUM.get((int)(byte)NBT_BASE.invokeMethod("getTypeId", nms));
+		return NBT_ENUM.get(NBT_BASE.invokeMethod(Byte.class/*"getTypeId"*/, nms));
 	}
 
 	/**
@@ -397,14 +380,7 @@ public class NbtFactory {
 	public static void saveStream(NbtCompound source, OutputSupplier<? extends OutputStream> stream, StreamOptions option) throws IOException {
 		try (OutputStream outputStream = stream.getOutput()) {
 			try (DataOutputStream dataOutput = new DataOutputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPOutputStream(outputStream) : outputStream)) {
-				List<Object> params = new ArrayList<>();
-
-				if (MinecraftProtocol.isPre1_8())
-					params.add(source.getHandle());
-
-				params.add(dataOutput);
-
-				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftProtocol.isPre1_8() ? null : source.getHandle()), ListUtil.toArray(params, Object.class));
+				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftProtocol.isPre1_8() ? null : source.getHandle()), dataOutput);
 			}
 		}
 	}
@@ -455,18 +431,17 @@ public class NbtFactory {
 	/**
 	 * Convert wrapped List and Map objects into their respective NBT counterparts.
 	 *
-	 * @param name - the name of the NBT element to create.
 	 * @param value - the value of the element to create. Can be a List or a Map.
 	 * @return The NBT element.
 	 */
-	static Object unwrapValue(String name, Object value) {
+	static Object unwrapValue(Object value) {
 		if (value == null)
 			return null;
 
 		if (value instanceof Wrapper)
 			return ((Wrapper)value).getHandle();
 		else
-			return createNbtTag(getPrimitiveType(value), name, value);
+			return createNbtTag(getPrimitiveType(value), value);
 	}
 
 	/**

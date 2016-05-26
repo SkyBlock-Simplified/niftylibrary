@@ -157,7 +157,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	protected T unwrapIncoming(Object wrapped) {
-		return (T)NbtFactory.unwrapValue("", this.adjustIncoming(wrapped));
+		return (T)NbtFactory.unwrapValue(this.adjustIncoming(wrapped));
 	}
 
 }
