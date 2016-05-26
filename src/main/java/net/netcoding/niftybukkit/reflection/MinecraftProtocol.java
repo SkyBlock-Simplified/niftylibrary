@@ -314,7 +314,7 @@ public enum MinecraftProtocol {
 	}
 
 	public static boolean isPre1_8() {
-		return getCurrentProtocol() < v1_7_10.getProtocol();
+		return getCurrentProtocol() <= v1_7_10.getProtocol();
 	}
 
 	public static boolean isPre1_8_3() {
