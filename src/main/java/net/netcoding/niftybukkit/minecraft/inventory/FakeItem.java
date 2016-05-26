@@ -6,6 +6,7 @@ import net.netcoding.niftybukkit.minecraft.events.profile.ProfileJoinEvent;
 import net.netcoding.niftybukkit.minecraft.inventory.events.ItemInteractEvent;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
 import net.netcoding.niftybukkit.mojang.BukkitMojangProfile;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -155,6 +156,28 @@ public class FakeItem {
 
 		public FakeBukkitListener(JavaPlugin plugin) {
 			super(plugin);
+
+			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_pre1.getProtocol())
+				new FakeBukkitListener1_9(plugin);
+		}
+
+		private class FakeBukkitListener1_9 extends BukkitListener {
+
+			public FakeBukkitListener1_9(JavaPlugin plugin) {
+				super(plugin);
+			}
+
+			@EventHandler
+			public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+				if (FakeItem.this.getItemOpener() != null) {
+					ItemData mainHandItem = new ItemData(event.getMainHandItem());
+					ItemData offHandItem = new ItemData(event.getOffHandItem());
+
+					if (FakeItem.this.isItemOpener(mainHandItem) || FakeItem.this.isItemOpener(offHandItem))
+						event.setCancelled(true);
+				}
+			}
+
 		}
 
 		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -201,17 +224,6 @@ public class FakeItem {
 						event.setCancelled(true);
 					}
 				}
-			}
-		}
-
-		@EventHandler
-		public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
-			if (FakeItem.this.getItemOpener() != null) {
-				ItemData mainHandItem = new ItemData(event.getMainHandItem());
-				ItemData offHandItem = new ItemData(event.getOffHandItem());
-
-				if (FakeItem.this.isItemOpener(mainHandItem) || FakeItem.this.isItemOpener(offHandItem))
-					event.setCancelled(true);
 			}
 		}
 
