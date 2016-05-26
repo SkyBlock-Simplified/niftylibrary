@@ -3,7 +3,7 @@ package net.netcoding.niftybukkit.minecraft.nbt;
 import java.util.List;
 import java.util.Map;
 
-enum NbtType {
+public enum NbtType {
 
 	TAG_END(0, Void.class),
 	TAG_BYTE(1, byte.class),
@@ -30,7 +30,7 @@ enum NbtType {
 		return this.id;
 	}
 
-	public final String getFieldName() {
+	final String getFieldName() {
 		if (this == TAG_COMPOUND)
 			return "map";
 		else if (this == TAG_LIST)
