@@ -104,11 +104,6 @@ final class NiftyListener extends BukkitListener {
 		MinecraftScheduler.schedule(this.getPlugin(), new Runnable() {
 			@Override
 			public void run() {
-				if (!NiftyBukkit.getBungeeHelper().isDetected()) {
-					event.getHandlers().unregister(NiftyListener.this);
-					return;
-				}
-
 				BukkitMojangProfile profile = NiftyBukkit.getMojangRepository().searchByPlayer(event.getPlayer());
 				getPlugin().getServer().getPluginManager().callEvent(new ProfileJoinEvent(profile));
 			}
