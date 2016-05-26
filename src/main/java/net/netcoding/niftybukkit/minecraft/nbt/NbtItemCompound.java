@@ -26,7 +26,7 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 	@Override
 	protected final void load() {
 		if (Material.AIR != this.getWrapped().getType()) {
-			Object tag = NbtFactory.NMS_ITEM_STACK.invokeMethod("getTag", this.nmsItem);
+			Object tag = NbtFactory.NMS_ITEM_STACK.invokeMethod(NbtFactory.NBT_TAG_COMPOUND.getClazz(), this.nmsItem);
 
 			if (tag != null) {
 				NbtCompound compound = NbtFactory.fromCompound(tag);
@@ -39,7 +39,7 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 	@Override
 	protected final void save() {
 		if (Material.AIR != this.getWrapped().getType()) {
-			NbtFactory.NMS_ITEM_STACK.invokeMethod("setTag", this.nmsItem, this.getHandle());
+			NbtFactory.NMS_ITEM_STACK.setValue(NbtFactory.NBT_TAG_COMPOUND.getClazz(), this.nmsItem, this.getHandle());
 			ItemMeta nmsMeta = (ItemMeta)NbtFactory.CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);
 
 			if (this.getWrapped().hasItemMeta()) {
