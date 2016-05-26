@@ -232,8 +232,8 @@ public enum MinecraftProtocol {
 			spigot = true;
 		} catch (Exception ignore) { }
 
-		String version = Bukkit.getVersion();
-		IS_FORGE = (version.contains("MCPC") || version.contains("Forge") || version.contains("Cauldron"));
+		String version = Bukkit.getVersion().toUpperCase();
+		IS_FORGE = (version.contains("MCPC") || version.contains("FORGE") || version.contains("CAULDRON"));
 		IS_SPIGOT = spigot;
 	}
 
