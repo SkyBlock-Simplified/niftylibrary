@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
@@ -214,10 +213,10 @@ public class NbtFactory {
 	 * @return The created tag.
 	 */
 	static Object createNbtTag(NbtType type, Object value) {
-		Object tag = NBT_BASE.invokeMethod(NBT_BASE.getClazz()/*"createTag"*/, null, type.getId());
+		Object tag = NBT_BASE.invokeMethod(NBT_BASE.getClazz(), null, type.getId());
 
 		if (value != null)
-			new Reflection(tag.getClass()).setValue(type.getFieldName(), tag, value);
+			new Reflection(tag.getClass()).setValue(type.getFieldType(), tag, value);
 
 		return tag;
 	}
@@ -263,13 +262,13 @@ public class NbtFactory {
 	 */
 	public static NbtItemCompound fromItemTag(ItemStack stack) {
 		checkItemStack(stack);
-		final Object nms = CRAFT_ITEM_STACK.invokeMethod(NMS_ITEM_STACK.getClazz(), null, stack);
-		Object handle = NMS_ITEM_STACK.invokeMethod(NBT_TAG_COMPOUND.getClazz(), nms);
+		Object nmsItem = CRAFT_ITEM_STACK.invokeMethod(NMS_ITEM_STACK.getClazz(), null, stack);
+		Object handle = NMS_ITEM_STACK.invokeMethod(NBT_TAG_COMPOUND.getClazz(), nmsItem);
 
 		if (handle == null)
 			handle = createRootNativeCompound();
 
-		return new NbtItemCompound(stack, nms, handle);
+		return new NbtItemCompound(stack, nmsItem, handle);
 	}
 
 	/**
@@ -311,7 +310,7 @@ public class NbtFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	static <T> T getDataField(NbtType type, Object base) {
-		return (T)new Reflection(base.getClass()).getValue(type.getFieldName(), base);
+		return (T)new Reflection(base.getClass()).getValue(type.getFieldType(), base);
 	}
 
 	/**
@@ -321,7 +320,7 @@ public class NbtFactory {
 	 * @return The corresponding type.
 	 */
 	static NbtType getNbtType(Object nms) {
-		return NBT_ENUM.get(NBT_BASE.invokeMethod(Byte.class/*"getTypeId"*/, nms));
+		return NBT_ENUM.get(NBT_BASE.invokeMethod(Byte.class, nms));
 	}
 
 	/**
@@ -347,14 +346,6 @@ public class NbtFactory {
 	 */
 	public static ItemStack getCraftItemStack(ItemStack stack) {
 		return (stack == null || CRAFT_ITEM_STACK.getClazz().isAssignableFrom(stack.getClass())) ? stack : (ItemStack)CRAFT_ITEM_STACK.invokeMethod("asCraftCopy", null, stack);
-	}
-
-	static Map<String, Object> getDataMap(Object handle) {
-		return getDataField(NbtType.TAG_COMPOUND, handle);
-	}
-
-	static <T> List<T> getDataList(Object handle) {
-		return getDataField(NbtType.TAG_LIST, handle);
 	}
 
 	/**
@@ -388,8 +379,8 @@ public class NbtFactory {
 		checkItemStack(stack);
 
 		if (!(compound instanceof NbtItemCompound)) {
-			Object nms = CRAFT_ITEM_STACK.getValue(NMS_ITEM_STACK.getClazz(), stack);
-			NMS_ITEM_STACK.invokeMethod("setTag", nms, compound.getHandle());
+			Object nmsItem = CRAFT_ITEM_STACK.getValue(NMS_ITEM_STACK.getClazz(), stack);
+			NMS_ITEM_STACK.setValue(NBT_TAG_COMPOUND.getClazz(), nmsItem, compound.getHandle());
 		}
 	}
 
