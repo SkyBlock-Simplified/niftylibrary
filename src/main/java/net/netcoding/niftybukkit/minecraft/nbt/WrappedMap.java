@@ -18,7 +18,7 @@ import java.util.*;
 abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper {
 
 	private static final String SUPPORT = "support";
-	private static final List<String> DO_NOT_SHOW = Arrays.asList("display", "ench", "HideFlags", SUPPORT);
+	private static final List<String> DO_NOT_SHOW = Arrays.asList("id", "Count", "Damage", "display", "ench", "HideFlags", SUPPORT);
 	private final WrappedNativeCache cache = new WrappedNativeCache();
 	private final Map<String, Object> original;
 	private final Object handle;
