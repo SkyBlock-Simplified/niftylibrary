@@ -80,9 +80,6 @@ public class ItemData extends ItemStack {
 
 			this.setItemMeta(meta);
 		}
-
-		//this.getNbt().put(GLOWING, true);
-		//System.out.println("GLOWING: " + this.getNbt().supported);
 	}
 
 	@Deprecated
