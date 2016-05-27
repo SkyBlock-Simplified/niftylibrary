@@ -5,6 +5,7 @@ import net.netcoding.niftycore.util.StringUtil;
 
 public class BukkitReflection extends Reflection {
 
+	public static final Reflection NMS_INVENTORY = BukkitReflection.getCompatibleForgeReflection((MinecraftProtocol.isForge() ? "InventoryPlayer" : "IInventory"), MinecraftPackage.MINECRAFT_SERVER, "entity.player");
 	public static final Reflection NMS_ENTITY_PLAYER = BukkitReflection.getCompatibleForgeReflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER, "entity.player");
 
 	public BukkitReflection(Class<?> clazz) {
