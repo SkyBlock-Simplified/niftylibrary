@@ -45,13 +45,7 @@ import org.bukkit.material.Attachable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -101,8 +95,14 @@ public class SignMonitor {
 
 					for (Object handle : handles) {
 						NbtCompound compound = NbtFactory.fromCompound(handle);
+						boolean isSign;
 
-						if ("Sign".equals(compound.get("id"))) {
+						if (compound.containsKey("id"))
+							isSign = "Sign".equals(compound.get("id"));
+						else
+							isSign = compound.containsKey("Text1") && compound.containsKey("Text2") && compound.containsKey("Text3") && compound.containsKey("Text4");
+
+						if (isSign) {
 							UUID uniqueId = event.getPlayer().getUniqueId();
 							ConcurrentList<NbtCompound> list;
 
