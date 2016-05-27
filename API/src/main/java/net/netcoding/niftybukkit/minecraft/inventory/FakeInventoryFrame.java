@@ -2,11 +2,14 @@ package net.netcoding.niftybukkit.minecraft.inventory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.netcoding.niftybukkit.minecraft.items.ItemData;
+import net.netcoding.niftybukkit.reflection.MinecraftProtocol;
 import net.netcoding.niftycore.util.ByteUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -21,6 +24,8 @@ import java.util.Map;
 
 public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 
+	private static final ItemData DEFAULT_PAGE_LEFT;
+	private static final ItemData DEFAULT_PAGE_RIGHT;
 	private final ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>();
 	private final ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
 	private final PrivateKey privateKey;
@@ -38,6 +43,32 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	// http://www.planetminecraft.com/banner/arrow-pointing-right/
 	// http://www.planetminecraft.com/banner/arrow-pointing-left-35059/
 
+	static {
+		JsonParser parser = new JsonParser();
+
+		// Default Page Left
+		if (MinecraftProtocol.isPost1_7()) {
+			DEFAULT_PAGE_LEFT = new ItemData(Material.BANNER);
+			DEFAULT_PAGE_LEFT.getNbt().putJson(parser.parse("{BlockEntityTag:{Base:0,Patterns:[{Pattern:mr,Color:15},{Pattern:vhr,Color:15},{Pattern:br,Color:0},{Pattern:tr,Color:0},{Pattern:tts,Color:0},{Pattern:bts,Color:0},{Pattern:bo,Color:0}]}}").getAsJsonObject());
+		} else
+			DEFAULT_PAGE_LEFT = new ItemData(Material.BONE);
+
+		ItemMeta pageLeftMeta = DEFAULT_PAGE_LEFT.getItemMeta(true);
+		pageLeftMeta.setDisplayName("Page Left");
+		DEFAULT_PAGE_LEFT.setItemMeta(pageLeftMeta);
+
+		// Default Page Right
+		if (MinecraftProtocol.isPost1_7()) {
+			DEFAULT_PAGE_RIGHT = new ItemData(Material.BANNER);
+			DEFAULT_PAGE_RIGHT.getNbt().putJson(parser.parse("{BlockEntityTag:{Base:0,Patterns:[{Pattern:mr,Color:15},{Pattern:vh,Color:15},{Pattern:bl,Color:0},{Pattern:tl,Color:0},{Pattern:bts,Color:0},{Pattern:tts,Color:0},{Pattern:bo,Color:0}]}}").getAsJsonObject());
+		} else
+			DEFAULT_PAGE_RIGHT = new ItemData(Material.ARROW);
+
+		ItemMeta pageRightMeta = DEFAULT_PAGE_RIGHT.getItemMeta(true);
+		pageRightMeta.setDisplayName("Page Right");
+		DEFAULT_PAGE_RIGHT.setItemMeta(pageRightMeta);
+	}
+
 	FakeInventoryFrame() {
 		PrivateKey privateKey = null;
 		PublicKey publicKey = null;
@@ -52,6 +83,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
+		this.setPaging(DEFAULT_PAGE_LEFT, DEFAULT_PAGE_RIGHT);
 	}
 
 	FakeInventoryFrame(FakeInventoryFrame frame) {
@@ -68,7 +100,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	public void add(int index, ItemStack itemStack) {
-		this.add(index, new ItemData(itemStack.clone()));
+		this.add(index, new ItemData(itemStack));
 	}
 
 	public void add(ItemData itemData) {
@@ -76,20 +108,20 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	public void add(ItemStack itemStack) {
-		this.add(new ItemData(itemStack.clone()));
+		this.add(new ItemData(itemStack));
 	}
 
 	public <T extends ItemStack> void addAll(T[] items) {
 		for (ItemStack itemStack : items) {
 			if (itemStack == null) continue;
-			this.items.put(getMax(), new ItemData(itemStack.clone()));
+			this.items.put(getMax(), new ItemData(itemStack));
 		}
 	}
 
 	public void addAll(Collection<? extends ItemStack> items) {
 		for (ItemStack itemStack : items) {
 			if (itemStack == null) continue;
-			this.items.put(getMax(), new ItemData(itemStack.clone()));
+			this.items.put(getMax(), new ItemData(itemStack));
 		}
 	}
 
@@ -101,12 +133,11 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 		int i = index;
 
 		for (ItemStack itemStack : items)
-			this.items.put(i++, new ItemData(itemStack.clone()));
+			this.items.put(i++, new ItemData(itemStack));
 	}
 
 	public static int calculateTotalSlots(int value) {
-		int calc = (value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9);
-		return calc > 54 ? 54 : calc;
+		return Math.min(54, (value >= 9 ? (value % 9 == 0 ? value : ((int)Math.ceil(value / 9.0) * 9)) : 9));
 	}
 
 	public final void clearItems() {
@@ -137,6 +168,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 					json.add(itemJson);
 				}
 
+				//NiftyBukkit.getPlugin().getLog().console("SIGN: {0}", json.toString());
 				byte[] bytes = ByteUtil.toByteArray(json.toString());
 				signature.update(bytes);
 				signatureBytes = signature.sign();
@@ -144,7 +176,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 		}
 
 
-		this.putMetadata(NbtKeys.SIGNATURE.getKey(), signatureBytes);
+		this.putMetadata(NbtKeys.SIGNATURE.getPath(), signatureBytes);
 	}
 
 	public final Map<String, Object> getAllMetadata() {
@@ -164,7 +196,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	final <T> T getMetadata(NbtKeys key) {
-		return this.getMetadata(key.getKey());
+		return this.getMetadata(key.getPath());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -193,11 +225,11 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	public int getTotalSlots() {
-		return this.totalSlots > 0 ? this.totalSlots : calculateTotalSlots(this.getItems().size());
+		return this.totalSlots > 0 ? this.totalSlots : calculateTotalSlots(this.getItems().size() - (calculateTotalSlots(this.getItems().size()) * this.getCurrentPage()));
 	}
 
 	final boolean hasMetadata(NbtKeys key) {
-		return this.hasMetadata(key.getKey());
+		return this.hasMetadata(key.getPath());
 	}
 
 	public final boolean hasMetadata(String key) {
@@ -226,7 +258,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	final Object putMetadata(NbtKeys key, Object obj) {
-		return this.putMetadata(key.getKey(), obj);
+		return this.putMetadata(key.getPath(), obj);
 	}
 
 	public final Object putMetadata(String key, Object obj) {
@@ -234,7 +266,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	final void removeMetadata(NbtKeys key) {
-		this.removeMetadata(key.getKey());
+		this.removeMetadata(key.getPath());
 	}
 
 	public final void removeMetadata(String key) {
@@ -261,8 +293,8 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 		this.currentPage = value;
 
 		if (this.pageLeft != null && this.pageRight != null) {
-			this.pageLeft.putNbt(NbtKeys.PAGING.getKey(), value - 1);
-			this.pageLeft.putNbt(NbtKeys.PAGING.getKey(), value + 1);
+			this.pageLeft.getNbt().putPath(NbtKeys.PAGING.getPath(), value - 1);
+			this.pageRight.getNbt().putPath(NbtKeys.PAGING.getPath(), value + 1);
 		}
 	}
 
@@ -297,10 +329,12 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 	}
 
 	void update(FakeInventoryFrame frame) {
+		ConcurrentMap<Integer, ItemData> items = new ConcurrentMap<>(frame.items);
 		this.items.clear();
-		this.putAll(frame.items);
+		this.putAll(items);
+		ConcurrentMap<String, Object> metadata = new ConcurrentMap<>(frame.metadata);
 		this.metadata.clear();
-		this.metadata.putAll(frame.metadata);
+		this.metadata.putAll(metadata);
 		this.setTotalSlots(frame.totalSlots);
 		this.setAllowEmpty(frame.allowEmpty);
 		this.setAutoCenter(frame.centered);
@@ -314,7 +348,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 
 	protected final boolean verifySignature(ItemStack[] items) {
 		boolean verified = false;
-		byte[] signatureBytes = this.getMetadata(NbtKeys.SIGNATURE.getKey());
+		byte[] signatureBytes = this.getMetadata(NbtKeys.SIGNATURE.getPath());
 
 		if (this.privateKey != null && this.publicKey != null) {
 			try {
@@ -333,6 +367,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemData> {
 					json.add(itemJson);
 				}
 
+				//NiftyBukkit.getPlugin().getLog().console("VERIFY: {0}", json.toString());
 				byte[] bytes = ByteUtil.toByteArray(json.toString());
 				signature.update(bytes);
 				verified = signature.verify(signatureBytes);

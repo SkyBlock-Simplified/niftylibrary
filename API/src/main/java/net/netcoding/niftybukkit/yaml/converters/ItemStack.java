@@ -41,7 +41,7 @@ public class ItemStack extends Converter {
 			if (metaMap.containsKey("lore"))
 				itemMeta.setLore((List<String>)this.getConverter(List.class).fromConfig(List.class, metaMap.get("lore"), null));
 
-			if (MinecraftProtocol.isPost1_8()) {
+			if (MinecraftProtocol.isPost1_7()) {
 				if (metaMap.containsKey("flags")) {
 					ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
 					Set<org.bukkit.inventory.ItemFlag> itemFlags = (Set<org.bukkit.inventory.ItemFlag>)this.getConverter(Set.class).fromConfig(Set.class, metaMap.get("flags"), flagType);
@@ -85,7 +85,7 @@ public class ItemStack extends Converter {
 
 		meta.put("lore", this.getConverter(List.class).toConfig(List.class, lore, null));
 
-		if (MinecraftProtocol.isPost1_8()) {
+		if (MinecraftProtocol.isPost1_7()) {
 			ParameterizedType flagType = (ParameterizedType)org.bukkit.inventory.ItemFlag.class.getGenericSuperclass();
 
 			if (!itemMeta.getItemFlags().isEmpty())
