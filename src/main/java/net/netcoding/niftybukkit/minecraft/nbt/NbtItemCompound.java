@@ -44,7 +44,6 @@ public final class NbtItemCompound extends WrappedCompound<ItemStack> {
 
 			if (this.getWrapped().hasItemMeta()) {
 				ItemMeta meta = this.getWrapped().getItemMeta();
-
 				nmsMeta.setDisplayName(meta.getDisplayName());
 				nmsMeta.setLore(meta.getLore());
 				Map<Enchantment, Integer> enchantments = meta.getEnchants();
