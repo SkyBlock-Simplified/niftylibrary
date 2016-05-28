@@ -4,8 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>niftyapi</artifactId>
-    <url>https://netcoding.net/</url>
-    <description>Extended Bukkit API with support from 1.7.10 through latest versions.</description>
+    <name>NiftyBukkit</name>
 
     <parent>
         <groupId>net.netcoding</groupId>

@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
 	<artifactId>niftybukkit</artifactId>
 	<name>NiftyBukkit</name>
 	<version>3.4.3</version>
@@ -14,7 +15,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	</parent>
 
 	<properties>
-		<skip-copy>false</skip-copy>
+		<skip-copy>true</skip-copy>
 		<minecraft.provider>bukkit</minecraft.provider>
 	</properties>
 
@@ -24,11 +25,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	</modules>
 
 	<dependencies>
-		<!--<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>craftbukkit</artifactId>
-			<scope>provided</scope>
-		</dependency>-->
 		<dependency>
 			<groupId>net.netcoding</groupId>
 			<artifactId>niftycore</artifactId>
