@@ -7,19 +7,19 @@ import net.netcoding.niftybukkit.minecraft.messages.BungeeHelper;
 import net.netcoding.niftybukkit.mojang.BukkitMojangRepository;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 public final class NiftyBukkit extends BukkitPlugin {
 
-	private final static transient ConcurrentHashMap<String, ConcurrentList<String>> PLUGINS = new ConcurrentHashMap<>();
+	private final static transient ConcurrentMap<String, ConcurrentList<String>> PLUGINS = new ConcurrentMap<>();
 	private static transient BukkitPlugin plugin;
 	private static transient ItemDatabase itemDatabase;
 	private static transient EnchantmentDatabase enchantmentDatabase;
@@ -66,7 +66,7 @@ public final class NiftyBukkit extends BukkitPlugin {
 	}
 
 	public static List<String> getPluginCache(String pluginName) {
-		return PLUGINS.keySet().contains(pluginName) ? PLUGINS.get(pluginName) : Collections.<String>emptyList();
+		return PLUGINS.containsKey(pluginName) ? PLUGINS.get(pluginName) : Collections.<String>emptyList();
 	}
 
 	public static net.milkbowl.vault.permission.Permission getPermissions() {

@@ -1,13 +1,12 @@
 package net.netcoding.niftybukkit.minecraft;
 
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public abstract class BukkitListener extends BukkitHelper implements Listener {
 
-	private final static transient ConcurrentHashMap<String, Integer> PLUGINS = new ConcurrentHashMap<>();
+	private final static transient ConcurrentMap<String, Integer> PLUGINS = new ConcurrentMap<>();
 
 	public BukkitListener(JavaPlugin plugin) {
 		super(plugin);

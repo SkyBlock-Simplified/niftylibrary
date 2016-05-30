@@ -45,8 +45,13 @@ import org.bukkit.material.Attachable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Monitor and update signs by tracking sign update packets.
@@ -57,8 +62,8 @@ public class SignMonitor {
 	private static final ConcurrentMap<UUID, ConcurrentList<NbtCompound>> CHUNK_ADJUSTMENT = new ConcurrentMap<>();
 	static final boolean IS_PRE_1_9_3 = MinecraftProtocol.getCurrentProtocol() < MinecraftProtocol.v1_9_3_pre1.getProtocol();
 	static final boolean IS_POST_1_9_3 = !IS_PRE_1_9_3;
-	private final transient ConcurrentHashMap<SignListener, List<String>> listeners = new ConcurrentHashMap<>();
-	private final ConcurrentHashMap<Location, SignInfo> signLocations = new ConcurrentHashMap<>();
+	private final transient ConcurrentMap<SignListener, List<String>> listeners = new ConcurrentMap<>();
+	private final ConcurrentMap<Location, SignInfo> signLocations = new ConcurrentMap<>();
 	private final transient BukkitSignListener signListener;
 	private transient PacketAdapter adapter;
 	private transient boolean listening = false;
