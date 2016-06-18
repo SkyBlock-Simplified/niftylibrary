@@ -1,7 +1,8 @@
 package net.netcoding.niftybukkit.minecraft;
 
-import net.netcoding.niftybukkit.NiftyBukkit;
-import net.netcoding.niftybukkit.minecraft.messages.BungeeServer;
+import net.netcoding.niftybukkit.Nifty;
+import net.netcoding.niftybukkit._new_.api.BukkitHelper;
+import net.netcoding.niftybukkit._new_.api.plugin.messaging.BungeeServer;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -23,7 +24,7 @@ import java.util.List;
  * A command wrapper that assists with common tasks like checking execution permissions,
  * only allowing console or player execution, has default permissions and overrides
  * bukkits default permission errors. Also has a simple method to show custom usage
- * messages to {@link CommandSender}.
+ * messages to {@link net.netcoding.niftybukkit._new_.minecraft.source.command.CommandSource}.
  */
 public abstract class BukkitCommand extends BukkitHelper {
 
@@ -193,7 +194,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 			return;
 		}
 
-		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected()) {
+		if (this.isBungeeOnly() && !Nifty.getBungeeHelper().isDetected()) {
 			this.getLog().error(sender, "The command {{0}} requires BungeeCord!", this.getCommand().getName());
 			return;
 		}
@@ -235,8 +236,8 @@ public abstract class BukkitCommand extends BukkitHelper {
 	public static List<String> getMatchingPlayers(String lookup) {
 		List<String> names = new ArrayList<>();
 
-		if (NiftyBukkit.getBungeeHelper().isDetected()) {
-			for (BungeeServer server : NiftyBukkit.getBungeeHelper().getServers()) {
+		if (Nifty.getBungeeHelper().isDetected()) {
+			for (BungeeServer server : Nifty.getBungeeHelper().getServers()) {
 				for (MojangProfile profile : server.getPlayerList()) {
 					if (profile.getName().toLowerCase().startsWith(lookup) || profile.getName().toLowerCase().contains(lookup))
 						names.add(profile.getName());
@@ -258,7 +259,7 @@ public abstract class BukkitCommand extends BukkitHelper {
 		if (isConsole(sender))
 			return Collections.emptyList();
 
-		if (this.isBungeeOnly() && !NiftyBukkit.getBungeeHelper().isDetected())
+		if (this.isBungeeOnly() && !Nifty.getBungeeHelper().isDetected())
 			return Collections.emptyList();
 
 		if (this.isCheckingPerms() && !sender.hasPermission(this.permission))

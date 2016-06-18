@@ -22,5 +22,19 @@
 			<version>${minecraft.version.minor}-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.comphenix.protocol</groupId>
+			<artifactId>ProtocolLib</artifactId>
+			<version>4.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>net.milkbowl.vault</groupId>
+			<artifactId>Vault</artifactId>
+			<version>1.5.6</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 </project>

@@ -3,6 +3,7 @@ package net.netcoding.niftybukkit.yaml.converters;
 import net.netcoding.niftycore.util.NumberUtil;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.converters.Converter;
+import org.bukkit.craftbukkit.v1_9_R2.enchantments.CraftEnchantment;
 import org.bukkit.potion.PotionEffectType;
 
 import java.lang.reflect.ParameterizedType;
@@ -20,8 +21,9 @@ public class PotionEffect extends Converter {
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		Map<String, Object> map = (Map<String, Object>)this.getConverter(Map.class).fromConfig(HashMap.class, section, null);
 		String name = (String)map.get("name");
-		int duration = NumberUtil.isInt((String)map.get("duration")) ? (Integer)map.get("duration") : 1;
-		int amplifier = NumberUtil.isInt((String)map.get("amplifier")) ? (Integer)map.get("amplifier") : 0;
+		CraftEnchantment ce;
+		int duration = NumberUtil.isNumber((String)map.get("duration")) ? (Integer)map.get("duration") : 1;
+		int amplifier = NumberUtil.isNumber((String)map.get("amplifier")) ? (Integer)map.get("amplifier") : 0;
 		return new org.bukkit.potion.PotionEffect(PotionEffectType.getByName(name), duration, amplifier);
 	}
 
@@ -37,7 +39,7 @@ public class PotionEffect extends Converter {
 
 	@Override
 	public boolean supports(Class<?> type) {
-		return PotionEffect.class.isAssignableFrom(type);
+		return org.bukkit.potion.PotionEffect.class.isAssignableFrom(type);
 	}
 
 }

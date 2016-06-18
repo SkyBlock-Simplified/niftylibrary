@@ -15,6 +15,7 @@
 	</parent>
 
 	<properties>
+		<name>NiftyBukkit</name>
 		<skip-copy>true</skip-copy>
 		<minecraft.provider>bukkit</minecraft.provider>
 	</properties>

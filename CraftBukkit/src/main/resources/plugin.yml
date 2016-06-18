@@ -1,4 +1,4 @@
-name: ${project.name}
+name: NiftyBukkit
 version: ${project.version}
 website: ${project.url}
 author: ${author}
