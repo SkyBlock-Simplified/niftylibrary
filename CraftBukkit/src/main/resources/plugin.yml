@@ -1,9 +1,9 @@
-name: NiftyBukkit
+name: ${project.name}
 version: ${project.version}
 website: ${project.url}
 author: ${author}
 
-main: ${project.groupId}.${project.artifactId}.${project.name}
+main: ${project.groupId}.${project.artifactId}.Nifty${project.name}
 softdepend: [Vault, ProtocolLib]
 
 commands:
