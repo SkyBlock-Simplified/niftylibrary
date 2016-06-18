@@ -5,7 +5,7 @@
 
 	<parent>
 		<groupId>net.netcoding.nifty</groupId>
-		<artifactId>niftylibrary</artifactId>
+		<artifactId>library</artifactId>
 		<version>4.0.0</version>
 	</parent>
 
