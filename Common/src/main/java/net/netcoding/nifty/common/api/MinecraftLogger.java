@@ -4,10 +4,10 @@ import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.api.plugin.IMinecraftPlugin;
 import net.netcoding.nifty.common.minecraft.command.source.CommandSource;
 import net.netcoding.nifty.common.minecraft.entity.living.Player;
-import net.netcoding.nifty.core.api.logger.BroadcasttLogger;
+import net.netcoding.nifty.core.api.logger.BroadcastLogger;
 import net.netcoding.nifty.core.util.StringUtil;
 
-public class MinecraftLogger extends BroadcasttLogger {
+public class MinecraftLogger extends BroadcastLogger {
 
 	public MinecraftLogger(IMinecraftPlugin plugin) {
 		super(plugin);
