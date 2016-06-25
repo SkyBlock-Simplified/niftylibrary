@@ -1,30 +1,15 @@
 package net.netcoding.nifty.common._new_.minecraft.event;
 
-public abstract class Event {
+import net.netcoding.nifty.common.Nifty;
 
-	private final String name = this.getClass().getSimpleName();
-	private final boolean isAsync;
+public interface Event {
 
-	protected Event() {
-		this(false);
+	default String getEventName() {
+		return this.getClass().getSimpleName();
 	}
 
-	protected Event(boolean isAsync) {
-		this.isAsync = isAsync;
-	}
-
-	public String getEventName() {
-		return this.name;
-	}
-
-	public final boolean isAsynchronous() {
-		return this.isAsync;
-	}
-
-	public enum Result {
-		DENY,
-		DEFAULT,
-		ALLOW
+	default boolean isAsynchronous() {
+		return !Thread.currentThread().equals(Nifty.getServiceManager().getProvider(Thread.class));
 	}
 
 }

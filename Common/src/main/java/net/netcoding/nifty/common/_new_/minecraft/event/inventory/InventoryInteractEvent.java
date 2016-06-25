@@ -1,22 +1,15 @@
 package net.netcoding.nifty.common._new_.minecraft.event.inventory;
 
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
 import net.netcoding.nifty.common._new_.minecraft.event.Cancellable;
+import net.netcoding.nifty.common._new_.minecraft.event.EventResult;
 
-public abstract class InventoryInteractEvent extends InventoryEvent implements Cancellable {
+public interface InventoryInteractEvent extends InventoryEvent, Cancellable {
 
-	private boolean cancelled;
+	EventResult getResult();
 
-	public InventoryInteractEvent(BukkitMojangProfile profile) {
-		super(profile);
-	}
+	HumanEntity getWhoClicked();
 
-	public boolean isCancelled() {
-		return this.cancelled;
-	}
-
-	public void setCancelled(boolean value) {
-		this.cancelled = value;
-	}
+	void setResult(EventResult result);
 
 }

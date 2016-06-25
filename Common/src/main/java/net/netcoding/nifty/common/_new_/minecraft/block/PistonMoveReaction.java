@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common._new_.minecraft.block;
 
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.util.Arrays;
 
@@ -10,7 +10,7 @@ public enum PistonMoveReaction {
 	BREAK(1),
 	BLOCK(2);
 
-	private static ConcurrentMap<Integer, PistonMoveReaction> BY_ID = new ConcurrentMap<>();
+	private static final ConcurrentMap<Integer, PistonMoveReaction> BY_ID = new ConcurrentMap<>();
 	private final int id;
 
 	static {

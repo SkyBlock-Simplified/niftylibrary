@@ -1,8 +1,8 @@
 package net.netcoding.nifty.common._new_.minecraft;
 
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.minecraft.block.BlockFace;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import org.bukkit.potion.Potion;
 
 import java.util.Arrays;

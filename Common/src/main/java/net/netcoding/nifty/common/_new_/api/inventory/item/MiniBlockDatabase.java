@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common._new_.api.inventory.item;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.util.misc.CSVStorage;
+import net.netcoding.nifty.core.util.misc.CSVStorage;
 
 public final class MiniBlockDatabase extends CSVStorage {
 
@@ -9,7 +9,7 @@ public final class MiniBlockDatabase extends CSVStorage {
 	private static MiniBlockDatabase INSTANCE;
 
 	private MiniBlockDatabase() {
-		super(Nifty.getPlugin().getPluginDescription().getStorage(), "miniblocks");
+		super(Nifty.getPlugin().getPluginDescription().getDataFolder(), "miniblocks");
 	}
 
 	public static MiniBlockDatabase getInstance() {

@@ -1,9 +1,9 @@
 package net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment;
 
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public abstract class Enchantment {

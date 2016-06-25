@@ -1,24 +1,28 @@
 package net.netcoding.nifty.common._new_.api.inventory;
 
-import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
-import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.api.BukkitListener;
 import net.netcoding.nifty.common._new_.api.Event;
+import net.netcoding.nifty.common._new_.api.inventory.events.FakeInventoryClickEvent;
+import net.netcoding.nifty.common._new_.api.inventory.events.FakeInventoryCloseEvent;
+import net.netcoding.nifty.common._new_.api.inventory.events.FakeInventoryOpenEvent;
 import net.netcoding.nifty.common._new_.api.inventory.item.FakeItem;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.common._new_.minecraft.event.EventResult;
 import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryClickEvent;
 import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryCloseEvent;
 import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryOpenEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerRespawnEvent;
 import net.netcoding.nifty.common._new_.minecraft.inventory.Inventory;
+import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -233,7 +237,7 @@ public class FakeInventory extends FakeInventoryFrame {
 		this.open(profile, target, this);
 	}
 
-	void open(BukkitMojangProfile profile, BukkitMojangProfile target, FakeInventoryFrame frame, boolean... test) {
+	void open(BukkitMojangProfile profile, BukkitMojangProfile target, FakeInventoryFrame frame) {
 		if (frame.isAllowEmpty() || !frame.getItems().isEmpty()) {
 			if (profile.isOnlineLocally() && target.isOnlineLocally()) {
 				Player viewerPlayer = profile.getOfflinePlayer().getPlayer();
@@ -297,7 +301,7 @@ public class FakeInventory extends FakeInventoryFrame {
 		}
 
 		@Event(priority = Event.Priority.HIGH, ignoreCancelled = true)
-		public void onInventoryClick(final InventoryClickEvent event) {
+		public void onInventoryClick(InventoryClickEvent event) {
 			if (!(event.getWhoClicked() instanceof Player)) return;
 			if (InventoryType.SlotType.OUTSIDE == event.getSlotType()) return;
 			final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
@@ -356,13 +360,13 @@ public class FakeInventory extends FakeInventoryFrame {
 
 							Nifty.getScheduler().schedule(() -> {
 								System.out.println("OPENING PAGE: " + frame.getCurrentPage() + ":" + frame.getItems().size());
-								FakeInventory.this.open(profile, target, frame, true);
+								FakeInventory.this.open(profile, target, frame);
 							});
 						} else {
 							if (event.getRawSlot() < event.getInventory().getSize()) {
 								if (!event.isShiftClick()) {
 									if (Material.AIR == placeClickItem.getType()) {
-										InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
+										FakeInventoryClickEvent myEvent = new FakeInventoryClickEvent(profile, event);
 										FakeInventory.this.listener.onInventoryClick(myEvent);
 									}
 								}
@@ -379,11 +383,11 @@ public class FakeInventory extends FakeInventoryFrame {
 
 							Nifty.getScheduler().schedule(() -> {
 								System.out.println("OPENING PAGE: " + frame.getCurrentPage() + ":" + frame.getItems().size());
-								FakeInventory.this.open(profile, target, frame, true);
+								FakeInventory.this.open(profile, target, frame);
 							});
 						} else {
 							if (frame.hasMetadata(NbtKeys.TRADE_COMPLETE)) {
-								InventoryClickEvent myEvent = new InventoryClickEvent(profile, event);
+								FakeInventoryClickEvent myEvent = new FakeInventoryClickEvent(profile, event);
 								FakeInventory.this.listener.onInventoryClick(myEvent);
 								event.setCancelled(myEvent.isCancelled());
 								this.getLog().console("Cancelled: {0}", event.isCancelled());
@@ -447,13 +451,13 @@ public class FakeInventory extends FakeInventoryFrame {
 			}
 
 			if (event.isCancelled()) {
-				event.setResult(Event.Result.DENY);
+				event.setResult(EventResult.DENY);
 				player.updateInventory();
 			}
 		}
 
 		@Event
-		public void onInventoryClose(final InventoryCloseEvent event) {
+		public void onInventoryClose(InventoryCloseEvent event) {
 			HumanEntity entity = event.getPlayer();
 
 			if (entity instanceof Player) {
@@ -466,7 +470,7 @@ public class FakeInventory extends FakeInventoryFrame {
 
 					if (!info.isOpening()) {
 						FakeInventory.this.getOpened().remove(profile);
-						FakeInventory.this.listener.onInventoryClose(new InventoryCloseEvent(profile, event));
+						FakeInventory.this.listener.onInventoryClose(new FakeInventoryCloseEvent(profile, event.getInventory()));
 					}
 
 					info.setOpening(false);
@@ -475,14 +479,14 @@ public class FakeInventory extends FakeInventoryFrame {
 		}
 
 		@Event(priority = Event.Priority.HIGHEST)
-		public void onInventoryOpen(final InventoryOpenEvent event) {
+		public void onInventoryOpen(InventoryOpenEvent event) {
 			HumanEntity entity = event.getPlayer();
 
 			if (entity instanceof Player) {
 				final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getPlayer());
 
 				if (FakeInventory.this.isOpen(profile)) {
-					InventoryOpenEvent myEvent = new InventoryOpenEvent(profile, event);
+					FakeInventoryOpenEvent myEvent = new FakeInventoryOpenEvent(profile, event.getInventory());
 					FakeInventory.this.listener.onInventoryOpen(myEvent);
 					event.setCancelled(myEvent.isCancelled());
 				}
@@ -491,7 +495,7 @@ public class FakeInventory extends FakeInventoryFrame {
 
 		@Event
 		public void onPlayerRespawn(PlayerRespawnEvent event) {
-			FakeInventory.this.giveItemOpener(Nifty.getMojangRepository().searchByPlayer(event.getPlayer()));
+			FakeInventory.this.giveItemOpener(event.getProfile());
 		}
 
 	}

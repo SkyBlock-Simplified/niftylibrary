@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common._new_.api.plugin.messaging;
 
-import net.netcoding.niftycore.api.plugin.Plugin;
+import net.netcoding.nifty.core.api.plugin.Plugin;
 
 import java.util.Set;
 

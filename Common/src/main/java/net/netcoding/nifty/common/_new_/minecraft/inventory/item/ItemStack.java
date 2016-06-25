@@ -1,18 +1,18 @@
 package net.netcoding.nifty.common._new_.minecraft.inventory.item;
 
 import com.google.common.base.Preconditions;
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
+import net.netcoding.nifty.common._new_.minecraft.inventory.ItemFlag;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
-import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.minecraft.inventory.ItemFlag;
 import net.netcoding.nifty.common._new_.minecraft.material.MaterialData;
-import net.netcoding.niftycore.api.builder.BuilderCore;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import net.netcoding.niftycore.util.misc.Serializable;
+import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.api.builder.BuilderCore;
+import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.misc.Serializable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,7 +66,7 @@ public interface ItemStack extends Cloneable, Serializable {
 	}
 
 	static Builder builder() {
-		return Nifty.getBuilderManager().createBuilder(Builder.class);
+		return Nifty.getBuilderManager().createBuilder(ItemStack.class);
 	}
 
 	default ItemStack clone() {

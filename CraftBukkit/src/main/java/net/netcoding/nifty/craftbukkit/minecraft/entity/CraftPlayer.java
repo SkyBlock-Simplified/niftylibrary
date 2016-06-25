@@ -1,9 +1,9 @@
 package net.netcoding.nifty.craftbukkit.minecraft.entity;
 
-import net.netcoding.niftybukkit._new_.minecraft.GameMode;
-import net.netcoding.niftybukkit._new_.minecraft.region.Location;
-import net.netcoding.niftybukkit._new_.minecraft.entity.living.Player;
-import net.netcoding.niftycore.util.json.JsonMessage;
+import net.netcoding.nifty.common._new_.minecraft.GameMode;
+import net.netcoding.nifty.common._new_.minecraft.region.Location;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.core.util.json.JsonMessage;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;

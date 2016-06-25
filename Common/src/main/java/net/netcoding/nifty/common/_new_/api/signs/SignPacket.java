@@ -6,15 +6,15 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.google.gson.Gson;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.json.JsonMessage;
-import net.netcoding.niftycore.util.misc.Vector;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.json.JsonMessage;
+import net.netcoding.nifty.core.util.misc.Vector;
 
 import java.util.List;
 import java.util.Map;
 
-class SignPacket {
+final class SignPacket {
 
 	private static final transient Gson GSON = new Gson();
 	private final transient PacketContainer updateSignPacket;

@@ -1,14 +1,17 @@
 package net.netcoding.nifty.common._new_.minecraft;
 
 import com.google.common.base.Preconditions;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common._new_.api.plugin.PluginManager;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
 import net.netcoding.nifty.common._new_.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common._new_.minecraft.region.World;
-import net.netcoding.nifty.common._new_.minecraft.source.command.ConsoleCommandSource;
+import net.netcoding.nifty.common._new_.minecraft.command.source.ConsoleCommandSource;
 import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryHolder;
-import net.netcoding.niftycore.api.Server;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.api.Server;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +35,8 @@ public interface BukkitServer extends Server<Player> {
 
 	ConsoleCommandSource getConsoleSource();
 
+	GameMode getDefaultGameMode();
+
 	@Override
 	Player getPlayer(String name);
 
@@ -44,6 +49,14 @@ public interface BukkitServer extends Server<Player> {
 
 	@Override
 	Collection<? extends Player> getPlayerList();
+
+	default <T extends MinecraftPlugin> T getPlugin(Class<T> plugin) {
+		return this.getPluginManager().getPlugin(plugin);
+	}
+
+	default PluginManager getPluginManager() {
+		return Nifty.getServiceManager().getProvider(PluginManager.class);
+	}
 
 	default World getWorld(String name) {
 		Preconditions.checkArgument(StringUtil.notEmpty(name), "Name cannot be NULL!");

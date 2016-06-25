@@ -5,9 +5,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (!this.original.containsKey(SUPPORT))
 			this.original.put(SUPPORT, Nifty.getNbtFactory().createCompound().getHandle());
 
-		NbtCompound support = NbtFactory.fromCompound(this.original.get(SUPPORT));
+		NbtCompound support = Nifty.getNbtFactory().fromCompound(this.original.get(SUPPORT));
 
 		if (!support.containsKey(key))
 			support.put(key, Nifty.getNbtFactory().createCompound());
@@ -64,7 +64,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (!this.original.containsKey(SUPPORT))
 			return value;
 
-		NbtCompound support = NbtFactory.fromCompound(this.original.get(SUPPORT));
+		NbtCompound support = Nifty.getNbtFactory().fromCompound(this.original.get(SUPPORT));
 
 		if (support.containsKey(key)) {
 			NbtCompound keyCompound = (NbtCompound)support.get(key);
@@ -214,7 +214,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	}
 
 	private void removeSupportKey(Object key) {
-		NbtFactory.fromCompound(this.original.get(SUPPORT)).remove(key);
+		Nifty.getNbtFactory().fromCompound(this.original.get(SUPPORT)).remove(key);
 	}
 
 	protected void save() { }
@@ -277,7 +277,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 			public Iterator<Object> iterator() {
 				return new Iterator<Object>() {
 
-					private Iterator<Entry<String, Object>> i = WrappedMap.this.entrySet().iterator();
+					private final Iterator<Entry<String, Object>> i = WrappedMap.this.entrySet().iterator();
 
 					public boolean hasNext() {
 						return i.hasNext();

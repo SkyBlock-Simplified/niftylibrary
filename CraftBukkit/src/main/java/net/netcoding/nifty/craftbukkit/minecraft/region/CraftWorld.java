@@ -1,19 +1,22 @@
 package net.netcoding.nifty.craftbukkit.minecraft.region;
 
+import net.netcoding.nifty.common._new_.minecraft.Effect;
+import net.netcoding.nifty.common._new_.minecraft.Particle;
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
+import net.netcoding.nifty.common._new_.minecraft.entity.EntityType;
+import net.netcoding.nifty.common._new_.minecraft.entity.Item;
+import net.netcoding.nifty.common._new_.minecraft.entity.block.FallingBlock;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.LivingEntity;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.common._new_.minecraft.entity.weather.LightningStrike;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.region.Biome;
+import net.netcoding.nifty.common._new_.minecraft.region.Chunk;
+import net.netcoding.nifty.common._new_.minecraft.region.Location;
+import net.netcoding.nifty.common._new_.minecraft.region.World;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
-import net.netcoding.niftybukkit._new_.minecraft.Effect;
-import net.netcoding.niftybukkit._new_.minecraft.Particle;
-import net.netcoding.niftybukkit._new_.minecraft.block.Block;
-import net.netcoding.niftybukkit._new_.minecraft.entity.living.Player;
-import net.netcoding.niftybukkit._new_.minecraft.region.Biome;
-import net.netcoding.niftybukkit._new_.minecraft.region.Chunk;
-import net.netcoding.niftybukkit._new_.minecraft.region.Location;
-import net.netcoding.niftybukkit._new_.minecraft.region.World;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 
 import java.io.File;
 import java.util.Collection;
@@ -39,6 +42,16 @@ public final class CraftWorld implements World {
 	@Override
 	public boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks) {
 		return this.getHandle().createExplosion(x, y, z, power, setFire, breakBlocks);
+	}
+
+	@Override
+	public Item dropItem(Location location, ItemStack itemStack) {
+		return null; // TODO
+	}
+
+	@Override
+	public Item dropItemNaturally(Location location, ItemStack itemStack) {
+		return null; // TODO
 	}
 
 	@Override
@@ -174,7 +187,7 @@ public final class CraftWorld implements World {
 	@Override
 	public List<Player> getPlayers() {
 		ConcurrentList<Player> players = new ConcurrentList<>();
-		Bukkit.getOnlinePlayers().stream().forEach(player -> players.add(new CraftPlayer(player)));
+		org.bukkit.Bukkit.getOnlinePlayers().stream().forEach(player -> players.add(new CraftPlayer(player)));
 		return players;
 	}
 
@@ -432,10 +445,22 @@ public final class CraftWorld implements World {
 	public Entity spawnEntity(Location location, EntityType type) {
 		return null; // TODO
 	}
+	@Override
+	public FallingBlock spawnFallingBlock(Location location, int id, byte data) {
+		return null; // TODO
+	}
 
 	@Override
 	public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data) {
 		this.getHandle().spawnParticle(org.bukkit.Particle.valueOf(particle.name()), x, y, z, count, offsetX, offsetY, offsetZ, extra, data);
+	}
+	@Override
+	public LightningStrike strikeLightning(Location location) {
+		return null; // TODO
+	}
+	@Override
+	public LightningStrike strikeLightningEffect(Location location) {
+		return null; // TODO
 	}
 
 	@Override

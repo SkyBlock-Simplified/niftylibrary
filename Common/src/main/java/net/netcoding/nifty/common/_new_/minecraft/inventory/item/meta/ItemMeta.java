@@ -2,10 +2,10 @@ package net.netcoding.nifty.common._new_.minecraft.inventory.item.meta;
 
 import net.netcoding.nifty.common._new_.minecraft.inventory.ItemFlag;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.misc.Serializable;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.misc.Serializable;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.util.Arrays;
 import java.util.Collection;

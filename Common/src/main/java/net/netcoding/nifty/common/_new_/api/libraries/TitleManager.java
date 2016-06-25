@@ -6,12 +6,12 @@ import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
 import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.api.ChatColor;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.api.ChatColor;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.RegexUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
-public class TitleManager {
+public final class TitleManager {
 
 	private String subtitle = "";
 	private ChatColor subtitleColor = ChatColor.WHITE;
@@ -115,7 +115,7 @@ public class TitleManager {
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
 		if (MinecraftProtocol.isPre1_8())
-			packetTitle.setValue("a", packetTitleObj, enumClear);
+			packetTitle.setValue(titleAction.getClazz(), packetTitleObj, enumClear);
 		else
 			packetTitleObj = packetTitle.newInstance(enumClear, null);
 
@@ -130,7 +130,7 @@ public class TitleManager {
 		Object enumReset = titleAction.getValue("RESET", null);
 
 		if (MinecraftProtocol.isPre1_8())
-			packetTitle.setValue("a", packetTitleObj, enumReset);
+			packetTitle.setValue(titleAction.getClazz(), packetTitleObj, enumReset);
 		else
 			packetTitleObj = packetTitle.newInstance(enumReset, null);
 

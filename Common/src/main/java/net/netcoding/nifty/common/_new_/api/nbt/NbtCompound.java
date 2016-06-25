@@ -3,7 +3,7 @@ package net.netcoding.nifty.common._new_.api.nbt;
 import com.google.common.io.Files;
 import com.google.common.io.OutputSupplier;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;

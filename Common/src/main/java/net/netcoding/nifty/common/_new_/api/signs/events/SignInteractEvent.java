@@ -7,7 +7,7 @@ import net.netcoding.nifty.common._new_.minecraft.block.Action;
 /**
  * Class for sign specific interact events.
  */
-public class SignInteractEvent extends SignEvent {
+public final class SignInteractEvent extends SignEvent {
 
 	public SignInteractEvent(BukkitMojangProfile profile, SignInfo signInfo, Action action, String key) {
 		super(profile, signInfo, action, key);

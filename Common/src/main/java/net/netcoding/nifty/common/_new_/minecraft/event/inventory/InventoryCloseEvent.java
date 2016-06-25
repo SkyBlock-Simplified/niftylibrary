@@ -1,11 +1,9 @@
 package net.netcoding.nifty.common._new_.minecraft.event.inventory;
 
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
 
-public class InventoryCloseEvent extends InventoryEvent {
+public interface InventoryCloseEvent extends InventoryEvent {
 
-	public InventoryCloseEvent(BukkitMojangProfile profile) {
-		super(profile);
-	}
+	HumanEntity getPlayer();
 
 }

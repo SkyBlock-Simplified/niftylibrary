@@ -1,14 +1,19 @@
 package net.netcoding.nifty.common._new_.minecraft.event.inventory;
 
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileEvent;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
+import net.netcoding.nifty.common._new_.minecraft.inventory.Inventory;
+import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryView;
 
-public abstract class InventoryEvent extends ProfileEvent {
+import java.util.List;
 
-	public InventoryEvent(BukkitMojangProfile profile) {
-		super(profile);
+public interface InventoryEvent {
+
+	Inventory getInventory();
+
+	InventoryView getView();
+
+	default List<HumanEntity> getViewers() {
+		return this.getInventory().getViewers();
 	}
-
-	// TODO: Inventory
 
 }

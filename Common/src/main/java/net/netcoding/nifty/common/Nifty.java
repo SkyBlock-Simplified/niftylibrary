@@ -6,25 +6,25 @@ import net.netcoding.nifty.common._new_.api.inventory.item.MiniBlockDatabase;
 import net.netcoding.nifty.common._new_.api.inventory.item.enchantment.EnchantmentDatabase;
 import net.netcoding.nifty.common._new_.api.nbt.NbtFactory;
 import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common._new_.api.plugin.PluginManager;
 import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeHelper;
 import net.netcoding.nifty.common._new_.api.plugin.messaging.Messenger;
 import net.netcoding.nifty.common._new_.minecraft.BukkitServer;
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemFactory;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangRepository;
-import net.netcoding.nifty.common._new_.minecraft.block.Block;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.niftycore.api.builder.BuilderManager;
-import net.netcoding.niftycore.api.plugin.Plugin;
-import net.netcoding.niftycore.api.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.api.service.ServiceManager;
+import net.netcoding.nifty.core.api.builder.BuilderManager;
+import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.api.service.ServiceManager;
 
 @SuppressWarnings("unchecked")
 public final class Nifty {
 
 	private static final BuilderManager<Plugin> BUILDER_MANAGER = new BuilderManager<>();
 	private static final ServiceManager<Plugin> SERVICE_MANAGER = new ServiceManager<>();
+	// TODO: FIREWORK BUILDER
 
 	public static BuilderManager<Plugin> getBuilderManager() {
 		return BUILDER_MANAGER;
@@ -72,10 +72,6 @@ public final class Nifty {
 
 	public static MinecraftPlugin getPlugin() {
 		return getServiceManager().getProvider(MinecraftPlugin.class);
-	}
-
-	public static PluginManager getPluginManager() {
-		return getServiceManager().getProvider(PluginManager.class);
 	}
 
 	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {

@@ -1,16 +1,16 @@
 package net.netcoding.nifty.craftbukkit.api.inventory.item;
 
 import com.google.common.base.Preconditions;
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtCompound;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.meta.ItemMeta;
-import net.netcoding.niftybukkit._new_.minecraft.material.Material;
-import net.netcoding.niftybukkit._new_.minecraft.material.MaterialData;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.minecraft.material.MaterialData;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.RegexUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.craftbukkit.api.nbt.CraftNbtFactory;
 
 import java.util.ArrayList;

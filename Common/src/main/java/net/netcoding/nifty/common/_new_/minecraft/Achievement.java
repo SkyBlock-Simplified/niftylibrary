@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common._new_.minecraft;
 
 import com.google.common.base.CaseFormat;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 /**
  * Represents an achievement, which may be given to players.

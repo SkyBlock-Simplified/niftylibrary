@@ -2,18 +2,18 @@ package net.netcoding.nifty.common._new_.api.signs;
 
 import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
 import net.netcoding.nifty.common._new_.minecraft.block.Block;
+import net.netcoding.nifty.common._new_.minecraft.block.Sign;
 import net.netcoding.nifty.common._new_.minecraft.region.Location;
 import net.netcoding.nifty.common._new_.minecraft.region.World;
-import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import org.bukkit.block.Sign;
+import net.netcoding.nifty.core.util.RegexUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.Arrays;
 
 /**
  * Used to access sign methods as well as retrieve or modify the lines.
  */
-public class SignInfo {
+public final class SignInfo {
 
 	private final transient Sign sign;
 	private final String[] lines;

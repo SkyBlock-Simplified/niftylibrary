@@ -1,10 +1,10 @@
 package net.netcoding.nifty.common._new_.api;
 
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.nifty.common._new_.minecraft.source.command.CommandSource;
+import net.netcoding.nifty.common._new_.minecraft.command.source.CommandSource;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.api.MinecraftLogger;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.api.MinecraftLogger;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

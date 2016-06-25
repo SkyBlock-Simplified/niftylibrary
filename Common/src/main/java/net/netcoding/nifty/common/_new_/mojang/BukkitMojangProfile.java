@@ -9,16 +9,16 @@ import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.SkullType;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.SkullMeta;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
 import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
 import net.netcoding.nifty.common._new_.util.LocationUtil;
-import net.netcoding.niftycore.api.ChatColor;
-import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.json.JsonMessage;
-import org.bukkit.inventory.meta.SkullMeta;
+import net.netcoding.nifty.core.api.ChatColor;
+import net.netcoding.nifty.core.mojang.MojangProfile;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.json.JsonMessage;
 
 public abstract class BukkitMojangProfile extends MojangProfile {
 

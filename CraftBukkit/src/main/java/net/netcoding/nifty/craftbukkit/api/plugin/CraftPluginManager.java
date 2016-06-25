@@ -1,6 +1,6 @@
 package net.netcoding.nifty.craftbukkit.api.plugin;
 
-import net.netcoding.niftybukkit._new_.api.plugin.PluginManager;
+import net.netcoding.nifty.common._new_.api.plugin.PluginManager;
 import org.bukkit.Bukkit;
 
 public final class CraftPluginManager extends PluginManager {

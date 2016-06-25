@@ -2,11 +2,11 @@ package net.netcoding.nifty.common._new_.api.inventory.events;
 
 import net.netcoding.nifty.common._new_.api.inventory.FakeInventory;
 import net.netcoding.nifty.common._new_.minecraft.event.Cancellable;
-import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.yaml.converters.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryClickEvent;
 import net.netcoding.nifty.common._new_.minecraft.inventory.ClickType;
+import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 
 public final class FakeInventoryClickEvent extends FakeInventoryEvent implements Cancellable {
 

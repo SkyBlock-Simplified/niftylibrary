@@ -6,12 +6,10 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.netcoding.nifty.common._new_.minecraft.event.server.GameStoppingEvent;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.api.BukkitListener;
 import net.netcoding.nifty.common._new_.api.Event;
-import net.netcoding.niftycore.api.plugin.Plugin;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common._new_.api.plugin.PluginManager;
 import net.netcoding.nifty.common._new_.api.plugin.messaging.exceptions.BungeeListenerException;
 import net.netcoding.nifty.common._new_.api.plugin.messaging.exceptions.IllegalServerNameException;
@@ -20,15 +18,17 @@ import net.netcoding.nifty.common._new_.minecraft.event.bungee.BungeeLoadedEvent
 import net.netcoding.nifty.common._new_.minecraft.event.bungee.BungeeProfileJoinEvent;
 import net.netcoding.nifty.common._new_.minecraft.event.bungee.BungeeProfileLeaveEvent;
 import net.netcoding.nifty.common._new_.minecraft.event.bungee.BungeeServerLoadedEvent;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileNameChangeEvent;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileQuitEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerNameChangeEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerQuitEvent;
 import net.netcoding.nifty.common._new_.minecraft.event.server.BukkitServerPingEvent;
-import net.netcoding.niftycore.api.MinecraftServer;
-import net.netcoding.niftycore.util.ByteUtil;
-import net.netcoding.niftycore.util.misc.ServerSocketWrapper;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.common._new_.minecraft.event.server.GameStoppingEvent;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.util.ByteUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.util.misc.ServerSocketWrapper;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -248,7 +248,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 
 	public final Set<BungeeServer<T>> getServers() throws BungeeListenerException {
 		if (this.getDetails().isDetected())
-			return Collections.unmodifiableSet(new HashSet<>(this.servers.values()));
+			return Collections.unmodifiableSet(new ConcurrentSet<>(this.servers.values()));
 
 		throw new BungeeListenerException();
 	}
@@ -266,7 +266,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 	void handleNifty(String channel, byte[] message) {
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String subChannel = input.readUTF();
-		PluginManager manager = Nifty.getPluginManager();
+		PluginManager manager = Nifty.getServer().getPluginManager();
 
 		if (NIFTY_CHANNEL.equals(channel)) {
 			try {
@@ -319,7 +319,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 
 								if (loaded == this.servers.size()) {
 									loadedAllOnce = true;
-									manager.call(new BungeeLoadedEvent(this.servers.values()));
+									manager.call(new BungeeLoadedEvent());
 								}
 							}
 						} else if (subChannel.startsWith("Player")) {
@@ -355,7 +355,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 						if (profile.equals(updatedProfile)) {
 							server.getUnsafePlayerList().remove(profile);
 							server.getUnsafePlayerList().add(updatedProfile);
-							manager.call(new ProfileNameChangeEvent(updatedProfile));
+							manager.call(new PlayerNameChangeEvent(updatedProfile));
 							break;
 						}
 					}
@@ -394,7 +394,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 	 * @param listener Channel listener implementation to send results to.
 	 * @return Wrapped channel containing plugin, BungeeCord channel and listener.
 	 */
-	public final ChannelWrapper register(Plugin plugin, ChannelListener listener) {
+	public final ChannelWrapper register(MinecraftPlugin plugin, ChannelListener listener) {
 		return this.register(plugin, BUNGEE_CHANNEL, listener);
 	}
 
@@ -406,7 +406,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 	 * @param listener Channel listener implementation to send results to.
 	 * @return Wrapped channel containing plugin, channel and listener.
 	 */
-	public final ChannelWrapper register(Plugin plugin, String channel, ChannelListener listener) {
+	public final ChannelWrapper register(MinecraftPlugin plugin, String channel, ChannelListener listener) {
 		Preconditions.checkArgument(plugin != null, "Plugin cannot be NULL!");
 		Preconditions.checkArgument(StringUtil.notEmpty(channel), "Channel cannot be NULL!");
 		Preconditions.checkArgument(listener != null, "Listener cannot be NULL!");
@@ -427,7 +427,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 		return wrapper;
 	}
 
-	protected abstract void sendPluginMessage(Plugin plugin, BukkitMojangProfile profile, String channel, byte[] data);
+	protected abstract void sendPluginMessage(MinecraftPlugin plugin, BukkitMojangProfile profile, String channel, byte[] data);
 
 	void write(BukkitMojangProfile profile, String channel, String subChannel, Object... data) {
 		if (!this.getDetails().isDetected()) return;
@@ -471,7 +471,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 		}
 
 		@Event(priority = Event.Priority.MONITOR)
-		public void onPlayerQuit(ProfileQuitEvent event) {
+		public void onPlayerQuit(PlayerQuitEvent event) {
 			if (BungeeHelper.this.getDetails().isDetected()) {
 				BukkitMojangProfile profile = null;
 
@@ -487,7 +487,7 @@ public abstract class BungeeHelper<T extends BukkitMojangProfile> {
 					BungeeHelper.this.getServer().playersLeft.remove(profile);
 
 					if (BungeeHelper.this.getServer().getPlayerCount() == 0) {
-						Nifty.getPluginManager().call(new BungeeProfileLeaveEvent(profile));
+						Nifty.getServer().getPluginManager().call(new BungeeProfileLeaveEvent(profile));
 						BungeeHelper.this.bungeeDetails.setDetected(false);
 						BungeeHelper.this.bungeeDetails.setOnlineMode(false);
 						BungeeHelper.this.servers.clear();

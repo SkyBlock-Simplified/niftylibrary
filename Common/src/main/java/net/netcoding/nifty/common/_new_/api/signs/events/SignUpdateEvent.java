@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * Class for sign specific update events.
  */
-public class SignUpdateEvent extends SignEvent {
+public final class SignUpdateEvent extends SignEvent {
 
 	public SignUpdateEvent(BukkitMojangProfile profile, SignInfo signInfo, String key) {
 		super(profile, signInfo, Action.PHYSICAL, key);

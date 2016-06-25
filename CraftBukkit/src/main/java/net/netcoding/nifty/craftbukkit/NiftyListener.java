@@ -1,21 +1,21 @@
 package net.netcoding.nifty.craftbukkit;
 
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.inventory.FakeInventory;
+import net.netcoding.nifty.common._new_.api.inventory.item.FakeItem;
+import net.netcoding.nifty.common._new_.minecraft.event.entity.EnderCrystalPlaceEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryCreativeNbtEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerJoinEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerQuitEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.server.GameStartingEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.server.GameStoppingEvent;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.craftbukkit.api.CraftListener;
+import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.api.plugin.CraftPlugin;
 import net.netcoding.nifty.craftbukkit.minecraft.event.server.CraftServerPingEvent;
 import net.netcoding.nifty.craftbukkit.mojang.CraftMojangRepository;
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit._new_.api.inventory.FakeInventory;
-import net.netcoding.niftybukkit._new_.api.inventory.item.FakeItem;
-import net.netcoding.niftybukkit._new_.minecraft.event.entity.EnderCrystalPlaceEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.inventory.InventoryCreativeNbtEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.profile.ProfileJoinEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.profile.ProfileQuitEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.server.GameStartingEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.server.GameStoppingEvent;
-import net.netcoding.niftybukkit._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit.minecraft.items.ItemData;
-import net.netcoding.niftycore.api.scheduler.MinecraftScheduler;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,8 +29,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -52,11 +50,11 @@ final class NiftyListener extends CraftListener {
 			BukkitMojangProfile profile = CraftMojangRepository.getInstance().searchByBukkitPlayer((Player)event.getWhoClicked());
 
 			if (!FakeInventory.isOpenAnywhere(profile)) {
-				ItemData itemData = new ItemData(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+				ItemStack itemData = new CraftItemStack(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
 
 				if (!FakeItem.isAnyItemOpener(itemData) && itemData.getNbt().notEmpty()) {
 					InventoryCreativeNbtEvent myEvent = new InventoryCreativeNbtEvent(profile, event, itemData);
-					Nifty.getPluginManager().call(myEvent);
+					Nifty.getServer().getPluginManager().call(myEvent);
 
 					if (myEvent.isCancelled())
 						event.setCancelled(true);
@@ -77,7 +75,7 @@ final class NiftyListener extends CraftListener {
 				if (Material.END_CRYSTAL == event.getMaterial()) {
 					final Player player = event.getPlayer();
 
-					MinecraftScheduler.getInstance().schedule(() -> {
+					Nifty.getScheduler().schedule(() -> {
 						List<Entity> entities = player.getNearbyEntities(4, 4, 4);
 
 						for (Entity entity : entities) {
@@ -88,7 +86,7 @@ final class NiftyListener extends CraftListener {
 								if (block.equals(belowCrystal)) {
 									BukkitMojangProfile profile = CraftMojangRepository.getInstance().searchByBukkitPlayer(player);
 									EnderCrystalPlaceEvent myEvent = new EnderCrystalPlaceEvent(profile, crystal);
-									Nifty.getPluginManager().call(myEvent);
+									Nifty.getServer().getPluginManager().call(myEvent);
 
 									if (myEvent.isCancelled())
 										crystal.remove();
@@ -108,10 +106,10 @@ final class NiftyListener extends CraftListener {
 	 * has finished logging in.
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerJoin(final PlayerJoinEvent event) {
-		MinecraftScheduler.getInstance().schedule(this.getPlugin(), () -> {
+	public void onPlayerJoin(final org.bukkit.event.player.PlayerJoinEvent event) {
+		Nifty.getScheduler().schedule(this.getPlugin(), () -> {
 			BukkitMojangProfile profile = CraftMojangRepository.getInstance().searchByBukkitPlayer(event.getPlayer());
-			Nifty.getPluginManager().call(new ProfileJoinEvent(profile));
+			Nifty.getServer().getPluginManager().call(new PlayerJoinEvent(profile));
 		}, 10L);
 	}
 
@@ -120,9 +118,9 @@ final class NiftyListener extends CraftListener {
 	 * logging out.
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPlayerQuit(PlayerQuitEvent event) {
+	public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
 		BukkitMojangProfile profile = CraftMojangRepository.getInstance().searchByBukkitPlayer(event.getPlayer());
-		ProfileQuitEvent myEvent = new ProfileQuitEvent(profile, event.getQuitMessage());
+		PlayerQuitEvent myEvent = new PlayerQuitEvent(profile, event.getQuitMessage());
 		event.setQuitMessage(myEvent.getQuitMessage());
 	}
 
@@ -132,7 +130,7 @@ final class NiftyListener extends CraftListener {
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
 		if (event.getPlugin().getName().equals("NiftyBukkit"))
-			Nifty.getPluginManager().call(new GameStartingEvent());
+			Nifty.getServer().getPluginManager().call(new GameStartingEvent());
 	}
 
 	/**
@@ -141,7 +139,7 @@ final class NiftyListener extends CraftListener {
 	@EventHandler
 	public void onPluginDisable(PluginDisableEvent event) {
 		if (event.getPlugin().getName().equals("NiftyBukkit"))
-			Nifty.getPluginManager().call(new GameStoppingEvent());
+			Nifty.getServer().getPluginManager().call(new GameStoppingEvent());
 	}
 
 	/**
@@ -149,7 +147,7 @@ final class NiftyListener extends CraftListener {
 	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onServerListPing(ServerListPingEvent event) {
-		Nifty.getPluginManager().call(new CraftServerPingEvent(event));
+		Nifty.getServer().getPluginManager().call(new CraftServerPingEvent(event));
 	}
 
 	/**

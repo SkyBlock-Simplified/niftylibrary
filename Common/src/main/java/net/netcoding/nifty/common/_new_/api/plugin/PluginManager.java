@@ -1,20 +1,20 @@
 package net.netcoding.nifty.common._new_.api.plugin;
 
 import com.google.common.base.Preconditions;
+import net.netcoding.nifty.common._new_.api.Listener;
 import net.netcoding.nifty.common._new_.minecraft.event.Cancellable;
 import net.netcoding.nifty.common._new_.minecraft.event.Event;
-import net.netcoding.nifty.common._new_.api.Listener;
-import net.netcoding.niftycore.api.plugin.Plugin;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
 public abstract class PluginManager {
 
-	private final transient ConcurrentMap<Plugin, ConcurrentSet<Listener>> listeners = new ConcurrentMap<>();
+	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentSet<Listener>> listeners = new ConcurrentMap<>();
 
 	protected PluginManager() { }
 
@@ -22,7 +22,7 @@ public abstract class PluginManager {
 		ConcurrentSet<Method> ignore = new ConcurrentSet<>();
 
 		for (int i = 0; i <= 5; i++) {
-			for (Map.Entry<Plugin, ConcurrentSet<Listener>> entry : listeners.entrySet()) {
+			for (Map.Entry<MinecraftPlugin, ConcurrentSet<Listener>> entry : listeners.entrySet()) {
 				Plugin plugin = entry.getKey();
 
 				for (Listener listener : entry.getValue()) {
@@ -69,22 +69,26 @@ public abstract class PluginManager {
 		}
 	}
 
-	public boolean hasRegistered(Plugin plugin) {
+	public abstract MinecraftPlugin getPlugin(String name);
+
+	public abstract <T extends MinecraftPlugin> T getPlugin(Class<T> plugin);
+
+	public boolean hasRegistered(MinecraftPlugin plugin) {
 		Preconditions.checkArgument(plugin != null, "Plugin cannot be NULL!");
 		return this.listeners.containsKey(plugin);
 	}
 
 	public abstract boolean hasPlugin(String name);
 
-	public boolean isRegistered(Plugin plugin, Listener listener) {
+	public boolean isRegistered(MinecraftPlugin plugin, Listener listener) {
 		Preconditions.checkArgument(plugin != null, "Plugin cannot be NULL!");
 		Preconditions.checkArgument(listener != null, "Listener cannot be NULL!");
 		return this.listeners.containsKey(plugin) && this.listeners.get(plugin).contains(listener);
 	}
 
-	public abstract boolean isPluginEnabled(String name);
+	public abstract boolean isEnabled(String name);
 
-	public void registerListener(Plugin plugin, Listener listener) {
+	public void registerListener(MinecraftPlugin plugin, Listener listener) {
 		if (!this.isRegistered(plugin, listener)) {
 			if (!this.listeners.containsKey(plugin))
 				this.listeners.put(plugin, new ConcurrentSet<>());
@@ -94,7 +98,7 @@ public abstract class PluginManager {
 			throw new IllegalArgumentException(StringUtil.format("Listener has already been registered for plugin ''{0}''!", plugin.getName()));
 	}
 
-	public void unregisterListener(Plugin plugin, Listener listener) {
+	public void unregisterListener(MinecraftPlugin plugin, Listener listener) {
 		if (this.hasRegistered(plugin)) {
 			if (this.isRegistered(plugin, listener)) {
 				this.listeners.get(plugin).remove(listener);
@@ -107,7 +111,7 @@ public abstract class PluginManager {
 			throw new IllegalArgumentException(StringUtil.format("Plugin ''{0}'' has no registered listeners!", plugin.getName()));
 	}
 
-	public void unregisterListeners(Plugin plugin) {
+	public void unregisterListeners(MinecraftPlugin plugin) {
 		if (this.hasRegistered(plugin))
 			this.listeners.remove(plugin);
 		else

@@ -2,16 +2,16 @@ package net.netcoding.nifty.common._new_.api.plugin.messaging;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftycore.api.plugin.Plugin;
 
 public class ChannelWrapper {
 
-	private final Plugin plugin;
+	private final MinecraftPlugin plugin;
 	private final String channel;
 	private final ChannelListener listener;
 
-	public ChannelWrapper(Plugin plugin, String channel, ChannelListener listener) {
+	public ChannelWrapper(MinecraftPlugin plugin, String channel, ChannelListener listener) {
 		this.plugin = plugin;
 		this.channel = channel;
 		this.listener = listener;
@@ -25,7 +25,7 @@ public class ChannelWrapper {
 		return wrapper.getPlugin().equals(this.getPlugin()) && wrapper.getChannel().equalsIgnoreCase(this.getChannel());
 	}
 
-	public final Plugin getPlugin() {
+	public final MinecraftPlugin getPlugin() {
 		return this.plugin;
 	}
 

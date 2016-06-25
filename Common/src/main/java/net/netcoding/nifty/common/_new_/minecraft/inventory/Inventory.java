@@ -1,8 +1,8 @@
 package net.netcoding.nifty.common._new_.minecraft.inventory;
 
 import net.netcoding.nifty.common._new_.minecraft.entity.living.HumanEntity;
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.minecraft.region.Location;
 
 import java.util.HashMap;
@@ -17,41 +17,45 @@ public interface Inventory extends Iterable<ItemStack> {
 
 	int getSize();
 
-	void setMaxStackSize(int var1);
+	void setMaxStackSize(int slot);
 
-	ItemStack getItem(int var1);
+	ItemStack getItem(int slot);
 
-	void setItem(int var1, ItemStack var2);
+	void setItem(int slot, ItemStack item);
 
-	HashMap<Integer, ItemStack> addItem(ItemStack... itemStacks) throws IllegalArgumentException;
+	HashMap<Integer, ItemStack> addItem(ItemStack... items) throws IllegalArgumentException;
 
-	HashMap<Integer, ItemStack> removeItem(ItemStack... itemStacks) throws IllegalArgumentException;
+	HashMap<Integer, ItemStack> removeItem(ItemStack... items) throws IllegalArgumentException;
 
 	ItemStack[] getContents();
 
-	void setContents(ItemStack[] var1) throws IllegalArgumentException;
+	void setContents(ItemStack[] items) throws IllegalArgumentException;
 
 	ItemStack[] getStorageContents();
 
-	void setStorageContents(ItemStack[] var1) throws IllegalArgumentException;
+	void setStorageContents(ItemStack[] items) throws IllegalArgumentException;
 
 	/** @deprecated */
 	@Deprecated
 	boolean contains(int var1);
 
-	boolean contains(Material var1) throws IllegalArgumentException;
+	boolean contains(Material material) throws IllegalArgumentException;
 
-	boolean contains(ItemStack var1);
+	default boolean contains(ItemStack item) {
+		return this.contains(item.getType());
+	}
 
 	/** @deprecated */
 	@Deprecated
 	boolean contains(int var1, int var2);
 
-	boolean contains(Material var1, int var2) throws IllegalArgumentException;
+	boolean contains(Material material, int slot) throws IllegalArgumentException;
 
-	boolean contains(ItemStack var1, int var2);
+	default boolean contains(ItemStack item, int slot) {
+		return this.contains(item.getType(), slot);
+	}
 
-	boolean containsAtLeast(ItemStack var1, int var2);
+	boolean containsAtLeast(ItemStack item, int slot);
 
 	/** @deprecated */
 	@Deprecated
@@ -91,6 +95,7 @@ public interface Inventory extends Iterable<ItemStack> {
 
 	InventoryHolder getHolder();
 
+	@Override
 	ListIterator<ItemStack> iterator();
 
 	ListIterator<ItemStack> iterator(int var1);

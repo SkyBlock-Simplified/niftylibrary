@@ -2,14 +2,14 @@ package net.netcoding.nifty.craftbukkit.minecraft;
 
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
 import net.netcoding.nifty.craftbukkit.minecraft.source.command.CraftConsoleCommandSource;
-import net.netcoding.niftybukkit._new_.minecraft.BukkitServer;
-import net.netcoding.niftybukkit._new_.minecraft.OfflinePlayer;
-import net.netcoding.niftybukkit._new_.minecraft.entity.living.Player;
-import net.netcoding.niftybukkit._new_.minecraft.region.World;
-import net.netcoding.niftybukkit._new_.minecraft.source.command.ConsoleCommandSource;
-import net.netcoding.niftybukkit._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.common._new_.minecraft.BukkitServer;
+import net.netcoding.nifty.common._new_.minecraft.OfflinePlayer;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.common._new_.minecraft.region.World;
+import net.netcoding.nifty.common._new_.minecraft.command.source.ConsoleCommandSource;
+import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftWorld;
 import org.bukkit.Bukkit;
 

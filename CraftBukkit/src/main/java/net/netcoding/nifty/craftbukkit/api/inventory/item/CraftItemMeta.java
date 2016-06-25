@@ -1,11 +1,11 @@
 package net.netcoding.nifty.craftbukkit.api.inventory.item;
 
-import net.netcoding.niftybukkit._new_.minecraft.inventory.ItemFlag;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.meta.ItemMeta;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.common._new_.minecraft.inventory.ItemFlag;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.util.ArrayList;
 import java.util.Collection;

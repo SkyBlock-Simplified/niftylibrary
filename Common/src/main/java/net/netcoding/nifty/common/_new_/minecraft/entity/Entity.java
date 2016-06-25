@@ -1,18 +1,18 @@
 package net.netcoding.nifty.common._new_.minecraft.entity;
 
-import net.netcoding.nifty.common._new_.minecraft.source.command.CommandSource;
+import net.netcoding.nifty.common._new_.minecraft.event.entity.EntityDamageEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerTeleportEvent;
 import net.netcoding.nifty.common._new_.minecraft.region.Location;
 import net.netcoding.nifty.common._new_.minecraft.region.World;
-import net.netcoding.niftycore.util.misc.Vector;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import net.netcoding.nifty.common._new_.minecraft.command.source.CommandSource;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.misc.Vector;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+// TODO: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/src/main/java/org/bukkit/entity
 public interface Entity extends CommandSource {
 
 	boolean eject();
@@ -50,6 +50,8 @@ public interface Entity extends CommandSource {
 	Entity getPassenger();
 
 	int getTicksLived();
+
+	EntityType getType();
 
 	UUID getUniqueId();
 
@@ -101,7 +103,6 @@ public interface Entity extends CommandSource {
 
 	void setVelocity(Vector velocity);
 
-
 	boolean teleport(Location location);
 
 	boolean teleport(Location location, PlayerTeleportEvent.TeleportCause var2);
@@ -109,10 +110,6 @@ public interface Entity extends CommandSource {
 	boolean teleport(Entity entity);
 
 	boolean teleport(Entity entity, PlayerTeleportEvent.TeleportCause var2);
-
-
-	EntityType getType();
-
 
 	enum Effect {
 
@@ -150,4 +147,5 @@ public interface Entity extends CommandSource {
 		}
 
 	}
+
 }

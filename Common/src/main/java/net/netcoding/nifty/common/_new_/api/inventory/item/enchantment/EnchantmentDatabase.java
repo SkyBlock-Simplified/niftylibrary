@@ -3,11 +3,11 @@ package net.netcoding.nifty.common._new_.api.inventory.item.enchantment;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.niftycore.util.misc.CSVStorage;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.comparator.LengthCompare;
+import net.netcoding.nifty.core.util.misc.CSVStorage;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.comparator.LengthCompare;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public abstract class EnchantmentDatabase extends CSVStorage {
 	private final transient Map<EnchantmentData, String> primaryName = new HashMap<>();
 
 	protected EnchantmentDatabase() {
-		super(Nifty.getPlugin().getPluginDescription().getStorage(), "enchantments");
+		super(Nifty.getPlugin().getDataFolder(), "enchantments");
 		this.registerEnchantments0();
 	}
 

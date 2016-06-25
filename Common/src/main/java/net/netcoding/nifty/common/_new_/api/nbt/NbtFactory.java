@@ -13,9 +13,9 @@ import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
 import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;

@@ -2,14 +2,18 @@ package net.netcoding.nifty.common._new_.minecraft.region;
 
 import net.netcoding.nifty.common._new_.minecraft.Effect;
 import net.netcoding.nifty.common._new_.minecraft.Particle;
-import net.netcoding.nifty.common._new_.minecraft.Sound;
 import net.netcoding.nifty.common._new_.minecraft.block.Block;
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
+import net.netcoding.nifty.common._new_.minecraft.entity.EntityType;
+import net.netcoding.nifty.common._new_.minecraft.entity.Item;
+import net.netcoding.nifty.common._new_.minecraft.entity.block.FallingBlock;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.LivingEntity;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
+import net.netcoding.nifty.common._new_.minecraft.entity.weather.LightningStrike;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.minecraft.sound.Sound;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("deprecation")
 public interface World {
 
 	boolean canGenerateStructures();
@@ -43,9 +48,9 @@ public interface World {
 
 	boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks);
 
-	//Item dropItem(Location location, ItemStack itemStack);
+	Item dropItem(Location location, ItemStack itemStack);
 
-	//Item dropItemNaturally(Location location, ItemStack itemStack);
+	Item dropItemNaturally(Location location, ItemStack itemStack);
 
 	boolean getAllowAnimals();
 
@@ -264,11 +269,11 @@ public interface World {
 
 	Entity spawnEntity(Location location, EntityType type);
 
-	/*default FallingBlock spawnFallingBlock(Location location, Material material, byte data) {
+	default FallingBlock spawnFallingBlock(Location location, Material material, byte data) {
 		return this.spawnFallingBlock(location, material.getId(), data);
 	}
 
-	FallingBlock spawnFallingBlock(Location location, int id, byte data);*/
+	FallingBlock spawnFallingBlock(Location location, int id, byte data);
 
 	default void spawnParticle(Particle particle, Location location, int count) {
 		this.spawnParticle(particle, location, count, 0, 0, 0);
@@ -316,6 +321,10 @@ public interface World {
 
 	<T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
+	LightningStrike strikeLightning(Location location);
+
+	LightningStrike strikeLightningEffect(Location location);
+
 	default boolean unloadChunk(Chunk chunk) {
 		return this.unloadChunk(chunk.getX(), chunk.getZ());
 	}
@@ -345,10 +354,6 @@ public interface World {
 	//boolean generateTree(Location var1, TreeType var2);
 
 	//boolean generateTree(Location var1, TreeType var2, BlockChangeDelegate var3);
-
-	//LightningStrike strikeLightning(Location var1);
-
-	//LightningStrike strikeLightningEffect(Location var1);
 
 	//ChunkGenerator getGenerator();
 
@@ -475,6 +480,13 @@ public interface World {
 		public static Type getType(String name) {
 			return BY_NAME.get(name.toUpperCase());
 		}
+
+	}
+
+	enum Weather {
+
+		CLEAR,
+		DOWNFALL
 
 	}
 

@@ -1,8 +1,8 @@
 package net.netcoding.nifty.craftbukkit.api.nbt;
 
-import net.netcoding.niftybukkit._new_.api.nbt.NbtBlockCompound;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtFactory;
-import net.netcoding.niftybukkit._new_.minecraft.block.Block;
+import net.netcoding.nifty.common._new_.api.nbt.NbtBlockCompound;
+import net.netcoding.nifty.common._new_.api.nbt.NbtFactory;
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
 
 public final class CraftNbtBlockCompound extends NbtBlockCompound<Block> {
 

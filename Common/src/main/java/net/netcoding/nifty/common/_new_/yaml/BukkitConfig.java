@@ -1,13 +1,13 @@
 package net.netcoding.nifty.common._new_.yaml;
 
-import net.netcoding.nifty.common._new_.yaml.converters.Block;
-import net.netcoding.nifty.common._new_.yaml.converters.ItemStack;
-import net.netcoding.nifty.common._new_.yaml.converters.Location;
-import net.netcoding.nifty.common._new_.yaml.converters.Vector;
-import net.netcoding.nifty.common.yaml.converters.PotionEffect;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
-import net.netcoding.niftycore.yaml.YamlConfig;
-import net.netcoding.niftycore.yaml.converters.Converter;
+import net.netcoding.nifty.common._new_.yaml.converters.BlockConverter;
+import net.netcoding.nifty.common._new_.yaml.converters.ItemStackConverter;
+import net.netcoding.nifty.common._new_.yaml.converters.LocationConverter;
+import net.netcoding.nifty.common._new_.yaml.converters.VectorConverter;
+import net.netcoding.nifty.common._new_.yaml.converters.PotionEffectConverter;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.yaml.YamlConfig;
+import net.netcoding.nifty.core.yaml.converters.Converter;
 
 import java.io.File;
 
@@ -17,11 +17,12 @@ public abstract class BukkitConfig extends YamlConfig {
 	private static transient boolean acceptingNewConverters = true;
 
 	static {
-		addGlobalCustomConverter(Block.class);
-		addGlobalCustomConverter(ItemStack.class);
-		addGlobalCustomConverter(Location.class);
-		addGlobalCustomConverter(PotionEffect.class);
-		addGlobalCustomConverter(Vector.class);
+		addGlobalCustomConverter(BlockConverter.class);
+		// TODO: addGlobalCustomConverter(FakeLocationConverter.class);
+		addGlobalCustomConverter(ItemStackConverter.class);
+		addGlobalCustomConverter(LocationConverter.class);
+		addGlobalCustomConverter(PotionEffectConverter.class);
+		addGlobalCustomConverter(VectorConverter.class);
 	}
 
 	public BukkitConfig(File folder, String fileName, String... header) {

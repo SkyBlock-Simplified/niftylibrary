@@ -1,9 +1,8 @@
 package net.netcoding.nifty.common._new_.minecraft.event.bungee;
 
 import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeServer;
-import net.netcoding.nifty.common._new_.minecraft.event.Event;
 
-public class BungeeServerLoadedEvent extends Event {
+public final class BungeeServerLoadedEvent implements BungeeEvent {
 
 	private final transient BungeeServer server;
 

@@ -17,8 +17,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>net.netcoding</groupId>
-			<artifactId>niftybukkit</artifactId>
+			<groupId>net.netcoding.nifty</groupId>
+			<artifactId>common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.minecraftforge</groupId>

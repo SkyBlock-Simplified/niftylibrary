@@ -7,7 +7,7 @@ public abstract class BukkitListener extends BukkitHelper implements Listener {
 
 	public BukkitListener(MinecraftPlugin plugin) {
 		super(plugin);
-		Nifty.getPluginManager().registerListener(plugin, this);
+		Nifty.getServer().getPluginManager().registerListener(plugin, this);
 	}
 
 }

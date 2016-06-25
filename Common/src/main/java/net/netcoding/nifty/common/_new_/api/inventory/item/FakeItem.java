@@ -1,31 +1,30 @@
 package net.netcoding.nifty.common._new_.api.inventory.item;
 
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.BukkitListener;
 import net.netcoding.nifty.common._new_.api.Event;
 import net.netcoding.nifty.common._new_.api.inventory.FakeInventory;
+import net.netcoding.nifty.common._new_.api.inventory.NbtKeys;
 import net.netcoding.nifty.common._new_.api.inventory.events.FakeItemInteractEvent;
 import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common._new_.minecraft.block.Action;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.common._new_.minecraft.event.EventResult;
 import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryClickEvent;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileJoinEvent;
-import net.netcoding.nifty.common._new_.minecraft.inventory.PlayerInventory;
+import net.netcoding.nifty.common._new_.minecraft.event.inventory.InventoryCreativeEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerDeathEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerDropItemEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerInteractEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerJoinEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerSwapHandItemsEvent;
+import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryType;
+import net.netcoding.nifty.common._new_.minecraft.inventory.types.PlayerInventory;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.api.BukkitListener;
-import net.netcoding.nifty.common._new_.api.inventory.NbtKeys;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.InventoryCreativeEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 import java.util.UUID;
-
-import static net.netcoding.nifty.common._new_.api.inventory.FakeInventory.getClickedItem;
 
 public class FakeItem {
 
@@ -212,14 +211,12 @@ public class FakeItem {
 
 		@Event(priority = Event.Priority.LOWEST)
 		public void onPlayerInteract(PlayerInteractEvent event) {
-			final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(event.getPlayer());
-
 			if (Action.PHYSICAL != event.getAction()) {
 				if (FakeItem.this.getItemOpener() != null) {
-					ItemStack handItem = new ItemStack(event.getItem());
+					ItemStack handItem = event.getItem();
 
 					if (FakeItem.this.isItemOpener(handItem)) {
-						FakeItemInteractEvent myEvent = new FakeItemInteractEvent(profile, handItem);
+						FakeItemInteractEvent myEvent = new FakeItemInteractEvent(event.getProfile(), handItem);
 						FakeItem.this.listener.onItemInteract(myEvent);
 						event.setCancelled(true);
 					}
@@ -228,7 +225,7 @@ public class FakeItem {
 		}
 
 		@Event
-		public void onProfileJoin(ProfileJoinEvent event) {
+		public void onProfileJoin(PlayerJoinEvent event) {
 			FakeItem.this.giveItemOpener(event.getProfile());
 		}
 
@@ -242,31 +239,26 @@ public class FakeItem {
 
 		@Event
 		public void onInventoryCreative(InventoryCreativeEvent event) {
-			ItemStack ItemStack = new ItemStack(Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
+			ItemStack ItemStack = (Material.AIR == event.getCursor().getType() ? event.getCurrentItem() : event.getCursor());
 
 			if (isAnyItemOpener(ItemStack)) {
 				event.setCancelled(true);
-				event.setResult(net.netcoding.nifty.common._new_.minecraft.event.Event.Result.DENY);
+				event.setResult(EventResult.DENY);
 			}
 		}
 
 		@Event
 		public void onPlayerDeath(PlayerDeathEvent event) {
-			for (ItemStack itemStack : event.getDrops()) {
-				ItemStack ItemStack = new ItemStack(itemStack);
-
-				if (isAnyItemOpener(ItemStack))
-					itemStack.setAmount(0);
-			}
+			event.getDrops().stream().filter(FakeItem::isAnyItemOpener).forEach(itemStack -> itemStack.setAmount(0));
 		}
 
 		@Event
 		public void onPlayerDropItem(PlayerDropItemEvent event) {
-			ItemStack ItemStack = new ItemStack(event.getItemDrop().getItemStack());
+			ItemStack ItemStack = event.getItem().getItemStack();
 
 			if (isAnyItemOpener(ItemStack)) {
 				if (ItemStack.getNbt().<Boolean>getPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath())) {
-					event.getItemDrop().remove();
+					event.getItem().remove();
 					ItemStack.setAmount(0);
 				} else
 					event.setCancelled(true);
@@ -274,7 +266,7 @@ public class FakeItem {
 		}
 
 		@Event(priority = Event.Priority.LOWEST)
-		public void onProfileJoin(ProfileJoinEvent event) {
+		public void onProfileJoin(PlayerJoinEvent event) {
 			FakeItem.removeAllItemOpeners(event.getProfile());
 		}
 

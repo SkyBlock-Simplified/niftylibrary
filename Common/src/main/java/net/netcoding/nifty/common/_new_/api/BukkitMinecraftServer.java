@@ -1,14 +1,14 @@
 package net.netcoding.nifty.common._new_.api;
 
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftycore.api.MinecraftServer;
-import org.bukkit.Bukkit;
+import net.netcoding.nifty.core.api.MinecraftServer;
 
 import java.net.InetSocketAddress;
 
 public abstract class BukkitMinecraftServer<T extends BukkitMojangProfile> extends MinecraftServer<T> {
 
-	private static final InetSocketAddress serverAddress = new InetSocketAddress(Bukkit.getIp(), Bukkit.getPort());
+	private static final InetSocketAddress serverAddress = Nifty.getServer().getAddress();
 
 	protected BukkitMinecraftServer() { }
 

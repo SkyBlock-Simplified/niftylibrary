@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common._new_.reflection;
 
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public abstract class MinecraftPackage {
 

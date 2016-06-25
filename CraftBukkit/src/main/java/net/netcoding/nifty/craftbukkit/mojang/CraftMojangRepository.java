@@ -1,15 +1,15 @@
 package net.netcoding.nifty.craftbukkit.mojang;
 
 import com.google.gson.JsonObject;
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit._new_.api.plugin.messaging.BungeeServer;
-import net.netcoding.niftybukkit._new_.minecraft.entity.living.Player;
-import net.netcoding.niftybukkit._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit._new_.mojang.BukkitMojangRepository;
-import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeServer;
+import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangRepository;
+import net.netcoding.nifty.core.mojang.exceptions.ProfileNotFoundException;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.craftbukkit.NiftyCraftBukkit;
 import net.netcoding.nifty.craftbukkit.api.plugin.messaging.CraftBungeeHelper;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;

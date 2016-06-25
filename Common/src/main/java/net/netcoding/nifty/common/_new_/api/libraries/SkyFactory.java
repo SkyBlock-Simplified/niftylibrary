@@ -3,7 +3,7 @@ package net.netcoding.nifty.common._new_.api.libraries;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.reflection.Reflection;
+import net.netcoding.nifty.core.reflection.Reflection;
 
 public enum SkyFactory {
 

@@ -1,10 +1,10 @@
 package net.netcoding.nifty.common._new_.minecraft.material;
 
 import com.google.common.base.Preconditions;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import org.bukkit.material.*;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public enum Material {
 
@@ -16,10 +16,10 @@ public enum Material {
 	WOOD(5, Wood.class),
 	SAPLING(6, Sapling.class),
 	BEDROCK(7),
-	WATER(8, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
-	STATIONARY_WATER(9, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
-	LAVA(10, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
-	STATIONARY_LAVA(11, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	WATER(8, MaterialData.class),
+	STATIONARY_WATER(9, MaterialData.class),
+	LAVA(10, MaterialData.class),
+	STATIONARY_LAVA(11, MaterialData.class),
 	SAND(12),
 	GRAVEL(13),
 	GOLD_ORE(14),
@@ -68,7 +68,7 @@ public enum Material {
 	DIAMOND_BLOCK(57),
 	WORKBENCH(58),
 	CROPS(59, Crops.class),
-	SOIL(60, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	SOIL(60, MaterialData.class),
 	FURNACE(61, Furnace.class),
 	BURNING_FURNACE(62, Furnace.class),
 	SIGN_POST(63, 64, Sign.class),
@@ -89,9 +89,9 @@ public enum Material {
 	SNOW(78),
 	ICE(79),
 	SNOW_BLOCK(80),
-	CACTUS(81, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	CACTUS(81, MaterialData.class),
 	CLAY(82),
-	SUGAR_CANE_BLOCK(83, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	SUGAR_CANE_BLOCK(83, MaterialData.class),
 	JUKEBOX(84),
 	FENCE(85),
 	PUMPKIN(86, Pumpkin.class),
@@ -112,8 +112,8 @@ public enum Material {
 	IRON_FENCE(101),
 	THIN_GLASS(102),
 	MELON_BLOCK(103),
-	PUMPKIN_STEM(104, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
-	MELON_STEM(105, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	PUMPKIN_STEM(104, MaterialData.class),
+	MELON_STEM(105, MaterialData.class),
 	VINE(106, Vine.class),
 	FENCE_GATE(107, Gate.class),
 	BRICK_STAIRS(108, Stairs.class),
@@ -125,7 +125,7 @@ public enum Material {
 	NETHER_BRICK_STAIRS(114, Stairs.class),
 	NETHER_WARTS(115, NetherWarts.class),
 	ENCHANTMENT_TABLE(116),
-	BREWING_STAND(117, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	BREWING_STAND(117, MaterialData.class),
 	CAULDRON(118, Cauldron.class),
 	ENDER_PORTAL(119),
 	ENDER_PORTAL_FRAME(120),
@@ -324,7 +324,7 @@ public enum Material {
 	BED(355, 1),
 	DIODE(356),
 	COOKIE(357),
-	MAP(358, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	MAP(358, MaterialData.class),
 	SHEARS(359, 1, 238),
 	MELON(360),
 	PUMPKIN_SEEDS(361),
@@ -339,7 +339,7 @@ public enum Material {
 	GHAST_TEAR(370),
 	GOLD_NUGGET(371),
 	NETHER_STALK(372),
-	POTION(373, 1, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class),
+	POTION(373, 1, MaterialData.class),
 	GLASS_BOTTLE(374),
 	SPIDER_EYE(375),
 	FERMENTED_SPIDER_EYE(376),
@@ -433,7 +433,7 @@ public enum Material {
 	private final int id;
 	private final int maxStack;
 	private final short durability;
-	private final Class<? extends net.netcoding.nifty.common._new_.minecraft.material.MaterialData> ctor;
+	private final Class<? extends MaterialData> ctor;
 
 	static {
 		for (Material material : Material.values()) {
@@ -447,22 +447,22 @@ public enum Material {
 	}
 
 	Material(int id, int maxStack) {
-		this(id, maxStack, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class);
+		this(id, maxStack, MaterialData.class);
 	}
 
 	Material(int id, int maxStack, int durability) {
-		this(id, maxStack, durability, net.netcoding.nifty.common._new_.minecraft.material.MaterialData.class);
+		this(id, maxStack, durability, MaterialData.class);
 	}
 
-	Material(int id, Class<? extends net.netcoding.nifty.common._new_.minecraft.material.MaterialData> data) {
+	Material(int id, Class<? extends MaterialData> data) {
 		this(id, 64, data);
 	}
 
-	Material(int id, int maxStack, Class<? extends net.netcoding.nifty.common._new_.minecraft.material.MaterialData> data) {
+	Material(int id, int maxStack, Class<? extends MaterialData> data) {
 		this(id, maxStack, 0, data);
 	}
 
-	Material(int id, int maxStack, int durability, Class<? extends net.netcoding.nifty.common._new_.minecraft.material.MaterialData> data) {
+	Material(int id, int maxStack, int durability, Class<? extends MaterialData> data) {
 		this.id = id;
 		this.durability = (short)durability;
 		this.maxStack = maxStack;
@@ -501,12 +501,12 @@ public enum Material {
 	 *
 	 * @return MaterialData associated with this Material
 	 */
-	public final Class<? extends net.netcoding.nifty.common._new_.minecraft.material.MaterialData> getData() {
+	public final Class<? extends MaterialData> getData() {
 		return this.ctor;
 	}
 
-	public net.netcoding.nifty.common._new_.minecraft.material.MaterialData getNewData(byte raw) {
-		return (net.netcoding.nifty.common._new_.minecraft.material.MaterialData)new Reflection(this.ctor).newInstance(this.getId(), raw);
+	public MaterialData getNewData(byte raw) {
+		return (MaterialData)new Reflection(this.ctor).newInstance(this.getId(), raw);
 	}
 
 	/**
@@ -581,7 +581,7 @@ public enum Material {
 	 * @return Material if found, or null
 	 */
 	public static Material getMaterial(String name) {
-		Preconditions.checkArgument(name != null, "Name cannot be NULL!");
+		Preconditions.checkArgument(StringUtil.notEmpty(name), "Name cannot be NULL!");
 		return BY_NAME.get(name);
 	}
 
@@ -598,7 +598,7 @@ public enum Material {
 	 * @return Material if found, or null
 	 */
 	public static Material matchMaterial(String name) {
-		Preconditions.checkArgument(name != null, "Name cannot be NULL!");
+		Preconditions.checkArgument(StringUtil.notEmpty(name), "Name cannot be NULL!");
 		Material result = null;
 
 		if (NumberUtil.isNumber(name))

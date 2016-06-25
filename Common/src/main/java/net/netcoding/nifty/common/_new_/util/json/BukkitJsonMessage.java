@@ -1,25 +1,28 @@
 package net.netcoding.nifty.common._new_.util.json;
 
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
-import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
+import net.netcoding.nifty.common._new_.api.nbt.NbtFactory;
+import net.netcoding.nifty.common._new_.api.nbt.NbtItemCompound;
 import net.netcoding.nifty.common._new_.minecraft.Achievement;
 import net.netcoding.nifty.common._new_.minecraft.Statistic;
+import net.netcoding.nifty.common._new_.minecraft.entity.EntityType;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
 import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
-import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
-import net.netcoding.niftycore.util.json.JsonMessage;
-import net.netcoding.niftycore.util.json.JsonString;
-import net.netcoding.niftycore.util.json.TextualComponent;
-import net.netcoding.niftycore.util.json.events.HoverEvent;
-import org.bukkit.entity.EntityType;
+import net.netcoding.nifty.core.reflection.exceptions.ReflectionException;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.util.json.JsonMessage;
+import net.netcoding.nifty.core.util.json.JsonString;
+import net.netcoding.nifty.core.util.json.TextualComponent;
+import net.netcoding.nifty.core.util.json.events.HoverEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class BukkitJsonMessage extends JsonMessage<BukkitJsonMessage> {
 
 	//private static final BukkitReflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
@@ -31,8 +34,8 @@ public class BukkitJsonMessage extends JsonMessage<BukkitJsonMessage> {
 	private static final ConcurrentSet<Statistic> STATISTIC_MATERIALS = new ConcurrentSet<>();
 	private static final ConcurrentMap<Statistic, String> NMS_MAP = new ConcurrentMap<>();
 	private static final String NMS_EGGINFO_FIELD_NAME;
-	private static String NMS_MONSTEREGG_KILL_FIELD_NAME;
-	private static String NMS_MONSTEREGG_KILLEDBY_FIELD_NAME;
+	private static final String NMS_MONSTEREGG_KILL_FIELD_NAME;
+	private static final String NMS_MONSTEREGG_KILLEDBY_FIELD_NAME;
 
 	static {
 		STATISTIC_MATERIALS.add(Statistic.CRAFT_ITEM);
@@ -250,10 +253,8 @@ public class BukkitJsonMessage extends JsonMessage<BukkitJsonMessage> {
 	 * @return This builder instance.
 	 */
 	public BukkitJsonMessage itemTooltip(final ItemStack itemStack) {
-		// TODO: Return NBT
-		return null;
-		//NbtItemCompound itemCompound = (NbtItemCompound)new ItemData(itemStack).getNbt();
-		//return itemTooltip(NbtFactory.NBT_TAG_COMPOUND.invokeMethod(NbtFactory.NBT_TAG_COMPOUND.getClazz(), itemCompound.getHandle(), itemCompound).toString());
+		NbtItemCompound itemCompound = (NbtItemCompound)itemStack.getNbt();
+		return itemTooltip(NbtFactory.NBT_TAG_COMPOUND.invokeMethod(NbtFactory.NBT_TAG_COMPOUND.getClazz(), itemCompound.getHandle(), itemCompound).toString());
 	}
 
 }

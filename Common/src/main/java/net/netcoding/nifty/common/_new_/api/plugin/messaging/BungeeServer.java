@@ -2,7 +2,7 @@ package net.netcoding.nifty.common._new_.api.plugin.messaging;
 
 import net.netcoding.nifty.common._new_.api.BukkitMinecraftServer;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.net.InetSocketAddress;
 import java.util.Set;

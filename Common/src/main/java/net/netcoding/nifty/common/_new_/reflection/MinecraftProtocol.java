@@ -2,12 +2,12 @@ package net.netcoding.nifty.common._new_.reflection;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.netcoding.niftycore.NiftyCore;
-import net.netcoding.niftycore.http.HttpBody;
-import net.netcoding.niftycore.http.HttpClient;
-import net.netcoding.niftycore.http.HttpResponse;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.http.HttpBody;
+import net.netcoding.nifty.core.http.HttpClient;
+import net.netcoding.nifty.core.http.HttpResponse;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.net.URL;
 
@@ -240,17 +240,18 @@ public enum MinecraftProtocol {
 				isSpigot = true;
 			} catch (Exception ignore) { }
 
-			String version = org.bukkit.Bukkit.getVersion().toUpperCase();
+			BukkitReflection bukkit = new BukkitReflection("Bukkit", "org.bukkit");
+			String version = bukkit.invokeMethod("getVersion", null).toString().toUpperCase();
 			isForge = (version.contains("MCPC") || version.contains("FORGE") || version.contains("CAULDRON"));
 
-			String json = new BukkitReflection("Bukkit", "org.bukkit").invokeMethod("getServer", null).toString().replaceAll("^[a-zA-Z0-9]+(?=\\{)", "");
+			String json = bukkit.invokeMethod("getServer", null).toString().replaceAll("^[a-zA-Z0-9]+(?=\\{)", "");
 			json = json.replace("=", "':'").replace(",", "','").replace("{", "{'").replace("}", "'}");
 			JsonObject bukkitVersion = new JsonParser().parse(json).getAsJsonObject();
 			serverVersion = bukkitVersion.get("minecraftVersion").getAsString();
 		} else if (NiftyCore.isSponge()) {
 			BukkitReflection spongeVersion = new BukkitReflection("SpongeMinecraftVersion", "common", "org.spongepowered");
 			Object minecraftVersion = new BukkitReflection("SpongeImpl", "common", "org.spongepowered").getValue(spongeVersion.getClazz(), null);
-			serverVersion = (String)spongeVersion.getValue(String.class, minecraftVersion);
+			serverVersion = spongeVersion.getValue(String.class, minecraftVersion);
 		} else
 			throw new UnsupportedOperationException("Unknown server type!");
 

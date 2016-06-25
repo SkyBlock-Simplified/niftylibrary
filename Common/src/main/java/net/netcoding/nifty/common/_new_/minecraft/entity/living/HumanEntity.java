@@ -4,12 +4,15 @@ import net.netcoding.nifty.common._new_.minecraft.GameMode;
 import net.netcoding.nifty.common._new_.minecraft.entity.AnimalTamer;
 import net.netcoding.nifty.common._new_.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryHolder;
-import net.netcoding.nifty.common._new_.minecraft.inventory.PlayerInventory;
+import net.netcoding.nifty.common._new_.minecraft.inventory.InventoryView;
+import net.netcoding.nifty.common._new_.minecraft.inventory.types.PlayerInventory;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.permission.Permissible;
 import net.netcoding.nifty.common._new_.minecraft.region.Location;
-import org.bukkit.inventory.InventoryView;
 
+/**
+ * Represents a human entity, such as an NPC or a player
+ */
 public interface HumanEntity extends AnimalTamer, InventoryHolder, LivingEntity, Permissible {
 
 	void closeInventory();
@@ -18,6 +21,7 @@ public interface HumanEntity extends AnimalTamer, InventoryHolder, LivingEntity,
 
 	GameMode getGameMode();
 
+	@Override
 	PlayerInventory getInventory();
 
 	default ItemStack getItemInHand() {

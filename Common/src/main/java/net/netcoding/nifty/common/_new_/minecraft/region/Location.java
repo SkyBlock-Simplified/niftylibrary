@@ -3,11 +3,11 @@ package net.netcoding.nifty.common._new_.minecraft.region;
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.common._new_.minecraft.block.Block;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.misc.Serializable;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.misc.Vector;
-import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
+import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.misc.Serializable;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.misc.Vector;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 
 import java.util.Map;
 

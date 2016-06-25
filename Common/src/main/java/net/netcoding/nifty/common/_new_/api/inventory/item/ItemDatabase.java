@@ -1,17 +1,15 @@
 package net.netcoding.nifty.common._new_.api.inventory.item;
 
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
-import net.netcoding.nifty.common.Nifty;
-import net.netcoding.niftycore.util.misc.CSVStorage;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.NumberUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.comparator.LengthCompare;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
-import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
+import net.netcoding.nifty.core.util.misc.CSVStorage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,52 +22,11 @@ import java.util.regex.Pattern;
 
 public abstract class ItemDatabase extends CSVStorage {
 
-	public final class ItemData {
-
-		private final ConcurrentSet<Short> durabilities = new ConcurrentSet<>();
-		private final ConcurrentList<String> names = new ConcurrentList<>();
-		private final String primaryName;
-		private final int id;
-
-		public ItemData(int id, String primaryName) {
-			this.id = id;
-			this.primaryName = primaryName;
-			this.names.add(primaryName);
-		}
-
-		public void addDurability(short durability) {
-			this.durabilities.add(durability);
-		}
-
-		public void addName(String name) {
-			this.names.add(name);
-			Collections.sort(this.names, LENGTH_COMPARE);
-		}
-
-		public Set<Short> getDurabilities() {
-			return this.durabilities;
-		}
-
-		public final int getId() {
-			return this.id;
-		}
-
-		public List<String> getNames() {
-			return this.names;
-		}
-
-		public String getPrimaryName() {
-			return this.primaryName;
-		}
-
-	}
-
-	private static final LengthCompare LENGTH_COMPARE = new LengthCompare();
 	private final static transient Pattern SPLIT_PATTERN = Pattern.compile("((.*)[:+',;.](\\d+))");
 	private final ConcurrentLinkedMap<String, ItemData> items = new ConcurrentLinkedMap<>();
 
 	protected ItemDatabase() {
-		super(Nifty.getPlugin().getPluginDescription().getStorage(), "items");
+		super(Nifty.getPlugin().getDataFolder(), "items");
 	}
 
 	public final ItemStack get(final String id) throws RuntimeException {

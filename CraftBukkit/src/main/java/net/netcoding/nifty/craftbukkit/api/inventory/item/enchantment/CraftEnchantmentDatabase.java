@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.api.inventory.item.enchantment;
 
-import net.netcoding.niftybukkit._new_.api.inventory.item.enchantment.EnchantmentDatabase;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common._new_.api.inventory.item.enchantment.EnchantmentDatabase;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.enchantment.CraftEnchantment;
 
 public final class CraftEnchantmentDatabase extends EnchantmentDatabase {

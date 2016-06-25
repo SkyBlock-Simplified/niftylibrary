@@ -1,6 +1,6 @@
 package net.netcoding.nifty.craftbukkit.api;
 
-import net.netcoding.niftybukkit._new_.api.BukkitLogger;
+import net.netcoding.nifty.common._new_.api.BukkitLogger;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

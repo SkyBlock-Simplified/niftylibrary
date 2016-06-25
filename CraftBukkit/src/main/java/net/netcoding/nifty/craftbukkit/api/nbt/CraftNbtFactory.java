@@ -2,15 +2,15 @@ package net.netcoding.nifty.craftbukkit.api.nbt;
 
 import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.reflection.CraftMinecraftPackage;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtBlockCompound;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtCompound;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtFactory;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtItemCompound;
-import net.netcoding.niftybukkit._new_.minecraft.block.Block;
-import net.netcoding.niftybukkit._new_.minecraft.entity.Entity;
-import net.netcoding.niftybukkit._new_.reflection.BukkitReflection;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.common._new_.api.nbt.NbtBlockCompound;
+import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
+import net.netcoding.nifty.common._new_.api.nbt.NbtFactory;
+import net.netcoding.nifty.common._new_.api.nbt.NbtItemCompound;
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
+import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public final class CraftNbtFactory extends NbtFactory<CraftItemStack, Block> {
 

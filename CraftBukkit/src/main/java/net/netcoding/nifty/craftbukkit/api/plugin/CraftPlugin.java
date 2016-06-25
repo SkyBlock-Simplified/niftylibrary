@@ -1,9 +1,9 @@
 package net.netcoding.nifty.craftbukkit.api.plugin;
 
+import net.netcoding.nifty.common._new_.api.BukkitLogger;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
 import net.netcoding.nifty.craftbukkit.api.CraftLogger;
-import net.netcoding.niftybukkit._new_.api.BukkitLogger;
-import net.netcoding.niftybukkit._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.niftycore.api.plugin.PluginDescription;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CraftPlugin extends JavaPlugin implements MinecraftPlugin {

@@ -5,7 +5,7 @@ import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 
-public abstract class BukkitServerPingEvent extends ServerEvent {
+public abstract class BukkitServerPingEvent implements ServerEvent {
 
 	private final static int PROTOCOL = MinecraftProtocol.getCurrentProtocol();
 	private final InetAddress internalAddress;

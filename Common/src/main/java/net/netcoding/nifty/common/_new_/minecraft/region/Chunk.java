@@ -1,9 +1,10 @@
 package net.netcoding.nifty.common._new_.minecraft.region;
 
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
 import net.netcoding.nifty.common._new_.minecraft.block.BlockState;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
 
+@SuppressWarnings("deprecation")
 public interface Chunk {
 
 	Block getBlock(int var1, int var2, int var3);
@@ -21,7 +22,7 @@ public interface Chunk {
 	boolean isLoaded();
 
 	default boolean load() {
-		return this.load(false); // TODO
+		return this.load(true);
 	}
 
 	boolean load(boolean generate);

@@ -1,13 +1,13 @@
 package net.netcoding.nifty.common._new_.api;
 
 import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common._new_.minecraft.source.command.CommandSource;
+import net.netcoding.nifty.common._new_.minecraft.command.source.CommandSource;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.niftycore.api.plugin.PluginDescription;
-import net.netcoding.niftycore.api.plugin.PluginHelper;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
+import net.netcoding.nifty.core.api.plugin.PluginHelper;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public abstract class BukkitHelper implements PluginHelper<BukkitLogger> {
 

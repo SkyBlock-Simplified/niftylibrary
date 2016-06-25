@@ -1,15 +1,14 @@
 package net.netcoding.nifty.common._new_.minecraft.entity.living;
 
-import net.netcoding.nifty.common._new_.minecraft.source.projectiles.ProjectileSource;
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
 import net.netcoding.nifty.common._new_.minecraft.entity.Damageable;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.potion.PotionEffect;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.potion.PotionEffectType;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.minecraft.region.Location;
+import net.netcoding.nifty.common._new_.minecraft.entity.projectile.source.ProjectileSource;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.Collection;
 import java.util.HashSet;

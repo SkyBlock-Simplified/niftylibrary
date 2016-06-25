@@ -1,13 +1,19 @@
 package net.netcoding.nifty.sponge;
 
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit._new_.api.BukkitLogger;
-import net.netcoding.niftycore.api.plugin.PluginDescription;
-import net.netcoding.niftybukkit._new_.minecraft.event.server.GameStartingEvent;
-import net.netcoding.niftybukkit._new_.minecraft.event.server.GameStoppingEvent;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.BukkitLogger;
+import net.netcoding.nifty.common._new_.minecraft.event.server.GameStartingEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.server.GameStoppingEvent;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.Hostile;
+import org.spongepowered.api.entity.living.monster.Ghast;
+import org.spongepowered.api.entity.living.monster.Monster;
+import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
@@ -19,12 +25,14 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform;
+import org.spongepowered.common.world.gen.builders.EnderCrystalPlatformBuilder;
 
 @Plugin(id = "niftybukkit", name = "NiftyBukkit", version = "${project.version}", dependencies = {
 		@Dependency(id = "ProtocolLib"),
 		@Dependency(id = "Vault")
 })
-public final class NiftySponge implements net.netcoding.niftycore.api.plugin.Plugin {
+public final class NiftySponge implements net.netcoding.nifty.core.api.plugin.Plugin {
 
 	// ID: https://docs.spongepowered.org/master/en/plugin/plugin-identifier.html
 	// Annotation: https://docs.spongepowered.org/master/en/plugin/plugin-class.html
@@ -70,12 +78,12 @@ public final class NiftySponge implements net.netcoding.niftycore.api.plugin.Plu
 
 	@Listener
 	public void onEnable(GameStartingServerEvent event) {
-		Nifty.getPluginManager().call(new GameStartingEvent());
+		Nifty.getServer().getPluginManager().call(new GameStartingEvent());
 	}
 
 	@Listener
 	public void onDisable(GameStoppingServerEvent event) {
-		Nifty.getPluginManager().call(new GameStoppingEvent());
+		Nifty.getServer().getPluginManager().call(new GameStoppingEvent());
 	}
 
 }

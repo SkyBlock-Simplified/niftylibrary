@@ -2,10 +2,10 @@ package net.netcoding.nifty.common._new_.mojang;
 
 import net.netcoding.nifty.common._new_.api.Event;
 import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileJoinEvent;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerJoinEvent;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common._new_.api.BukkitListener;
-import net.netcoding.niftycore.mojang.MojangRepository;
+import net.netcoding.nifty.core.mojang.MojangRepository;
 
 import java.util.UUID;
 
@@ -27,14 +27,14 @@ public abstract class BukkitMojangRepository<T extends BukkitMojangProfile> exte
 		}
 
 		@Event
-		public void onProfileJoin(ProfileJoinEvent event) {
+		public void onProfileJoin(PlayerJoinEvent event) {
 			if (Nifty.getBungeeHelper().getDetails().isDetected()) {
 				UUID uuid = event.getProfile().getUniqueId();
 				String name = event.getProfile().getName();
 
-				Nifty.getBungeeHelper().getPlayerList().stream().filter(profile -> profile.getUniqueId().equals(uuid) || profile.getName().equalsIgnoreCase(name)).forEach(profile -> {
-					CACHE.stream().filter(cache -> cache.equals(profile)).forEach(CACHE::remove);
-				});
+				Nifty.getBungeeHelper().getPlayerList().stream().filter(profile ->
+					profile.getUniqueId().equals(uuid) || profile.getName().equalsIgnoreCase(name)).forEach(profile ->
+					CACHE.stream().filter(cache -> cache.equals(profile)).forEach(CACHE::remove));
 			}
 		}
 

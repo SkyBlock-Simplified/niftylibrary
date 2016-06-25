@@ -1,11 +1,10 @@
 package net.netcoding.nifty.common._new_.minecraft.block;
 
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.minecraft.material.MaterialData;
 import net.netcoding.nifty.common._new_.minecraft.region.Chunk;
 import net.netcoding.nifty.common._new_.minecraft.region.Location;
 import net.netcoding.nifty.common._new_.minecraft.region.World;
-import net.netcoding.nifty.common._new_.minecraft.material.MaterialData;
-import org.bukkit.block.Block;
 
 public interface BlockState { // Metadatable
 

@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common._new_.api.inventory;
 
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public enum NbtKeys {
 

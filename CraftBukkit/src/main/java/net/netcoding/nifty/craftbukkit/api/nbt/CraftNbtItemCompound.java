@@ -1,12 +1,12 @@
 package net.netcoding.nifty.craftbukkit.api.nbt;
 
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtCompound;
-import net.netcoding.niftybukkit._new_.api.nbt.NbtItemCompound;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.niftybukkit._new_.minecraft.inventory.item.meta.ItemMeta;
-import net.netcoding.niftybukkit._new_.minecraft.material.Material;
-import net.netcoding.niftybukkit._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
+import net.netcoding.nifty.common._new_.api.nbt.NbtItemCompound;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
+import net.netcoding.nifty.common._new_.minecraft.material.Material;
+import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
 import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemMeta;
 import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
 

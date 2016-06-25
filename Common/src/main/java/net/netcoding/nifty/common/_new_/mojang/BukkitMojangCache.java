@@ -1,14 +1,14 @@
 package net.netcoding.nifty.common._new_.mojang;
 
-import net.netcoding.niftybukkit.minecraft.BukkitHelper;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.java.JavaPlugin;
+import net.netcoding.nifty.common._new_.api.BukkitHelper;
+import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common._new_.minecraft.OfflinePlayer;
 
 public class BukkitMojangCache<T extends BukkitMojangProfile> extends BukkitHelper {
 
 	private final T profile;
 
-	public BukkitMojangCache(JavaPlugin plugin, T profile) {
+	public BukkitMojangCache(MinecraftPlugin plugin, T profile) {
 		super(plugin);
 		this.profile = profile;
 	}
@@ -49,7 +49,7 @@ public class BukkitMojangCache<T extends BukkitMojangProfile> extends BukkitHelp
 	}
 
 	public boolean isOnlineAnywhere() {
-		return this.getProfile().isOnlineAnywhere();
+		return this.getProfile().isOnline();
 	}
 
 }

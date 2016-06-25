@@ -1,13 +1,13 @@
 package net.netcoding.nifty.craftbukkit;
 
-import net.netcoding.niftybukkit.Nifty;
-import net.netcoding.niftybukkit.minecraft.BukkitCommand;
-import net.netcoding.niftybukkit.minecraft.BukkitListener;
-import net.netcoding.niftybukkit.minecraft.BukkitPlugin;
-import net.netcoding.niftybukkit._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.NumberUtil;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.minecraft.BukkitCommand;
+import net.netcoding.nifty.common.minecraft.BukkitListener;
+import net.netcoding.nifty.common.minecraft.BukkitPlugin;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.NumberUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;

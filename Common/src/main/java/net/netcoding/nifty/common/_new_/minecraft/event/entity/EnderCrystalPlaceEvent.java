@@ -1,29 +1,34 @@
 package net.netcoding.nifty.common._new_.minecraft.event.entity;
 
+import net.netcoding.nifty.common._new_.minecraft.block.Block;
+import net.netcoding.nifty.common._new_.minecraft.block.BlockFace;
+import net.netcoding.nifty.common._new_.minecraft.entity.block.EnderCrystal;
 import net.netcoding.nifty.common._new_.minecraft.event.Cancellable;
+import net.netcoding.nifty.common._new_.minecraft.event.player.PlayerEvent;
 import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.minecraft.event.profile.ProfileEvent;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.EnderCrystal;
 
-// TODO
-public class EnderCrystalPlaceEvent extends ProfileEvent implements Cancellable {
+public final class EnderCrystalPlaceEvent implements Cancellable, PlayerEvent {
 
+	private final BukkitMojangProfile profile;
 	private final EnderCrystal entity;
 	private boolean cancelled = false;
 
 	public EnderCrystalPlaceEvent(BukkitMojangProfile profile, EnderCrystal entity) {
-		super(profile);
+		this.profile = profile;
 		this.entity = entity;
 	}
 
-	public final Block getBaseBlock() {
+	public Block getBaseBlock() {
 		return this.entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
 	}
 
-	public final EnderCrystal getEntity() {
+	public EnderCrystal getEntity() {
 		return this.entity;
+	}
+
+	@Override
+	public BukkitMojangProfile getProfile() {
+		return this.profile;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common._new_.api.plugin.messaging.exceptions;
 
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public final class IllegalServerNameException extends PluginMessageException {
 

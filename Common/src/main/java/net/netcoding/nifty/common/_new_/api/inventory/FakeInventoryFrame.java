@@ -7,8 +7,8 @@ import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.util.ByteUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.ByteUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

@@ -1,12 +1,12 @@
 package net.netcoding.nifty.craftbukkit.mojang;
 
+import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
+import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
+import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
+import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.craftbukkit.reflection.CraftMinecraftPackage;
-import net.netcoding.niftybukkit._new_.minecraft.entity.Entity;
-import net.netcoding.niftybukkit._new_.mojang.BukkitMojangProfile;
-import net.netcoding.niftybukkit._new_.reflection.BukkitReflection;
-import net.netcoding.niftybukkit._new_.reflection.MinecraftPackage;
-import net.netcoding.niftybukkit._new_.reflection.MinecraftProtocol;
-import net.netcoding.niftycore.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 

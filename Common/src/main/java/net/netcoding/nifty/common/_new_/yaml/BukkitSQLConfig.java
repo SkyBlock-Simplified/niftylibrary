@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common._new_.yaml;
 
-import net.netcoding.niftycore.database.factory.SQLWrapper;
-import net.netcoding.niftycore.yaml.SQLYamlConfig;
+import net.netcoding.nifty.core.database.factory.SQLWrapper;
+import net.netcoding.nifty.core.yaml.SQLYamlConfig;
 
 import java.io.File;
 

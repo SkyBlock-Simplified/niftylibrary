@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.api.plugin.messaging;
 
-import net.netcoding.niftybukkit._new_.api.plugin.messaging.ChannelWrapper;
-import net.netcoding.niftybukkit._new_.api.plugin.messaging.BungeeHelper;
+import net.netcoding.nifty.common._new_.api.plugin.messaging.ChannelWrapper;
+import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,7 +13,7 @@ final class CraftNiftyChannelWrapper extends ChannelWrapper.Nifty {
 	private final HiddenMessageListener hiddenListener;
 
 	public CraftNiftyChannelWrapper() {
-		this.plugin = net.netcoding.niftybukkit.Nifty.getServiceManager().getProvider(JavaPlugin.class);
+		this.plugin = net.netcoding.nifty.common.Nifty.getServiceManager().getProvider(JavaPlugin.class);
 		this.hiddenListener = new HiddenMessageListener();
 	}
 

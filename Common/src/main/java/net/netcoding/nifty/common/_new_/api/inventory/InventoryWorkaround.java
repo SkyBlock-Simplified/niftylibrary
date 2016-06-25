@@ -4,7 +4,7 @@ import net.netcoding.nifty.common._new_.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common._new_.minecraft.material.Material;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.minecraft.inventory.PlayerInventory;
+import net.netcoding.nifty.common._new_.minecraft.inventory.types.PlayerInventory;
 
 import java.util.HashMap;
 import java.util.Map;
