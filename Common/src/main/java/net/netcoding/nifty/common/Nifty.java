@@ -1,19 +1,19 @@
 package net.netcoding.nifty.common;
 
-import net.netcoding.nifty.common._new_.api.BukkitLogger;
-import net.netcoding.nifty.common._new_.api.inventory.item.ItemDatabase;
-import net.netcoding.nifty.common._new_.api.inventory.item.MiniBlockDatabase;
-import net.netcoding.nifty.common._new_.api.inventory.item.enchantment.EnchantmentDatabase;
-import net.netcoding.nifty.common._new_.api.nbt.NbtFactory;
-import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeHelper;
-import net.netcoding.nifty.common._new_.api.plugin.messaging.Messenger;
-import net.netcoding.nifty.common._new_.minecraft.BukkitServer;
-import net.netcoding.nifty.common._new_.minecraft.block.Block;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemFactory;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangRepository;
+import net.netcoding.nifty.common.api.MinecraftLogger;
+import net.netcoding.nifty.common.api.inventory.item.ItemDatabase;
+import net.netcoding.nifty.common.api.inventory.item.MiniBlockDatabase;
+import net.netcoding.nifty.common.api.inventory.item.enchantment.EnchantmentDatabase;
+import net.netcoding.nifty.common.api.nbt.NbtFactory;
+import net.netcoding.nifty.common.api.plugin.IMinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.messaging.BungeeHelper;
+import net.netcoding.nifty.common.api.plugin.messaging.Messenger;
+import net.netcoding.nifty.common.minecraft.BukkitServer;
+import net.netcoding.nifty.common.minecraft.block.Block;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemFactory;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.BukkitMojangRepository;
 import net.netcoding.nifty.core.api.builder.BuilderManager;
 import net.netcoding.nifty.core.api.plugin.Plugin;
 import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
@@ -46,8 +46,8 @@ public final class Nifty {
 		return getServiceManager().getProvider(ItemDatabase.class);
 	}
 
-	public static BukkitLogger getLog() {
-		return getServiceManager().getProvider(BukkitLogger.class);
+	public static MinecraftLogger getLog() {
+		return getServiceManager().getProvider(MinecraftLogger.class);
 	}
 
 	public static Messenger getMessenger() {
@@ -66,16 +66,8 @@ public final class Nifty {
 		return getServiceManager().getProvider(NbtFactory.class);
 	}
 
-	public static net.milkbowl.vault.permission.Permission getPermissions() {
-		return getServiceManager().getProvider(net.milkbowl.vault.permission.Permission.class);
-	}
-
-	public static MinecraftPlugin getPlugin() {
-		return getServiceManager().getProvider(MinecraftPlugin.class);
-	}
-
-	public static com.comphenix.protocol.ProtocolManager getProtocolManager() {
-		return getServiceManager().getProvider(com.comphenix.protocol.ProtocolManager.class);
+	public static IMinecraftPlugin getPlugin() {
+		return getServiceManager().getProvider(IMinecraftPlugin.class);
 	}
 
 	public static MinecraftScheduler getScheduler() {

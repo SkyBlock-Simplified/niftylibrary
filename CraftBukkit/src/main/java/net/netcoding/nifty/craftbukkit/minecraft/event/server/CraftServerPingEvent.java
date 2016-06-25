@@ -1,9 +1,9 @@
 package net.netcoding.nifty.craftbukkit.minecraft.event.server;
 
-import net.netcoding.nifty.common._new_.minecraft.event.server.BukkitServerPingEvent;
-import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
-import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
-import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.minecraft.event.server.BukkitServerPingEvent;
+import net.netcoding.nifty.common.reflection.BukkitReflection;
+import net.netcoding.nifty.common.reflection.MinecraftPackage;
+import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 import org.bukkit.Bukkit;

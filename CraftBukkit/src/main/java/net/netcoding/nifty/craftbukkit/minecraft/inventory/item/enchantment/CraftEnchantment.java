@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.minecraft.inventory.item.enchantment;
 
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
 import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
 
 @SuppressWarnings("deprecation")

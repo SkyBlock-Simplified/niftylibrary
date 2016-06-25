@@ -1,8 +1,8 @@
 package net.netcoding.nifty.craftbukkit.api.inventory.item;
 
-import net.netcoding.nifty.common._new_.minecraft.inventory.ItemFlag;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
+import net.netcoding.nifty.common.minecraft.inventory.ItemFlag;
+import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;

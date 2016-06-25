@@ -18,10 +18,12 @@
 		<dependency>
 			<groupId>net.netcoding.nifty</groupId>
 			<artifactId>common</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.netcoding.nifty</groupId>
 			<artifactId>craftbukkit</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.netcoding.nifty</groupId>

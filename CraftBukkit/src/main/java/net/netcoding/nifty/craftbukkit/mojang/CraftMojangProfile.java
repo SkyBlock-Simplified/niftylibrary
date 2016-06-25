@@ -1,10 +1,10 @@
 package net.netcoding.nifty.craftbukkit.mojang;
 
-import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.reflection.BukkitReflection;
-import net.netcoding.nifty.common._new_.reflection.MinecraftPackage;
-import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.minecraft.entity.Entity;
+import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.reflection.BukkitReflection;
+import net.netcoding.nifty.common.reflection.MinecraftPackage;
+import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.craftbukkit.reflection.CraftMinecraftPackage;
 import org.bukkit.Bukkit;

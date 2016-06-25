@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<artifactId>library</artifactId>
-	<name>NiftyLibrary</name>
+	<name>Library</name>
 	<version>4.0.0</version>
 	<url>https://netcoding.net/</url>
 	<description>Extended API with support for Minecraft 1.7.10 up through latest versions.</description>
@@ -22,8 +22,8 @@
 	<modules>
 		<module>Common</module>
 		<module>CraftBukkit</module>
-		<module>Main</module>
 		<module>Sponge</module>
+		<module>Main</module>
 	</modules>
 
 	<dependencies>

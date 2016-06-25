@@ -1,16 +1,19 @@
 package net.netcoding.nifty.craftbukkit.minecraft;
 
-import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
-import net.netcoding.nifty.craftbukkit.minecraft.source.command.CraftConsoleCommandSource;
-import net.netcoding.nifty.common._new_.minecraft.BukkitServer;
-import net.netcoding.nifty.common._new_.minecraft.OfflinePlayer;
-import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.nifty.common._new_.minecraft.region.World;
-import net.netcoding.nifty.common._new_.minecraft.command.source.ConsoleCommandSource;
-import net.netcoding.nifty.common._new_.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.minecraft.BukkitServer;
+import net.netcoding.nifty.common.minecraft.GameMode;
+import net.netcoding.nifty.common.minecraft.OfflinePlayer;
+import net.netcoding.nifty.common.minecraft.command.source.ConsoleCommandSource;
+import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.inventory.Inventory;
+import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
+import net.netcoding.nifty.common.minecraft.region.World;
+import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftWorld;
+import net.netcoding.nifty.craftbukkit.minecraft.source.command.CraftConsoleCommandSource;
 import org.bukkit.Bukkit;
 
 import java.net.InetSocketAddress;
@@ -36,6 +39,11 @@ public final class CraftServer implements BukkitServer {
 	}
 
 	@Override
+	public Inventory createInventory(InventoryHolder holder, int size, String title) {
+		return null;
+	}
+
+	@Override
 	public InetSocketAddress getAddress() {
 		return this.address;
 	}
@@ -43,6 +51,11 @@ public final class CraftServer implements BukkitServer {
 	@Override
 	public ConsoleCommandSource getConsoleSource() {
 		return this.console;
+	}
+
+	@Override
+	public GameMode getDefaultGameMode() {
+		return GameMode.valueOf(org.bukkit.Bukkit.getDefaultGameMode().name());
 	}
 
 	public static CraftServer getInstance() {

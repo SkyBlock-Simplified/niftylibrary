@@ -1,6 +1,6 @@
 package net.netcoding.nifty.craftbukkit.yaml.converters;
 
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.core.yaml.InternalConverter;
 import net.netcoding.nifty.core.yaml.converters.Converter;
 

@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.api.inventory.item;
 
-import net.netcoding.nifty.common._new_.api.inventory.item.ItemDatabase;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.api.inventory.item.ItemDatabase;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import org.bukkit.Material;
 
 public final class CraftItemDatabase extends ItemDatabase {

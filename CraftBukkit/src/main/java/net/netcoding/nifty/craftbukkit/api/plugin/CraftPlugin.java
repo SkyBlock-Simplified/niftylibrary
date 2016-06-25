@@ -1,29 +1,21 @@
 package net.netcoding.nifty.craftbukkit.api.plugin;
 
-import net.netcoding.nifty.common._new_.api.BukkitLogger;
-import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.api.MinecraftLogger;
+import net.netcoding.nifty.common.api.plugin.IMinecraftPlugin;
 import net.netcoding.nifty.core.api.plugin.PluginDescription;
-import net.netcoding.nifty.craftbukkit.api.CraftLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CraftPlugin extends JavaPlugin implements MinecraftPlugin {
+public class CraftPlugin extends JavaPlugin implements IMinecraftPlugin {
 
-	private CraftLogger logger;
-	private PluginDescription description;
+	private final MinecraftLogger logger = new MinecraftLogger(this);
 
 	@Override
-	public PluginDescription getPluginDescription() {
-		if (this.description == null)
-			this.description = new PluginDescription(this.getDescription().getName(), this.getFile(), this.getDataFolder());
-
-		return this.description;
+	public final PluginDescription getPluginDescription() {
+		return new PluginDescription(this.getDescription().getName(), this.getFile(), this.getDataFolder());
 	}
 
 	@Override
-	public BukkitLogger getLog() {
-		if (this.logger == null)
-			this.logger = new CraftLogger(this.getLogger());
-
+	public final MinecraftLogger getLog() {
 		return this.logger;
 	}
 

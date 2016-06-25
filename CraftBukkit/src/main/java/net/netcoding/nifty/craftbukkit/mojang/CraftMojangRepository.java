@@ -2,10 +2,10 @@ package net.netcoding.nifty.craftbukkit.mojang;
 
 import com.google.gson.JsonObject;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeServer;
-import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangRepository;
+import net.netcoding.nifty.common.api.plugin.messaging.BungeeServer;
+import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.BukkitMojangRepository;
 import net.netcoding.nifty.core.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;

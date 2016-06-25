@@ -1,6 +1,7 @@
 package net.netcoding.nifty.craftbukkit.api.plugin;
 
-import net.netcoding.nifty.common._new_.api.plugin.PluginManager;
+import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.PluginManager;
 import org.bukkit.Bukkit;
 
 public final class CraftPluginManager extends PluginManager {
@@ -17,12 +18,22 @@ public final class CraftPluginManager extends PluginManager {
 	}
 
 	@Override
+	public MinecraftPlugin getPlugin(String name) {
+		return null; // TODO
+	}
+
+	@Override
+	public <T extends MinecraftPlugin> T getPlugin(Class<?> plugin) {
+		return null; // TODO
+	}
+
+	@Override
 	public boolean hasPlugin(String name) {
 		return Bukkit.getPluginManager().getPlugin(name) != null;
 	}
 
 	@Override
-	public boolean isPluginEnabled(String name) {
+	public boolean isEnabled(String name) {
 		return this.hasPlugin(name) && Bukkit.getPluginManager().getPlugin(name).isEnabled();
 	}
 

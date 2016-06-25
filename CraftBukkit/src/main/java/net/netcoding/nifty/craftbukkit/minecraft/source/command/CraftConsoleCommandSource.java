@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.minecraft.source.command;
 
-import net.netcoding.nifty.common._new_.minecraft.BukkitServer;
-import net.netcoding.nifty.common._new_.minecraft.command.source.ConsoleCommandSource;
+import net.netcoding.nifty.common.minecraft.BukkitServer;
+import net.netcoding.nifty.common.minecraft.command.source.ConsoleCommandSource;
 import net.netcoding.nifty.core.util.json.JsonMessage;
 
 public final class CraftConsoleCommandSource implements ConsoleCommandSource {

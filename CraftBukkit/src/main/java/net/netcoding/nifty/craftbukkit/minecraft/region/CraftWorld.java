@@ -1,20 +1,20 @@
 package net.netcoding.nifty.craftbukkit.minecraft.region;
 
-import net.netcoding.nifty.common._new_.minecraft.Effect;
-import net.netcoding.nifty.common._new_.minecraft.Particle;
-import net.netcoding.nifty.common._new_.minecraft.block.Block;
-import net.netcoding.nifty.common._new_.minecraft.entity.Entity;
-import net.netcoding.nifty.common._new_.minecraft.entity.EntityType;
-import net.netcoding.nifty.common._new_.minecraft.entity.Item;
-import net.netcoding.nifty.common._new_.minecraft.entity.block.FallingBlock;
-import net.netcoding.nifty.common._new_.minecraft.entity.living.LivingEntity;
-import net.netcoding.nifty.common._new_.minecraft.entity.living.Player;
-import net.netcoding.nifty.common._new_.minecraft.entity.weather.LightningStrike;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common._new_.minecraft.region.Biome;
-import net.netcoding.nifty.common._new_.minecraft.region.Chunk;
-import net.netcoding.nifty.common._new_.minecraft.region.Location;
-import net.netcoding.nifty.common._new_.minecraft.region.World;
+import net.netcoding.nifty.common.minecraft.Effect;
+import net.netcoding.nifty.common.minecraft.Particle;
+import net.netcoding.nifty.common.minecraft.block.Block;
+import net.netcoding.nifty.common.minecraft.entity.Entity;
+import net.netcoding.nifty.common.minecraft.entity.EntityType;
+import net.netcoding.nifty.common.minecraft.entity.Item;
+import net.netcoding.nifty.common.minecraft.entity.block.FallingBlock;
+import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
+import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.weather.LightningStrike;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.region.Biome;
+import net.netcoding.nifty.common.minecraft.region.Chunk;
+import net.netcoding.nifty.common.minecraft.region.Location;
+import net.netcoding.nifty.common.minecraft.region.World;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
 

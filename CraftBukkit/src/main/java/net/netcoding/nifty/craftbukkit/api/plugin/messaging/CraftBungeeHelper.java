@@ -1,9 +1,9 @@
 package net.netcoding.nifty.craftbukkit.api.plugin.messaging;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeHelper;
-import net.netcoding.nifty.common._new_.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.messaging.BungeeHelper;
+import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.craftbukkit.mojang.CraftMojangProfile;
 import net.netcoding.nifty.craftbukkit.mojang.CraftMojangRepository;
 import org.bukkit.entity.Player;
@@ -22,6 +22,11 @@ public final class CraftBungeeHelper extends BungeeHelper<CraftMojangProfile> {
 			INSTANCE = new CraftBungeeHelper();
 
 		return INSTANCE;
+	}
+
+	@Override
+	protected void handleNiftyHook(String channel, byte[] message) {
+		this.handleNifty(channel, message);
 	}
 
 	@Override

@@ -1,24 +1,31 @@
 package net.netcoding.nifty.craftbukkit.api.plugin.messaging;
 
-import net.netcoding.nifty.common._new_.api.plugin.messaging.ChannelWrapper;
-import net.netcoding.nifty.common._new_.api.plugin.messaging.BungeeHelper;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.api.plugin.messaging.BungeeHelper;
+import net.netcoding.nifty.common.api.plugin.messaging.ChannelWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
-final class CraftNiftyChannelWrapper extends ChannelWrapper.Nifty {
+final class CraftNiftyChannelWrapper extends ChannelWrapper {
 
 	private final JavaPlugin plugin;
 	private final HiddenMessageListener hiddenListener;
 
 	public CraftNiftyChannelWrapper() {
+		super(Nifty.getPlugin(), BungeeHelper.NIFTY_CHANNEL, null);
 		this.plugin = net.netcoding.nifty.common.Nifty.getServiceManager().getProvider(JavaPlugin.class);
 		this.hiddenListener = new HiddenMessageListener();
 	}
 
 	public final JavaPlugin getJavaPlugin() {
 		return this.plugin;
+	}
+
+	@Override
+	public final void handle(String channel, byte[] message) {
+		CraftBungeeHelper.getInstance().handleNiftyHook(channel, message);
 	}
 
 	@Override

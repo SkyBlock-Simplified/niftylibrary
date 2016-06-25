@@ -2,12 +2,12 @@ package net.netcoding.nifty.craftbukkit.api.inventory.item;
 
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common._new_.api.nbt.NbtCompound;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.nifty.common._new_.minecraft.inventory.item.meta.ItemMeta;
-import net.netcoding.nifty.common._new_.minecraft.material.Material;
-import net.netcoding.nifty.common._new_.minecraft.material.MaterialData;
+import net.netcoding.nifty.common.api.nbt.NbtCompound;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common.minecraft.inventory.item.meta.ItemMeta;
+import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.common.minecraft.material.MaterialData;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
@@ -51,6 +51,21 @@ public final class CraftItemStack implements ItemStack {
 	@Override
 	public void addUnsafeEnchant(Enchantment enchantment, int level) {
 		this.meta.addEnchant(enchantment, level, true);
+	}
+
+	@Override
+	public CraftItemStack clone() {
+		CraftItemStack clone;
+
+		try {
+			clone = (CraftItemStack)super.clone();
+		} catch (CloneNotSupportedException cnsex) {
+			clone = new CraftItemStack(this.getBukkitItem());
+		}
+
+		clone.getNbt().putAll(this.getNbt());
+		clone.setGlowing(this.hasGlow());
+		return clone;
 	}
 
 	@Override
