@@ -5,7 +5,7 @@ import net.netcoding.nifty.common.minecraft.entity.projectile.source.ProjectileS
 import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionData;
 import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffect;
 import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffectType;
-import net.netcoding.nifty.core.api.Color;
+import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.util.ListUtil;
 
 import java.util.List;

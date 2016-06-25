@@ -2,7 +2,7 @@ package net.netcoding.nifty.common.minecraft.inventory.item;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.core.api.Color;
+import net.netcoding.nifty.core.api.color.Color;
 
 public interface ItemFactory {
 

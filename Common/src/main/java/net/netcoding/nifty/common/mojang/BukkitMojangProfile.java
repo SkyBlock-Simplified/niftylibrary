@@ -14,7 +14,7 @@ import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.reflection.BukkitReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.util.LocationUtil;
-import net.netcoding.nifty.core.api.ChatColor;
+import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.mojang.MojangProfile;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;

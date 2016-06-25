@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common.minecraft.entity.living.animal;
 
 import net.netcoding.nifty.common.minecraft.entity.Tameable;
-import net.netcoding.nifty.core.api.DyeColor;
+import net.netcoding.nifty.core.api.color.DyeColor;
 
 /**
  * Represents a Wolf.

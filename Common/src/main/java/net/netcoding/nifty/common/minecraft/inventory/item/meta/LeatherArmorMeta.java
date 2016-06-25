@@ -2,7 +2,7 @@ package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemFactory;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.core.api.Color;
+import net.netcoding.nifty.core.api.color.Color;
 
 /**
  * Represents leather armor ({@link Material#LEATHER_BOOTS}, {@link

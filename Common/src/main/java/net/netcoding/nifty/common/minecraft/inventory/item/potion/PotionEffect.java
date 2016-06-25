@@ -3,7 +3,7 @@ package net.netcoding.nifty.common.minecraft.inventory.item.potion;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
-import net.netcoding.nifty.core.api.Color;
+import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.util.misc.Serializable;
 
 import java.util.Map;

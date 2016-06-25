@@ -6,7 +6,7 @@ import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
 import net.netcoding.nifty.common.reflection.BukkitReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
-import net.netcoding.nifty.core.api.ChatColor;
+import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;

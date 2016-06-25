@@ -3,7 +3,7 @@ package net.netcoding.nifty.common.minecraft;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.core.api.Color;
+import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.api.builder.BuilderCore;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;

@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common.minecraft.block;
 
 import com.google.common.collect.ImmutableMap;
-import net.netcoding.nifty.core.api.DyeColor;
+import net.netcoding.nifty.core.api.color.DyeColor;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.misc.Serializable;

@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.material;
 
-import net.netcoding.nifty.core.api.DyeColor;
+import net.netcoding.nifty.core.api.color.DyeColor;
 
 public interface Dye extends MaterialData, Colorable {
 
