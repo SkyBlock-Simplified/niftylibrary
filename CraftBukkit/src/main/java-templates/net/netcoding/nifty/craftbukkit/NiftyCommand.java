@@ -1,27 +1,41 @@
 package net.netcoding.nifty.craftbukkit;
 
-import net.netcoding.nifty.common.old_BukkitCommand;
-import net.netcoding.nifty.craftbukkit.api.plugin.CraftPlugin;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.api.plugin.Command;
+import net.netcoding.nifty.common.api.plugin.MinecraftListener;
+import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.minecraft.command.CommandSource;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
+import net.netcoding.nifty.common.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.api.color.ChatColor;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.NumberUtil;
 
-final class NiftyCommand extends old_BukkitCommand {
+import java.util.Iterator;
+import java.util.Set;
+import java.util.UUID;
 
-    NiftyCommand(CraftPlugin plugin) {
-		super(plugin, "nifty");
-		this.setMinimumArgsLength(0);
-	    this.setMaximumArgsLength(2);
-		this.editUsage(1, "search", "<player|uuid>");
-		this.editUsage(1, "lookup", "<player|uuid>");
-	    this.editUsage(1, "uuid", "<player|uuid>");
+final class NiftyCommand extends MinecraftListener {
+
+    NiftyCommand(MinecraftPlugin plugin) {
+		super(plugin);
 	}
 
-	/*@Override
-	protected void onCommand(CommandSender sender, String alias, String[] args) throws Exception {
-		List<String> nameCache = BukkitPlugin.getPluginCache();
+	@Command(name = "nifty",
+			minimumArgs = 0,
+			maximumArgs = 2,
+			usages = {
+					@Command.Usage(match = "search", replace = "<player|uuid>"),
+					@Command.Usage(match = "lookup", replace = "<player|uuid>"),
+					@Command.Usage(match = "uiid", replace = "<player|uuid>")
+	})
+	protected void onCommand(CommandSource source, String label, String[] args) throws Exception {
+		Set<MinecraftPlugin> pluginCache = Nifty.getPluginManager().getPlugins();
 
 		if (ListUtil.isEmpty(args) || NumberUtil.isNumber(args[0])) {
-			int rounded = NumberUtil.roundUp(nameCache.size(), 5);
+			int rounded = NumberUtil.roundUp(pluginCache.size(), 5);
 			int pages = rounded / 5;
-			int page = args.length == 1 ? NumberUtil.isNumber(args[0]) ? nameCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0 : 0;
+			int page = args.length == 1 ? NumberUtil.isNumber(args[0]) ? pluginCache.size() > 5 ? Integer.parseInt(args[0]) : 0 : 0 : 0;
 
 			if (page <= 0)
 				page = 1;
@@ -30,36 +44,39 @@ final class NiftyCommand extends old_BukkitCommand {
 				page = pages;
 
 			int start = ((page - 1) * 5);
-			int many = Math.min(nameCache.size() - start, 5);
-			this.getLog().message(sender, "[{{0}} (Page {{1}}/{{2}})]", "NiftyBukkit Implementations", page, pages);
+			int many = Math.min(pluginCache.size() - start, 5);
+			this.getLog().message(source, "[{{0}} (Page {{1}}/{{2}})]", "${name} Implementations", page, pages);
+			Iterator<MinecraftPlugin> iterator = pluginCache.iterator();
+
+			for (int i = 0; i < start; i++)
+				iterator.next();
 
 			for (int i = start; i < (start + many); i++) {
-				String pluginName = nameCache.get(i);
-				NiftyPluginInfo info = new NiftyPluginInfo(pluginName);
-				boolean trouble = !info.isUsingBukkitPlugin() || info.getBukkitCommandCount() < info.getTotalCommandCount();
+				MinecraftPlugin plugin = iterator.next();
+				NiftyPluginInfo info = new NiftyPluginInfo(plugin.getName());
 				boolean error = !info.isEnabled() || info.getErrorCount() > 0;
-				this.getLog().message(sender, "{0} [{{1}}]{2}", pluginName, info.getVersion(), (error ? ChatColor.RED + " !" : (trouble ? ChatColor.YELLOW + " !" : "")));
+				this.getLog().message(source, "{0} [{{1}}]{2}", plugin.getName(), info.getVersion(), (error ? ChatColor.RED + " !" : ""));
 			}
 		} else {
 			String pluginName = args[0];
 
 			if (pluginName.matches("^(lookup|search|uuid|user(name)?)$")) {
 				if (args.length < 2) {
-					this.showUsage(sender);
+					this.showUsage(source);
 					return;
 				}
 
 				try {
-                    BukkitMojangProfile profile = Nifty.getMojangRepository().searchByUniqueId(UUID.fromString(args[1]));
-					this.getLog().message(sender, "The name for {{0}} is {{1}}.", profile.getUniqueId(), profile.getName());
+                    MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByUniqueId(UUID.fromString(args[1]));
+					this.getLog().message(source, "The name for {{0}} is {{1}}.", profile.getUniqueId(), profile.getName());
 				} catch (Exception ex) {
-                    BukkitMojangProfile profile = Nifty.getMojangRepository().searchByUsername(args[1]);
-					this.getLog().message(sender, "The UUID of {{0}} is {{1}}.", profile.getName(), profile.getUniqueId());
+                    MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByUsername(args[1]);
+					this.getLog().message(source, "The UUID of {{0}} is {{1}}.", profile.getName(), profile.getUniqueId());
 				}
 			} else {
-				for (String cache : nameCache) {
-					if (cache.equalsIgnoreCase(pluginName)) {
-						pluginName = cache;
+				for (MinecraftPlugin plugin : pluginCache) {
+					if (plugin.getName().equalsIgnoreCase(pluginName)) {
+						pluginName = plugin.getName();
 						break;
 					}
 				}
@@ -67,27 +84,23 @@ final class NiftyCommand extends old_BukkitCommand {
 				NiftyPluginInfo info = new NiftyPluginInfo(pluginName);
 
 				if ("Bukkit".equals(pluginName)) {
-					this.getLog().message(sender, "[{{0}} Information]", pluginName);
-					this.getLog().message(sender, "Version: {{0}}", MinecraftProtocol.getCurrentVersion());
-					this.getLog().message(sender, "Errors: {{0}}", info.getErrors());
+					this.getLog().message(source, "[{{0}} Information]", pluginName);
+					this.getLog().message(source, "Version: {{0}}", MinecraftProtocol.getCurrentVersion());
+					this.getLog().message(source, "Errors: {{0}}", info.getErrors());
 				} else {
 					if (info.exists()) {
-						this.getLog().message(sender, "[{{0}} Information]", pluginName);
-						this.getLog().message(sender, "Version: {{0}}", info.getVersion());
-						this.getLog().message(sender, "Status: {{0}}", info.getStatus());
-						this.getLog().message(sender, "Errors: {{0}}", info.getErrors());
-						this.getLog().message(sender, "Helpers:");
-						this.getLog().message(sender, "   BukkitPlugin: {{0}}", info.getUsingBukkitPlugin());
-						this.getLog().message(sender, "   Commands: {{0}}/{{1}}", info.getBukkitCommands(), info.getTotalCommands());
-						this.getLog().message(sender, "   Listeners: {{0}}/{{1}}", info.getBukkitListeners(), info.getTotalListeners());
+						this.getLog().message(source, "[{{0}} Information]", pluginName);
+						this.getLog().message(source, "Version: {{0}}", info.getVersion());
+						this.getLog().message(source, "Status: {{0}}", info.getStatus());
+						this.getLog().message(source, "Errors: {{0}}", info.getErrors());
 					} else
-						this.getLog().message(sender, "{{0}} is an invalid plugin name!", pluginName);
+						this.getLog().message(source, "{{0}} is an invalid plugin name!", pluginName);
 				}
 			}
 		}
 	}
 
-	@Override
+	/*@Override
 	protected List<String> onTabComplete(CommandSender sender, String label, String[] args) throws Exception {
 		Plugin[] plugins = this.getPlugin().getServer().getPluginManager().getPlugins();
 		final String arg = args[0].toLowerCase();
@@ -101,7 +114,7 @@ final class NiftyCommand extends old_BukkitCommand {
 		}
 
 		return names;
-	}
+	}*/
 
 	private class NiftyPluginInfo {
 
@@ -115,91 +128,30 @@ final class NiftyCommand extends old_BukkitCommand {
 			return this.getPlugin() != null;
 		}
 
-		public int getBukkitCommandCount() {
-			return old_BukkitCommand.getPluginCache(this.getPlugin().getName());
-		}
-
-		public String getBukkitCommands() {
-			return (this.getBukkitCommandCount() == this.getTotalCommandCount() ? ChatColor.GREEN.toString() : "") + this.getBukkitCommandCount();
-		}
-
-		public int getBukkitListenerCount() {
-			return BukkitListener.getPluginCache(this.getPlugin().getName());
-		}
-
-		public String getBukkitListeners() {
-			return (this.getBukkitListenerCount() == this.getTotalListenerCount() ? ChatColor.GREEN.toString() : "") + this.getBukkitListenerCount();
-		}
-
 		public int getErrorCount() {
-			return Nifty.getPluginCache(this.pluginName).size();
+			return Nifty.getPluginManager().getPluginErrors(this.getPlugin()).size();
 		}
 
 		public String getErrors() {
 			return (this.getErrorCount() == 0 ? ChatColor.GREEN.toString() : "") + this.getErrorCount();
 		}
 
-		public JavaPlugin getPlugin() {
-			return (JavaPlugin) Nifty.getPlugin().getServer().getPluginManager().getPlugin(pluginName);
+		public MinecraftPlugin getPlugin() {
+			return Nifty.getPluginManager().getPlugin(pluginName);
 		}
 
 		public String getStatus() {
 			return (this.isEnabled() ? ChatColor.GREEN + "En" : "Dis") + "abled";
 		}
 
-		public int getTotalCommandCount() {
-			int totalCommands = 0;
-
-			for (HelpTopic topic : this.getPlugin().getServer().getHelpMap().getHelpTopics()) {
-				if (topic.getName().equals(this.getPlugin().getName())) {
-					totalCommands = topic.getFullText(this.getPlugin().getServer().getConsoleSender()).split("\n").length - 1;
-					break;
-				}
-			}
-
-			return totalCommands;
-		}
-
-		public String getTotalCommands() {
-			return (this.getBukkitCommandCount() == this.getTotalCommandCount() ? ChatColor.GREEN.toString() : "") + this.getTotalCommandCount();
-		}
-
-		public int getTotalListenerCount() {
-			int totalListeners = 0;
-			HashSet<String> used = new HashSet<>();
-
-			for (RegisteredListener listener : HandlerList.getRegisteredListeners(this.getPlugin())) {
-				Class<?> clazz = listener.getListener().getClass();
-
-				if (!used.contains(clazz.getName())) {
-					used.add(clazz.getName());
-					totalListeners++;
-				}
-			}
-
-			return totalListeners;
-		}
-
-		public String getTotalListeners() {
-			return (this.getBukkitListenerCount() == this.getTotalListenerCount() ? ChatColor.GREEN.toString() : "") + this.getTotalListenerCount();
-		}
-
-		public String getUsingBukkitPlugin() {
-			return BukkitPlugin.getPluginCache().contains(this.getPlugin().getName()) ? ChatColor.GREEN + "Yes" : "No";
-		}
-
 		public String getVersion() {
-			return ChatColor.WHITE + this.getPlugin().getDescription().getVersion();
+			return ChatColor.WHITE + this.getPlugin().getDesc().getVersion();
 		}
 
 		public boolean isEnabled() {
 			return this.getPlugin().isEnabled();
 		}
 
-		public boolean isUsingBukkitPlugin() {
-			return BukkitPlugin.getPluginCache().contains(this.getPlugin().getName());
-		}
-
-	}*/
+	}
 
 }

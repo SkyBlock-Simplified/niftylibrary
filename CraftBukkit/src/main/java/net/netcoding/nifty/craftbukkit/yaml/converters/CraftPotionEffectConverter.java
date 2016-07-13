@@ -3,6 +3,7 @@ package net.netcoding.nifty.craftbukkit.yaml.converters;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.yaml.InternalConverter;
 import net.netcoding.nifty.core.yaml.converters.Converter;
+import org.bukkit.Color;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -23,7 +24,10 @@ public final class CraftPotionEffectConverter extends Converter {
 		String name = (String)map.get("name");
 		int duration = NumberUtil.isNumber((String)map.get("duration")) ? (Integer)map.get("duration") : 1;
 		int amplifier = NumberUtil.isNumber((String)map.get("amplifier")) ? (Integer)map.get("amplifier") : 0;
-		return new PotionEffect(PotionEffectType.getByName(name), duration, amplifier);
+		boolean ambient = map.containsKey("ambient") ? (Boolean)map.get("ambient") : false;
+		boolean particles = map.containsKey("particles") ? (Boolean)map.get("particles") : false;
+		Color color = map.containsKey("color") ? Color.fromRGB(NumberUtil.toLong((String)map.get("color")).intValue()) : null;
+		return new PotionEffect(PotionEffectType.getByName(name), duration, amplifier, ambient, particles, color);
 	}
 
 	@Override
@@ -33,6 +37,9 @@ public final class CraftPotionEffectConverter extends Converter {
 		saveMap.put("name", potion.getType().getName());
 		saveMap.put("duration", potion.getDuration());
 		saveMap.put("amplifier", potion.getAmplifier());
+		saveMap.put("ambient", potion.isAmbient());
+		saveMap.put("particles", potion.hasParticles());
+		saveMap.put("color", NumberUtil.toHexString(potion.getColor().asRGB()));
 		return saveMap;
 	}
 

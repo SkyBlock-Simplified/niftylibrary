@@ -1,5 +1,5 @@
-name: ${project.name}
-version: ${project.version}
+name: ${name}
+version: ${version}
 website: ${project.url}
 author: ${author}
 
@@ -8,12 +8,12 @@ softdepend: [Vault, ProtocolLib]
 
 commands:
   nifty:
-    description: Show status of plugins using NiftyBukkit
+    description: Show status of plugins using ${name}
     usage: /<command> [page|plugin]
 
 permissions:
-  niftybukkit.*:
+  niftylibrary.*:
     description: Gives access to all plugin commands
     children:
-      niftybukkit.nifty:
-        description: Show status of plugins using NiftyBukkit
+      niftylibrary.nifty:
+        description: Show status of plugins using ${name}

@@ -8,17 +8,29 @@ import net.netcoding.nifty.common.minecraft.entity.EntityType;
 import net.netcoding.nifty.common.minecraft.entity.Item;
 import net.netcoding.nifty.common.minecraft.entity.block.FallingBlock;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
+import net.netcoding.nifty.common.minecraft.entity.projectile.arrow.Arrow;
 import net.netcoding.nifty.common.minecraft.entity.weather.LightningStrike;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.material.types.TreeType;
 import net.netcoding.nifty.common.minecraft.region.Biome;
 import net.netcoding.nifty.common.minecraft.region.Chunk;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
-import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
-import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.misc.Vector;
+import net.netcoding.nifty.craftbukkit.minecraft.block.CraftBlock;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntityType;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftItem;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.block.CraftFallingBlock;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.living.human.CraftPlayer;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.weather.CraftLightningStrike;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -45,13 +57,18 @@ public final class CraftWorld implements World {
 	}
 
 	@Override
-	public Item dropItem(Location location, ItemStack itemStack) {
-		return null; // TODO
+	public Item dropItem(Location location, ItemStack item) {
+		return new CraftItem(this.getHandle().dropItem(((CraftLocation)location).getHandle(), ((CraftItemStack)item).getHandle()));
 	}
 
 	@Override
-	public Item dropItemNaturally(Location location, ItemStack itemStack) {
-		return null; // TODO
+	public Item dropItemNaturally(Location location, ItemStack item) {
+		return new CraftItem(this.getHandle().dropItemNaturally(((CraftLocation)location).getHandle(), ((CraftItemStack)item).getHandle()));
+	}
+
+	@Override
+	public boolean generateTree(Location location, TreeType type) {
+		return this.getHandle().generateTree(((CraftLocation)location).getHandle(), org.bukkit.TreeType.valueOf(type.name()));
 	}
 
 	@Override
@@ -81,12 +98,12 @@ public final class CraftWorld implements World {
 
 	@Override
 	public Block getBlockAt(int x, int y, int z) {
-		return null; // TODO
+		return new CraftBlock(this.getHandle().getBlockAt(x, y, z));
 	}
 
 	@Override
 	public Chunk getChunkAt(int x, int z) {
-		return null; // TODO
+		return new CraftChunk(this.getHandle().getChunkAt(x, z));
 	}
 
 	@Override
@@ -96,18 +113,20 @@ public final class CraftWorld implements World {
 
 	@Override
 	public List<Entity> getEntities() {
-		return null; // TODO
+		return this.getHandle().getEntities().stream().map(CraftEntity::convertBukkitEntity).collect(Concurrent.toList());
 	}
 
 	@Override
-	public final <T extends Entity> Collection<Entity> getEntitiesByClass(Class<T> clazz) {
-		return null; // TODO
+	public final <T extends Entity> Collection<T> getEntitiesByClass(Class<T> clazz) {
+		return this.getHandle().getEntitiesByClass(CraftEntityType.getByClass(clazz).getBukkitClass()).stream().map(entity -> CraftEntity.convertBukkitEntity(entity, clazz)).collect(Concurrent.toSet());
 	}
 
-	@SafeVarargs
+	@SuppressWarnings({"unchecked", "ConfusingArgumentToVarargsMethod"})
 	@Override
 	public final Collection<Entity> getEntitiesByClasses(Class<? extends Entity>... clazzes) {
-		return null;
+		Class<? extends org.bukkit.entity.Entity>[] bukkitClazzes = (Class<? extends org.bukkit.entity.Entity>[])
+				Arrays.stream(clazzes).map(CraftEntity.class::cast).map(CraftEntity::getHandle).map(org.bukkit.entity.Entity::getClass).toArray();
+		return this.getHandle().getEntitiesByClasses(bukkitClazzes).stream().map(CraftEntity::convertBukkitEntity).collect(Concurrent.toSet());
 	}
 
 	@Override
@@ -130,13 +149,13 @@ public final class CraftWorld implements World {
 		return this.getHandle().getGameRuleValue(rule);
 	}
 
-	protected final org.bukkit.World getHandle() {
+	public org.bukkit.World getHandle() {
 		return this.world;
 	}
 
 	@Override
 	public Block getHighestBlockAt(int x, int z) {
-		return null; // TODO
+		return new CraftBlock(this.getHandle().getHighestBlockAt(x, z));
 	}
 
 	@Override
@@ -156,12 +175,14 @@ public final class CraftWorld implements World {
 
 	@Override
 	public List<LivingEntity> getLivingEntities() {
-		return null; // TODO
+		return this.getHandle().getLivingEntities().stream()
+				.filter(entity -> CraftEntityType.valueOf(entity.getType().name()) != CraftEntityType.UNKNOWN)
+				.map(entity -> CraftEntity.convertBukkitEntity(entity, LivingEntity.class)).collect(Concurrent.toList());
 	}
 
 	@Override
-	public Chunk[] getLoadedChunks() {
-		return new Chunk[0]; // TODO
+	public Collection<Chunk> getLoadedChunks() {
+		return Arrays.stream(this.getHandle().getLoadedChunks()).map(CraftChunk::new).collect(Concurrent.toSet());
 	}
 
 	@Override
@@ -180,20 +201,19 @@ public final class CraftWorld implements World {
 	}
 
 	@Override
-	public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z) {
-		return null; // TODO
+	public List<Entity> getNearbyEntities(Location location, double x, double y, double z) {
+		return this.getHandle().getNearbyEntities(((CraftLocation)location).getHandle(), x, y, z).stream()
+				.map(CraftEntity::convertBukkitEntity).collect(Concurrent.toList());
 	}
 
 	@Override
 	public List<Player> getPlayers() {
-		ConcurrentList<Player> players = new ConcurrentList<>();
-		org.bukkit.Bukkit.getOnlinePlayers().stream().forEach(player -> players.add(new CraftPlayer(player)));
-		return players;
+		return org.bukkit.Bukkit.getOnlinePlayers().stream().map(CraftPlayer::new).collect(Concurrent.toList());
 	}
 
 	@Override
 	public Location getSpawnLocation() {
-		return null; // TODO
+		return new CraftLocation(this.getHandle().getSpawnLocation());
 	}
 
 	@Override
@@ -298,27 +318,27 @@ public final class CraftWorld implements World {
 
 	@Override
 	public void playEffect(Location location, Effect effect, int data) {
-		// TODO
+		this.getHandle().playEffect(((CraftLocation)location).getHandle(), org.bukkit.Effect.valueOf(effect.name()), data);
 	}
 
 	@Override
 	public void playEffect(Location location, Effect effect, int data, int radius) {
-		// TODO
+		this.getHandle().playEffect(((CraftLocation)location).getHandle(), org.bukkit.Effect.valueOf(effect.name()), data, radius);
 	}
 
 	@Override
 	public <T> void playEffect(Location location, Effect effect, T data) {
-		// TODO
+		this.getHandle().playEffect(((CraftLocation)location).getHandle(), org.bukkit.Effect.valueOf(effect.name()), data);
 	}
 
 	@Override
 	public <T> void playEffect(Location location, Effect effect, T data, int radius) {
-		// TODO
+		this.getHandle().playEffect(((CraftLocation)location).getHandle(), org.bukkit.Effect.valueOf(effect.name()), data, radius);
 	}
 
 	@Override
 	public void playSound(Location location, String sound, float volume, float pitch) {
-		// TODO
+		this.getHandle().playSound(((CraftLocation)location).getHandle(), sound, volume, pitch);
 	}
 
 	@Override
@@ -438,29 +458,42 @@ public final class CraftWorld implements World {
 
 	@Override
 	public <T extends Entity> T spawn(Location location, Class<T> entity) {
-		return null; // TODO
+		return CraftEntity.convertBukkitEntity(this.getHandle().spawn(((CraftLocation)location).getHandle(), CraftEntityType.getByClass(entity).getBukkitClass()), entity);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Arrow> T spawnArrow(Location location, Vector direction, float speed, float spread, Class<T> type) {
+		return CraftEntity.convertBukkitEntity(this.getHandle().spawnArrow(
+				((CraftLocation)location).getHandle(),
+				CraftConverter.toBukkitVector(direction), speed, spread,
+				(Class<org.bukkit.entity.Arrow>)(CraftEntityType.getByClass(type).getBukkitClass())
+		), type);
 	}
 
 	@Override
 	public Entity spawnEntity(Location location, EntityType type) {
-		return null; // TODO
+		return CraftEntity.convertBukkitEntity(this.getHandle().spawnEntity(((CraftLocation)location).getHandle(), org.bukkit.entity.EntityType.valueOf(type.name())));
 	}
+
 	@Override
 	public FallingBlock spawnFallingBlock(Location location, int id, byte data) {
-		return null; // TODO
+		return new CraftFallingBlock(this.getHandle().spawnFallingBlock(((CraftLocation)location).getHandle(), id, data));
 	}
 
 	@Override
 	public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data) {
 		this.getHandle().spawnParticle(org.bukkit.Particle.valueOf(particle.name()), x, y, z, count, offsetX, offsetY, offsetZ, extra, data);
 	}
+
 	@Override
 	public LightningStrike strikeLightning(Location location) {
-		return null; // TODO
+		return new CraftLightningStrike(this.getHandle().strikeLightning(((CraftLocation)location).getHandle()));
 	}
+
 	@Override
 	public LightningStrike strikeLightningEffect(Location location) {
-		return null; // TODO
+		return new CraftLightningStrike(this.getHandle().strikeLightningEffect(((CraftLocation)location).getHandle()));
 	}
 
 	@Override
@@ -488,7 +521,7 @@ public final class CraftWorld implements World {
 
 		@Override
 		public Location getCenter() {
-			return null; // TODO
+			return new CraftLocation(this.getHandle().getCenter());
 		}
 
 		@Override

@@ -6,14 +6,11 @@ import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.enchantment.Craf
 
 public final class CraftEnchantmentDatabase extends EnchantmentDatabase {
 
-	private static CraftEnchantmentDatabase INSTANCE;
+	private static final CraftEnchantmentDatabase INSTANCE = new CraftEnchantmentDatabase();
 
 	private CraftEnchantmentDatabase() { }
 
 	public static CraftEnchantmentDatabase getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new CraftEnchantmentDatabase();
-
 		return INSTANCE;
 	}
 

@@ -1,12 +1,12 @@
 package net.netcoding.nifty.craftbukkit.minecraft.event.server;
 
-import net.netcoding.nifty.common.minecraft.event.server.BukkitServerPingEvent;
-import net.netcoding.nifty.common.reflection.BukkitReflection;
+import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.minecraft.event.server.ServerPingEvent;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.event.server.ServerListPingEvent;
 
 import java.net.SocketAddress;
@@ -14,16 +14,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class CraftServerPingEvent extends BukkitServerPingEvent {
+public final class CraftServerPingEvent extends ServerPingEvent {
 
-	private final static transient Reflection SERVER_LIST_PING = new Reflection("PacketStatusListener$1ServerListPingEvent", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection PACKET_LISTENER = new Reflection("PacketStatusListener", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection MINECRAFT_SERVER = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection NETWORK_MANAGER = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection SERVER_PING = new Reflection("ServerPing", MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection SERVER_PING_SAMPLE = BukkitReflection.getCompatibleReflection("ServerPing", "ServerPingPlayerSample");
-	private final static transient Reflection SERVER_PING_DATA = new Reflection(StringUtil.format("ServerPing{0}ServerData", (MinecraftProtocol.isPre1_8_3() ? "" : "$")), MinecraftPackage.MINECRAFT_SERVER);
-	private final static transient Reflection SERVER_PING_PACKET = new Reflection("PacketStatusOutServerInfo", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection SERVER_LIST_PING = new Reflection("PacketStatusListener$1ServerListPingEvent", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection PACKET_LISTENER = new Reflection("PacketStatusListener", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection MINECRAFT_SERVER = new Reflection("MinecraftServer", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection NETWORK_MANAGER = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection SERVER_PING = new Reflection("ServerPing", MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection SERVER_PING_SAMPLE = MinecraftReflection.getCompatibleReflection("ServerPing", "ServerPingPlayerSample");
+	private static final transient Reflection SERVER_PING_DATA = new Reflection(StringUtil.format("ServerPing{0}ServerData", (MinecraftProtocol.isPre1_8_3() ? "" : "$")), MinecraftPackage.MINECRAFT_SERVER);
+	private static final transient Reflection SERVER_PING_PACKET = new Reflection("PacketStatusOutServerInfo", MinecraftPackage.MINECRAFT_SERVER);
 
 	private final Object minecraftServer;
 	private final Object networkManager;
@@ -53,7 +53,7 @@ public final class CraftServerPingEvent extends BukkitServerPingEvent {
 	@Override
 	public final void sendSpoofedVersion(String name, int protocol, boolean merge) {
 		Object pingObj = SERVER_PING.newInstance();
-		SERVER_PING.invokeMethod("setPlayerSample", pingObj, SERVER_PING_SAMPLE.newInstance(Bukkit.getMaxPlayers(), 0));
+		SERVER_PING.invokeMethod("setPlayerSample", pingObj, SERVER_PING_SAMPLE.newInstance(Nifty.getServer().getMaxPlayers(), 0));
 		String mergedName = name;
 
 		if (merge) {

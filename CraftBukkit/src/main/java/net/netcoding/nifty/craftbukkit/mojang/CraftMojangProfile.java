@@ -1,18 +1,20 @@
 package net.netcoding.nifty.craftbukkit.mojang;
 
 import net.netcoding.nifty.common.minecraft.entity.Entity;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common.reflection.BukkitReflection;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.living.human.CraftPlayer;
 import net.netcoding.nifty.craftbukkit.reflection.CraftMinecraftPackage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
-public final class CraftMojangProfile extends BukkitMojangProfile {
+public final class CraftMojangProfile extends MinecraftMojangProfile {
 
-	protected CraftMojangProfile() { }
+	private CraftMojangProfile() { }
 
 	/**
 	 * Gets the connection of this profiles client, if they are online.
@@ -20,7 +22,7 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 	 * @return Connection of the client.
 	 */
 	public final Object getConnection() {
-		return this.isOnlineLocally() ? BukkitReflection.NMS_ENTITY_PLAYER.getValue("playerConnection", this.getHandle()) : null;
+		return this.isOnlineLocally() ? MinecraftReflection.ENTITY_PLAYER.getValue(MinecraftReflection.PLAYER_CONNECTION.getClazz(), this.getHandle()) : null;
 	}
 
 	/**
@@ -30,8 +32,8 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 	 */
 	public final Object getHandle() {
 		if (!this.isOnlineLocally()) return null;
-		Reflection craftPlayer = new BukkitReflection("CraftPlayer", "entity", CraftMinecraftPackage.CRAFTBUKKIT);
-		Object craftPlayerObj = craftPlayer.getClazz().cast(this.getOfflinePlayer().getPlayer());
+		Reflection craftPlayer = new MinecraftReflection("CraftPlayer", "entity", CraftMinecraftPackage.CRAFTBUKKIT);
+		Object craftPlayerObj = craftPlayer.getClazz().cast(((CraftPlayer)this.getOfflinePlayer().getPlayer()).getHandle());
 		return craftPlayer.invokeMethod("getHandle", craftPlayerObj);
 	}
 
@@ -41,7 +43,7 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 			if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_2.getProtocol())
 				return this.getOfflinePlayer().getPlayer().isGliding();
 			else if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_1_pre1.getProtocol())
-				return (boolean)BukkitReflection.NMS_ENTITY_PLAYER.invokeMethod("cB", this.getHandle());
+				return (boolean) MinecraftReflection.ENTITY_PLAYER.invokeMethod("cB", this.getHandle());
 		}
 
 		return false;
@@ -53,7 +55,7 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 
 		if (this.isOnlineLocally()) {
 			try {
-				locale = (String)BukkitReflection.NMS_ENTITY_PLAYER.getValue("locale", this.getHandle());
+				locale = (String) MinecraftReflection.ENTITY_PLAYER.getValue("locale", this.getHandle());
 			} catch (Exception ignore) { }
 		}
 
@@ -70,7 +72,7 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 
 		if (this.isOnlineLocally()) {
 			try {
-				ping = (int)BukkitReflection.NMS_ENTITY_PLAYER.getValue("ping", this.getHandle());
+				ping = (int) MinecraftReflection.ENTITY_PLAYER.getValue("ping", this.getHandle());
 			} catch (Exception ignore) { }
 		}
 
@@ -83,10 +85,8 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 
 		if (this.getOfflinePlayer().isOnline()) {
 			try {
-				Reflection playerConnection = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-				Reflection networkManager = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
-				Object networkManagerObj = playerConnection.getValue("networkManager", this.getConnection());
-				version = (int)networkManager.invokeMethod("getVersion", networkManagerObj);
+				Object networkManagerObj = MinecraftReflection.PLAYER_CONNECTION.getValue(MinecraftReflection.NETWORK_MANAGER, this.getConnection());
+				version = (int)MinecraftReflection.NETWORK_MANAGER.invokeMethod("getVersion", networkManagerObj);
 			} catch (Exception ignore) { }
 		}
 
@@ -100,26 +100,28 @@ public final class CraftMojangProfile extends BukkitMojangProfile {
 		try {
 			Reflection clientCommandObj = new Reflection("PacketPlayInClientCommand", MinecraftPackage.MINECRAFT_SERVER);
 			Reflection enumCommandsObj = new Reflection("PacketPlayInClientCommand$EnumClientCommand", MinecraftPackage.MINECRAFT_SERVER);
-			Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 			Object[] titleActionEnums = enumCommandsObj.getClazz().getEnumConstants();
-			playerConnObj.invokeMethod("a", this.getConnection(), clientCommandObj.newInstance(titleActionEnums[1]));
+			MinecraftReflection.PLAYER_CONNECTION.invokeMethod(Void.class, this.getConnection(), clientCommandObj.newInstance(titleActionEnums[1]));
 		} catch (Exception ignore) { }
 	}
 
 	@Override
 	public void sendPacket(Object packet) {
 		if (!this.isOnlineLocally()) return;
-		Reflection playerConnObj = new Reflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
-		Object playerConnectionObj = this.getConnection();
-		playerConnObj.invokeMethod("sendPacket", playerConnectionObj, packet);
+		MinecraftReflection.PLAYER_CONNECTION.invokeMethod(Void.class/*"sendPacket"*/, this.getConnection(), packet);
 	}
 
 	@Override
 	protected void spectate(Entity target) {
-		/*if (!this.isOnlineLocally()) return;
-		Reflection entityTarget = new Reflection(target.getClass().getSimpleName(), MinecraftPackage.CRAFTBUKKIT);
-		Object targetHandle = entityTarget.invokeMethod("getHandle", target); // TODO
-		BukkitReflection.NMS_ENTITY_PLAYER.invokeMethod("e", this.getHandle(), targetHandle);*/
+		if (!this.isOnlineLocally()) return;
+		org.bukkit.entity.Entity bukkitEntity = ((CraftEntity)target).getHandle();
+		Reflection entityTarget = new Reflection(bukkitEntity.getClass().getSimpleName(), CraftMinecraftPackage.CRAFTBUKKIT);
+		Object targetHandle = entityTarget.invokeMethod(MinecraftReflection.ENTITY.getClazz(), bukkitEntity);
+
+		if (MinecraftProtocol.getCurrentProtocol() >= MinecraftProtocol.v1_9_pre1.getProtocol())
+			MinecraftReflection.ENTITY_PLAYER.invokeMethod("setSpectatorTarget", this.getHandle(), targetHandle);
+		else
+			MinecraftReflection.ENTITY_PLAYER.invokeMethod("e", this.getHandle(), targetHandle);
 	}
 
 }

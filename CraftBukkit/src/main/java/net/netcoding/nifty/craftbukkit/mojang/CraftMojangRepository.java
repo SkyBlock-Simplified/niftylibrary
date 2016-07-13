@@ -3,20 +3,19 @@ package net.netcoding.nifty.craftbukkit.mojang;
 import com.google.gson.JsonObject;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.api.plugin.messaging.BungeeServer;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common.mojang.BukkitMojangRepository;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
+import net.netcoding.nifty.common.mojang.MinecraftMojangRepository;
 import net.netcoding.nifty.core.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.craftbukkit.NiftyCraftBukkit;
 import net.netcoding.nifty.craftbukkit.api.plugin.messaging.CraftBungeeHelper;
-import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftPlayer;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.living.human.CraftPlayer;
 import org.bukkit.OfflinePlayer;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,16 +24,13 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class CraftMojangRepository extends BukkitMojangRepository<CraftMojangProfile> {
+public final class CraftMojangRepository extends MinecraftMojangRepository<CraftMojangProfile> {
 
-	private static CraftMojangRepository INSTANCE;
+	private static final CraftMojangRepository INSTANCE = new CraftMojangRepository();
 
 	private CraftMojangRepository() { }
 
 	public static CraftMojangRepository getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new CraftMojangRepository();
-
 		return INSTANCE;
 	}
 
@@ -141,7 +137,7 @@ public final class CraftMojangRepository extends BukkitMojangRepository<CraftMoj
 				JsonObject json = new JsonObject();
 				json.addProperty("id", player.getUniqueId().toString());
 				json.addProperty("name", player.getName());
-				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, BukkitMojangProfile.class));
+				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, CraftMojangProfile.class));
 			}
 
 			throw pnfex;
@@ -164,7 +160,7 @@ public final class CraftMojangRepository extends BukkitMojangRepository<CraftMoj
 				JsonObject json = new JsonObject();
 				json.addProperty("id", player.getUniqueId().toString());
 				json.addProperty("name", player.getName());
-				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, BukkitMojangProfile.class));
+				throw new ProfileNotFoundException(ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER, ProfileNotFoundException.LookupType.OFFLINE_PLAYER, GSON.fromJson(json, CraftMojangProfile.class));
 			}
 
 			throw pnfex;
@@ -215,8 +211,8 @@ public final class CraftMojangRepository extends BukkitMojangRepository<CraftMoj
 	@Override
 	public CraftMojangProfile[] searchByPlayer(Collection<? extends Player> players) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.OFFLINE_PLAYERS;
-		List<CraftMojangProfile> profiles = new ArrayList<>();
-		ConcurrentList<CraftMojangProfile> tempProfiles = new ConcurrentList<>();
+		ConcurrentList<CraftMojangProfile> profiles = Concurrent.newList();
+		ConcurrentList<CraftMojangProfile> tempProfiles = Concurrent.newList();
 
 		try {
 			// Create Temporary Matching Profiles
@@ -229,8 +225,7 @@ public final class CraftMojangRepository extends BukkitMojangRepository<CraftMoj
 
 			// Search Online Servers
 			if (Nifty.getBungeeHelper().getDetails().isDetected()) {
-				for (BukkitMojangProfile temp : tempProfiles) {
-					// TODO: BungeeHelper
+				for (CraftMojangProfile temp : tempProfiles) {
 					for (CraftMojangProfile profile : CraftBungeeHelper.getInstance().getServer().getPlayerList()) {
 						if (profile.equals(temp)) {
 							profiles.add(profile);
@@ -250,9 +245,9 @@ public final class CraftMojangRepository extends BukkitMojangRepository<CraftMoj
 
 			return ListUtil.toArray(profiles, CraftMojangProfile.class);
 		} catch (ProfileNotFoundException pnfex) {
-			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
+			throw new ProfileNotFoundException(pnfex.getReason(), type, pnfex.getCause(), ListUtil.toArray(tempProfiles, CraftMojangProfile.class));
 		} catch (Exception ex) {
-			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(tempProfiles, BukkitMojangProfile.class));
+			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(tempProfiles, CraftMojangProfile.class));
 		}
 	}
 

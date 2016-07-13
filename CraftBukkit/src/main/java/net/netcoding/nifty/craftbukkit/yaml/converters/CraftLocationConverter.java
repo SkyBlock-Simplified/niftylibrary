@@ -1,6 +1,7 @@
 package net.netcoding.nifty.craftbukkit.yaml.converters;
 
 import com.google.common.base.Preconditions;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.yaml.InternalConverter;
@@ -16,7 +17,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public final class CraftLocationConverter extends Converter {
 
-	private final static ConcurrentSet<Location> WILDCARDS = new ConcurrentSet<>();
+	private static final ConcurrentSet<Location> WILDCARDS = Concurrent.newSet();
 
 	public CraftLocationConverter(InternalConverter converter) {
 		super(converter);

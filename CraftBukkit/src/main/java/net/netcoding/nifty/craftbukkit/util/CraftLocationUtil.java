@@ -3,7 +3,11 @@ package net.netcoding.nifty.craftbukkit.util;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
-public class CraftLocationUtil {
+/**
+ * A collection of location utilities to assist in location
+ * determining and manipulation.
+ */
+public final class CraftLocationUtil {
 
 	private static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 	private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };

@@ -7,8 +7,8 @@ import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantme
 import net.netcoding.nifty.common.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
-import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemMeta;
-import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.meta.CraftItemMeta;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ public final class CraftNbtItemCompound extends NbtItemCompound<CraftItemStack> 
 	}
 
 	@Override
-	protected final void load() {
+	protected void load() {
 		if (Material.AIR != this.getWrapped().getType()) {
 			Object tag = CraftNbtFactory.NMS_ITEM_STACK.invokeMethod(CraftNbtFactory.NBT_TAG_COMPOUND.getClazz(), this.nmsItem);
 
@@ -36,7 +36,7 @@ public final class CraftNbtItemCompound extends NbtItemCompound<CraftItemStack> 
 	}
 
 	@Override
-	protected final void save() {
+	protected void save() {
 		if (Material.AIR != this.getWrapped().getType()) {
 			CraftNbtFactory.NMS_ITEM_STACK.setValue(CraftNbtFactory.NBT_TAG_COMPOUND.getClazz(), this.nmsItem, this.getHandle());
 			org.bukkit.inventory.meta.ItemMeta nmsMeta = (org.bukkit.inventory.meta.ItemMeta)CraftNbtFactory.CRAFT_ITEM_STACK.invokeMethod("getItemMeta", null, this.nmsItem);

@@ -1,40 +1,31 @@
 package net.netcoding.nifty.craftbukkit.api.plugin;
 
-import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.Command;
 import net.netcoding.nifty.common.api.plugin.PluginManager;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 public final class CraftPluginManager extends PluginManager {
 
-	private static CraftPluginManager INSTANCE;
+	private static final CraftPluginManager INSTANCE = new CraftPluginManager();
 
 	private CraftPluginManager() { }
 
 	public static CraftPluginManager getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new CraftPluginManager();
-
 		return INSTANCE;
 	}
 
-	@Override
-	public MinecraftPlugin getPlugin(String name) {
-		return null; // TODO
+	public Plugin getBukkitPlugin(String name) {
+		return Bukkit.getPluginManager().getPlugin(name);
 	}
 
-	@Override
-	public <T extends MinecraftPlugin> T getPlugin(Class<?> plugin) {
-		return null; // TODO
-	}
-
-	@Override
-	public boolean hasPlugin(String name) {
-		return Bukkit.getPluginManager().getPlugin(name) != null;
-	}
-
-	@Override
-	public boolean isEnabled(String name) {
+	public boolean isBukkitPluginEnabled(String name) {
 		return this.hasPlugin(name) && Bukkit.getPluginManager().getPlugin(name).isEnabled();
+	}
+
+	@Override
+	protected void injectCommand(Command command) {
+
 	}
 
 }

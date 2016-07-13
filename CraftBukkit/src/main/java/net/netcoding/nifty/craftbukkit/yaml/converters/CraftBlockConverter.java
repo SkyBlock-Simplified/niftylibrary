@@ -12,7 +12,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "deprecation" })
 public final class CraftBlockConverter extends Converter {
 
 	public CraftBlockConverter(InternalConverter converter) {

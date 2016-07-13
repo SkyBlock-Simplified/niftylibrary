@@ -1,60 +1,59 @@
 package net.netcoding.nifty.craftbukkit.api.nbt;
 
-import net.netcoding.nifty.common.api.nbt.NbtBlockCompound;
-import net.netcoding.nifty.common.api.nbt.NbtCompound;
-import net.netcoding.nifty.common.api.nbt.NbtFactory;
-import net.netcoding.nifty.common.api.nbt.NbtItemCompound;
-import net.netcoding.nifty.common.minecraft.block.Block;
-import net.netcoding.nifty.common.minecraft.entity.Entity;
-import net.netcoding.nifty.common.reflection.BukkitReflection;
+import com.google.common.base.Preconditions;
+import net.minecraft.server.v1_9_R2.TileEntity;
+import net.netcoding.nifty.common.api.nbt.*;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.craftbukkit.api.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.minecraft.block.CraftBlock;
+import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.reflection.CraftMinecraftPackage;
 
-public final class CraftNbtFactory extends NbtFactory<CraftItemStack, Block> {
+public final class CraftNbtFactory extends NbtFactory<CraftItemStack, CraftBlock, CraftEntity> {
 
-	private static CraftNbtFactory INSTANCE;
-	public static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", CraftMinecraftPackage.CRAFTBUKKIT);
-	public static final Reflection CRAFT_WORLD = new BukkitReflection("CraftWorld", CraftMinecraftPackage.CRAFTBUKKIT);
-	public static final Reflection CRAFT_BLOCK = new BukkitReflection("CraftBlock", "block", CraftMinecraftPackage.CRAFTBUKKIT);
+	private static final CraftNbtFactory INSTANCE = new CraftNbtFactory();
+	public static final Reflection CRAFT_ITEM_STACK = new MinecraftReflection("CraftItemStack", "inventory", CraftMinecraftPackage.CRAFTBUKKIT);
+	public static final Reflection CRAFT_WORLD = new MinecraftReflection("CraftWorld", CraftMinecraftPackage.CRAFTBUKKIT);
+	public static final Reflection CRAFT_BLOCK = new MinecraftReflection("CraftBlock", "block", CraftMinecraftPackage.CRAFTBUKKIT);
 
-	protected CraftNbtFactory() { }
+	private CraftNbtFactory() { }
 
 	@Override
 	protected void checkItem(CraftItemStack item) {
-		if (item == null)
-			throw new IllegalArgumentException("Stack cannot be NULL!");
+		Preconditions.checkArgument(item != null, "Item cannot be NULL!");
 
-		if (getCraftItemStack(item.getBukkitItem()).getType() == org.bukkit.Material.AIR)
-			throw new UnsupportedOperationException(StringUtil.format("ItemStack type {0} cannot store NMS information!", item.getType()));
+		if (getCraftItemStack(item.getHandle()).getType() == org.bukkit.Material.AIR)
+			throw new UnsupportedOperationException(StringUtil.format("ItemStack type ''{0}'' cannot store NMS information!", item.getType()));
 	}
 
 	@Override
-	protected void checkBlock(Block block) {
-		if (block == null)
-			throw new IllegalArgumentException("Block cannot be NULL!");
+	protected void checkBlock(CraftBlock block) {
+		Preconditions.checkArgument(block != null, "Block cannot be NULL!");
 
-		if (!CRAFT_BLOCK.getClazz().isAssignableFrom(block.getClass())) // TODO
+		if (!CRAFT_BLOCK.getClazz().isAssignableFrom(block.getHandle().getClass()))
 			throw new UnsupportedOperationException("Block must be a CraftBlock!");
 	}
 
 	@Override
-	protected void checkEntity(Entity entity) {
-		if (entity == null)
-			throw new IllegalArgumentException("Entity cannot be NULL!");
-
-		// TODO: Other Checks
+	protected void checkEntity(CraftEntity entity) {
+		Preconditions.checkArgument(entity != null, "Entity cannot be NULL!");
 	}
 
 	@Override
-	protected NbtBlockCompound fromBlockTag0(Block block) {
+	protected NbtBlockCompound<CraftBlock> fromBlockTag0(CraftBlock block) {
 		return new CraftNbtBlockCompound(block, createRootNativeCompound());
 	}
 
 	@Override
-	protected NbtItemCompound fromItemTag0(CraftItemStack item) {
-		Object nmsItem = CRAFT_ITEM_STACK.invokeMethod(NMS_ITEM_STACK.getClazz(), null, item.getBukkitItem());
+	protected NbtEntityCompound<CraftEntity> fromEntityTag0(CraftEntity entity) {
+		throw new UnsupportedOperationException("Entity NBT is not currently supported!"); // TODO
+	}
+
+	@Override
+	protected NbtItemCompound<CraftItemStack> fromItemTag0(CraftItemStack item) {
+		Object nmsItem = CRAFT_ITEM_STACK.invokeMethod(NMS_ITEM_STACK.getClazz(), null, item.getHandle());
 		Object handle = NMS_ITEM_STACK.invokeMethod(NBT_TAG_COMPOUND.getClazz(), nmsItem);
 
 		if (handle == null)
@@ -74,22 +73,22 @@ public final class CraftNbtFactory extends NbtFactory<CraftItemStack, Block> {
 	}
 
 	public static CraftNbtFactory getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new CraftNbtFactory();
-
 		return INSTANCE;
 	}
 
 	@Override
-	protected void setBlockTag0(Block block, NbtCompound compound) {
+	protected void setBlockTag0(CraftBlock block, NbtCompound compound) {
 		if (!(compound instanceof NbtBlockCompound)) {
-			if ((boolean) NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), block))) {
-				compound.put("x", block.getX());
-				compound.put("y", block.getY());
-				compound.put("z", block.getZ());
-				Object craftWorld = CRAFT_WORLD.getClazz().cast(block.getWorld());
-				Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, block.getX(), block.getY(), block.getZ());
-				NMS_TILE_ENTITY.invokeMethod("a", tileEntity, compound.getHandle());
+			org.bukkit.block.Block bukkitBlock = block.getHandle();
+
+			if ((boolean) NMS_BLOCK.invokeMethod("isTileEntity", CRAFT_BLOCK.invokeMethod(NMS_BLOCK.getClazz(), bukkitBlock))) {
+				compound.put("x", bukkitBlock.getX());
+				compound.put("y", bukkitBlock.getY());
+				compound.put("z", bukkitBlock.getZ());
+				TileEntity te;
+				Object craftWorld = CRAFT_WORLD.getClazz().cast(bukkitBlock.getWorld());
+				Object tileEntity = CRAFT_WORLD.invokeMethod(NMS_TILE_ENTITY.getClazz(), craftWorld, bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ());
+				NMS_TILE_ENTITY.invokeMethod(Void.class, tileEntity, compound.getHandle());
 			}
 		}
 	}

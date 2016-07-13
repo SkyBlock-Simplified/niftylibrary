@@ -6,9 +6,9 @@ import org.bukkit.Material;
 
 public final class CraftItemDatabase extends ItemDatabase {
 
-	private static CraftItemDatabase INSTANCE;
+	private static final CraftItemDatabase INSTANCE = new CraftItemDatabase();
 
-	protected CraftItemDatabase() { }
+	private CraftItemDatabase() { }
 
 	public org.bukkit.inventory.ItemStack getBukkit(String id) {
 		ItemStack item = this.get(id);
@@ -19,9 +19,6 @@ public final class CraftItemDatabase extends ItemDatabase {
 	}
 
 	public static CraftItemDatabase getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new CraftItemDatabase();
-
 		return INSTANCE;
 	}
 
