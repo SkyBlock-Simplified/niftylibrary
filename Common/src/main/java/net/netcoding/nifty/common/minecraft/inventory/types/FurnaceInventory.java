@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.inventory.types;
 
-import net.netcoding.nifty.common.minecraft.block.Furnace;
+import net.netcoding.nifty.common.minecraft.block.state.Furnace;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 

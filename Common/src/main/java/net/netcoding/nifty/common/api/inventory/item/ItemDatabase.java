@@ -1,12 +1,13 @@
 package net.netcoding.nifty.common.api.inventory.item;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.util.misc.CSVStorage;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 
 public abstract class ItemDatabase extends CSVStorage {
 
-	private final static transient Pattern SPLIT_PATTERN = Pattern.compile("((.*)[:+',;.](\\d+))");
+	private static final transient Pattern SPLIT_PATTERN = Pattern.compile("((.*)[:+',;.](\\d+))");
 	private final ConcurrentLinkedMap<String, ItemData> items = new ConcurrentLinkedMap<>();
 
 	protected ItemDatabase() {
@@ -114,10 +115,10 @@ public abstract class ItemDatabase extends CSVStorage {
 
 	public final List<String> names(ItemStack stack) {
 		ItemData itemData = this.items.get(stack.getType().name());
-		List<String> nameList = itemData.getNames();
+		ConcurrentList<String> nameList = itemData.getNames();
 
 		if (ListUtil.isEmpty(nameList))
-			nameList = new ConcurrentList<>();
+			nameList = Concurrent.newList();
 
 		if (nameList.size() > 15)
 			nameList = nameList.subList(0, 15);
@@ -179,7 +180,6 @@ public abstract class ItemDatabase extends CSVStorage {
 		try {
 			final List<String> lines = this.getLines();
 			if (lines.isEmpty()) return;
-
 			this.items.clear();
 
 			for (String line : lines) {

@@ -1,6 +1,7 @@
 package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 
 import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.core.util.StringUtil;
 
 /**
  * Represents a skull ({@link Material#SKULL_ITEM}) that can have an owner.
@@ -22,7 +23,9 @@ public interface SkullMeta extends ItemMeta {
 	 *
 	 * @return True if the skull has an owner.
 	 */
-	boolean hasOwner();
+	default boolean hasOwner() {
+		return StringUtil.notEmpty(this.getOwner());
+	}
 
 	/**
 	 * Sets the owner of the skull.

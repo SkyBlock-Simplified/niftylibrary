@@ -5,15 +5,15 @@ import net.netcoding.nifty.common.minecraft.block.BlockFace;
 import net.netcoding.nifty.common.minecraft.entity.block.EnderCrystal;
 import net.netcoding.nifty.common.minecraft.event.Cancellable;
 import net.netcoding.nifty.common.minecraft.event.player.PlayerEvent;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 public final class EnderCrystalPlaceEvent implements Cancellable, PlayerEvent {
 
-	private final BukkitMojangProfile profile;
+	private final MinecraftMojangProfile profile;
 	private final EnderCrystal entity;
 	private boolean cancelled = false;
 
-	public EnderCrystalPlaceEvent(BukkitMojangProfile profile, EnderCrystal entity) {
+	public EnderCrystalPlaceEvent(MinecraftMojangProfile profile, EnderCrystal entity) {
 		this.profile = profile;
 		this.entity = entity;
 	}
@@ -27,7 +27,7 @@ public final class EnderCrystalPlaceEvent implements Cancellable, PlayerEvent {
 	}
 
 	@Override
-	public BukkitMojangProfile getProfile() {
+	public MinecraftMojangProfile getProfile() {
 		return this.profile;
 	}
 

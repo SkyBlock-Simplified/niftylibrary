@@ -8,6 +8,8 @@ public interface EntityEvent extends Event {
 
 	Entity getEntity();
 
-	EntityType getEntityType();
+	default EntityType getEntityType() {
+		return this.getEntity().getType();
+	}
 
 }

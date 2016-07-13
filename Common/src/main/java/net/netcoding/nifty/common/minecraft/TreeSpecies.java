@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public enum TreeSpecies {
@@ -29,7 +30,7 @@ public enum TreeSpecies {
 	 */
 	DARK_OAK(0x5);
 
-	private static final ConcurrentMap<Byte, TreeSpecies> BY_DATA = new ConcurrentMap<>();
+	private static final ConcurrentMap<Byte, TreeSpecies> BY_DATA = Concurrent.newMap();
 	private final byte data;
 
 	static {

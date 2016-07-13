@@ -10,13 +10,6 @@ import net.netcoding.nifty.common.minecraft.region.World;
 public interface PrimedTNT extends Explosive {
 
 	/**
-	 * Set the number of ticks until the TNT blows up after being primed.
-	 *
-	 * @param fuseTicks The fuse ticks.
-	 */
-	void setFuseTicks(int fuseTicks);
-
-	/**
 	 * Retrieve the number of ticks until the explosion of this entity.
 	 *
 	 * @return The number of ticks until this entity explodes.
@@ -38,5 +31,12 @@ public interface PrimedTNT extends Explosive {
 	 * @return The source of this primed TNT.
 	 */
 	Entity getSource();
+
+	/**
+	 * Set the number of ticks until the TNT blows up after being primed.
+	 *
+	 * @param fuseTicks The fuse ticks.
+	 */
+	void setFuseTicks(int fuseTicks);
 
 }

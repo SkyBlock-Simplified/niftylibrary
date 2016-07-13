@@ -1,14 +1,14 @@
 package net.netcoding.nifty.common.api.inventory.item;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.api.MinecraftListener;
-import net.netcoding.nifty.common.api.Event;
+import net.netcoding.nifty.common.api.plugin.MinecraftListener;
+import net.netcoding.nifty.common.api.plugin.Event;
 import net.netcoding.nifty.common.api.inventory.FakeInventory;
 import net.netcoding.nifty.common.api.inventory.NbtKeys;
 import net.netcoding.nifty.common.api.inventory.events.FakeItemInteractEvent;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common.minecraft.block.Action;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.event.EventResult;
 import net.netcoding.nifty.common.minecraft.event.inventory.InventoryClickEvent;
 import net.netcoding.nifty.common.minecraft.event.inventory.InventoryCreativeEvent;
@@ -21,7 +21,7 @@ import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.types.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 
 import java.util.UUID;
@@ -54,11 +54,11 @@ public class FakeItem {
 		return this.uniqueId;
 	}
 
-	public final void giveItemOpener(BukkitMojangProfile profile) {
+	public final void giveItemOpener(MinecraftMojangProfile profile) {
 		this.giveItemOpener(profile, this.getItemOpenerSlot(), this.getItemOpener());
 	}
 
-	private void giveItemOpener(BukkitMojangProfile profile, int index, ItemStack itemOpener) {
+	private void giveItemOpener(MinecraftMojangProfile profile, int index, ItemStack itemOpener) {
 		if (this.getItemOpener() != null) {
 			if (profile.getOfflinePlayer().isOnline())
 				profile.getOfflinePlayer().getPlayer().getInventory().setItem(index, itemOpener);
@@ -77,7 +77,7 @@ public class FakeItem {
 		return this.itemOpener != null && this.itemOpener.getNbt().<Boolean>getPath(NbtKeys.ITEMOPENER_DESTRUCTABLE.getPath());
 	}
 
-	public static void removeAllItemOpeners(BukkitMojangProfile profile) {
+	public static void removeAllItemOpeners(MinecraftMojangProfile profile) {
 		if (profile.isOnlineLocally()) {
 			PlayerInventory inventory = profile.getOfflinePlayer().getPlayer().getInventory();
 			ItemStack[] contents = inventory.getContents();
@@ -92,7 +92,7 @@ public class FakeItem {
 		}
 	}
 
-	public final void removeItemOpener(BukkitMojangProfile profile) {
+	public final void removeItemOpener(MinecraftMojangProfile profile) {
 		if (profile.isOnlineLocally()) {
 			PlayerInventory inventory = profile.getOfflinePlayer().getPlayer().getInventory();
 			ItemStack[] contents = inventory.getContents();
@@ -111,7 +111,7 @@ public class FakeItem {
 		this.setItemOpener(ItemStack, null);
 	}
 
-	public void setItemOpener(ItemStack ItemStack, BukkitMojangProfile profile) {
+	public void setItemOpener(ItemStack ItemStack, MinecraftMojangProfile profile) {
 		this.setItemOpener(-1, ItemStack, profile);
 	}
 
@@ -119,7 +119,7 @@ public class FakeItem {
 		this.setItemOpener(index, ItemStack, null);
 	}
 
-	public void setItemOpener(int index, ItemStack ItemStack, BukkitMojangProfile specific) {
+	public void setItemOpener(int index, ItemStack ItemStack, MinecraftMojangProfile specific) {
 		ItemStack itemOpener = null;
 
 		if (ItemStack != null && Material.AIR != ItemStack.getType()) {
@@ -135,7 +135,7 @@ public class FakeItem {
 			this.itemOpenerSlot = index;
 			this.itemOpener = itemOpener;
 
-			for (BukkitMojangProfile profile : Nifty.getBungeeHelper().getPlayerList()) {
+			for (MinecraftMojangProfile profile : Nifty.getBungeeHelper().getPlayerList()) {
 				this.removeItemOpener(profile);
 				this.giveItemOpener(profile);
 			}
@@ -184,7 +184,7 @@ public class FakeItem {
 			if (event.getWhoClicked() instanceof Player) {
 				if (InventoryType.SlotType.OUTSIDE != event.getSlotType()) {
 					if (FakeItem.this.getItemOpener() != null) {
-						BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
+						MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
 
 						if (!FakeInventory.isOpenAnywhere(profile)) {
 							ItemStack firstClickItem = FakeInventory.getClickedItem(event);

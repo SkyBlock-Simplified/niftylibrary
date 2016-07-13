@@ -1,18 +1,18 @@
 package net.netcoding.nifty.common.api.inventory.item;
 
 import net.netcoding.nifty.core.util.comparator.LengthCompare;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 class ItemData {
 
 	private static final LengthCompare LENGTH_COMPARE = new LengthCompare();
-	private final ConcurrentSet<Short> durabilities = new ConcurrentSet<>();
-	private final ConcurrentList<String> names = new ConcurrentList<>();
+	private final ConcurrentSet<Short> durabilities = Concurrent.newSet();
+	private final ConcurrentList<String> names = Concurrent.newList();
 	private final String primaryName;
 	private final int id;
 
@@ -39,7 +39,7 @@ class ItemData {
 		return this.id;
 	}
 
-	public List<String> getNames() {
+	public ConcurrentList<String> getNames() {
 		return this.names;
 	}
 

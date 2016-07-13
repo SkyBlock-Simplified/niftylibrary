@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common.minecraft.inventory;
 
 import net.netcoding.nifty.common.minecraft.GameMode;
-import net.netcoding.nifty.common.minecraft.entity.living.HumanEntity;
+import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 
 /**
@@ -31,11 +31,11 @@ public interface InventoryView {
 	Inventory getBottomInventory();
 
 	/**
-	 * Get the player viewing.
+	 * Get the viewing entity.
 	 *
-	 * @return the player
+	 * @return The viewer;
 	 */
-	HumanEntity getPlayer();
+	HumanEntity getViewer();
 
 	/**
 	 * Determine the type of inventory involved in the transaction. This
@@ -63,7 +63,7 @@ public interface InventoryView {
 				this.getBottomInventory().setItem(this.convertSlot(slot),item);
 			}
 		} else {
-			this.getPlayer().getWorld().dropItemNaturally(this.getPlayer().getLocation(), item);
+			this.getViewer().getWorld().dropItemNaturally(this.getViewer().getLocation(), item);
 		}
 	}
 
@@ -90,7 +90,7 @@ public interface InventoryView {
 	 *     on their cursor.
 	 */
 	default void setCursor(ItemStack item) {
-		this.getPlayer().setItemOnCursor(item);
+		this.getViewer().setItemOnCursor(item);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public interface InventoryView {
 	 *     one.
 	 */
 	default ItemStack getCursor() {
-		return this.getPlayer().getItemOnCursor();
+		return this.getViewer().getItemOnCursor();
 	}
 
 	/**
@@ -126,7 +126,7 @@ public interface InventoryView {
 		int slot = rawSlot - numInTop;
 
 		// Creative mode players have one contiguous inventory dictated by the client
-		if (getPlayer().getGameMode() == GameMode.CREATIVE && getType() == InventoryType.PLAYER) {
+		if (getViewer().getGameMode() == GameMode.CREATIVE && getType() == InventoryType.PLAYER) {
 			return slot;
 		}
 
@@ -187,7 +187,7 @@ public interface InventoryView {
 	 * Closes the inventory view.
 	 */
 	default void close() {
-		this.getPlayer().closeInventory();
+		this.getViewer().closeInventory();
 	}
 
 	/**
@@ -213,7 +213,7 @@ public interface InventoryView {
 	 *     property is not supported by that inventory
 	 */
 	default boolean setProperty(Property prop, int value) {
-		return this.getPlayer().setWindowProperty(prop, value);
+		return this.getViewer().setWindowProperty(prop, value);
 	}
 
 	/**

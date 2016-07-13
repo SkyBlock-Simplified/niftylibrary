@@ -93,14 +93,18 @@ public interface BookMeta extends ItemMeta {
 	 *
 	 * @return true if the book has a generation level
 	 */
-	boolean hasGeneration();
+	default boolean hasGeneration() {
+		return this.getGeneration() != null;
+	}
 
 	/**
 	 * Checks for the existence of pages in the book.
 	 *
 	 * @return true if the book has pages
 	 */
-	boolean hasPages();
+	default boolean hasPages() {
+		return ListUtil.notEmpty(this.getPages());
+	}
 
 	/**
 	 * Checks for the existence of a title in the book.
@@ -110,7 +114,6 @@ public interface BookMeta extends ItemMeta {
 	default boolean hasTitle() {
 		return StringUtil.notEmpty(this.getTitle());
 	}
-
 
 	/**
 	 * Sets the author of the book. Removes author when given null.

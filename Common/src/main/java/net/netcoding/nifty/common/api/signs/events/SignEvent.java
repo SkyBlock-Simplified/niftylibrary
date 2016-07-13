@@ -4,7 +4,7 @@ import net.netcoding.nifty.common.api.signs.SignInfo;
 import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.common.minecraft.event.Cancellable;
 import net.netcoding.nifty.common.minecraft.region.World;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.minecraft.block.Action;
 import net.netcoding.nifty.common.minecraft.region.Location;
 
@@ -13,13 +13,13 @@ import net.netcoding.nifty.common.minecraft.region.Location;
  */
 abstract class SignEvent implements Cancellable {
 
-	private final transient BukkitMojangProfile profile;
+	private final transient MinecraftMojangProfile profile;
 	private final transient SignInfo signInfo;
 	private final transient Action action;
 	protected final String key;
 	private boolean cancelled = false;
 
-	SignEvent(BukkitMojangProfile profile, SignInfo signInfo, Action action, String key) {
+	SignEvent(MinecraftMojangProfile profile, SignInfo signInfo, Action action, String key) {
 		this.profile = profile;
 		this.signInfo = signInfo;
 		this.action = action;
@@ -115,7 +115,7 @@ abstract class SignEvent implements Cancellable {
 	 *
 	 * @return Profile of who performed the event.
 	 */
-	public BukkitMojangProfile getProfile() {
+	public MinecraftMojangProfile getProfile() {
 		return this.profile;
 	}
 

@@ -110,10 +110,10 @@ public interface Minecart extends Vehicle {
 	void setMaxSpeed(double speed);
 
 	/**
-	 * Sets whether this minecart will slow down faster without a passenger occupying it
+	 * Sets whether this minecart will value down faster without a passenger occupying it
 	 *
-	 * @param slow Whether it will decelerate faster.
+	 * @param value Whether it will decelerate faster.
 	 */
-	void setSlowWhenEmpty(boolean slow);
+	void setSlowWhenEmpty(boolean value);
 
 }

@@ -23,15 +23,6 @@ import java.util.stream.Collectors;
  */
 public final class FireworkEffect implements Serializable {
 
-	/**
-	 * Construct a firework effect.
-	 *
-	 * @return A utility object for building a firework effect
-	 */
-	public static Builder builder() {
-		return Nifty.getBuilderManager().createBuilder(FireworkEffect.class);
-	}
-
 	private final boolean flicker;
 	private final boolean trail;
 	private final ConcurrentSet<Color> colors = Concurrent.newSet();
@@ -47,6 +38,15 @@ public final class FireworkEffect implements Serializable {
 		this.colors.addAll(colors);
 		this.fadeColors.addAll(colors);
 		this.type = type;
+	}
+
+	/**
+	 * Construct a firework effect.
+	 *
+	 * @return A utility object for building a firework effect
+	 */
+	public static Builder builder() {
+		return Nifty.getBuilderManager().createBuilder(FireworkEffect.class);
 	}
 
 	@SuppressWarnings("unchecked")

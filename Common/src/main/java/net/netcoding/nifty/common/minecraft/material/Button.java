@@ -34,6 +34,7 @@ public interface Button extends SimpleAttachableMaterialData, OptionalRedstone {
 		return (this.getData() & 0x8) == 0x8;
 	}
 
+	@Override
 	default void setFacingDirection(BlockFace face) {
 		byte data = (byte) (this.getData() & 0x8);
 

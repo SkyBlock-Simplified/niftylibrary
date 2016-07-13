@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.api.plugin.messaging;
 
-import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 
 import java.util.Set;
 
@@ -8,6 +8,6 @@ public interface PluginMessageRecipient {
 
 	Set<String> getListeningPluginChannels();
 
-	void sendPluginMessage(Plugin plugin, String channel, byte[] message);
+	void sendPluginMessage(MinecraftPlugin plugin, String channel, byte[] message);
 
 }

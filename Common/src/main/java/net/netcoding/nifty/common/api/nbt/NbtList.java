@@ -10,16 +10,14 @@ import net.netcoding.nifty.common.Nifty;
  *   <li>{@link NbtFactory#fromList}</li>
  * </ul>
  */
-@SuppressWarnings("unchecked")
-public final class NbtList<T> extends WrappedList<T> {
+public final class NbtList<E> extends WrappedList<E> {
 
 	NbtList(Object handle) {
 		super(handle, NbtFactory.getDataField(NbtType.TAG_LIST, handle));
 	}
 
-	@SuppressWarnings("CloneDoesntCallSuperClone")
 	@Override
-	public NbtList<T> clone() {
+	public NbtList<E> clone() {
 		return Nifty.getNbtFactory().createList(this);
 	}
 

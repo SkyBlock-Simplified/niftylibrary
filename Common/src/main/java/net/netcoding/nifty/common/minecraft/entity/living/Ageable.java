@@ -41,9 +41,9 @@ public interface Ageable extends Creature {
 	 * Lock the age of the entity, setting this will prevent the entity from
 	 * maturing or getting ready for mating.
 	 *
-	 * @param lock New lock.
+	 * @param value New lock.
 	 */
-	void setAgeLock(boolean lock);
+	void setAgeLock(boolean value);
 
 	/**
 	 * Sets the age of the entity to an adult.
@@ -59,8 +59,8 @@ public interface Ageable extends Creature {
 	 * Set breedability of the entity, if the entity is a baby and set to
 	 * breed it will instantly grow up.
 	 *
-	 * @param breed Breedability of the entity.
+	 * @param value Breedability of the entity.
 	 */
-	void setBreed(boolean breed);
+	void setBreed(boolean value);
 
 }

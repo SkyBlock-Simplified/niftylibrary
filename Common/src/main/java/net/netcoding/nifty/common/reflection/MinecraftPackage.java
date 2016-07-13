@@ -8,7 +8,6 @@ public abstract class MinecraftPackage {
 	public static final String MINECRAFT_SERVER;
 
 	static {
-		// TODO: Remove CRAFTBUKKIT, Determine MINECRAFT_VERSION, Adjust MINECRAFT_SERVER if Forge
 		String minecraftServer;
 
 		if (MinecraftProtocol.isForge())

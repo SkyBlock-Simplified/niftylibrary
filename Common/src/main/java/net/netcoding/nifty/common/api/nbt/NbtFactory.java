@@ -2,24 +2,17 @@ package net.netcoding.nifty.common.api.nbt;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
-import com.google.common.io.OutputSupplier;
 import com.google.common.primitives.Primitives;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.common.minecraft.entity.Entity;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.reflection.BukkitReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
-import net.netcoding.nifty.common.reflection.MinecraftProtocol;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,33 +22,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-@SuppressWarnings({ "unchecked", "deprecation" })
-public abstract class NbtFactory<I extends ItemStack, B extends Block> {
-
-	// https://bukkit.org/threads/library-edit-or-create-nbt-tags-with-a-compact-class-no-obc-nms.178464/
-	// https://gist.github.com/aadnk/6753244 (Nov 3, 2013)
+@SuppressWarnings("unchecked")
+public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends Entity> {
 
 	// Convert between NBT id and the equivalent class in java
 	static final BiMap<Byte, Class<?>> NBT_CLASS = HashBiMap.create();
 	static final BiMap<Byte, NbtType> NBT_ENUM = HashBiMap.create();
 
 	// Reflection
-	//static final Reflection CRAFT_ITEM_STACK = new BukkitReflection("CraftItemStack", "inventory", MinecraftPackage.CRAFTBUKKIT);
-	//static final Reflection CRAFT_WORLD = new BukkitReflection("CraftWorld", MinecraftPackage.CRAFTBUKKIT);
-	//static final Reflection CRAFT_BLOCK = new BukkitReflection("CraftBlock", "block", MinecraftPackage.CRAFTBUKKIT);
-	public static final Reflection NBT_BASE = BukkitReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	public static final Reflection NBT_READ_LIMITER = BukkitReflection.getCompatibleForgeReflection((MinecraftProtocol.isForge() ? "NBTSizeTracker" : "NBTReadLimiter"), MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	public static final Reflection NBT_TAG_COMPOUND = BukkitReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	public static final Reflection NBT_TAG_LIST = BukkitReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
-	protected static final Object NBT_READ_NOLIMIT = NBT_READ_LIMITER.getValue(NBT_READ_LIMITER.getClazz(), null);
-	public static final Reflection NMS_ITEM_STACK = BukkitReflection.getCompatibleForgeReflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER, "item");
-	public static final Reflection NMS_TILE_ENTITY = BukkitReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
-	public static final Reflection NMS_BLOCK = new BukkitReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
-
-	protected NbtFactory() { }
+	public static final Reflection NBT_BASE = MinecraftReflection.getCompatibleForgeReflection("NBTBase", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	public static final Reflection NBT_TAG_COMPOUND = MinecraftReflection.getCompatibleForgeReflection("NBTTagCompound", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	public static final Reflection NBT_TAG_LIST = MinecraftReflection.getCompatibleForgeReflection("NBTTagList", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	public static final Reflection NBT_COMPRESSED_TOOLS = MinecraftReflection.getCompatibleForgeReflection("NBTCompressedStreamTools", MinecraftPackage.MINECRAFT_SERVER, "nbt");
+	public static final Reflection NMS_ITEM_STACK = MinecraftReflection.getCompatibleForgeReflection("ItemStack", MinecraftPackage.MINECRAFT_SERVER, "item");
+	public static final Reflection NMS_TILE_ENTITY = MinecraftReflection.getCompatibleForgeReflection("TileEntity", MinecraftPackage.MINECRAFT_SERVER, "tileentity");
+	public static final Reflection NMS_BLOCK = new MinecraftReflection("Block", MinecraftPackage.MINECRAFT_SERVER);
 
 	static Object adjustIncoming(Object value) {
 		if (value == null)
@@ -158,14 +140,14 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 	 *
 	 * @param block - The item to check.
 	 */
-	protected abstract void checkBlock(Block block);
+	protected abstract void checkBlock(B block);
 
 	/**
 	 * Ensure that the given entity can store NBT information.
 	 *
 	 * @param entity - The item to check.
 	 */
-	protected abstract void checkEntity(Entity entity);
+	protected abstract void checkEntity(E entity);
 
 	/**
 	 * Construct a new NBT list of an unspecified type.
@@ -173,7 +155,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 	 * @return The NBT list.
 	 */
 	@SafeVarargs
-	public final <T> NbtList<T> createList(T... content) {
+	public final <E> NbtList<E> createList(E... content) {
 		return createList(Arrays.asList(content));
 	}
 
@@ -182,12 +164,9 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 	 *
 	 * @return The NBT list.
 	 */
-	public final <T> NbtList<T> createList(Iterable<T> iterable) {
-		NbtList<T> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, null));
-
-		for (T obj : iterable)
-			list.add(obj);
-
+	public final <E> NbtList<E> createList(Iterable<E> iterable) {
+		NbtList<E> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, null));
+		iterable.forEach(list::add);
 		return list;
 	}
 
@@ -242,12 +221,14 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 		return this.fromBlockTag0(block);
 	}
 
-	protected abstract NbtBlockCompound fromBlockTag0(B block);
+	protected abstract NbtBlockCompound<B> fromBlockTag0(B block);
 
-	protected final NbtEntityCompound fromEntityTag(Entity entity) {
+	public final NbtEntityCompound fromEntityTag(E entity) {
 		this.checkEntity(entity);
-		return new NbtEntityCompound(entity, createRootNativeCompound());
+		return this.fromEntityTag0(entity);
 	}
+
+	protected abstract NbtEntityCompound<E> fromEntityTag0(E entity);
 
 	/**
 	 * Construct a wrapper for an NBT tag stored (in memory) in an item stack. This is where
@@ -262,7 +243,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 		return this.fromItemTag0(stack);
 	}
 
-	protected abstract NbtItemCompound fromItemTag0(I item);
+	protected abstract NbtItemCompound<I> fromItemTag0(I item);
 
 	/**
 	 * Construct a new NBT wrapper from a list.
@@ -276,22 +257,12 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 
 	/**
 	 * Load the content of a file from a stream.
-	 * <p>
-	 * Use {@link Files#newInputStreamSupplier(java.io.File)} to provide a stream from a file.
 	 *
-	 * @param stream - the stream supplier.
-	 * @param option - whether or not to decompress the input stream.
+	 * @param stream - The input stream.
 	 * @return The decoded NBT compound.
 	 */
-	public final NbtCompound fromStream(InputSupplier<? extends InputStream> stream, StreamOptions option) throws IOException {
-		try (InputStream inputStream = stream.getInput()) {
-			try (BufferedInputStream bufferedInput = new BufferedInputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPInputStream(inputStream) : inputStream)) {
-				try (DataInputStream dataInput = new DataInputStream(bufferedInput)) {
-					NbtCompound compound = this.createCompound();
-					return this.fromCompound(NBT_BASE.invokeMethod(Void.class, (MinecraftProtocol.isPre1_8() ? null : compound.getHandle()), dataInput, 512, NBT_READ_NOLIMIT));
-				}
-			}
-		}
+	public final NbtCompound fromStream(InputStream stream) throws IOException {
+		return this.fromCompound(NBT_COMPRESSED_TOOLS.invokeMethod(NBT_TAG_COMPOUND.getClazz(), stream));
 	}
 
 	/**
@@ -326,26 +297,19 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 		NbtType type = NBT_ENUM.get(NBT_CLASS.inverse().get(Primitives.unwrap(primitive.getClass())));
 
 		if (type == null)
-			throw new IllegalArgumentException(StringUtil.format("Illegal type: {0} ({1})", primitive.getClass(), primitive));
+			throw new IllegalArgumentException(StringUtil.format("Illegal type: {0} ({1})!", primitive.getClass(), primitive));
 
 		return type;
 	}
 
 	/**
 	 * Save the content of a NBT compound to a stream.
-	 * <p>
-	 * Use {@link Files#newOutputStreamSupplier(java.io.File)} to provide a stream supplier to a file.
 	 *
-	 * @param source - the NBT compound to save.
-	 * @param stream - the stream.
-	 * @param option - whether or not to compress the output.
+	 * @param source - The NBT compound to save.
+	 * @param stream - The output stream.
 	 */
-	public static void saveStream(NbtCompound source, OutputSupplier<? extends OutputStream> stream, StreamOptions option) throws IOException {
-		try (OutputStream outputStream = stream.getOutput()) {
-			try (DataOutputStream dataOutput = new DataOutputStream(StreamOptions.GZIP_COMPRESSION == option ? new GZIPOutputStream(outputStream) : outputStream)) {
-				new Reflection(source.getHandle().getClass()).invokeMethod((String)null, (MinecraftProtocol.isPre1_8() ? null : source.getHandle()), dataOutput);
-			}
-		}
+	public static void saveStream(NbtCompound source, OutputStream stream) throws IOException {
+		NBT_COMPRESSED_TOOLS.invokeMethod(Void.class, source.getHandle(), stream);
 	}
 
 	/**
@@ -419,12 +383,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block> {
 			}
 		}
 
-		throw new IllegalArgumentException(StringUtil.format("Unexpected type: {0}", nms));
-	}
-
-	public enum StreamOptions {
-		NO_COMPRESSION,
-		GZIP_COMPRESSION,
+		throw new IllegalArgumentException(StringUtil.format("Unexpected type: {0}!", nms));
 	}
 
 }

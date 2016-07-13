@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.entity.living;
 
+import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
 import net.netcoding.nifty.common.minecraft.inventory.recipe.MerchantRecipe;

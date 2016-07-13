@@ -15,6 +15,4 @@ abstract class WrappedCompound<W> extends NbtCompound {
 
 	protected abstract void load();
 
-	protected abstract void save();
-
 }

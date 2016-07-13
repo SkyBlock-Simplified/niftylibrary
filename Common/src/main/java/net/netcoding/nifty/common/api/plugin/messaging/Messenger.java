@@ -3,6 +3,7 @@ package net.netcoding.nifty.common.api.plugin.messaging;
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
@@ -10,16 +11,13 @@ import java.util.Map;
 
 public final class Messenger {
 
-	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentMap<String, ChannelWrapper>> INCOMING_CHANNELS = new ConcurrentMap<>();
-	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentSet<String>> OUTGOING_CHANNELS = new ConcurrentMap<>();
-	private static transient Messenger INSTANCE;
+	private static final transient Messenger INSTANCE = new Messenger();
+	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentMap<String, ChannelWrapper>> INCOMING_CHANNELS = Concurrent.newMap();
+	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentSet<String>> OUTGOING_CHANNELS = Concurrent.newMap();
 
-	protected Messenger() { }
+	private Messenger() { }
 
 	public static Messenger getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new Messenger();
-
 		return INSTANCE;
 	}
 
@@ -51,7 +49,7 @@ public final class Messenger {
 	public void registerIncomingPluginChannel(MinecraftPlugin plugin, String channel, ChannelWrapper listener) {
 		if (!this.isIncomingChannelRegistered(plugin, channel)) {
 			if (!INCOMING_CHANNELS.containsKey(plugin))
-				INCOMING_CHANNELS.put(plugin, new ConcurrentMap<>());
+				INCOMING_CHANNELS.put(plugin, Concurrent.newMap());
 
 			INCOMING_CHANNELS.get(plugin).put(channel, listener);
 		} else
@@ -61,7 +59,7 @@ public final class Messenger {
 	public void registerOutgoingPluginChannel(MinecraftPlugin plugin, String channel) {
 		if (!this.isOutgoingChannelRegistered(plugin, channel)) {
 			if (!OUTGOING_CHANNELS.containsKey(plugin))
-				OUTGOING_CHANNELS.put(plugin, new ConcurrentSet<>());
+				OUTGOING_CHANNELS.put(plugin, Concurrent.newSet());
 
 			OUTGOING_CHANNELS.get(plugin).add(channel);
 		} else

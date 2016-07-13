@@ -274,19 +274,23 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	public Collection<Object> values() {
 		return new AbstractCollection<Object>() {
 
+			@Override
 			public Iterator<Object> iterator() {
 				return new Iterator<Object>() {
 
 					private final Iterator<Entry<String, Object>> i = WrappedMap.this.entrySet().iterator();
 
+					@Override
 					public boolean hasNext() {
 						return i.hasNext();
 					}
 
+					@Override
 					public Object next() {
 						return i.next().getValue();
 					}
 
+					@Override
 					public void remove() {
 						i.remove();
 					}
@@ -294,18 +298,22 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 				};
 			}
 
+			@Override
 			public int size() {
 				return WrappedMap.this.size();
 			}
 
+			@Override
 			public boolean isEmpty() {
 				return WrappedMap.this.isEmpty();
 			}
 
+			@Override
 			public void clear() {
 				WrappedMap.this.clear();
 			}
 
+			@Override
 			public boolean contains(Object value) {
 				return WrappedMap.this.containsValue(value);
 			}

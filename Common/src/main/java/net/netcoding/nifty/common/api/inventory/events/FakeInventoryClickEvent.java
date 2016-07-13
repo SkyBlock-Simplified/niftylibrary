@@ -6,14 +6,14 @@ import net.netcoding.nifty.common.minecraft.event.inventory.InventoryClickEvent;
 import net.netcoding.nifty.common.minecraft.inventory.ClickType;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 public final class FakeInventoryClickEvent extends FakeInventoryEvent implements Cancellable {
 
 	private final InventoryClickEvent clickEvent;
 	private boolean cancelled = false;
 
-	public FakeInventoryClickEvent(BukkitMojangProfile profile, InventoryClickEvent clickEvent) {
+	public FakeInventoryClickEvent(MinecraftMojangProfile profile, InventoryClickEvent clickEvent) {
 		super(profile, clickEvent.getInventory());
 		this.clickEvent = clickEvent;
 	}

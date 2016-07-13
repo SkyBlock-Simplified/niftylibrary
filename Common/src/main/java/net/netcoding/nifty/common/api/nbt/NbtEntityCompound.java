@@ -2,20 +2,10 @@ package net.netcoding.nifty.common.api.nbt;
 
 import net.netcoding.nifty.common.minecraft.entity.Entity;
 
-public final class NbtEntityCompound extends WrappedCompound<Entity> {
+public abstract class NbtEntityCompound<T extends Entity> extends WrappedCompound<T> {
 
-	NbtEntityCompound(Entity entity, Object handle) {
+	protected NbtEntityCompound(T entity, Object handle) {
 		super(entity, handle);
-	}
-
-	@Override
-	protected final void load() {
-
-	}
-
-	@Override
-	protected final void save() {
-
 	}
 
 }

@@ -4,62 +4,66 @@ import net.netcoding.nifty.common.minecraft.event.Cancellable;
 
 public interface EntityDamageEvent extends Cancellable, EntityEvent {
 
-	DamageCause getCause();
+	Damage.Cause getCause();
 
 	default double getDamage() {
-		return this.getDamage(DamageModifier.BASE);
+		return this.getDamage(Damage.Modifier.BASE);
 	}
 
-	double getDamage(DamageModifier type);
+	double getDamage(Damage.Modifier type);
 
 	double getFinalDamage();
 
-	double getOriginalDamage(DamageModifier type);
+	double getOriginalDamage(Damage.Modifier type);
 
-	boolean isApplicable(DamageModifier type);
+	boolean isApplicable(Damage.Modifier type);
 
 	void setDamage(double damage);
 
-	void setDamage(DamageModifier type, double damage);
+	void setDamage(Damage.Modifier type, double damage);
 
-	enum DamageCause {
+	class Damage {
 
-		CONTACT,
-		ENTITY_ATTACK,
-		PROJECTILE,
-		SUFFOCATION,
-		FALL,
-		FIRE,
-		FIRE_TICK,
-		MELTING,
-		LAVA,
-		DROWNING,
-		BLOCK_EXPLOSION,
-		ENTITY_EXPLOSION,
-		VOID,
-		LIGHTNING,
-		SUICIDE,
-		STARVATION,
-		POISON,
-		MAGIC,
-		WITHER,
-		FALLING_BLOCK,
-		THORNS,
-		DRAGON_BREATH,
-		CUSTOM,
-		FLY_INTO_WALL
+		public enum Cause {
 
-	}
+			CONTACT,
+			ENTITY_ATTACK,
+			PROJECTILE,
+			SUFFOCATION,
+			FALL,
+			FIRE,
+			FIRE_TICK,
+			MELTING,
+			LAVA,
+			DROWNING,
+			BLOCK_EXPLOSION,
+			ENTITY_EXPLOSION,
+			VOID,
+			LIGHTNING,
+			SUICIDE,
+			STARVATION,
+			POISON,
+			MAGIC,
+			WITHER,
+			FALLING_BLOCK,
+			THORNS,
+			DRAGON_BREATH,
+			CUSTOM,
+			FLY_INTO_WALL
 
-	enum DamageModifier {
+		}
 
-		BASE,
-		HARD_HAT,
-		BLOCKING,
-		ARMOR,
-		RESISTANCE,
-		MAGIC,
-		ABSORPTION
+		public enum Modifier {
+
+			BASE,
+			HARD_HAT,
+			BLOCKING,
+			ARMOR,
+			RESISTANCE,
+			MAGIC,
+			ABSORPTION
+
+		}
 
 	}
 

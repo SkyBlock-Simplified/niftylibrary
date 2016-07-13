@@ -190,7 +190,7 @@ public interface Horse extends Animal, InventoryHolder, Tameable, Vehicle {
 		/**
 		 * Dark brown
 		 */
-		DARK_BROWN;
+		DARK_BROWN
 
 	}
 
@@ -218,7 +218,7 @@ public interface Horse extends Animal, InventoryHolder, Tameable, Vehicle {
 		/**
 		 * Small black dots
 		 */
-		BLACK_DOTS;
+		BLACK_DOTS
 
 	}
 
@@ -246,7 +246,7 @@ public interface Horse extends Animal, InventoryHolder, Tameable, Vehicle {
 		/**
 		 * A skeleton horse
 		 */
-		SKELETON_HORSE;
+		SKELETON_HORSE
 
 	}
 

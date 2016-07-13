@@ -1,15 +1,14 @@
 package net.netcoding.nifty.common.minecraft.event.inventory;
 
-import net.netcoding.nifty.common.minecraft.inventory.ClickType;
-import net.netcoding.nifty.common.minecraft.inventory.InventoryAction;
+import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 
 public interface InventoryClickEvent extends InventoryInteractEvent {
 
-	InventoryAction getAction();
+	Inventory.Action getAction();
 
-	ClickType getClick();
+	Inventory.ClickType getClick();
 
 	ItemStack getCurrentItem();
 
@@ -23,11 +22,17 @@ public interface InventoryClickEvent extends InventoryInteractEvent {
 
 	InventoryType.SlotType getSlotType();
 
-	boolean isLeftClick();
+	default boolean isLeftClick() {
+		return this.getClick().isLeftClick();
+	}
 
-	boolean isRightClick();
+	default boolean isRightClick() {
+		return this.getClick().isRightClick();
+	}
 
-	boolean isShiftClick();
+	default boolean isShiftClick() {
+		return this.getClick().isShiftClick();
+	}
 
 	void setCurrentItem(ItemStack item);
 

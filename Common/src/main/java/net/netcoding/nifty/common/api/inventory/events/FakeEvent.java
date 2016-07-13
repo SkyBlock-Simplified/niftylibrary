@@ -1,14 +1,14 @@
 package net.netcoding.nifty.common.api.inventory.events;
 
 import net.netcoding.nifty.common.api.inventory.FakeInventory;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 abstract class FakeEvent {
 
-	private final BukkitMojangProfile profile;
-	private final BukkitMojangProfile target;
+	private final MinecraftMojangProfile profile;
+	private final MinecraftMojangProfile target;
 
-	FakeEvent(BukkitMojangProfile profile) {
+	FakeEvent(MinecraftMojangProfile profile) {
 		this.profile = profile;
 		this.target = FakeInventory.getTargetAnywhere(profile);
 	}
@@ -18,7 +18,7 @@ abstract class FakeEvent {
 	 *
 	 * @return Profile of who performed the event.
 	 */
-	public final BukkitMojangProfile getProfile() {
+	public final MinecraftMojangProfile getProfile() {
 		return this.profile;
 	}
 
@@ -27,7 +27,7 @@ abstract class FakeEvent {
 	 *
 	 * @return Profile being viewed by the event.
 	 */
-	public final BukkitMojangProfile getTarget() {
+	public final MinecraftMojangProfile getTarget() {
 		return this.target;
 	}
 

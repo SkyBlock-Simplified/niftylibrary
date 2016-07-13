@@ -57,11 +57,11 @@ public interface Boat extends Vehicle {
 	/**
 	 * Sets the maximum speed of a boat. Must be nonnegative. Default is 0.4D.
 	 *
-	 * @param speed The max speed.
+	 * @param value The max speed.
 	 * @deprecated boats are complex and many of these methods do not work correctly across multiple versions.
 	 */
 	@Deprecated
-	void setMaxSpeed(double speed);
+	void setMaxSpeed(double value);
 
 	/**
 	 * Sets the deceleration rate (newSpeed = curSpeed * rate) of occupied
@@ -96,10 +96,10 @@ public interface Boat extends Vehicle {
 	/**
 	 * Set whether boats can work on land.
 	 *
-	 * @param workOnLand Whether boats can work on land
+	 * @param value Whether boats can work on land
 	 * @deprecated boats are complex and many of these methods do not work correctly across multiple versions.
 	 */
 	@Deprecated
-	void setWorkOnLand(boolean workOnLand);
+	void setWorkOnLand(boolean value);
 
 }

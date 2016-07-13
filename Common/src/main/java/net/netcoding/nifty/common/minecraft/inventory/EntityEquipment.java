@@ -4,7 +4,7 @@ import net.netcoding.nifty.common.minecraft.entity.Entity;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 
 /**
- * An of a Creatures inventory.
+ * A Creatures inventory.
  */
 public interface EntityEquipment {
 
@@ -38,26 +38,6 @@ public interface EntityEquipment {
 	 * @return Chance of the boots being dropped (1 for players).
 	 */
 	float getBootsDropChance();
-
-	/**
-	 * Gets a copy of the leggings currently being worn by the entity.
-	 *
-	 * @return The leggings being worn.
-	 */
-	ItemStack getLeggings();
-
-	/**
-	 * Gets the chance of the leggings being dropped upon this creature's
-	 * death.
-	 *
-	 * <ul>
-	 * <li>A drop chance of 0F will never drop.
-	 * <li>A drop chance of 1F will always drop.
-	 * </ul>
-	 *
-	 * @return Chance of the leggings being dropped (1 for players).
-	 */
-	float getLeggingsDropChance();
 
 	/**
 	 * Gets a copy of the chest plate currently being worn by the entity.
@@ -162,6 +142,26 @@ public interface EntityEquipment {
 	float getItemInOffHandDropChance();
 
 	/**
+	 * Gets a copy of the leggings currently being worn by the entity.
+	 *
+	 * @return The leggings being worn.
+	 */
+	ItemStack getLeggings();
+
+	/**
+	 * Gets the chance of the leggings being dropped upon this creature's
+	 * death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @return Chance of the leggings being dropped (1 for players).
+	 */
+	float getLeggingsDropChance();
+
+	/**
 	 * Sets the entities armor to the provided array of ItemStacks.
 	 *
 	 * @param items The items to set the armor as.
@@ -171,8 +171,144 @@ public interface EntityEquipment {
 	/**
 	 * Sets the boots worn by the entity.
 	 *
-	 * @param boots The boots to put on the entity.
+	 * @param item The boots to put on the entity.
 	 */
-	void setBoots(ItemStack boots);
+	void setBoots(ItemStack item);
+
+	/**
+	 * Sets the chance of the boots being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of the boots being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setBootsDropChance(float chance);
+
+	/**
+	 * Sets the chest plate worn by the entity.
+	 *
+	 * @param item The chest plate to put on the entity.
+	 */
+	void setChestplate(ItemStack item);
+
+	/**
+	 * Sets the chance of the chest plate being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of the chest plate being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setChestplateDropChance(float chance);
+
+	/**
+	 * Sets the helmet worn by the entity.
+	 *
+	 * @param item The helmet to put on the entity.
+	 */
+	void setHelmet(ItemStack item);
+
+	/**
+	 * Sets the chance of the helmet being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of the helmet being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setHelmetDropChance(float chance);
+
+	/**
+	 * Sets the item the entity is holding.
+	 *
+	 * @param item The item to put into the entities hand.
+	 * @see #setItemInMainHand(ItemStack)
+	 * @see #setItemInOffHand(ItemStack)
+	 */
+	void setItemInHand(ItemStack item);
+
+	/**
+	 * Sets the chance of the item this creature is currently holding being dropped upon this creature's death.
+	 *
+	 * @param chance The drop chance.
+	 * @see #setItemInMainHandDropChance(float)
+	 * @see #setItemInOffHandDropChance(float)
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setItemInHandDropChance(float chance);
+
+	/**
+	 * Sets the item the entity is holding in their main hand.
+	 *
+	 * @param item The item to put into the entities hand.
+	 */
+	default void setItemInMainHand(ItemStack item) {
+		this.setItemInHand(item);
+	}
+
+	/**
+	 * Sets the chance of the item this creature is currently holding in their main hand being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of the main hand item being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	default void setItemInMainHandDropChance(float chance) {
+		this.setItemInHandDropChance(chance);
+	}
+
+	/**
+	 * Sets the item the entity is holding in their off hand.
+	 *
+	 * @param item The item to put into the entities hand.
+	 */
+	void setItemInOffHand(ItemStack item);
+
+	/**
+	 * Sets the chance of the off hand item being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of the off hand item being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setItemInOffHandDropChance(float chance);
+
+	/**
+	 * Sets the leggings worn by the entity.
+	 *
+	 * @param item The leggings to put on the entity.
+	 */
+	void setLeggings(ItemStack item);
+
+	/**
+	 * Sets the chance of the leggings being dropped upon this creature's death.
+	 *
+	 * <ul>
+	 * <li>A drop chance of 0F will never drop.
+	 * <li>A drop chance of 1F will always drop.
+	 * </ul>
+	 *
+	 * @param chance The chance of leggings being dropped.
+	 * @throws UnsupportedOperationException When called on players.
+	 */
+	void setLeggingsDropChance(float chance);
 
 }

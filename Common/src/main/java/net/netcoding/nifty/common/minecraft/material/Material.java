@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public enum Material {
@@ -428,8 +429,8 @@ public enum Material {
 	RECORD_11(2266, 1),
 	RECORD_12(2267, 1);
 
-	private static final ConcurrentMap<Integer, Material> BY_ID = new ConcurrentMap<>();
-	private static final ConcurrentMap<String, Material> BY_NAME = new ConcurrentMap<>();
+	private static final ConcurrentMap<Integer, Material> BY_ID = Concurrent.newMap();
+	private static final ConcurrentMap<String, Material> BY_NAME = Concurrent.newMap();
 	private final int id;
 	private final int maxStack;
 	private final short durability;

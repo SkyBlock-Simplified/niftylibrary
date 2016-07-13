@@ -3,7 +3,7 @@ package net.netcoding.nifty.common.api.plugin.messaging;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 public class ChannelWrapper {
 
@@ -92,7 +92,7 @@ public class ChannelWrapper {
 		}
 	}
 
-	public final void write(BukkitMojangProfile profile, String subChannel, Object... data) {
+	public final void write(MinecraftMojangProfile profile, String subChannel, Object... data) {
 		net.netcoding.nifty.common.Nifty.getBungeeHelper().write(profile, this.getChannel(), subChannel, data);
 	}
 

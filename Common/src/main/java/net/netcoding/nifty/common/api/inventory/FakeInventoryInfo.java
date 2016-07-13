@@ -1,19 +1,19 @@
 package net.netcoding.nifty.common.api.inventory;
 
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 class FakeInventoryInfo {
 
-	private final BukkitMojangProfile target;
+	private final MinecraftMojangProfile target;
 	private final FakeInventoryFrame frame;
 	private boolean opening = false;
 
-	FakeInventoryInfo(BukkitMojangProfile target, FakeInventoryFrame frame) {
+	FakeInventoryInfo(MinecraftMojangProfile target, FakeInventoryFrame frame) {
 		this.target = target;
 		this.frame = frame;
 	}
 
-	public final BukkitMojangProfile getTarget() {
+	public final MinecraftMojangProfile getTarget() {
 		return this.target;
 	}
 

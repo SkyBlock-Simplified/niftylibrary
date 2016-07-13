@@ -1,17 +1,17 @@
 package net.netcoding.nifty.common.minecraft.event.player;
 
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 public final class PlayerNameChangeEvent implements PlayerEvent {
 
-	private final BukkitMojangProfile profile;
+	private final MinecraftMojangProfile profile;
 
-	public PlayerNameChangeEvent(BukkitMojangProfile profile) {
+	public PlayerNameChangeEvent(MinecraftMojangProfile profile) {
 		this.profile = profile;
 	}
 
 	@Override
-	public BukkitMojangProfile getProfile() {
+	public MinecraftMojangProfile getProfile() {
 		return this.profile;
 	}
 

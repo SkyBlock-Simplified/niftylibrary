@@ -1,8 +1,9 @@
 package net.netcoding.nifty.common.minecraft;
 
 import net.netcoding.nifty.common.minecraft.block.BlockFace;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.Potion;
+import net.netcoding.nifty.common.minecraft.potion.Potion;
 import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.util.Arrays;
@@ -196,7 +197,7 @@ public enum Effect {
 	 */
 	ENDERDRAGON_GROWL(3001, Type.SOUND);
 
-	private static final ConcurrentMap<Integer, Effect> BY_ID = new ConcurrentMap<>();
+	private static final ConcurrentMap<Integer, Effect> BY_ID = Concurrent.newMap();
 	private final Class<?> data;
 	private final Type type;
 	private final int id;

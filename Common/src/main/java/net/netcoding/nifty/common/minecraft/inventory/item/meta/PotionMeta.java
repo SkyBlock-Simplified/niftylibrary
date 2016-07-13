@@ -1,23 +1,34 @@
 package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionData;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffect;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffectType;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionType;
+import net.netcoding.nifty.common.minecraft.potion.PotionData;
+import net.netcoding.nifty.common.minecraft.potion.PotionEffect;
+import net.netcoding.nifty.common.minecraft.potion.PotionEffectType;
+import net.netcoding.nifty.common.minecraft.potion.PotionType;
+import net.netcoding.nifty.core.util.ListUtil;
 
 import java.util.List;
 
 public interface PotionMeta extends ItemMeta {
 
-	@Override
-	PotionMeta clone();
+	/**
+	 * Adds a custom potion effect to this potion.
+	 *
+	 * @param effect the potion effect to add
+	 * @param overwrite true if any existing effect of the same type should be
+	 * overwritten
+	 * @return true if the potion meta changed as a result of this call
+	 */
+	boolean addCustomEffect(PotionEffect effect, boolean overwrite);
 
 	/**
-	 * Sets the underlying potion data
+	 * Removes all custom potion effects from this potion.
 	 *
-	 * @param data PotionData to set the base potion state to
+	 * @return true if the potion meta changed as a result of this call
 	 */
-	void setBasePotionData(PotionData data);
+	boolean clearCustomEffects();
+
+	@Override
+	PotionMeta clone();
 
 	/**
 	 * Returns the potion data about the base potion
@@ -25,13 +36,6 @@ public interface PotionMeta extends ItemMeta {
 	 * @return a PotionData object
 	 */
 	PotionData getBasePotionData();
-
-	/**
-	 * Checks for the presence of custom potion effects.
-	 *
-	 * @return true if custom potion effects are applied
-	 */
-	boolean hasCustomEffects();
 
 	/**
 	 * Gets an immutable list containing all custom potion effects applied to
@@ -45,14 +49,30 @@ public interface PotionMeta extends ItemMeta {
 	List<PotionEffect> getCustomEffects();
 
 	/**
-	 * Adds a custom potion effect to this potion.
+	 * Checks for a specific custom potion effect type on this potion.
 	 *
-	 * @param effect the potion effect to add
-	 * @param overwrite true if any existing effect of the same type should be
-	 * overwritten
-	 * @return true if the potion meta changed as a result of this call
+	 * @param type the potion effect type to check for
+	 * @return true if the potion has this effect
 	 */
-	boolean addCustomEffect(PotionEffect effect, boolean overwrite);
+	default boolean hasCustomEffect(PotionEffectType type) {
+		return this.getCustomEffects().stream().anyMatch(effect -> effect.getType().equals(type));
+	}
+
+	/**
+	 * Checks for the presence of custom potion effects.
+	 *
+	 * @return true if custom potion effects are applied
+	 */
+	default boolean hasCustomEffects() {
+		return ListUtil.notEmpty(this.getCustomEffects());
+	}
+
+	/**
+	 * Sets the underlying potion data
+	 *
+	 * @param data PotionData to set the base potion state to
+	 */
+	void setBasePotionData(PotionData data);
 
 	/**
 	 * Removes a custom potion effect from this potion.
@@ -61,14 +81,6 @@ public interface PotionMeta extends ItemMeta {
 	 * @return true if the potion meta changed as a result of this call
 	 */
 	boolean removeCustomEffect(PotionEffectType type);
-
-	/**
-	 * Checks for a specific custom potion effect type on this potion.
-	 *
-	 * @param type the potion effect type to check for
-	 * @return true if the potion has this effect
-	 */
-	boolean hasCustomEffect(PotionEffectType type);
 
 	/**
 	 * Moves a potion effect to the top of the potion effect list.
@@ -81,12 +93,5 @@ public interface PotionMeta extends ItemMeta {
 	 */
 	@Deprecated
 	boolean setMainEffect(PotionEffectType type);
-
-	/**
-	 * Removes all custom potion effects from this potion.
-	 *
-	 * @return true if the potion meta changed as a result of this call
-	 */
-	boolean clearCustomEffects();
 
 }

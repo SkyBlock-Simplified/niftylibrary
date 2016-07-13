@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.api.inventory.events;
 
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.minecraft.event.Cancellable;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 
@@ -8,7 +8,7 @@ public final class FakeInventoryOpenEvent extends FakeInventoryEvent implements 
 
 	private boolean cancelled = false;
 
-	public FakeInventoryOpenEvent(BukkitMojangProfile profile, Inventory inventory) {
+	public FakeInventoryOpenEvent(MinecraftMojangProfile profile, Inventory inventory) {
 		super(profile, inventory);
 	}
 

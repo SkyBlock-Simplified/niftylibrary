@@ -9,6 +9,11 @@ import net.netcoding.nifty.common.minecraft.material.Attachable;
  */
 public interface Hanging extends Entity, Attachable {
 
+	@Override
+	default void setFacingDirection(BlockFace face) {
+		this.setFacingDirection(face, false);
+	}
+
 	/**
 	 * Sets the direction of the hanging entity, potentially overriding rules
 	 * of placement. Note that if the result is not valid the object would

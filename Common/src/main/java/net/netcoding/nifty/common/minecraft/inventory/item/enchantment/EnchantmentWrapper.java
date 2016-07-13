@@ -16,10 +16,12 @@ final class EnchantmentWrapper extends Enchantment {
 		ORIGINAL.put(this.getId(), this);
 	}
 
+	@Override
 	public boolean canEnchant(ItemStack item) {
 		return this.getEnchantment().canEnchant(item);
 	}
 
+	@Override
 	public boolean conflictsWith(Enchantment other) {
 		return this.getEnchantment().conflictsWith(other);
 	}
@@ -28,6 +30,7 @@ final class EnchantmentWrapper extends Enchantment {
 		return Enchantment.getById(this.getId());
 	}
 
+	@Override
 	public int getMaxLevel() {
 		return this.getEnchantment().getMaxLevel();
 	}

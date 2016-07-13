@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 
-import net.netcoding.nifty.common.minecraft.block.Banner;
+import net.netcoding.nifty.common.minecraft.block.state.Banner;
 import net.netcoding.nifty.core.api.color.DyeColor;
 
 import java.util.List;

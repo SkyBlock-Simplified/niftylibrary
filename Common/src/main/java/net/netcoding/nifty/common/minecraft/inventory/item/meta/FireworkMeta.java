@@ -3,6 +3,7 @@ package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 import net.netcoding.nifty.common.minecraft.FireworkEffect;
 import net.netcoding.nifty.core.util.ListUtil;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,14 +14,16 @@ public interface FireworkMeta extends ItemMeta {
 	 *
 	 * @param effects The firework effects to add
 	 */
-	void addEffects(FireworkEffect... effects);
+	default void addEffects(FireworkEffect... effects) {
+		this.addEffects(Arrays.asList(effects));
+	}
 
 	/**
 	 * Add several firework effects to this firework.
 	 *
 	 * @param effects A collections containing the desired firework effects.
 	 */
-	void addEffects(Collection<FireworkEffect> effects);
+	void addEffects(Collection<? extends FireworkEffect> effects);
 
 	/**
 	 * Remove all effects from this firework.

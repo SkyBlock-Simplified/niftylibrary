@@ -14,14 +14,14 @@ import java.util.Objects;
  * of its type and another exposed type.
  */
 @SuppressWarnings("unchecked")
-abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
+abstract class WrappedList<E> extends AbstractList<E> implements Wrapper {
 
 	private final WrappedNativeCache cache = new WrappedNativeCache();
-	private final List<T> original;
+	private final List<E> original;
 	private final Object handle;
 	private Class<?> support;
 
-	public WrappedList(Object handle, List<T> original) {
+	public WrappedList(Object handle, List<E> original) {
 		this.handle = handle;
 		this.original = original;
 	}
@@ -36,8 +36,8 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public boolean add(T element) {
-		T nbt = this.unwrapIncoming(element);
+	public boolean add(E element) {
+		E nbt = this.unwrapIncoming(element);
 
 		// Set the list type if its the first element
 		if (this.size() == 0)
@@ -47,8 +47,8 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public void add(int index, T element) {
-		T nbt = this.unwrapIncoming(element);
+	public void add(int index, E element) {
+		E nbt = this.unwrapIncoming(element);
 
 		// Set the list type if its the first element
 		if (this.size() == 0)
@@ -58,28 +58,28 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> collection) {
+	public boolean addAll(Collection<? extends E> collection) {
 		boolean changed = false;
 
-		for (T element : collection)
+		for (E element : collection)
 			changed = changed || this.add(element);
 
 		return changed;
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends T> collection) {
+	public boolean addAll(int index, Collection<? extends E> collection) {
 		int previousSize = this.size();
 		int start = -1;
 
-		for (T element : collection)
+		for (E element : collection)
 			this.add(index + (start = start + 1), element);
 
 		return this.size() > previousSize;
 	}
 
 	@Override
-	public T get(int index) {
+	public E get(int index) {
 		return this.wrapOutgoing(this.original.get(index));
 	}
 
@@ -89,10 +89,10 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public Iterator<T> iterator() {
-		final Iterator<T> proxy = this.original.iterator();
+	public Iterator<E> iterator() {
+		final Iterator<E> proxy = this.original.iterator();
 
-		return new Iterator<T>() {
+		return new Iterator<E>() {
 
 			@Override
 			public boolean hasNext() {
@@ -100,7 +100,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 			}
 
 			@Override
-			public T next() {
+			public E next() {
 				return WrappedList.this.wrapOutgoing(proxy.next());
 			}
 
@@ -113,7 +113,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public T remove(int index) {
+	public E remove(int index) {
 		return this.wrapOutgoing(this.original.remove(index));
 	}
 
@@ -128,7 +128,7 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 	}
 
 	@Override
-	public T set(int index, T element) {
+	public E set(int index, E element) {
 		return this.wrapOutgoing(this.original.set(index, this.unwrapIncoming(element)));
 	}
 
@@ -152,12 +152,12 @@ abstract class WrappedList<T> extends AbstractList<T> implements Wrapper {
 		return this.serialize();
 	}
 
-	protected T wrapOutgoing(Object value) {
-		return (T)NbtFactory.adjustOutgoing(this.cache.wrap(value), this.support);
+	protected E wrapOutgoing(Object value) {
+		return (E)NbtFactory.adjustOutgoing(this.cache.wrap(value), this.support);
 	}
 
-	protected T unwrapIncoming(Object wrapped) {
-		return (T)NbtFactory.unwrapValue(this.adjustIncoming(wrapped));
+	protected E unwrapIncoming(Object wrapped) {
+		return (E)NbtFactory.unwrapValue(this.adjustIncoming(wrapped));
 	}
 
 }

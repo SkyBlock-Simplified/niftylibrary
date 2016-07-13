@@ -1,136 +1,119 @@
 package net.netcoding.nifty.common.minecraft.region;
 
 import com.google.common.base.Preconditions;
-import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.minecraft.block.Block;
+import net.netcoding.nifty.core.api.builder.BuilderCore;
 import net.netcoding.nifty.core.util.NumberUtil;
-import net.netcoding.nifty.core.util.misc.Serializable;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.core.util.misc.Vector;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
+import net.netcoding.nifty.core.util.misc.Serializable;
+import net.netcoding.nifty.core.util.misc.Vector;
 
 import java.util.Map;
 
-public class Location implements Cloneable, Serializable {
+public interface Location extends Cloneable, Serializable {
 
-	private World world;
-	private double x;
-	private double y;
-	private double z;
-	private float pitch;
-	private float yaw;
-	private boolean wildcard;
-
-	public Location(World world, double x, double y, double z) {
-		this(world, x, y, z, 0.0F, 0.0F);
-	}
-
-	public Location(World world, double x, double y, double z, float yaw, float pitch) {
-		this.world = world;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.pitch = pitch;
-		this.yaw = yaw;
-	}
-
-	public final Location add(Location location) {
+	default Location add(Location location) {
 		Preconditions.checkArgument(location != null, "Cannot add a NULL location!");
 		Preconditions.checkArgument(location.getWorld() != null && this.getWorld() != null, "Cannot add from/to a NULL world!");
 		Preconditions.checkArgument(!location.getWorld().equals(this.getWorld()), StringUtil.format("Cannot add locations of worlds ''{0}'' and ''{1}''!", this.getWorld().getName(), location.getWorld().getName()));
-		this.x += location.x;
-		this.y += location.y;
-		this.z += location.z;
+		this.setX(this.getX() + location.getX());
+		this.setY(this.getY() + location.getY());
+		this.setZ(this.getZ() + location.getZ());
 		return this;
 	}
 
-	public final Location add(Vector vec) {
-		this.x += vec.getX();
-		this.y += vec.getY();
-		this.z += vec.getZ();
+	default Location add(Vector vector) {
+		this.setX(this.getX() + vector.getX());
+		this.setY(this.getY() + vector.getY());
+		this.setZ(this.getZ() + vector.getZ());
 		return this;
 	}
 
-	public final Location add(double x, double y, double z) {
-		this.x += x;
-		this.y += y;
-		this.z += z;
+	default Location add(double x, double y, double z) {
+		this.setX(this.getX() + x);
+		this.setY(this.getY() + y);
+		this.setZ(this.getZ() + z);
 		return this;
 	}
 
-	@Override
-	public final Location clone() {
-		try {
-			return (Location) super.clone();
-		} catch (CloneNotSupportedException var2) {
-			throw new Error(var2);
-		}
+	static Location.Builder builder() {
+		return Nifty.getBuilderManager().createBuilder(Location.class);
 	}
 
-	public static Location deserialize(Map<String, Object> map) {
+	Location clone();
+
+	static Location deserialize(Map<String, Object> map) {
 		String worldName = (String)map.get("world");
-		Preconditions.checkArgument(worldName != null, "World cannot be NULL!");
 		boolean wildcard = false;
-		World world;
+		World world = null;
 
-		if (worldName.matches("(?i)^%(world%)?$")) {
-			world = Nifty.getServer().getWorlds().get(0);
-			wildcard = true;
-		} else
-			world = Nifty.getServer().getWorld(worldName);
+		if (StringUtil.notEmpty(worldName)) {
+			if (worldName.matches("(?i)^%(world%)?$")) {
+				world = Nifty.getServer().getWorlds().get(0);
+				wildcard = true;
+			} else
+				world = Nifty.getServer().getWorld(worldName);
+		}
 
-		Preconditions.checkArgument(world != null, StringUtil.format("Unknown world with name ''{0}''!", worldName));
 		float yaw = (map.get("yaw") instanceof Double) ? ((Double)map.get("yaw")).floatValue() : (Float)map.get("yaw");
 		float pitch = (map.get("pitch") instanceof Double) ? ((Double)map.get("pitch")).floatValue() : (Float)map.get("pitch");
-		Location location = new Location(world, NumberUtil.to(map.get("x"), Double.class), NumberUtil.to(map.get("y"), Double.class), NumberUtil.to(map.get("z"), Double.class), yaw, pitch);
-		location.wildcard = wildcard;
+		Location location = Location.of(world, NumberUtil.to(map.get("x"), Double.class), NumberUtil.to(map.get("y"), Double.class), NumberUtil.to(map.get("z"), Double.class), yaw, pitch);
+		location.setWildcard(wildcard);
 		return location;
 	}
 
-	public final double distance(Location location) {
+	default double distance(Location location) {
 		return Math.sqrt(this.distanceSquared(location));
 	}
 
-	public final double distanceSquared(Location location) {
+	default double distanceSquared(Location location) {
 		Preconditions.checkArgument(location != null, "Cannot measure distance to a NULL location!");
 		Preconditions.checkArgument(location.getWorld() != null && this.getWorld() != null, "Cannot measure distance to a NULL world!");
 		Preconditions.checkArgument(!location.getWorld().equals(this.getWorld()), StringUtil.format("Cannot measure distance between ''{0}'' and ''{1}''!", this.getWorld().getName(), location.getWorld().getName()));
 		return NumberUtil.square(this.getX() - location.getX()) + NumberUtil.square(this.getY() - location.getY()) + NumberUtil.square(this.getZ() - location.getZ());
 	}
 
-	@Override
-	public final boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		else if (Location.class.isAssignableFrom(obj.getClass()))
-			return true;
-		else {
-			Location other = (Location) obj;
-			return this.world != other.world && (this.world == null || !this.world.equals(other.world)) ? false : (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x) ? false : (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y) ? false : (Double.doubleToLongBits(this.z) != Double.doubleToLongBits(other.z) ? false : (Float.floatToIntBits(this.pitch) != Float.floatToIntBits(other.pitch) ? false : Float.floatToIntBits(this.yaw) == Float.floatToIntBits(other.yaw)))));
+	@SuppressWarnings("ObjectEquality")
+	static boolean equals(Location location, Location other) {
+		if (location.getWorld() == null && other.getWorld() == null || location.getWorld() == other.getWorld() || location.getWorld().equals(other.getWorld())) {
+			if (Double.doubleToLongBits(location.getX()) != Double.doubleToLongBits(other.getX())) {
+				if (Double.doubleToLongBits(location.getY()) != Double.doubleToLongBits(other.getY())) {
+					if (Double.doubleToLongBits(location.getZ()) != Double.doubleToLongBits(other.getZ())) {
+						if (Float.floatToIntBits(location.getYaw()) != Float.floatToIntBits(other.getYaw())) {
+							if (Float.floatToIntBits(location.getPitch()) != Float.floatToIntBits(other.getPitch()))
+								return true;
+						}
+					}
+				}
+			}
 		}
+
+		return false;
 	}
 
-	public final Block getBlock() {
-		return this.world.getBlockAt(this);
+	default Block getBlock() {
+		return this.getWorld().getBlockAt(this);
 	}
 
-	public final int getBlockX() {
-		return locToBlock(this.x);
+	default int getBlockX() {
+		return NumberUtil.floor(this.getX());
 	}
 
-	public final int getBlockY() {
-		return locToBlock(this.y);
+	default int getBlockY() {
+		return NumberUtil.floor(this.getY());
 	}
 
-	public final int getBlockZ() {
-		return locToBlock(this.z);
+	default int getBlockZ() {
+		return NumberUtil.floor(this.getZ());
 	}
 
-	public final Chunk getChunk() {
-		return this.world.getChunkAt(this);
+	default Chunk getChunk() {
+		return this.getWorld().getChunkAt(this);
 	}
 
-	public final Vector getDirection() {
+	default Vector getDirection() {
 		Vector vector = new Vector();
 		double rotX = (double) this.getYaw();
 		double rotY = (double) this.getPitch();
@@ -141,159 +124,191 @@ public class Location implements Cloneable, Serializable {
 		return vector;
 	}
 
-	public final float getPitch() {
-		return this.pitch;
+	float getPitch();
+
+	World getWorld();
+
+	double getX();
+
+	double getY();
+
+	float getYaw();
+
+	double getZ();
+
+	boolean isWildcard();
+
+	default double length() {
+		return Math.sqrt(NumberUtil.square(this.getX()) + NumberUtil.square(this.getY()) + NumberUtil.square(this.getZ()));
 	}
 
-	public final World getWorld() {
-		return this.world;
+	default double lengthSquared() {
+		return NumberUtil.square(this.getX()) + NumberUtil.square(this.getY()) + NumberUtil.square(this.getZ());
 	}
 
-	public final double getX() {
-		return this.x;
-	}
-
-	public final double getY() {
-		return this.y;
-	}
-
-	public final float getYaw() {
-		return this.yaw;
-	}
-
-	public final double getZ() {
-		return this.z;
-	}
-
-	@Override
-	public final int hashCode() {
-		byte hash = 3;
-		int hash1 = 19 * hash + (this.world != null ? this.world.hashCode() : 0);
-		hash1 = 19 * hash1 + (int) (Double.doubleToLongBits(this.x) ^ Double.doubleToLongBits(this.x) >>> 32);
-		hash1 = 19 * hash1 + (int) (Double.doubleToLongBits(this.y) ^ Double.doubleToLongBits(this.y) >>> 32);
-		hash1 = 19 * hash1 + (int) (Double.doubleToLongBits(this.z) ^ Double.doubleToLongBits(this.z) >>> 32);
-		hash1 = 19 * hash1 + Float.floatToIntBits(this.pitch);
-		hash1 = 19 * hash1 + Float.floatToIntBits(this.yaw);
-		return hash1;
-	}
-
-	public final boolean isWildcard() {
-		return this.wildcard;
-	}
-
-	public final double length() {
-		return Math.sqrt(NumberUtil.square(this.x) + NumberUtil.square(this.y) + NumberUtil.square(this.z));
-	}
-
-	public final double lengthSquared() {
-		return NumberUtil.square(this.x) + NumberUtil.square(this.y) + NumberUtil.square(this.z);
-	}
-
-	public static int locToBlock(double loc) {
-		return NumberUtil.floor(loc);
-	}
-
-	public final Location multiply(double m) {
-		this.x *= m;
-		this.y *= m;
-		this.z *= m;
+	default Location multiply(double m) {
+		this.setX(this.getX() * m);
+		this.setY(this.getY() * m);
+		this.setZ(this.getZ() * m);
 		return this;
 	}
 
+	static Location of(World world, int x, int y, int z) {
+		return of(world, (double)x, y, z);
+	}
+
+	static Location of(World world, double x, double y, double z) {
+		return of(world, x, y, z, 0F, 0F);
+	}
+
+	static Location of(World world, int x, int y, int z, int yaw, int pitch) {
+		return of(world, (double)x, y, z, yaw, pitch);
+	}
+
+	static Location of(World world, double x, double y, double z, float yaw, float pitch) {
+		return builder().world(world).x(x).y(y).z(z).yaw(yaw).pitch(pitch).build();
+	}
+
+	static Location of(Location location) {
+		return builder().fromLocation(location).build();
+	}
+
 	@Override
-	public final Map<String, Object> serialize() {
+	default Map<String, Object> serialize() {
 		ConcurrentLinkedMap<String, Object> data = new ConcurrentLinkedMap<>();
-		data.put("world", (this.isWildcard() ? "%world%" : this.world.getName()));
-		data.put("x", this.x);
-		data.put("y", this.y);
-		data.put("z", this.z);
-		data.put("yaw", this.yaw);
-		data.put("pitch", this.pitch);
+		data.put("world", (this.isWildcard() ? "%world%" : (this.getWorld() != null ? this.getWorld().getName() : "")));
+		data.put("x", this.getX());
+		data.put("y", this.getY());
+		data.put("z", this.getZ());
+		data.put("yaw", this.getYaw());
+		data.put("pitch", this.getPitch());
 		return data;
 	}
 
-	public final Location setDirection(Vector vector) {
+	default Location setDirection(Vector vector) {
 		double x = vector.getX();
 		double z = vector.getZ();
 
 		if (x == 0.0D && z == 0.0D) {
-			this.pitch = (float) (vector.getY() > 0.0D ? -90 : 90);
+			this.setPitch((float)(vector.getY() > 0.0D ? -90 : 90));
 			return this;
 		} else {
 			double theta = Math.atan2(-x, z);
-			this.yaw = (float) Math.toDegrees((theta + 6.283185307179586D) % 6.283185307179586D);
+			this.setYaw((float)Math.toDegrees((theta + 6.283185307179586D) % 6.283185307179586D));
 			double x2 = NumberUtil.square(x);
 			double z2 = NumberUtil.square(z);
 			double xz = Math.sqrt(x2 + z2);
-			this.pitch = (float) Math.toDegrees(Math.atan(-vector.getY() / xz));
+			this.setPitch((float)Math.toDegrees(Math.atan(-vector.getY() / xz)));
 			return this;
 		}
 	}
 
-	public final void setPitch(float pitch) {
-		this.pitch = pitch;
+	default void setPitch(int pitch) {
+		this.setPitch((float)pitch);
 	}
 
-	public final void setWorld(World world) {
-		this.world = world;
-		this.wildcard = false;
+	void setPitch(float pitch);
+
+	void setWildcard(boolean value);
+
+	void setWorld(World world);
+
+	default void setX(int x) {
+		this.setX((double)x);
 	}
 
-	public final void setX(double x) {
-		this.x = x;
+	void setX(double x);
+
+	default void setY(int y) {
+		this.setY((double)y);
 	}
 
-	public final void setY(double y) {
-		this.y = y;
+	void setY(double y);
+
+	default void setYaw(int yaw) {
+		this.setYaw((float)yaw);
 	}
 
-	public final void setYaw(float yaw) {
-		this.yaw = yaw;
+	void setYaw(float yaw);
+
+	default void setZ(int z) {
+		this.setZ((double)z);
 	}
 
-	public final void setZ(double z) {
-		this.z = z;
-	}
+	void setZ(double z);
 
-	public final Location subtract(Location vec) {
-		if (vec != null && vec.getWorld().equals(this.getWorld())) {
-			this.x -= vec.x;
-			this.y -= vec.y;
-			this.z -= vec.z;
+	default Location subtract(Location location) {
+		if (location != null && location.getWorld().equals(this.getWorld())) {
+			this.setX(this.getX() - location.getX());
+			this.setY(this.getY() - location.getY());
+			this.setZ(this.getZ() - location.getZ());
 			return this;
 		}
 
-		throw new IllegalArgumentException("Cannot add Locations of differing worlds");
+		throw new IllegalArgumentException("Cannot subtract Locations of differing worlds");
 	}
 
-	public final Location subtract(Vector vec) {
-		this.x -= vec.getX();
-		this.y -= vec.getY();
-		this.z -= vec.getZ();
+	default Location subtract(Vector vector) {
+		this.setX(this.getX() - vector.getX());
+		this.setY(this.getY() - vector.getY());
+		this.setZ(this.getZ() - vector.getZ());
 		return this;
 	}
 
-	public final Location subtract(double x, double y, double z) {
-		this.x -= x;
-		this.y -= y;
-		this.z -= z;
+	default Location subtract(double x, double y, double z) {
+		this.setX(this.getX() - x);
+		this.setY(this.getY() - y);
+		this.setZ(this.getZ() - z);
 		return this;
 	}
 
-	@Override
-	public String toString() {
-		return "Location{world=" + this.world + ",x=" + this.x + ",y=" + this.y + ",z=" + this.z + ",pitch=" + this.pitch + ",yaw=" + this.yaw + '}';
+	default Vector toVector() {
+		return new Vector(this.getX(), this.getY(), this.getZ());
 	}
 
-	public final Vector toVector() {
-		return new Vector(this.x, this.y, this.z);
-	}
-
-	public final Location zero() {
-		this.x = 0.0D;
-		this.y = 0.0D;
-		this.z = 0.0D;
+	default Location zero() {
+		this.setX(0);
+		this.setY(0);
+		this.setZ(0);
 		return this;
+	}
+
+	interface Builder extends BuilderCore<Location> {
+
+		Builder fromLocation(Location location);
+
+		default Builder pitch(int pitch) {
+			return this.pitch((float)pitch);
+		}
+
+		Builder pitch(float pitch);
+
+		Builder world(World world);
+
+		default Builder x(int x) {
+			return this.x((double)x);
+		}
+
+		Builder x(double x);
+
+		default Builder y(int y) {
+			return this.y((double)y);
+		}
+
+		Builder y(double y);
+
+		default Builder yaw(int yaw) {
+			return this.yaw((float)yaw);
+		}
+
+		Builder yaw(float yaw);
+
+		default Builder z(int z) {
+			return this.z((double)z);
+		}
+
+		Builder z(double z);
+
 	}
 
 }

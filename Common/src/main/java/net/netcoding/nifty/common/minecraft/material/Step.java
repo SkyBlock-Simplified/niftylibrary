@@ -32,6 +32,7 @@ public interface Step extends TexturedMaterial, Invertable {
 		this.setData((byte)data);
 	}
 
+	@Override
 	default void setTextureIndex(int index) {
 		this.setData((byte) ((this.getData() & 0x8) | index));
 	}

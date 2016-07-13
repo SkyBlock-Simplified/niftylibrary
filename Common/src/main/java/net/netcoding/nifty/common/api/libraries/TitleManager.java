@@ -2,8 +2,8 @@ package net.netcoding.nifty.common.api.libraries;
 
 import com.google.gson.JsonObject;
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common.reflection.BukkitReflection;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.api.color.ChatColor;
@@ -42,27 +42,27 @@ public final class TitleManager {
 	}
 
 	public static void broadcastActionBar(String text) throws Exception {
-		for (BukkitMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
+		for (MinecraftMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
 			sendActionBar(profile, text);
 	}
 
 	public void clear() throws Exception {
-		for (BukkitMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
+		for (MinecraftMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
 			this.sendClear(profile);
 	}
 
 	public void reset() throws Exception {
-		for (BukkitMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
+		for (MinecraftMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
 			this.sendReset(profile);
 	}
 
 	public static void broadcastTabList(String header, String footer) throws Exception {
-		for (BukkitMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
+		for (MinecraftMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
 			sendTabList(profile, header, footer);
 	}
 
 	public void broadcast() throws Exception {
-		for (BukkitMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
+		for (MinecraftMojangProfile profile : Nifty.getMojangRepository().searchByPlayer(Nifty.getServer().getPlayerList()))
 			this.sendTitle(profile);
 	}
 
@@ -94,10 +94,10 @@ public final class TitleManager {
 		return this.titleColor;
 	}
 
-	public static void sendActionBar(BukkitMojangProfile profile, String text) {
+	public static void sendActionBar(MinecraftMojangProfile profile, String text) {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetChat = new Reflection("PacketPlayOutChat", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection chatSerializer = MinecraftReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 
 		// Text
 		JsonObject json = new JsonObject();
@@ -107,10 +107,10 @@ public final class TitleManager {
 		profile.sendPacket(packetChatObj);
 	}
 
-	public final void sendClear(BukkitMojangProfile profile) {
+	public final void sendClear(MinecraftMojangProfile profile) {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection titleAction = MinecraftReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumClear = titleAction.getValue("CLEAR", null);
 
@@ -122,10 +122,10 @@ public final class TitleManager {
 		profile.sendPacket(packetTitleObj);
 	}
 
-	public final void sendReset(BukkitMojangProfile profile) {
+	public final void sendReset(MinecraftMojangProfile profile) {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection titleAction = MinecraftReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
 		Object packetTitleObj = packetTitle.newInstance();
 		Object enumReset = titleAction.getValue("RESET", null);
 
@@ -137,10 +137,10 @@ public final class TitleManager {
 		profile.sendPacket(packetTitleObj);
 	}
 
-	public static void sendTabList(BukkitMojangProfile profile, String header, String footer) {
+	public static void sendTabList(MinecraftMojangProfile profile, String header, String footer) {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetList = new Reflection("PacketPlayOutPlayerListHeaderFooter", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection chatSerializer = MinecraftReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 		Object packetListObj = packetList.newInstance();
 
 		// Header
@@ -157,11 +157,11 @@ public final class TitleManager {
 		profile.sendPacket(packetListObj);
 	}
 
-	public final void sendTitle(BukkitMojangProfile profile) {
+	public final void sendTitle(MinecraftMojangProfile profile) {
 		if (!profile.getOfflinePlayer().isOnline()) return;
 		Reflection packetTitle = new Reflection("PacketPlayOutTitle", MinecraftPackage.MINECRAFT_SERVER);
-		Reflection titleAction = BukkitReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
-		Reflection chatSerializer = BukkitReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
+		Reflection titleAction = MinecraftReflection.getCompatibleReflection("PacketPlayOutTitle", "EnumTitleAction");
+		Reflection chatSerializer = MinecraftReflection.getCompatibleReflection("IChatBaseComponent", "ChatSerializer");
 
 		if (this.getStay() > 0 && StringUtil.notEmpty(this.getTitle())) {
 			Object enumTimes = titleAction.getValue("TIMES", null);

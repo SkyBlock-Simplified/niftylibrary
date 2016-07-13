@@ -7,5 +7,5 @@ import net.netcoding.nifty.common.minecraft.entity.living.Hostile;
  * Represents a Ghast.
  */
 public interface Ghast extends Aerial, Hostile {
-	// TODO: Hostile, ProjectileSource
+
 }

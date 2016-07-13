@@ -3,8 +3,9 @@ package net.netcoding.nifty.common.yaml;
 import net.netcoding.nifty.common.yaml.converters.BlockConverter;
 import net.netcoding.nifty.common.yaml.converters.ItemStackConverter;
 import net.netcoding.nifty.common.yaml.converters.LocationConverter;
-import net.netcoding.nifty.common.yaml.converters.VectorConverter;
 import net.netcoding.nifty.common.yaml.converters.PotionEffectConverter;
+import net.netcoding.nifty.common.yaml.converters.VectorConverter;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 import net.netcoding.nifty.core.yaml.YamlConfig;
 import net.netcoding.nifty.core.yaml.converters.Converter;
@@ -13,12 +14,11 @@ import java.io.File;
 
 public abstract class BukkitConfig extends YamlConfig {
 
-	protected static final transient ConcurrentSet<Class<? extends Converter>> GLOBAL_CUSTOM_CONVERTERS = new ConcurrentSet<>();
+	protected static final transient ConcurrentSet<Class<? extends Converter>> GLOBAL_CUSTOM_CONVERTERS = Concurrent.newSet();
 	private static transient boolean acceptingNewConverters = true;
 
 	static {
 		addGlobalCustomConverter(BlockConverter.class);
-		// TODO: addGlobalCustomConverter(FakeLocationConverter.class);
 		addGlobalCustomConverter(ItemStackConverter.class);
 		addGlobalCustomConverter(LocationConverter.class);
 		addGlobalCustomConverter(PotionEffectConverter.class);

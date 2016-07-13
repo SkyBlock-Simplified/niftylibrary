@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.entity;
 
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.entity.living.complex.EnderDragon;
 import net.netcoding.nifty.common.minecraft.entity.living.monster.Wither;
 
@@ -14,7 +14,9 @@ public interface Damageable extends Entity {
 	 *
 	 * @param amount Amount of damage to deal.
 	 */
-	void damage(double amount);
+	default void damage(double amount) {
+		this.damage(amount, null);
+	}
 
 	/**
 	 * Deals the given amount of damage to this entity, from a specified entity.

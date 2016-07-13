@@ -1,18 +1,18 @@
 package net.netcoding.nifty.common.api.inventory;
 
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 
 public class FakeInventoryInstance extends FakeInventoryFrame {
 
 	private final transient FakeInventory inventory;
-	private final transient BukkitMojangProfile profile;
+	private final transient MinecraftMojangProfile profile;
 
-	FakeInventoryInstance(FakeInventory inventory, BukkitMojangProfile profile) {
+	FakeInventoryInstance(FakeInventory inventory, MinecraftMojangProfile profile) {
 		this.inventory = inventory;
 		this.profile = profile;
 	}
 
-	FakeInventoryInstance(FakeInventoryFrame frame, FakeInventory inventory, BukkitMojangProfile profile) {
+	FakeInventoryInstance(FakeInventoryFrame frame, FakeInventory inventory, MinecraftMojangProfile profile) {
 		super(frame);
 		this.inventory = inventory;
 		this.profile = profile;
@@ -22,11 +22,11 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 		this.inventory.close(this.getProfile());
 	}
 
-	public BukkitMojangProfile getProfile() {
+	public MinecraftMojangProfile getProfile() {
 		return this.profile;
 	}
 
-	public BukkitMojangProfile getTarget() {
+	public MinecraftMojangProfile getTarget() {
 		return this.inventory.getTarget(this.getProfile());
 	}
 
@@ -38,7 +38,7 @@ public class FakeInventoryInstance extends FakeInventoryFrame {
 		this.open(this.isOpen() ? this.getTarget() : this.getProfile());
 	}
 
-	public void open(BukkitMojangProfile target) {
+	public void open(MinecraftMojangProfile target) {
 		this.inventory.open(this.getProfile(), target, this);
 	}
 

@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.material;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public interface Coal extends MaterialData {
@@ -20,7 +21,7 @@ public interface Coal extends MaterialData {
 		COAL(0),
 		CHARCOAL(1);
 
-		private static final ConcurrentMap<Byte, CoalType> BY_DATA = new ConcurrentMap<>();
+		private static final ConcurrentMap<Byte, CoalType> BY_DATA = Concurrent.newMap();
 		private final byte data;
 
 		static {

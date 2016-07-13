@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common.minecraft;
 
 import net.netcoding.nifty.common.minecraft.entity.AnimalTamer;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.permission.ServerOperator;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.core.mojang.Profile;

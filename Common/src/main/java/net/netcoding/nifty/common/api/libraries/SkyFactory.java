@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.api.libraries;
 
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.core.reflection.Reflection;
@@ -27,7 +27,7 @@ public enum SkyFactory {
 	LIGHT_SEPIA_BLACK(2, 6),
 	BLUE_SKY_DARK_TERRAIN(3, 9);
 
-	private final static Reflection GAME_STATE_CHANGE = new Reflection("PacketPlayOutGameStateChange", MinecraftPackage.MINECRAFT_SERVER);
+	private static final Reflection GAME_STATE_CHANGE = new Reflection("PacketPlayOutGameStateChange", MinecraftPackage.MINECRAFT_SERVER);
 
 	private final int value1;
 	private final float value2;
@@ -37,7 +37,7 @@ public enum SkyFactory {
 		this.value2 = value2;
 	}
 
-	public void show(BukkitMojangProfile profile) throws Exception {
+	public void show(MinecraftMojangProfile profile) throws Exception {
 		if (profile.isOnlineLocally()) {
 			profile.sendPacket(GAME_STATE_CHANGE.newInstance(7, this.value1));
 			profile.sendPacket(GAME_STATE_CHANGE.newInstance(8, this.value2));
@@ -45,11 +45,11 @@ public enum SkyFactory {
 	}
 
 	public static void show(SkyFactory color) {
-		for (BukkitMojangProfile profile : Nifty.getBungeeHelper().getPlayerList())
+		for (MinecraftMojangProfile profile : Nifty.getBungeeHelper().getPlayerList())
 			show(color, profile);
 	}
 
-	public static void show(SkyFactory color, BukkitMojangProfile profile) {
+	public static void show(SkyFactory color, MinecraftMojangProfile profile) {
 		if (profile.isOnlineLocally()) {
 			profile.sendPacket(GAME_STATE_CHANGE.newInstance(7, color.value1));
 			profile.sendPacket(GAME_STATE_CHANGE.newInstance(8, color.value2));

@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.event.player;
 
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.event.Cancellable;
 
 import java.util.Set;

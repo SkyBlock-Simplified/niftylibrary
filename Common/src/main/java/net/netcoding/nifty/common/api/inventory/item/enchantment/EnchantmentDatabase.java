@@ -144,6 +144,7 @@ public abstract class EnchantmentDatabase extends CSVStorage {
 		Enchantment.stopAcceptingRegistrations();
 	}
 
+	@Override
 	public void reload() {
 		try {
 			List<String> lines = this.getLines();

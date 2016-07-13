@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.block;
 
+import net.netcoding.nifty.common.minecraft.block.state.BlockState;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.region.Biome;
@@ -38,7 +39,9 @@ public interface Block {
 	 *
 	 * @return The power level.
 	 */
-	int getBlockPower();
+	default int getBlockPower() {
+		return this.getBlockPower(BlockFace.SELF);
+	}
 
 	/**
 	 * Returns the redstone power being provided to this block face.
@@ -240,7 +243,9 @@ public interface Block {
 	 *
 	 * @return World containing this block.
 	 */
-	World getWorld();
+	default World getWorld() {
+		return this.getChunk().getWorld();
+	}
 
 	/**
 	 * Gets the x-coordinate of this block.

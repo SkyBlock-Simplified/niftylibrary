@@ -1,11 +1,12 @@
 package net.netcoding.nifty.common.minecraft.material;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedList;
 
 class MaterialHelper {
 
-	private static final ConcurrentMap<Class<? extends MaterialData>, ConcurrentLinkedList<Material>> TEXTURES = new ConcurrentMap<>();
+	private static final ConcurrentMap<Class<? extends MaterialData>, ConcurrentLinkedList<Material>> TEXTURES = Concurrent.newMap();
 
 	static {
 		TEXTURES.put(MonsterEggs.class, new ConcurrentLinkedList<>(

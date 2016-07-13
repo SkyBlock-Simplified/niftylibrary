@@ -1,10 +1,10 @@
 package net.netcoding.nifty.common.api.signs;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.api.MinecraftListener;
-import net.netcoding.nifty.common.api.Event;
 import net.netcoding.nifty.common.api.inventory.InventoryWorkaround;
 import net.netcoding.nifty.common.api.nbt.NbtCompound;
+import net.netcoding.nifty.common.api.plugin.Event;
+import net.netcoding.nifty.common.api.plugin.MinecraftListener;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common.api.signs.events.SignBreakEvent;
 import net.netcoding.nifty.common.api.signs.events.SignCreateEvent;
@@ -13,9 +13,9 @@ import net.netcoding.nifty.common.minecraft.GameMode;
 import net.netcoding.nifty.common.minecraft.block.Action;
 import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.common.minecraft.block.BlockFace;
-import net.netcoding.nifty.common.minecraft.block.Sign;
+import net.netcoding.nifty.common.minecraft.block.state.Sign;
 import net.netcoding.nifty.common.minecraft.entity.EntityType;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.event.block.BlockBreakEvent;
 import net.netcoding.nifty.common.minecraft.event.block.SignChangeEvent;
 import net.netcoding.nifty.common.minecraft.event.block.piston.BlockPistonExtendEvent;
@@ -27,12 +27,13 @@ import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.material.Attachable;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.minecraft.region.Location;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
@@ -51,11 +52,11 @@ import java.util.UUID;
 public class SignMonitor {
 
 	private static final Reflection NMS_MAP_CHUNK = new Reflection("PacketPlayOutMapChunk", MinecraftPackage.MINECRAFT_SERVER);
-	private static final ConcurrentMap<UUID, ConcurrentList<NbtCompound>> CHUNK_ADJUSTMENT = new ConcurrentMap<>();
+	private static final ConcurrentMap<UUID, ConcurrentList<NbtCompound>> CHUNK_ADJUSTMENT = Concurrent.newMap();
 	static final boolean IS_PRE_1_9_3 = MinecraftProtocol.getCurrentProtocol() < MinecraftProtocol.v1_9_3_pre1.getProtocol();
 	static final boolean IS_POST_1_9_3 = !IS_PRE_1_9_3;
-	private final transient ConcurrentMap<SignListener, List<String>> listeners = new ConcurrentMap<>();
-	private final ConcurrentMap<Location, SignInfo> signLocations = new ConcurrentMap<>();
+	private final transient ConcurrentMap<SignListener, List<String>> listeners = Concurrent.newMap();
+	private final ConcurrentMap<Location, SignInfo> signLocations = Concurrent.newMap();
 	private final transient MinecraftSignListener signListener;
 	//private transient PacketAdapter adapter;
 	private transient boolean listening = false;
@@ -104,7 +105,7 @@ public class SignMonitor {
 							ConcurrentList<NbtCompound> list;
 
 							if (!CHUNK_ADJUSTMENT.containsKey(uniqueId))
-								CHUNK_ADJUSTMENT.put(uniqueId, list = new ConcurrentList<>());
+								CHUNK_ADJUSTMENT.put(uniqueId, list = Concurrent.newList());
 							else
 								list = CHUNK_ADJUSTMENT.get(uniqueId);
 
@@ -244,7 +245,7 @@ public class SignMonitor {
 	 *
 	 * @param profile Player to send updates to.
 	 */
-	public void sendSignUpdate(BukkitMojangProfile profile) {
+	public void sendSignUpdate(MinecraftMojangProfile profile) {
 		this.sendSignUpdate(profile, "");
 	}
 
@@ -254,7 +255,7 @@ public class SignMonitor {
 	 * @param key Only signs containing this key.
 	 */
 	public void sendSignUpdate(String key) {
-		for (BukkitMojangProfile profile : Nifty.getBungeeHelper().getPlayerList())
+		for (MinecraftMojangProfile profile : Nifty.getBungeeHelper().getPlayerList())
 			this.sendSignUpdate(profile, key);
 	}
 
@@ -264,7 +265,7 @@ public class SignMonitor {
 	 * @param profile Profile to send updates to.
 	 * @param key     Only signs containing this key.
 	 */
-	public void sendSignUpdate(BukkitMojangProfile profile, String key) {
+	public void sendSignUpdate(MinecraftMojangProfile profile, String key) {
 		if (!profile.isOnlineLocally()) return;
 		Player player = profile.getOfflinePlayer().getPlayer();
 
@@ -392,7 +393,7 @@ public class SignMonitor {
 
 		@Event(priority = Event.Priority.HIGH)
 		public void onBlockBreak(BlockBreakEvent event) {
-			BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(event.getPlayer());
+			MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(event.getPlayer());
 			Block block = event.getBlock();
 			Set<Location> fallingSigns = getSignsThatWouldFall(block);
 			Set<Location> removeSigns = new HashSet<>();
@@ -475,7 +476,7 @@ public class SignMonitor {
 									for (String line : signInfo.getLines()) {
 										for (String key : entry.getValue()) {
 											if (line.toLowerCase().contains(key)) {
-												BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(event.getPlayer());
+												MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(event.getPlayer());
 												SignInteractEvent interactEvent = new SignInteractEvent(profile, signInfo, event.getAction(), key);
 												entry.getKey().onSignInteract(interactEvent);
 												Sign sign = (Sign)block.getState();
@@ -539,7 +540,7 @@ public class SignMonitor {
 							for (String key : keys) {
 								if (line.toLowerCase().contains(key)) {
 									Player player = event.getPlayer();
-									BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(player);
+									MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer(player);
 									SignCreateEvent createEvent = new SignCreateEvent(profile, signInfo, key);
 									listener.onSignCreate(createEvent);
 

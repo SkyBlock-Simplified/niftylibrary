@@ -3,6 +3,7 @@ package net.netcoding.nifty.common.minecraft.inventory.item.enchantment;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings("StaticInitializerReferencesSubClass")
@@ -35,9 +36,9 @@ public abstract class Enchantment {
 	public static final Enchantment LUCK = new EnchantmentWrapper(61, "luck_of_the_sea", "LUCK", EnchantmentTarget.WEAPON);
 	public static final Enchantment LURE = new EnchantmentWrapper(62, "lure", "LURE", EnchantmentTarget.WEAPON);
 	public static final Enchantment MENDING = new EnchantmentWrapper(70, "mending", "MENDING", EnchantmentTarget.ALL);
-	static final ConcurrentMap<Integer, Enchantment> BY_ID = new ConcurrentMap<>();
-	static final ConcurrentMap<String, Enchantment> BY_NAME = new ConcurrentMap<>();
-	static final ConcurrentMap<Integer, Enchantment> ORIGINAL = new ConcurrentMap<>();
+	static final ConcurrentMap<Integer, Enchantment> BY_ID = Concurrent.newMap();
+	static final ConcurrentMap<String, Enchantment> BY_NAME = Concurrent.newMap();
+	static final ConcurrentMap<Integer, Enchantment> ORIGINAL = Concurrent.newMap();
 	private static boolean acceptingNew;
 	private final int id;
 
@@ -103,7 +104,7 @@ public abstract class Enchantment {
 	public static void registerEnchantment(Enchantment enchantment) {
 		if (!BY_ID.containsKey(enchantment.getId()) && !BY_NAME.containsKey(enchantment.getName())) {
 			if (!isAcceptingRegistrations())
-				throw new IllegalStateException("No longer accepting new enchantments! (Only NiftyBukkit implementation)");
+				throw new IllegalStateException("No longer accepting new enchantments!");
 
 			BY_ID.put(enchantment.getId(), enchantment);
 			BY_NAME.put(enchantment.getName(), enchantment);

@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.material.types;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public enum SandstoneType {
@@ -8,7 +9,7 @@ public enum SandstoneType {
 	GLYPHED(0x1),
 	SMOOTH(0x2);
 
-	private static final ConcurrentMap<Byte, SandstoneType> BY_DATA = new ConcurrentMap<>();
+	private static final ConcurrentMap<Byte, SandstoneType> BY_DATA = Concurrent.newMap();
 	private final byte data;
 
 	static {

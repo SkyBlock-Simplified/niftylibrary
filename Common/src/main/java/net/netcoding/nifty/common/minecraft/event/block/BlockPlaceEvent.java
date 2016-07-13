@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common.minecraft.event.block;
 
 import net.netcoding.nifty.common.minecraft.block.Block;
-import net.netcoding.nifty.common.minecraft.block.BlockState;
+import net.netcoding.nifty.common.minecraft.block.state.BlockState;
 import net.netcoding.nifty.common.minecraft.event.Cancellable;
 import net.netcoding.nifty.common.minecraft.event.player.PlayerEvent;
 import net.netcoding.nifty.common.minecraft.inventory.EquipmentSlot;

@@ -8,18 +8,18 @@ import net.netcoding.nifty.common.minecraft.entity.Entity;
 public interface Explosive extends Entity {
 
 	/**
-	 * Set the radius affected by this explosive's explosion.
-	 *
-	 * @param yield The explosive yield.
-	 */
-	void setYield(float yield);
-
-	/**
 	 * Return the radius or yield of this explosive's explosion.
 	 *
 	 * @return The radius of blocks affected.
 	 */
 	float getYield();
+
+	/**
+	 * Return whether or not this explosive creates a fire when exploding.
+	 *
+	 * @return True if the explosive creates fire.
+	 */
+	boolean isIncendiary();
 
 	/**
 	 * Set whether or not this explosive's explosion causes fire.
@@ -29,10 +29,10 @@ public interface Explosive extends Entity {
 	void setIncendiary(boolean value);
 
 	/**
-	 * Return whether or not this explosive creates a fire when exploding.
+	 * Set the radius affected by this explosive's explosion.
 	 *
-	 * @return True if the explosive creates fire.
+	 * @param yield The explosive yield.
 	 */
-	boolean isIncendiary();
+	void setYield(float yield);
 
 }

@@ -29,10 +29,12 @@ public interface PlayerInteractEvent extends PlayerEvent, Cancellable {
 
 	boolean isBlockInHand();
 
+	@Override
 	default boolean isCancelled() {
 		return this.useInteractedBlock() == EventResult.DENY;
 	}
 
+	@Override
 	default void setCancelled(boolean cancelled) {
 		this.setUseInteractedBlock(cancelled ? EventResult.DENY : (this.useInteractedBlock() == EventResult.DENY ? EventResult.DEFAULT : this.useInteractedBlock()));
 		this.setUseItemInHand(cancelled ? EventResult.DENY : (this.useItemInHand() == EventResult.DENY ? EventResult.DEFAULT : this.useItemInHand()));

@@ -1,34 +1,38 @@
 package net.netcoding.nifty.common.api.nbt;
 
-import com.google.common.io.Files;
-import com.google.common.io.OutputSupplier;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.core.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Represents a root NBT compound.
+ * Represents an NBT compound.
  * <p>
- * All changes to this map will be reflected in the underlying NBT compound. Values may only be one of the following:
+ * All changes to this map will be reflected in the underlying NBT compound. Values may only be of the following:
  * <ul>
  *   <li>Primitive types</li>
- *   <li>{@link java.lang.String String}</li>
+ *   <li>{@link String String}</li>
+ *   <li>{@link Collection}</li>
+ *   <li>{@link List}</li>
+ *   <li>{@link Set}</li>
+ *   <li>{@link Map}</li>
  *   <li>{@link NbtList}</li>
  *   <li>{@link NbtCompound}</li>
  * </ul>
  * <p>
  * See also:
  * <ul>
- *   <li>{@link NbtFactory#createCompound()}</li>
- *   <li>{@link NbtFactory#fromCompound(Object)}</li>
+ *   <li>{@link NbtFactory#createCompound}</li>
+ *   <li>{@link NbtFactory#fromCompound}</li>
  * </ul>
  */
-@SuppressWarnings({ "deprecation", "unchecked" })
+@SuppressWarnings("unchecked")
 public class NbtCompound extends WrappedMap implements Cloneable {
 
 	NbtCompound(Object handle) {
@@ -42,7 +46,6 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	 *
 	 * @return Copy of current compound
 	 */
-	@SuppressWarnings("CloneDoesntCallSuperClone")
 	@Override
 	public NbtCompound clone() {
 		NbtCompound compound = Nifty.getNbtFactory().createCompound();
@@ -222,15 +225,12 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 
 	/**
 	 * Save the content of a NBT compound to a stream.
-	 * <p>
-	 * Use {@link Files#newOutputStreamSupplier(java.io.File)} to provide a stream supplier to a file.
 	 *
-	 * @param stream - the output stream.
-	 * @param option - whether or not to compress the output.
-	 * @throws IOException If anything went wrong.
+	 * @param stream - The output stream.
+	 * @throws IOException
 	 */
-	public void saveTo(OutputSupplier<? extends OutputStream> stream, NbtFactory.StreamOptions option) throws IOException {
-		NbtFactory.saveStream(this, stream, option);
+	public void saveTo(OutputStream stream) throws IOException {
+		NbtFactory.saveStream(this, stream);
 	}
 
 }

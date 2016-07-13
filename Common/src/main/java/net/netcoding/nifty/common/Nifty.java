@@ -1,19 +1,21 @@
 package net.netcoding.nifty.common;
 
-import net.netcoding.nifty.common.api.MinecraftLogger;
 import net.netcoding.nifty.common.api.inventory.item.ItemDatabase;
 import net.netcoding.nifty.common.api.inventory.item.MiniBlockDatabase;
 import net.netcoding.nifty.common.api.inventory.item.enchantment.EnchantmentDatabase;
 import net.netcoding.nifty.common.api.nbt.NbtFactory;
-import net.netcoding.nifty.common.api.plugin.IMinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.MinecraftLogger;
+import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
+import net.netcoding.nifty.common.api.plugin.PluginManager;
 import net.netcoding.nifty.common.api.plugin.messaging.BungeeHelper;
 import net.netcoding.nifty.common.api.plugin.messaging.Messenger;
-import net.netcoding.nifty.common.minecraft.BukkitServer;
+import net.netcoding.nifty.common.minecraft.Server;
 import net.netcoding.nifty.common.minecraft.block.Block;
+import net.netcoding.nifty.common.minecraft.entity.Entity;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemFactory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
-import net.netcoding.nifty.common.mojang.BukkitMojangRepository;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangRepository;
 import net.netcoding.nifty.core.api.builder.BuilderManager;
 import net.netcoding.nifty.core.api.plugin.Plugin;
 import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
@@ -24,13 +26,12 @@ public final class Nifty {
 
 	private static final BuilderManager<Plugin> BUILDER_MANAGER = new BuilderManager<>();
 	private static final ServiceManager<Plugin> SERVICE_MANAGER = new ServiceManager<>();
-	// TODO: FIREWORK BUILDER
 
 	public static BuilderManager<Plugin> getBuilderManager() {
 		return BUILDER_MANAGER;
 	}
 
-	public static <T extends BukkitMojangProfile> BungeeHelper<T> getBungeeHelper() {
+	public static <T extends MinecraftMojangProfile> BungeeHelper<T> getBungeeHelper() {
 		return getServiceManager().getProvider(BungeeHelper.class);
 	}
 
@@ -58,24 +59,28 @@ public final class Nifty {
 		return getServiceManager().getProvider(MiniBlockDatabase.class);
 	}
 
-	public static <T extends BukkitMojangProfile> BukkitMojangRepository<T> getMojangRepository() {
-		return getServiceManager().getProvider(BukkitMojangRepository.class);
+	public static <T extends MinecraftMojangProfile> MinecraftMojangRepository<T> getMojangRepository() {
+		return getServiceManager().getProvider(MinecraftMojangRepository.class);
 	}
 
-	public static NbtFactory<ItemStack, Block> getNbtFactory() {
+	public static NbtFactory<ItemStack, Block, Entity> getNbtFactory() {
 		return getServiceManager().getProvider(NbtFactory.class);
 	}
 
-	public static IMinecraftPlugin getPlugin() {
-		return getServiceManager().getProvider(IMinecraftPlugin.class);
+	public static MinecraftPlugin getPlugin() {
+		return getServiceManager().getProvider(MinecraftPlugin.class);
+	}
+
+	public static PluginManager getPluginManager() {
+		return getServiceManager().getProvider(PluginManager.class);
 	}
 
 	public static MinecraftScheduler getScheduler() {
 		return getServiceManager().getProvider(MinecraftScheduler.class);
 	}
 
-	public static BukkitServer getServer() {
-		return getServiceManager().getProvider(BukkitServer.class);
+	public static Server getServer() {
+		return getServiceManager().getProvider(Server.class);
 	}
 
 	public static ServiceManager<Plugin> getServiceManager() {

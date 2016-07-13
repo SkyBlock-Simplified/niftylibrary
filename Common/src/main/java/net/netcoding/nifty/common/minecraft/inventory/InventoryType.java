@@ -2,21 +2,21 @@ package net.netcoding.nifty.common.minecraft.inventory;
 
 public enum InventoryType {
 
-	CHEST(27, "Chest"),
-	DISPENSER(9, "Dispenser"),
-	DROPPER(9, "Dropper"),
-	FURNACE(3, "Furnace"),
-	WORKBENCH(10, "Crafting"),
-	CRAFTING(5, "Crafting"),
-	ENCHANTING(2, "Enchanting"),
-	BREWING(5, "Brewing"),
-	PLAYER(41, "Player"),
-	CREATIVE(9, "Creative"),
-	MERCHANT(3, "Villager"),
-	ENDER_CHEST(27, "Ender Chest"),
 	ANVIL(3, "Repairing"),
 	BEACON(1, "container.beacon"),
-	HOPPER(5, "Item Hopper");
+	BREWING(5, "Brewing"),
+	CHEST(27, "Chest"),
+	CRAFTING(5, "Crafting"),
+	CREATIVE(9, "Creative"),
+	DISPENSER(9, "Dispenser"),
+	DROPPER(9, "Dropper"),
+	ENCHANTING(2, "Enchanting"),
+	ENDER_CHEST(27, "Ender Chest"),
+	FURNACE(3, "Furnace"),
+	HOPPER(5, "Item Hopper"),
+	MERCHANT(3, "Villager"),
+	PLAYER(41, "Player"),
+	WORKBENCH(10, "Crafting");
 
 	private final int size;
 	private final String title;

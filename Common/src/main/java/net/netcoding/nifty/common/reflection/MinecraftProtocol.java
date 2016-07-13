@@ -14,24 +14,28 @@ import java.net.URL;
 public enum MinecraftProtocol {
 
 	// http://wiki.vg/Protocol_version_numbers
+	v1_10_2(210),
+	v1_10_1(210),
+	v1_10(210, true),
+	v1_10_pre2(205),
 	v1_10_pre1(204),
 	v16w21b(203),
 	v16w21a(202),
 	v16w20a(201),
-	v1_9_4(110),
+	v1_9_4(110, true),
 	v1_9_3(110),
 	v1_9_3_pre2(110),
 	v1_9_3_pre1(110),
 	v16w15b(109),
 	v16w15a(109),
 	v16w14a(109),
-	v1_9_2(109),
+	v1_9_2(109, true),
 	v1_RV_pre1(108),
-	v1_9_1(108),
+	v1_9_1(108, true),
 	v1_9_1_pre3(108),
 	v1_9_1_pre2(108),
 	v1_9_1_pre1(107),
-	v1_9(107),
+	v1_9(107, true),
 	v1_9_pre4(106),
 	v1_9_pre3(105),
 	v1_9_pre2(104),
@@ -98,7 +102,7 @@ public enum MinecraftProtocol {
 	v1_8_3(47),
 	v1_8_2(47),
 	v1_8_1(47),
-	v1_8(47),
+	v1_8(47, true),
 	v1_8_pre3(46),
 	v1_8_pre2(45),
 	v1_8_pre1(44),
@@ -141,7 +145,7 @@ public enum MinecraftProtocol {
 	v14w04a(7),
 	v14w03a(6),
 	v14w02a(5),
-	v1_7_10(5),
+	v1_7_10(5, true),
 	v1_7_9(5),
 	v1_7_8(5),
 	v1_7_7(5),
@@ -172,7 +176,7 @@ public enum MinecraftProtocol {
 	v13w16b(63),
 	v1_5_2(61),
 	v1_5_1(60),
-	v1_5(60),
+	v1_5(60, true),
 	v13w09b(59),
 	v13w06a(58),
 	v13w05b(57),
@@ -228,7 +232,7 @@ public enum MinecraftProtocol {
 	private static final String SERVER_VERSION;
 
 	static {
-		boolean isForge = false;
+		boolean isForge;
 		boolean isPre1_8_3 = false;
 		boolean isSpigot = false;
 		String serverVersion;
@@ -240,7 +244,7 @@ public enum MinecraftProtocol {
 				isSpigot = true;
 			} catch (Exception ignore) { }
 
-			BukkitReflection bukkit = new BukkitReflection("Bukkit", "org.bukkit");
+			MinecraftReflection bukkit = new MinecraftReflection("Bukkit", "org.bukkit");
 			String version = bukkit.invokeMethod("getVersion", null).toString().toUpperCase();
 			isForge = (version.contains("MCPC") || version.contains("FORGE") || version.contains("CAULDRON"));
 
@@ -249,14 +253,15 @@ public enum MinecraftProtocol {
 			JsonObject bukkitVersion = new JsonParser().parse(json).getAsJsonObject();
 			serverVersion = bukkitVersion.get("minecraftVersion").getAsString();
 		} else if (NiftyCore.isSponge()) {
-			BukkitReflection spongeVersion = new BukkitReflection("SpongeMinecraftVersion", "common", "org.spongepowered");
-			Object minecraftVersion = new BukkitReflection("SpongeImpl", "common", "org.spongepowered").getValue(spongeVersion.getClazz(), null);
+			MinecraftReflection spongeVersion = new MinecraftReflection("SpongeMinecraftVersion", "common", "org.spongepowered");
+			Object minecraftVersion = new MinecraftReflection("SpongeImpl", "common", "org.spongepowered").getValue(spongeVersion.getClazz(), null);
 			serverVersion = spongeVersion.getValue(String.class, minecraftVersion);
+			isForge = true;
 		} else
 			throw new UnsupportedOperationException("Unknown server type!");
 
 		try {
-			new BukkitReflection("ChatSerializer", MinecraftPackage.MINECRAFT_SERVER).getClazz();
+			new MinecraftReflection("ChatSerializer", MinecraftPackage.MINECRAFT_SERVER).getClazz();
 			isPre1_8_3 = true;
 		} catch (Exception ignore) { }
 
@@ -268,9 +273,15 @@ public enum MinecraftProtocol {
 
 	private final int protocol;
 	private final String version;
+	private final boolean rc;
 
 	MinecraftProtocol(int protocol) {
+		this(protocol, false);
+	}
+
+	MinecraftProtocol(int protocol, boolean rc) {
 		this.protocol = protocol;
+		this.rc = rc;
 		this.version = "v1_RV_pre1".equals(name()) /* April Fools */ ? "1.9.1" : this.name().replaceAll("^v", "").replace("_pre", "-pre").replace("_", ".");
 	}
 
@@ -284,11 +295,20 @@ public enum MinecraftProtocol {
 
 	public static MinecraftProtocol getCurrent() {
 		int currentProtocol = getProtocol(getServerVersion());
+		MinecraftProtocol first = null;
 
 		for (MinecraftProtocol protocol : values()) {
-			if (protocol.getProtocol() == currentProtocol)
-				return protocol;
+			if (protocol.getProtocol() == currentProtocol) {
+				if (first == null)
+					first = protocol;
+
+				if (protocol.isReleaseCandidate())
+					return protocol;
+			}
 		}
+
+		if (first != null)
+			return first;
 
 		return MinecraftProtocol.values()[0];
 	}
@@ -338,6 +358,10 @@ public enum MinecraftProtocol {
 
 	public static boolean isPre1_8_3() {
 		return IS_PRE_1_8_3;
+	}
+
+	public boolean isReleaseCandidate() {
+		return this.rc;
 	}
 
 	public static boolean isSpigot() {

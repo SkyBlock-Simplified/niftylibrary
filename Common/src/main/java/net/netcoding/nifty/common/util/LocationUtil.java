@@ -7,7 +7,7 @@ import net.netcoding.nifty.common.minecraft.region.Location;
  * A collection of location utilities to assist in location
  * determining and manipulation.
  */
-public class LocationUtil {
+public final class LocationUtil {
 
 	private static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 	private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };

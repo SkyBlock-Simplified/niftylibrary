@@ -2,9 +2,9 @@ package net.netcoding.nifty.common.minecraft.entity;
 
 import net.netcoding.nifty.common.minecraft.Particle;
 import net.netcoding.nifty.common.minecraft.entity.projectile.source.ProjectileSource;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionData;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffect;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffectType;
+import net.netcoding.nifty.common.minecraft.potion.PotionData;
+import net.netcoding.nifty.common.minecraft.potion.PotionEffect;
+import net.netcoding.nifty.common.minecraft.potion.PotionEffectType;
 import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.util.ListUtil;
 

@@ -11,20 +11,25 @@ import net.netcoding.nifty.common.minecraft.entity.living.ArmorStand;
 import net.netcoding.nifty.common.minecraft.entity.living.Bat;
 import net.netcoding.nifty.common.minecraft.entity.living.Hostile;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
-import net.netcoding.nifty.common.minecraft.entity.living.Villager;
 import net.netcoding.nifty.common.minecraft.entity.living.animal.*;
 import net.netcoding.nifty.common.minecraft.entity.living.complex.ComplexEntityPart;
 import net.netcoding.nifty.common.minecraft.entity.living.complex.EnderDragon;
 import net.netcoding.nifty.common.minecraft.entity.living.golem.IronGolem;
 import net.netcoding.nifty.common.minecraft.entity.living.golem.Shulker;
 import net.netcoding.nifty.common.minecraft.entity.living.golem.SnowGolem;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.Villager;
 import net.netcoding.nifty.common.minecraft.entity.living.monster.*;
 import net.netcoding.nifty.common.minecraft.entity.projectile.*;
+import net.netcoding.nifty.common.minecraft.entity.projectile.arrow.Arrow;
+import net.netcoding.nifty.common.minecraft.entity.projectile.arrow.SpectralArrow;
+import net.netcoding.nifty.common.minecraft.entity.projectile.arrow.TippedArrow;
 import net.netcoding.nifty.common.minecraft.entity.projectile.explosive.DragonFireball;
 import net.netcoding.nifty.common.minecraft.entity.projectile.explosive.LargeFireball;
 import net.netcoding.nifty.common.minecraft.entity.projectile.explosive.SmallFireball;
 import net.netcoding.nifty.common.minecraft.entity.projectile.explosive.WitherSkull;
+import net.netcoding.nifty.common.minecraft.entity.projectile.potion.LingeringPotion;
+import net.netcoding.nifty.common.minecraft.entity.projectile.potion.SplashPotion;
 import net.netcoding.nifty.common.minecraft.entity.vehicle.Boat;
 import net.netcoding.nifty.common.minecraft.entity.vehicle.minecart.CommandMinecart;
 import net.netcoding.nifty.common.minecraft.entity.vehicle.minecart.ExplosiveMinecart;
@@ -36,7 +41,7 @@ import net.netcoding.nifty.common.minecraft.entity.vehicle.minecart.StorageMinec
 import net.netcoding.nifty.common.minecraft.entity.weather.LightningStrike;
 import net.netcoding.nifty.common.minecraft.entity.weather.Weather;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.item.potion.PotionEffectType;
+import net.netcoding.nifty.common.minecraft.potion.PotionEffectType;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
 import net.netcoding.nifty.core.util.StringUtil;
@@ -193,7 +198,7 @@ public enum EntityType {
 	/**
 	 * A fishing line and bobber.
 	 */
-	FISHING_HOOK(null, Fish.class, -1, false),
+	FISHING_HOOK(null, FishHook.class, -1, false),
 	/**
 	 * A bolt of lightning.
 	 * <p>
@@ -217,6 +222,7 @@ public enum EntityType {
 	private final Behavior behavior;
 	private final boolean independent;
 	private final boolean living;
+	private boolean supported = false;
 
 	static {
 		for (EntityType type : values()) {
@@ -273,6 +279,10 @@ public enum EntityType {
 		return (id > Short.MAX_VALUE ? null : BY_ID.get((short)id));
 	}
 
+	public Behavior getBehavior() {
+		return this.behavior;
+	}
+
 	public Class<? extends Entity> getEntityClass() {
 		return this.clazz;
 	}
@@ -292,7 +302,11 @@ public enum EntityType {
 	 * @return The raw type id.
 	 */
 	public short getTypeId() {
-		return typeId;
+		return this.typeId;
+	}
+
+	public boolean isAlive() {
+		return this.living;
 	}
 
 	/**
@@ -304,11 +318,27 @@ public enum EntityType {
 	 * @return False if the entity type cannot be spawned
 	 */
 	public boolean isSpawnable() {
-		return independent;
+		return this.independent;
 	}
 
-	public boolean isAlive() {
-		return living;
+	/**
+	 * Checks if this entity is valid for the current minecraft version.
+	 * <p>
+	 * Example: {@link PolarBear} is 1.10 only.
+	 *
+	 * @return True if the entity is valid.
+	 */
+	public boolean isSupported() {
+		return this.supported;
+	}
+
+	public Entity spawn(Location location) {
+		Entity entity = location.getWorld().spawn(location, this.getEntityClass());
+
+		if (entity == null)
+			throw new RuntimeException(StringUtil.format("Unable to spawn {{0}} at {{1}}!", this.getName(), location));
+
+		return entity;
 	}
 
 	public enum Behavior {

@@ -2,7 +2,7 @@ package net.netcoding.nifty.common.api.signs;
 
 import net.netcoding.nifty.common.api.nbt.NbtCompound;
 import net.netcoding.nifty.common.minecraft.block.Block;
-import net.netcoding.nifty.common.minecraft.block.Sign;
+import net.netcoding.nifty.common.minecraft.block.state.Sign;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
 import net.netcoding.nifty.core.util.RegexUtil;
@@ -31,7 +31,7 @@ public final class SignInfo {
 	}
 
 	static SignInfo fromCompound(World world, NbtCompound compound) {
-		return new SignInfo((Sign)new Location(world, compound.<Integer>get("x"), compound.<Integer>get("y"), compound.<Integer>get("z")).getBlock().getState());
+		return new SignInfo((Sign)Location.of(world, compound.<Integer>get("x"), compound.<Integer>get("y"), compound.<Integer>get("z")).getBlock().getState());
 	}
 
 	/**

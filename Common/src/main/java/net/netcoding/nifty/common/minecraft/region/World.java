@@ -8,12 +8,16 @@ import net.netcoding.nifty.common.minecraft.entity.EntityType;
 import net.netcoding.nifty.common.minecraft.entity.Item;
 import net.netcoding.nifty.common.minecraft.entity.block.FallingBlock;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
+import net.netcoding.nifty.common.minecraft.entity.projectile.arrow.Arrow;
 import net.netcoding.nifty.common.minecraft.entity.weather.LightningStrike;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.common.minecraft.material.types.TreeType;
 import net.netcoding.nifty.common.minecraft.sound.Sound;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.misc.Vector;
 
 import java.io.File;
 import java.util.Arrays;
@@ -48,9 +52,11 @@ public interface World {
 
 	boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks);
 
-	Item dropItem(Location location, ItemStack itemStack);
+	Item dropItem(Location location, ItemStack item);
 
-	Item dropItemNaturally(Location location, ItemStack itemStack);
+	Item dropItemNaturally(Location location, ItemStack item);
+
+	boolean generateTree(Location location, TreeType type);
 
 	boolean getAllowAnimals();
 
@@ -98,8 +104,7 @@ public interface World {
 
 	List<Entity> getEntities();
 
-	@SuppressWarnings("unchecked")
-	<T extends Entity> Collection<Entity> getEntitiesByClass(Class<T> clazz);
+	<T extends Entity> Collection<T> getEntitiesByClass(Class<T> clazz);
 
 	@SuppressWarnings("unchecked")
 	Collection<Entity> getEntitiesByClasses(Class<? extends Entity>... clazzes);
@@ -130,7 +135,7 @@ public interface World {
 
 	List<LivingEntity> getLivingEntities();
 
-	Chunk[] getLoadedChunks();
+	Collection<Chunk> getLoadedChunks();
 
 	int getMaxHeight();
 
@@ -138,7 +143,7 @@ public interface World {
 
 	String getName();
 
-	Collection<Entity> getNearbyEntities(Location location, double x, double y, double z);
+	List<Entity> getNearbyEntities(Location location, double x, double y, double z);
 
 	List<Player> getPlayers();
 
@@ -179,7 +184,7 @@ public interface World {
 	}
 
 	default boolean isChunkLoaded(int x, int z) {
-		return Arrays.stream(this.getLoadedChunks()).anyMatch(chunk -> chunk.getX() == x && chunk.getZ() == z);
+		return this.getLoadedChunks().stream().anyMatch(chunk -> chunk.getX() == x && chunk.getZ() == z);
 	}
 
 	boolean isChunkInUse(int x, int z);
@@ -200,11 +205,15 @@ public interface World {
 
 	boolean loadChunk(int x, int z, boolean generate);
 
-	void playEffect(Location location, Effect effect, int data);
+	default void playEffect(Location location, Effect effect, int data) {
+		this.playEffect(location, effect, data, 64);
+	}
 
 	void playEffect(Location location, Effect effect, int data, int radius);
 
-	<T> void playEffect(Location location, Effect effect, T data);
+	default <T> void playEffect(Location location, Effect effect, T data) {
+		this.playEffect(location, effect, data, 64);
+	}
 
 	<T> void playEffect(Location location, Effect effect, T data, int radius);
 
@@ -266,6 +275,12 @@ public interface World {
 	void setWeatherDuration(int value);
 
 	<T extends Entity> T spawn(Location location, Class<T> entity);
+
+	default Arrow spawnArrow(Location location, Vector direction, float speed, float spread) {
+		return this.spawnArrow(location, direction, speed, spread, Arrow.class);
+	}
+
+	<T extends Arrow> T spawnArrow(Location location, Vector direction, float speed, float spread, Class<T> type);
 
 	Entity spawnEntity(Location location, EntityType type);
 
@@ -347,19 +362,13 @@ public interface World {
 	boolean unloadChunkRequest(int x, int z, boolean save);
 
 
-	//Arrow spawnArrow(Location var1, Vector var2, float var3, float var4);
-
-	//<T extends Arrow> T spawnArrow(Location var1, Vector var2, float var3, float var4, Class<T> var5);
-
-	//boolean generateTree(Location var1, TreeType var2);
-
-	//boolean generateTree(Location var1, TreeType var2, BlockChangeDelegate var3);
+	//boolean generateTree(Location location, TreeType type, BlockChangeDelegate delegate);
 
 	//ChunkGenerator getGenerator();
 
 	//List<BlockPopulator> getPopulators();
 
-	//ChunkSnapshot getEmptyChunkSnapshot(int var1, int var2, boolean var3, boolean var4);
+	//ChunkSnapshot getEmptyChunkSnapshot(int x, int z, boolean includeBiome, boolean includeBiomeTempRain);
 
 
 	interface Border {
@@ -397,6 +406,7 @@ public interface World {
 		void setWarningDistance(int distance);
 
 		void setWarningTime(int time);
+
 	}
 
 	enum Difficulty {
@@ -406,7 +416,7 @@ public interface World {
 		NORMAL(2),
 		HARD(3);
 
-		private static final ConcurrentMap<Integer, Difficulty> BY_ID = new ConcurrentMap<>();
+		private static final ConcurrentMap<Integer, Difficulty> BY_ID = Concurrent.newMap();
 		private final int value;
 
 		static {
@@ -433,7 +443,7 @@ public interface World {
 		NETHER(-1),
 		THE_END(1);
 
-		private static final ConcurrentMap<Integer, Environment> BY_ID = new ConcurrentMap<>();
+		private static final ConcurrentMap<Integer, Environment> BY_ID = Concurrent.newMap();
 		private final int id;
 
 		static {
@@ -462,7 +472,7 @@ public interface World {
 		AMPLIFIED("AMPLIFIED"),
 		CUSTOMIZED("CUSTOMIZED");
 
-		private static final ConcurrentMap<String, Type> BY_NAME = new ConcurrentMap<>();
+		private static final ConcurrentMap<String, Type> BY_NAME = Concurrent.newMap();
 		private final String name;
 
 		static {

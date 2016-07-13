@@ -8,6 +8,7 @@ import net.netcoding.nifty.common.minecraft.inventory.item.meta.ItemMeta;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.util.ByteUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.security.KeyPair;
@@ -25,8 +26,8 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 
 	private static final ItemStack DEFAULT_PAGE_LEFT;
 	private static final ItemStack DEFAULT_PAGE_RIGHT;
-	private final ConcurrentMap<Integer, ItemStack> items = new ConcurrentMap<>();
-	private final ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+	private final ConcurrentMap<Integer, ItemStack> items = Concurrent.newMap();
+	private final ConcurrentMap<String, Object> metadata = Concurrent.newMap();
 	private final PrivateKey privateKey;
 	private final PublicKey publicKey;
 	private int totalSlots = -1;
@@ -52,7 +53,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 		} else
 			DEFAULT_PAGE_LEFT = ItemStack.of(Material.BONE);
 
-		ItemMeta pageLeftMeta = DEFAULT_PAGE_LEFT.getItemMeta(true);
+		ItemMeta pageLeftMeta = DEFAULT_PAGE_LEFT.getItemMeta();
 		pageLeftMeta.setDisplayName("Page Left");
 		DEFAULT_PAGE_LEFT.setItemMeta(pageLeftMeta);
 
@@ -63,7 +64,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 		} else
 			DEFAULT_PAGE_RIGHT = ItemStack.of(Material.ARROW);
 
-		ItemMeta pageRightMeta = DEFAULT_PAGE_RIGHT.getItemMeta(true);
+		ItemMeta pageRightMeta = DEFAULT_PAGE_RIGHT.getItemMeta();
 		pageRightMeta.setDisplayName("Page Right");
 		DEFAULT_PAGE_RIGHT.setItemMeta(pageRightMeta);
 	}
@@ -159,7 +160,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 					json.add(itemJson);
 				}
 
-				//NiftyBukkit.getPlugin().getLog().console("SIGN: {0}", json.toString());
+				//Nifty.getLog().console("SIGN: {0}", json.toString());
 				byte[] bytes = ByteUtil.toByteArray(json.toString());
 				signature.update(bytes);
 				signatureBytes = signature.sign();
@@ -171,7 +172,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 	}
 
 	public final Map<String, Object> getAllMetadata() {
-		ConcurrentMap<String, Object> metadata = new ConcurrentMap<>();
+		ConcurrentMap<String, Object> metadata = Concurrent.newMap();
 		metadata.putAll(this.metadata);
 		return Collections.unmodifiableMap(metadata);
 	}
@@ -318,10 +319,10 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 	}
 
 	void update(FakeInventoryFrame frame) {
-		ConcurrentMap<Integer, ItemStack> items = new ConcurrentMap<>(frame.items);
+		ConcurrentMap<Integer, ItemStack> items = Concurrent.newMap(frame.items);
 		this.items.clear();
 		this.putAll(items);
-		ConcurrentMap<String, Object> metadata = new ConcurrentMap<>(frame.metadata);
+		ConcurrentMap<String, Object> metadata = Concurrent.newMap(frame.metadata);
 		this.metadata.clear();
 		this.metadata.putAll(metadata);
 		this.setTotalSlots(frame.totalSlots);
@@ -356,7 +357,7 @@ public abstract class FakeInventoryFrame implements Iterable<ItemStack> {
 					json.add(itemJson);
 				}
 
-				//NiftyBukkit.getPlugin().getLog().console("VERIFY: {0}", json.toString());
+				//Nifty.getLog().console("VERIFY: {0}", json.toString());
 				byte[] bytes = ByteUtil.toByteArray(json.toString());
 				signature.update(bytes);
 				verified = signature.verify(signatureBytes);

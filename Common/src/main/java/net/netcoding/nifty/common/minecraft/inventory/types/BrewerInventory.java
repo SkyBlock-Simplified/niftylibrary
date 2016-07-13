@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.inventory.types;
 
-import net.netcoding.nifty.common.minecraft.block.BrewingStand;
+import net.netcoding.nifty.common.minecraft.block.state.BrewingStand;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 

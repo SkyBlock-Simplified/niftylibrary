@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.entity.vehicle.minecart;
 
-import net.netcoding.nifty.common.minecraft.command.source.CommandSource;
+import net.netcoding.nifty.common.minecraft.command.CommandSource;
 
 public interface CommandMinecart extends Minecart, CommandSource {
 

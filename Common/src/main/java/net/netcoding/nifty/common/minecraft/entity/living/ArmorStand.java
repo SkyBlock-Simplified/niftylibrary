@@ -118,11 +118,11 @@ public interface ArmorStand extends LivingEntity {
 	boolean isVisible();
 
 	/**
-	 * Sets whether this armor stand has arms.
+	 * Sets whether this armor stand has value.
 	 *
-	 * @param arms Whether this has arms or not.
+	 * @param value Whether this has value or not.
 	 */
-	void setArms(boolean arms);
+	void setArms(boolean value);
 
 	/**
 	 * Sets the armor stand's body's current pose.
@@ -134,9 +134,9 @@ public interface ArmorStand extends LivingEntity {
 	/**
 	 * Sets whether the armor stand has a base plate.
 	 *
-	 * @param basePlate Whether is has a base plate.
+	 * @param value Whether is has a base plate.
 	 */
-	void setBasePlate(boolean basePlate);
+	void setBasePlate(boolean value);
 
 	/**
 	 * Sets the item currently being worn by the armor stand on its feet.
@@ -197,16 +197,16 @@ public interface ArmorStand extends LivingEntity {
 	/**
 	 * Sets whether this armor stand is scaled down.
 	 *
-	 * @param small Whether this is scaled down.
+	 * @param value Whether this is scaled down.
 	 */
-	void setSmall(boolean small);
+	void setSmall(boolean value);
 
 	/**
-	 * Sets whether this armor stand is a marker, meaning it has a very small collision box.
+	 * Sets whether this armor stand is a value, meaning it has a very small collision box.
 	 *
-	 * @param marker Whether this is a marker.
+	 * @param value Whether this is a value.
 	 */
-	void setMarker(boolean marker);
+	void setMarker(boolean value);
 
 	/**
 	 * Sets the armor stand's right arm's current pose.
@@ -223,10 +223,10 @@ public interface ArmorStand extends LivingEntity {
 	void setRightLegPose(Vector pose);
 
 	/**
-	 * Sets whether the armor stand should be visible or not.
+	 * Sets whether the armor stand should be value or not.
 	 *
-	 * @param visible Whether the stand is visible or not.
+	 * @param value Whether the stand is value or not.
 	 */
-	void setVisible(boolean visible);
+	void setVisible(boolean value);
 
 }

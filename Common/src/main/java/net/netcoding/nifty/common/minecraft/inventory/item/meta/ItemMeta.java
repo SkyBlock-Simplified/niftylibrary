@@ -3,9 +3,10 @@ package net.netcoding.nifty.common.minecraft.inventory.item.meta;
 import net.netcoding.nifty.common.minecraft.inventory.ItemFlag;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
 import net.netcoding.nifty.core.util.ListUtil;
-import net.netcoding.nifty.core.util.misc.Serializable;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.misc.Serializable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,10 +75,15 @@ public interface ItemMeta extends Cloneable, Serializable {
 
 	boolean removeEnchant(Enchantment enchantment);
 
-	void removeItemFlags(ItemFlag... flags);
+	default void removeItemFlags(ItemFlag... flags) {
+		this.removeItemFlags(Arrays.asList(flags));
+	}
 
+	void removeItemFlags(Collection<? extends ItemFlag> flags);
+
+	@Override
 	default Map<String, Object> serialize() {
-		ConcurrentMap<String, Object> result = new ConcurrentMap<>();
+		ConcurrentMap<String, Object> result = Concurrent.newMap();
 		result.put("name", this.getDisplayName());
 		result.put("lore", this.getLore());
 

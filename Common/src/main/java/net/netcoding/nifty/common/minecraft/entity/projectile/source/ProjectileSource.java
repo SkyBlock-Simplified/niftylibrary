@@ -15,7 +15,9 @@ public interface ProjectileSource {
 	 * @param projectile Class of the projectile to launch.
 	 * @return The launched projectile.
 	 */
-	<T extends Projectile> T launchProjectile(Class<? extends T> projectile);
+	default <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
+		return this.launchProjectile(projectile, null);
+	}
 
 	/**
 	 * Launches a {@link Projectile} from the ProjectileSource with an

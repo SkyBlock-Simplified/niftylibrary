@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public enum GrassSpecies {
@@ -17,7 +18,7 @@ public enum GrassSpecies {
 	 */
 	FERN_LIKE(0x2);
 
-	private static final ConcurrentMap<Byte, GrassSpecies> BY_DATA = new ConcurrentMap<>();
+	private static final ConcurrentMap<Byte, GrassSpecies> BY_DATA = Concurrent.newMap();
 	private final byte data;
 
 	static {

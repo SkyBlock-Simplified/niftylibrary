@@ -7,6 +7,7 @@ public interface PrepareItemCraftEvent extends InventoryEvent {
 
 	Recipe getRecipe();
 
+	@Override
 	CraftingInventory getInventory();
 
 	boolean isRepair();

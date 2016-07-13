@@ -11,6 +11,7 @@ import net.netcoding.nifty.common.minecraft.material.MaterialData;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.api.builder.BuilderCore;
 import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.misc.Serializable;
 
@@ -195,7 +196,7 @@ public interface ItemStack extends Cloneable, Serializable {
 	}
 
 	static ItemStack of(ItemStack item) {
-		return builder().fromItemStack(item).build();
+		return builder().fromItem(item).build();
 	}
 
 	int removeEnchant(Enchantment enchantment);
@@ -222,7 +223,7 @@ public interface ItemStack extends Cloneable, Serializable {
 
 	@Override
 	default Map<String, Object> serialize() {
-		ConcurrentMap<String, Object> result = new ConcurrentMap<>();
+		ConcurrentMap<String, Object> result = Concurrent.newMap();
 		result.put("id", this.getType().name() + (this.getDurability() > 0 ? ":" + this.getDurability() : ""));
 		result.put("amount", this.getAmount());
 		result.put("meta", this.getItemMeta().serialize());
@@ -246,7 +247,7 @@ public interface ItemStack extends Cloneable, Serializable {
 			this.removeGlow();
 	}
 
-	boolean setItemMeta(ItemMeta itemMeta);
+	boolean setItemMeta(ItemMeta meta);
 
 	void setType(Material material);
 
@@ -260,11 +261,15 @@ public interface ItemStack extends Cloneable, Serializable {
 
 		Builder clearLore();
 
+		Builder clearNbt();
+
 		Builder durability(short durability);
 
 		Builder enchant(Enchantment enchantment, int level);
 
-		Builder fromItemStack(ItemStack item);
+		Builder fromItem(ItemStack item);
+
+		Builder glow(boolean value);
 
 		default Builder lore(String... lore) {
 			return this.lore(Arrays.asList(lore));
@@ -273,6 +278,10 @@ public interface ItemStack extends Cloneable, Serializable {
 		Builder lore(Collection<String> lore);
 
 		Builder name(String displayName);
+
+		Builder nbt(String key, Object value);
+
+		Builder nbtPath(String path, Object value);
 
 		Builder type(Material material);
 

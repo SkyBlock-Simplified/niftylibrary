@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.material;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 public interface Crops extends MaterialData {
@@ -77,7 +78,7 @@ public interface Crops extends MaterialData {
 		 */
 		RIPE(0x7);
 
-		private static final ConcurrentMap<Byte, State> BY_DATA = new ConcurrentMap<>();
+		private static final ConcurrentMap<Byte, State> BY_DATA = Concurrent.newMap();
 		private final byte data;
 
 		static {

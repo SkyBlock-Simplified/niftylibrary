@@ -1,15 +1,15 @@
 package net.netcoding.nifty.common.api.inventory;
 
 import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.api.MinecraftListener;
-import net.netcoding.nifty.common.api.Event;
 import net.netcoding.nifty.common.api.inventory.events.FakeInventoryClickEvent;
 import net.netcoding.nifty.common.api.inventory.events.FakeInventoryCloseEvent;
 import net.netcoding.nifty.common.api.inventory.events.FakeInventoryOpenEvent;
 import net.netcoding.nifty.common.api.inventory.item.FakeItem;
+import net.netcoding.nifty.common.api.plugin.Event;
+import net.netcoding.nifty.common.api.plugin.MinecraftListener;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
-import net.netcoding.nifty.common.minecraft.entity.living.HumanEntity;
-import net.netcoding.nifty.common.minecraft.entity.living.Player;
+import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
+import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.event.EventResult;
 import net.netcoding.nifty.common.minecraft.event.inventory.InventoryClickEvent;
 import net.netcoding.nifty.common.minecraft.event.inventory.InventoryCloseEvent;
@@ -19,8 +19,9 @@ import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.common.mojang.BukkitMojangProfile;
+import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
@@ -33,19 +34,19 @@ import java.util.stream.Collectors;
 @SuppressWarnings("deprecation")
 public class FakeInventory extends FakeInventoryFrame {
 
-	private static final transient ConcurrentMap<UUID, ConcurrentMap<BukkitMojangProfile, FakeInventoryInfo>> OPENED = new ConcurrentMap<>();
+	private static final transient ConcurrentMap<UUID, ConcurrentMap<MinecraftMojangProfile, FakeInventoryInfo>> OPENED = Concurrent.newMap();
 	private final UUID uniqueId = UUID.randomUUID();
 	private final transient FakeInventoryListener listener;
 	private final FakeItem fakeItem;
 
 	public FakeInventory(MinecraftPlugin plugin, FakeInventoryListener listener) {
-		OPENED.put(this.getUniqueId(), new ConcurrentMap<>());
+		OPENED.put(this.getUniqueId(), Concurrent.newMap());
 		this.listener = listener;
 		this.fakeItem = new FakeItem(plugin, listener);
 		new FakeMinecraftListener(plugin);
 	}
 
-	public final void close(BukkitMojangProfile profile) {
+	public final void close(MinecraftMojangProfile profile) {
 		if (this.isOpen(profile))
 			profile.getOfflinePlayer().getPlayer().closeInventory();
 	}
@@ -99,7 +100,7 @@ public class FakeInventory extends FakeInventoryFrame {
 					inventory.setItem(index + space, iterator.next());
 			}
 		} else {
-			ConcurrentList<Integer> keys = new ConcurrentList<>(items.keySet());
+			ConcurrentList<Integer> keys = Concurrent.newList(items.keySet());
 			int push = 0;
 
 			for (int i = 0; i < items.size(); i++) {
@@ -144,12 +145,12 @@ public class FakeInventory extends FakeInventoryFrame {
 		return this.fakeItem.getItemOpenerSlot();
 	}
 
-	public final BukkitMojangProfile getTarget(BukkitMojangProfile profile) {
+	public final MinecraftMojangProfile getTarget(MinecraftMojangProfile profile) {
 		return this.isOpen(profile) ? this.getOpened().get(profile).getTarget() : profile;
 	}
 
-	public static BukkitMojangProfile getTargetAnywhere(BukkitMojangProfile profile) {
-		Collection<ConcurrentMap<BukkitMojangProfile, FakeInventoryInfo>> instances = OPENED.values();
+	public static MinecraftMojangProfile getTargetAnywhere(MinecraftMojangProfile profile) {
+		Collection<ConcurrentMap<MinecraftMojangProfile, FakeInventoryInfo>> instances = OPENED.values();
 		instances = instances.stream().filter(x -> x.containsKey(profile)).collect(Collectors.toSet());
 
 		if (instances.size() == 1)
@@ -158,10 +159,10 @@ public class FakeInventory extends FakeInventoryFrame {
 		return profile;
 	}
 
-	public final BukkitMojangProfile getTargeter(BukkitMojangProfile profile) {
-		ConcurrentMap<BukkitMojangProfile, FakeInventoryInfo> opened = this.getOpened();
+	public final MinecraftMojangProfile getTargeter(MinecraftMojangProfile profile) {
+		ConcurrentMap<MinecraftMojangProfile, FakeInventoryInfo> opened = this.getOpened();
 
-		for (Map.Entry<BukkitMojangProfile, FakeInventoryInfo> info : opened.entrySet()) {
+		for (Map.Entry<MinecraftMojangProfile, FakeInventoryInfo> info : opened.entrySet()) {
 			if (info.getValue().getTarget().equals(profile))
 				return info.getKey();
 		}
@@ -173,28 +174,28 @@ public class FakeInventory extends FakeInventoryFrame {
 		return this.uniqueId;
 	}
 
-	public FakeInventoryInstance getInstance(BukkitMojangProfile profile) {
+	public FakeInventoryInstance getInstance(MinecraftMojangProfile profile) {
 		if (this.isOpen(profile))
 			return new FakeInventoryInstance(this.getOpened().get(profile).getFrame(), this, profile);
 		else
 			return this.newInstance(profile);
 	}
 
-	public final void giveItemOpener(BukkitMojangProfile profile) {
+	public final void giveItemOpener(MinecraftMojangProfile profile) {
 		this.fakeItem.giveItemOpener(profile);
 	}
 
-	public ConcurrentMap<BukkitMojangProfile, FakeInventoryInfo> getOpened() {
-		ConcurrentMap<BukkitMojangProfile, FakeInventoryInfo> opened = OPENED.get(this.getUniqueId());
+	public ConcurrentMap<MinecraftMojangProfile, FakeInventoryInfo> getOpened() {
+		ConcurrentMap<MinecraftMojangProfile, FakeInventoryInfo> opened = OPENED.get(this.getUniqueId());
 		opened.keySet().stream().filter(profile -> !profile.isOnlineLocally()).forEach(opened::remove);
 		return opened;
 	}
 
-	public final boolean isOpen(BukkitMojangProfile profile) {
+	public final boolean isOpen(MinecraftMojangProfile profile) {
 		return profile.isOnlineLocally() && this.getOpened().containsKey(profile);
 	}
 
-	public static boolean isOpenAnywhere(BukkitMojangProfile profile) {
+	public static boolean isOpenAnywhere(MinecraftMojangProfile profile) {
 		for (UUID uniqueId : OPENED.keySet()) {
 			if (OPENED.get(uniqueId).containsKey(profile))
 				return true;
@@ -211,7 +212,7 @@ public class FakeInventory extends FakeInventoryFrame {
 		return this.fakeItem.isItemOpenerDestructable();
 	}
 
-	public final boolean isTargeted(BukkitMojangProfile profile) {
+	public final boolean isTargeted(MinecraftMojangProfile profile) {
 		for (FakeInventoryInfo info : this.getOpened().values()) {
 			if (info.getTarget().equals(profile))
 				return true;
@@ -220,7 +221,7 @@ public class FakeInventory extends FakeInventoryFrame {
 		return false;
 	}
 
-	public FakeInventoryInstance newInstance(BukkitMojangProfile profile) {
+	public FakeInventoryInstance newInstance(MinecraftMojangProfile profile) {
 		FakeInventoryInstance instance = new FakeInventoryInstance(this, profile);
 		instance.setAllowEmpty(this.isAllowEmpty());
 		instance.setAutoCenter(this.isAutoCentered());
@@ -229,15 +230,15 @@ public class FakeInventory extends FakeInventoryFrame {
 		return instance;
 	}
 
-	public void open(BukkitMojangProfile profile) {
+	public void open(MinecraftMojangProfile profile) {
 		this.open(profile, (this.isOpen(profile) ? this.getTarget(profile) : profile));
 	}
 
-	public void open(BukkitMojangProfile profile, BukkitMojangProfile target) {
+	public void open(MinecraftMojangProfile profile, MinecraftMojangProfile target) {
 		this.open(profile, target, this);
 	}
 
-	void open(BukkitMojangProfile profile, BukkitMojangProfile target, FakeInventoryFrame frame) {
+	void open(MinecraftMojangProfile profile, MinecraftMojangProfile target, FakeInventoryFrame frame) {
 		if (frame.isAllowEmpty() || !frame.getItems().isEmpty()) {
 			if (profile.isOnlineLocally() && target.isOnlineLocally()) {
 				Player viewerPlayer = profile.getOfflinePlayer().getPlayer();
@@ -264,17 +265,17 @@ public class FakeInventory extends FakeInventoryFrame {
 		}
 	}
 
-	public final void removeItemOpener(BukkitMojangProfile profile) {
+	public final void removeItemOpener(MinecraftMojangProfile profile) {
 		this.fakeItem.removeItemOpener(profile);
 	}
 
 	public final void reopenAll() {
-		for (Map.Entry<BukkitMojangProfile, FakeInventoryInfo> instance : this.getOpened().entrySet())
+		for (Map.Entry<MinecraftMojangProfile, FakeInventoryInfo> instance : this.getOpened().entrySet())
 			this.open(instance.getKey(), instance.getValue().getTarget(), instance.getValue().getFrame());
 	}
 
 	public final void reopenAll(FakeInventoryFrame frame) {
-		for (BukkitMojangProfile profile : this.getOpened().keySet())
+		for (MinecraftMojangProfile profile : this.getOpened().keySet())
 			this.open(profile, this.getTarget(profile), frame);
 	}
 
@@ -304,8 +305,8 @@ public class FakeInventory extends FakeInventoryFrame {
 		public void onInventoryClick(InventoryClickEvent event) {
 			if (!(event.getWhoClicked() instanceof Player)) return;
 			if (InventoryType.SlotType.OUTSIDE == event.getSlotType()) return;
-			final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
-			final BukkitMojangProfile target = FakeInventory.this.getTarget(profile);
+			final MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getWhoClicked());
+			final MinecraftMojangProfile target = FakeInventory.this.getTarget(profile);
 			final ItemStack firstClickItem = getClickedItem(event);
 			final ItemStack placeClickItem = getClickedItem(event, false);
 			final Player player = profile.getOfflinePlayer().getPlayer();
@@ -461,7 +462,7 @@ public class FakeInventory extends FakeInventoryFrame {
 			HumanEntity entity = event.getPlayer();
 
 			if (entity instanceof Player) {
-				final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getPlayer());
+				final MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getPlayer());
 				Player player = profile.getOfflinePlayer().getPlayer();
 				player.updateInventory();
 
@@ -483,7 +484,7 @@ public class FakeInventory extends FakeInventoryFrame {
 			HumanEntity entity = event.getPlayer();
 
 			if (entity instanceof Player) {
-				final BukkitMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getPlayer());
+				final MinecraftMojangProfile profile = Nifty.getMojangRepository().searchByPlayer((Player)event.getPlayer());
 
 				if (FakeInventory.this.isOpen(profile)) {
 					FakeInventoryOpenEvent myEvent = new FakeInventoryOpenEvent(profile, event.getInventory());

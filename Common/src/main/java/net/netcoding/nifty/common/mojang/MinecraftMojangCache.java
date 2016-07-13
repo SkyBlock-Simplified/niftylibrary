@@ -1,10 +1,10 @@
 package net.netcoding.nifty.common.mojang;
 
-import net.netcoding.nifty.common.api.MinecraftHelper;
+import net.netcoding.nifty.common.api.plugin.MinecraftHelper;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common.minecraft.OfflinePlayer;
 
-public class MinecraftMojangCache<T extends BukkitMojangProfile> extends MinecraftHelper {
+public class MinecraftMojangCache<T extends MinecraftMojangProfile> extends MinecraftHelper {
 
 	private final T profile;
 
@@ -17,12 +17,12 @@ public class MinecraftMojangCache<T extends BukkitMojangProfile> extends Minecra
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (this == obj) return true;
-		BukkitMojangProfile profile = null;
+		MinecraftMojangProfile profile = null;
 
 		if (obj instanceof MinecraftMojangCache)
 			profile = ((MinecraftMojangCache)obj).getProfile();
-		else if (obj instanceof BukkitMojangProfile)
-			profile = (BukkitMojangProfile)obj;
+		else if (obj instanceof MinecraftMojangProfile)
+			profile = (MinecraftMojangProfile)obj;
 
 		return this.getProfile().equals(profile);
 	}

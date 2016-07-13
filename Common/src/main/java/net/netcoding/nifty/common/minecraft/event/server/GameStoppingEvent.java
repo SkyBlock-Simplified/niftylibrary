@@ -1,5 +1,5 @@
 package net.netcoding.nifty.common.minecraft.event.server;
 
-public interface GameStoppingEvent extends GameEvent {
+public final class GameStoppingEvent implements GameEvent {
 
 }

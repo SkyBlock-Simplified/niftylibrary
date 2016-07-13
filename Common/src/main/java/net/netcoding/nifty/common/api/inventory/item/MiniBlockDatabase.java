@@ -6,16 +6,13 @@ import net.netcoding.nifty.core.util.misc.CSVStorage;
 public final class MiniBlockDatabase extends CSVStorage {
 
 	// https://www.spigotmc.org/resources/mini-blocks-library.9155/
-	private static MiniBlockDatabase INSTANCE;
+	private static final MiniBlockDatabase INSTANCE = new MiniBlockDatabase();
 
 	private MiniBlockDatabase() {
-		super(Nifty.getPlugin().getPluginDescription().getDataFolder(), "miniblocks");
+		super(Nifty.getPlugin().getDesc().getDataFolder(), "miniblocks");
 	}
 
 	public static MiniBlockDatabase getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new MiniBlockDatabase();
-
 		return INSTANCE;
 	}
 

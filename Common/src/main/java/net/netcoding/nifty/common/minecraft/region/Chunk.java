@@ -1,17 +1,19 @@
 package net.netcoding.nifty.common.minecraft.region;
 
 import net.netcoding.nifty.common.minecraft.block.Block;
-import net.netcoding.nifty.common.minecraft.block.BlockState;
+import net.netcoding.nifty.common.minecraft.block.state.BlockState;
 import net.netcoding.nifty.common.minecraft.entity.Entity;
+
+import java.util.Set;
 
 @SuppressWarnings("deprecation")
 public interface Chunk {
 
 	Block getBlock(int var1, int var2, int var3);
 
-	Entity[] getEntities();
+	Set<Entity> getEntities();
 
-	BlockState[] getTileEntities();
+	Set<BlockState> getTileEntities();
 
 	World getWorld();
 
