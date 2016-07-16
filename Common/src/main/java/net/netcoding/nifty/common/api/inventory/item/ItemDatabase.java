@@ -12,19 +12,14 @@ import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.util.misc.CSVStorage;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class ItemDatabase extends CSVStorage {
 
 	private static final transient Pattern SPLIT_PATTERN = Pattern.compile("((.*)[:+',;.](\\d+))");
-	private final ConcurrentLinkedMap<String, ItemData> items = new ConcurrentLinkedMap<>();
+	private final ConcurrentLinkedMap<String, ItemData> items = Concurrent.newLinkedMap();
 
 	protected ItemDatabase() {
 		super(Nifty.getPlugin().getDataFolder(), "items");
@@ -171,48 +166,39 @@ public abstract class ItemDatabase extends CSVStorage {
 		return this.parse(itemColonList.split(",(?![^\\[]*\\])"));
 	}
 
+	@Override
+	protected final void preReload() {
+		this.items.clear();
+	}
+
 	public final Set<String> primaryNames() {
 		return Collections.unmodifiableSet(this.items.keySet());
 	}
 
 	@Override
-	public void reload() {
+	public void processLine(String[] parts) {
+		if (parts.length < 2) return;
+		String itemName = parts[0].toLowerCase(Locale.ENGLISH);
+		if (!NumberUtil.isNumber(parts[1])) return;
+		final int numeric = Integer.parseInt(parts[1]);
+		if (parts.length > 2) parts[2] = NumberUtil.isNumber(parts[2]) ? parts[2] : "0";
+		final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
+		if (numeric < 0 || data < 0) return;
+
 		try {
-			final List<String> lines = this.getLines();
-			if (lines.isEmpty()) return;
-			this.items.clear();
+			Material material = Material.getMaterial(numeric);
+			if (numeric > 0 && Material.AIR == material) return;
+			ItemStack itemStack = ItemStack.builder().type(material, false).type(data).build();
+			String primaryName = itemStack.getType().name();
+			ItemData itemData;
 
-			for (String line : lines) {
-				line = line.trim().toLowerCase(Locale.ENGLISH);
-				if (!line.isEmpty() && line.charAt(0) == '#') continue;
-				final String[] parts = line.split("[^a-zA-Z0-9]");
-				if (parts.length < 2) continue;
-				String itemName = parts[0].toLowerCase(Locale.ENGLISH);
-				if (!NumberUtil.isNumber(parts[1])) continue;
-				final int numeric = Integer.parseInt(parts[1]);
-				if (parts.length > 2) parts[2] = NumberUtil.isNumber(parts[2]) ? parts[2] : "0";
-				final short data = parts.length > 2 ? Short.parseShort(parts[2]) : 0;
-				if (numeric < 0 || data < 0) continue;
+			if (!this.items.containsKey(primaryName))
+				this.items.put(primaryName, itemData = new ItemData(itemStack.getTypeId(), primaryName));
+			else
+				(itemData = this.items.get(primaryName)).addName(itemName);
 
-				try {
-					Material material = Material.getMaterial(numeric);
-					if (numeric > 0 && Material.AIR == material) continue;
-					ItemStack itemStack = ItemStack.builder().type(material, false).type(data).build();
-					String primaryName = itemStack.getType().name();
-					ItemData itemData;
-
-					if (!this.items.containsKey(primaryName))
-						this.items.put(primaryName, itemData = new ItemData(itemStack.getTypeId(), primaryName));
-					else
-						(itemData = this.items.get(primaryName)).addName(itemName);
-
-					itemData.addDurability(data);
-				} catch (Exception ignore) {
-				}
-			}
-		} catch (IOException ioex) {
-			Nifty.getLog().console("Unable to read ''{0}''!", ioex, this.getLocalFile().getName());
-		}
+			itemData.addDurability(data);
+		} catch (Exception ignore) { }
 	}
 
 }

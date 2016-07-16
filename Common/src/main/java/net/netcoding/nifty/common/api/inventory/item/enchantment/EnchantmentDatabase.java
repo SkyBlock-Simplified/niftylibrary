@@ -3,23 +3,18 @@ package net.netcoding.nifty.common.api.inventory.item.enchantment;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.nifty.core.util.misc.CSVStorage;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.comparator.LengthCompare;
+import net.netcoding.nifty.core.util.misc.CSVStorage;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class EnchantmentDatabase extends CSVStorage {
 
+	private static final transient LengthCompare LENGTH_COMPARE = new LengthCompare();
 	private final transient Map<EnchantmentData, List<String>> names = new HashMap<>();
 	private final transient Map<EnchantmentData, String> primaryName = new HashMap<>();
 
@@ -133,8 +128,32 @@ public abstract class EnchantmentDatabase extends CSVStorage {
 		return this.parse(enchStringList.split("[,\\s]+"));
 	}
 
+	@Override
+	protected final void preReload() {
+		this.names.clear();
+		this.primaryName.clear();
+	}
+
 	public List<String> primaryNames() {
 		return Collections.unmodifiableList(new ArrayList<>(this.primaryName.values()));
+	}
+
+	@Override
+	protected final void processLine(String[] parts) {
+		if (parts.length < 2) return;
+		String enchName = parts[0].toLowerCase(Locale.ENGLISH);
+		final int numeric = Integer.parseInt(parts[1]);
+		EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
+		if (enchData.getEnchantment() == null) return;
+
+		if (!this.names.containsKey(enchData)) {
+			this.names.put(enchData, new ArrayList<>(Collections.singletonList(enchName)));
+			if (enchName.contains("_")) this.names.get(enchData).add(enchName.replace("_", ""));
+			this.primaryName.put(enchData, enchName);
+		} else {
+			this.names.get(enchData).add(enchName);
+			Collections.sort(this.names.get(enchData), LENGTH_COMPARE);
+		}
 	}
 
 	protected abstract void registerEnchantments();
@@ -142,40 +161,6 @@ public abstract class EnchantmentDatabase extends CSVStorage {
 	private void registerEnchantments0() {
 		this.registerEnchantments();
 		Enchantment.stopAcceptingRegistrations();
-	}
-
-	@Override
-	public void reload() {
-		try {
-			List<String> lines = this.getLines();
-			if (lines.isEmpty()) return;
-
-			this.names.clear();
-			this.primaryName.clear();
-			LengthCompare compare = new LengthCompare();
-
-			for (String line : lines) {
-				line = line.trim().toLowerCase(Locale.ENGLISH);
-				if (!line.isEmpty() && line.charAt(0) == '#') continue;
-				final String[] parts = line.split(",");
-				if (parts.length < 2) continue;
-				String enchName = parts[0].toLowerCase(Locale.ENGLISH);
-				final int numeric = Integer.parseInt(parts[1]);
-				EnchantmentData enchData = new EnchantmentData(Enchantment.getById(numeric));
-				if (enchData.getEnchantment() == null) continue;
-
-				if (!this.names.containsKey(enchData)) {
-					this.names.put(enchData, new ArrayList<>(Collections.singletonList(enchName)));
-					if (enchName.contains("_")) this.names.get(enchData).add(enchName.replace("_", ""));
-					this.primaryName.put(enchData, enchName);
-				} else {
-					this.names.get(enchData).add(enchName);
-					Collections.sort(this.names.get(enchData), compare);
-				}
-			}
-		} catch (IOException ioex) {
-			Nifty.getLog().console("Unable to read ''{0}''!", ioex, this.getLocalFile().getName());
-		}
 	}
 
 }
