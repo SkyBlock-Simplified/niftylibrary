@@ -1,10 +1,10 @@
 package net.netcoding.nifty.common.api.inventory;
 
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
+import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.common.Nifty;
-import net.netcoding.nifty.common.minecraft.inventory.types.PlayerInventory;
 
 import java.util.HashMap;
 import java.util.Map;
