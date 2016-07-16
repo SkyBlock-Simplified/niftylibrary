@@ -50,7 +50,7 @@ public final class CraftLocationConverter extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		org.bukkit.Location location = (org.bukkit.Location)obj;
-		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = Concurrent.newLinkedMap();
 		saveMap.put("world", (WILDCARDS.contains(location) ? "%world%" : location.getWorld().getName()));
 		saveMap.put("x", location.getX());
 		saveMap.put("y", location.getY());

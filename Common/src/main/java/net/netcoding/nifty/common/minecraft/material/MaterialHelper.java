@@ -9,18 +9,18 @@ class MaterialHelper {
 	private static final ConcurrentMap<Class<? extends MaterialData>, ConcurrentLinkedList<Material>> TEXTURES = Concurrent.newMap();
 
 	static {
-		TEXTURES.put(MonsterEggs.class, new ConcurrentLinkedList<>(
+		TEXTURES.put(MonsterEggs.class, Concurrent.newLinkedList(
 				Material.STONE,
 		        Material.COBBLESTONE,
 		        Material.SMOOTH_BRICK
 		));
-		TEXTURES.put(SmoothBrick.class, new ConcurrentLinkedList<>(
+		TEXTURES.put(SmoothBrick.class, Concurrent.newLinkedList(
 				Material.STONE,
 		        Material.MOSSY_COBBLESTONE,
 		        Material.COBBLESTONE,
 		        Material.SMOOTH_BRICK
 		));
-		TEXTURES.put(Step.class, new ConcurrentLinkedList<>(
+		TEXTURES.put(Step.class, Concurrent.newLinkedList(
 				Material.STONE,
 				Material.SANDSTONE,
 				Material.WOOD,

@@ -1,7 +1,8 @@
 package net.netcoding.nifty.common.yaml.converters;
 
-import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.Nifty;
+import net.netcoding.nifty.common.minecraft.region.Location;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.yaml.InternalConverter;
 import net.netcoding.nifty.core.yaml.converters.Converter;
@@ -33,7 +34,7 @@ public final class BlockConverter extends Converter {
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		net.netcoding.nifty.common.minecraft.block.Block block = (net.netcoding.nifty.common.minecraft.block.Block) obj;
 		Converter locationConverter = this.getConverter(Location.class);
-		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = Concurrent.newLinkedMap();
 		saveMap.put("id", block.getType() + ((block.getData() > 0) ? ":" + block.getData() : ""));
 		saveMap.put("location", locationConverter.toConfig(Location.class, block.getLocation(), null));
 		return saveMap;

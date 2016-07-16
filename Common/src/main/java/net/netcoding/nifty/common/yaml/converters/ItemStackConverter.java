@@ -6,6 +6,7 @@ import net.netcoding.nifty.common.minecraft.inventory.ItemFlag;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.yaml.InternalConverter;
 import net.netcoding.nifty.core.yaml.converters.Converter;
@@ -69,8 +70,8 @@ public class ItemStackConverter extends Converter {
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		net.netcoding.nifty.common.minecraft.inventory.item.ItemStack item = (net.netcoding.nifty.common.minecraft.inventory.item.ItemStack)obj;
 		ItemMeta meta = item.getItemMeta(true);
-		ConcurrentLinkedMap<String, Object> saveMap = new ConcurrentLinkedMap<>();
-		ConcurrentLinkedMap<String, Object> metaMap = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = Concurrent.newLinkedMap();
+		ConcurrentLinkedMap<String, Object> metaMap = Concurrent.newLinkedMap();
 		List<String> lore = new ArrayList<>();
 		saveMap.put("id", item.getType() + ((item.getDurability() > 0) ? ":" + item.getDurability() : ""));
 		saveMap.put("amount", item.getAmount());
@@ -89,7 +90,7 @@ public class ItemStackConverter extends Converter {
 		}
 
 		if (!meta.getEnchants().isEmpty()) {
-			ConcurrentLinkedMap<String, Integer> enchantments = new ConcurrentLinkedMap<>();
+			ConcurrentLinkedMap<String, Integer> enchantments = Concurrent.newLinkedMap();
 
 			for (Map.Entry<Enchantment, Integer> enchantment : meta.getEnchants().entrySet())
 				enchantments.put(enchantment.getKey().getName(), enchantment.getValue());

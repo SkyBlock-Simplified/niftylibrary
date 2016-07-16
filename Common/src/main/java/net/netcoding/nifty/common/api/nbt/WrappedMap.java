@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.util.*;
@@ -137,7 +138,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	}
 
 	private Iterator<Entry<String, Object>> iterator() {
-		ConcurrentSet<Entry<String, Object>> entrySet = new ConcurrentSet(this.original.entrySet());
+		ConcurrentSet<Entry<String, Object>> entrySet = Concurrent.newSet(this.original.entrySet());
 		entrySet.stream().filter(entry -> DO_NOT_SHOW.contains(entry.getKey())).forEach(entrySet::remove);
 		final Iterator<Entry<String, Object>> proxy = entrySet.iterator();
 

@@ -9,6 +9,7 @@ import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.reflection.MinecraftProtocol;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.meta.CraftItemMeta;
+import org.bukkit.inventory.ItemFlag;
 
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public final class CraftNbtItemCompound extends NbtItemCompound<CraftItemStack> 
 				nmsMeta.setLore(meta.getLore());
 
 				if (MinecraftProtocol.isPost1_7())
-					meta.getItemFlags().stream().forEach(flag -> nmsMeta.addItemFlags(org.bukkit.inventory.ItemFlag.valueOf(flag.name())));
+					meta.getItemFlags().forEach(flag -> nmsMeta.addItemFlags(ItemFlag.valueOf(flag.name())));
 
 				for (Map.Entry<Enchantment, Integer> entry : meta.getEnchants().entrySet())
 					nmsMeta.addEnchant(org.bukkit.enchantments.Enchantment.getByName(entry.getKey().getName()), entry.getValue(), true);

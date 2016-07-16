@@ -6,6 +6,7 @@ import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.core.api.builder.BuilderCore;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.util.misc.Serializable;
 import net.netcoding.nifty.core.util.misc.Vector;
@@ -175,7 +176,7 @@ public interface Location extends Cloneable, Serializable {
 
 	@Override
 	default Map<String, Object> serialize() {
-		ConcurrentLinkedMap<String, Object> data = new ConcurrentLinkedMap<>();
+		ConcurrentLinkedMap<String, Object> data = Concurrent.newLinkedMap();
 		data.put("world", (this.isWildcard() ? "%world%" : (this.getWorld() != null ? this.getWorld().getName() : "")));
 		data.put("x", this.getX());
 		data.put("y", this.getY());

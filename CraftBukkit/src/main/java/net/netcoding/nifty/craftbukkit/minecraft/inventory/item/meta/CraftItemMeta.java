@@ -31,7 +31,7 @@ public class CraftItemMeta implements ItemMeta {
 
 	@Override
 	public void addItemFlags(Collection<? extends ItemFlag> flags) {
-		flags.stream().forEach(flag -> this.getHandle().addItemFlags(org.bukkit.inventory.ItemFlag.valueOf(flag.name())));
+		flags.forEach(flag -> this.getHandle().addItemFlags(org.bukkit.inventory.ItemFlag.valueOf(flag.name())));
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class CraftItemMeta implements ItemMeta {
 
 	@Override
 	public void removeItemFlags(Collection<? extends ItemFlag> flags) {
-		flags.stream().forEach(flag -> this.getHandle().removeItemFlags(org.bukkit.inventory.ItemFlag.valueOf(flag.name())));
+		flags.forEach(flag -> this.getHandle().removeItemFlags(org.bukkit.inventory.ItemFlag.valueOf(flag.name())));
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import net.netcoding.nifty.common.minecraft.potion.PotionEffect;
 import net.netcoding.nifty.common.minecraft.potion.PotionEffectType;
 import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.util.NumberUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.yaml.InternalConverter;
 import net.netcoding.nifty.core.yaml.converters.Converter;
 
@@ -33,7 +35,7 @@ public class PotionEffectConverter extends Converter {
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
 		PotionEffect potion = (PotionEffect)obj;
-		Map<String, Object> saveMap = new HashMap<>();
+		ConcurrentLinkedMap<String, Object> saveMap = Concurrent.newLinkedMap();
 		saveMap.put("name", potion.getType().getName());
 		saveMap.put("duration", potion.getDuration());
 		saveMap.put("amplifier", potion.getAmplifier());

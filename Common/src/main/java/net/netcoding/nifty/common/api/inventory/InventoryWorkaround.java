@@ -5,8 +5,9 @@ import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class InventoryWorkaround {
@@ -49,8 +50,8 @@ public class InventoryWorkaround {
 	// Returns what it couldnt store
 	// Set oversizedStack to below normal stack size to disable oversized stacks
 	public static Map<Integer, ItemStack> addOversizedItems(Inventory inventory, int oversizedStacks, ItemStack... items) {
-		Map<Integer, ItemStack> leftover = new HashMap<>();
-		Map<Material, Integer> lastPartial = new HashMap<>();
+		ConcurrentMap<Integer, ItemStack> leftover = Concurrent.newMap();
+		ConcurrentMap<Material, Integer> lastPartial = Concurrent.newMap();
 		ItemStack[] combined = new ItemStack[items.length];
 
 		for (ItemStack item : items) {
