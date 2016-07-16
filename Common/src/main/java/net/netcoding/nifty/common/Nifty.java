@@ -1,7 +1,7 @@
 package net.netcoding.nifty.common;
 
 import net.netcoding.nifty.common.api.inventory.item.ItemDatabase;
-import net.netcoding.nifty.common.api.inventory.item.MiniBlockDatabase;
+import net.netcoding.nifty.common.api.inventory.item.mini.MiniBlockDatabase;
 import net.netcoding.nifty.common.api.inventory.item.enchantment.EnchantmentDatabase;
 import net.netcoding.nifty.common.api.nbt.NbtFactory;
 import net.netcoding.nifty.common.api.plugin.MinecraftLogger;

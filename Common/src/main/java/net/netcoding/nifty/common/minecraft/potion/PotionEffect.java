@@ -220,9 +220,4 @@ public final class PotionEffect implements Serializable {
 		);
 	}
 
-	@Override
-	public String toString() {
-		return type.getName() + (ambient ? ":(" : ":") + duration + "t-x" + amplifier + (ambient ? ")" : "");
-	}
-
 }

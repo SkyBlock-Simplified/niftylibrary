@@ -51,7 +51,7 @@ public abstract class Enchantment {
 	public abstract boolean conflictsWith(Enchantment enchantment);
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (obj == null)
 			return false;
 		else if (!(obj instanceof Enchantment))
@@ -74,17 +74,17 @@ public abstract class Enchantment {
 		return this.id;
 	}
 
-	public String getKey() {
+	public final String getKey() {
 		return ORIGINAL.get(this.getId()).getKey();
 	}
 
-	public EnchantmentTarget getTarget() {
+	public final EnchantmentTarget getTarget() {
 		return ORIGINAL.get(this.getId()).getTarget();
 	}
 
 	public abstract int getMaxLevel();
 
-	public String getName() {
+	public final String getName() {
 		return ORIGINAL.get(this.getId()).getName();
 	}
 
@@ -93,7 +93,7 @@ public abstract class Enchantment {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return this.getId();
 	}
 
@@ -114,11 +114,6 @@ public abstract class Enchantment {
 
 	public static void stopAcceptingRegistrations() {
 		acceptingNew = false;
-	}
-
-	@Override
-	public String toString() {
-		return "Enchantment[" + this.getId() + ", " + this.getName() + "]";
 	}
 
 	public static Enchantment[] values() {

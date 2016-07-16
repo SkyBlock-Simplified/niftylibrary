@@ -35,7 +35,7 @@ class ItemData {
 		return this.durabilities;
 	}
 
-	public final int getId() {
+	public int getId() {
 		return this.id;
 	}
 

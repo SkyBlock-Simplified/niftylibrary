@@ -2,15 +2,16 @@ package net.netcoding.nifty.common.minecraft.potion;
 
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.core.util.StringUtil;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 /**
  * Represents a type of potion and its effect on an entity.
  */
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public abstract class PotionEffectType {
+	// TODO: Implement Bukkit Registration
+
 	/**
 	 * Increases movement speed.
 	 */
@@ -122,6 +123,11 @@ public abstract class PotionEffectType {
 	 */
 	public static final PotionEffectType UNLUCK = new PotionEffectTypeWrapper(27);
 
+	private static final PotionEffectType[] byId = new PotionEffectType[28];
+	private static final ConcurrentMap<String, PotionEffectType> byName = Concurrent.newMap();
+	// will break on updates.
+	private static boolean acceptingNew = true;
+
 	private final int id;
 
 	protected PotionEffectType(int id) {
@@ -189,16 +195,6 @@ public abstract class PotionEffectType {
 	public int hashCode() {
 		return id;
 	}
-
-	@Override
-	public String toString() {
-		return "PotionEffectType[" + id + ", " + getName() + "]";
-	}
-
-	private static final PotionEffectType[] byId = new PotionEffectType[28];
-	private static final Map<String, PotionEffectType> byName = new HashMap<>();
-	// will break on updates.
-	private static boolean acceptingNew = true;
 
 	/**
 	 * Gets the effect type specified by the unique id.
