@@ -5,19 +5,30 @@ import net.netcoding.nifty.common.minecraft.block.state.Banner;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
 import net.netcoding.nifty.common.minecraft.entity.projectile.source.ProjectileSource;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common.minecraft.material.Material;
+import net.netcoding.nifty.common.minecraft.material.MaterialData;
 import net.netcoding.nifty.common.minecraft.potion.PotionData;
 import net.netcoding.nifty.common.minecraft.potion.PotionEffect;
 import net.netcoding.nifty.common.minecraft.potion.PotionEffectType;
 import net.netcoding.nifty.common.minecraft.potion.PotionType;
 import net.netcoding.nifty.core.api.color.Color;
 import net.netcoding.nifty.core.api.color.DyeColor;
+import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.misc.Vector;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.living.CraftLivingEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.projectile.source.CraftBlockProjectileSource;
+import net.netcoding.nifty.craftbukkit.minecraft.material.CraftMaterial;
+import net.netcoding.nifty.craftbukkit.minecraft.material.CraftMaterialData;
 
+@SuppressWarnings("deprecation")
 public final class CraftConverter {
+
+	public static MaterialData fromBukkitData(org.bukkit.material.MaterialData bukkitData) {
+		Material material = Material.getMaterial(bukkitData.getItemType().name());
+		return (CraftMaterialData)new Reflection(CraftMaterial.getDataByMaterial(material)).newInstance(bukkitData);
+	}
 
 	public static PotionData fromBukkitData(org.bukkit.potion.PotionData bukkitData) {
 		return new PotionData(PotionType.valueOf(bukkitData.getType().name()), bukkitData.isExtended(), bukkitData.isUpgraded());
@@ -61,6 +72,10 @@ public final class CraftConverter {
 
 	public static Vector fromBukkitVector(org.bukkit.util.Vector bukkitVector) {
 		return new Vector(bukkitVector.getX(), bukkitVector.getY(), bukkitVector.getZ());
+	}
+
+	public static org.bukkit.material.MaterialData toBukkitData(MaterialData data) {
+		return (data instanceof CraftMaterialData) ? ((CraftMaterialData)data).getHandle() : org.bukkit.Material.valueOf(data.getItemType().name()).getNewData(data.getData());
 	}
 
 	public static org.bukkit.potion.PotionData toBukkitData(PotionData data) {

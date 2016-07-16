@@ -44,8 +44,8 @@ public final class CraftServer implements Server {
 	}
 
 	@Override
-	public void dispatchCommand(CommandSource source, String command) {
-		// TODO
+	public boolean dispatchCommand(CommandSource source, String command) {
+		return false; // TODO
 	}
 
 	@Override

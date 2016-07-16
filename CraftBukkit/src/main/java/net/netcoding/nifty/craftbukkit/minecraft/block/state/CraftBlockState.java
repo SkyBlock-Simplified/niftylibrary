@@ -9,6 +9,7 @@ import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.craftbukkit.minecraft.block.CraftBlock;
 import net.netcoding.nifty.craftbukkit.minecraft.block.CraftBlockType;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftLocation;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 @SuppressWarnings("deprecation")
 public class CraftBlockState implements BlockState {
@@ -39,7 +40,7 @@ public class CraftBlockState implements BlockState {
 
 	@Override
 	public MaterialData getData() {
-		return null; // TODO
+		return CraftConverter.fromBukkitData(this.getHandle().getData());
 	}
 
 	public org.bukkit.block.BlockState getHandle() {
@@ -73,7 +74,7 @@ public class CraftBlockState implements BlockState {
 
 	@Override
 	public void setData(MaterialData data) {
-		// TODO
+		this.getHandle().setData(CraftConverter.toBukkitData(data));
 	}
 
 	@Override

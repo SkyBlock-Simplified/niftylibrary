@@ -2,6 +2,7 @@ package net.netcoding.nifty.craftbukkit.minecraft.block.state;
 
 import net.netcoding.nifty.common.minecraft.block.state.FlowerPot;
 import net.netcoding.nifty.common.minecraft.material.MaterialData;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftFlowerPot extends CraftBlockState implements FlowerPot {
 
@@ -16,12 +17,12 @@ public final class CraftFlowerPot extends CraftBlockState implements FlowerPot {
 
 	@Override
 	public MaterialData getContents() {
-		return null; // TODO
+		return CraftConverter.fromBukkitData(this.getHandle().getContents());
 	}
 
 	@Override
 	public void setContents(MaterialData data) {
-		// TODO
+		this.getHandle().setContents(CraftConverter.toBukkitData(data));
 	}
 
 }

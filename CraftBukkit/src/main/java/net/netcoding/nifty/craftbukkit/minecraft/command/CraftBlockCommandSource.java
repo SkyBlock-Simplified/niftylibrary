@@ -2,6 +2,7 @@ package net.netcoding.nifty.craftbukkit.minecraft.command;
 
 import net.netcoding.nifty.common.minecraft.block.Block;
 import net.netcoding.nifty.common.minecraft.command.BlockCommandSource;
+import net.netcoding.nifty.craftbukkit.minecraft.block.CraftBlock;
 
 public final class CraftBlockCommandSource extends CraftCommandSource implements BlockCommandSource {
 
@@ -16,7 +17,7 @@ public final class CraftBlockCommandSource extends CraftCommandSource implements
 
 	@Override
 	public Block getBlock() {
-		return null; // TODO
+		return new CraftBlock(this.getHandle().getBlock());
 	}
 
 }

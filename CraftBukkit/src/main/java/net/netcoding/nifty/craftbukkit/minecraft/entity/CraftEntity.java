@@ -126,7 +126,7 @@ public abstract class CraftEntity extends CraftCommandSource implements Entity {
 
 	@Override
 	public boolean hasGravity() {
-		return false; // TODO
+		return this.getHandle().hasGravity();
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public abstract class CraftEntity extends CraftCommandSource implements Entity {
 
 	@Override
 	public void setGravity(boolean value) {
-		// TODO
+		this.getHandle().setGravity(value);
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
 
 	@Override
 	public MaterialData getDisplayBlock() {
-		return null; // TODO
+		return CraftConverter.fromBukkitData(this.getHandle().getDisplayBlock());
 	}
 
 	@Override
@@ -63,8 +63,8 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
 	}
 
 	@Override
-	public void setDisplayBlock(MaterialData material) {
-		// TODO
+	public void setDisplayBlock(MaterialData data) {
+		this.getHandle().setDisplayBlock(CraftConverter.toBukkitData(data));
 	}
 
 	@Override

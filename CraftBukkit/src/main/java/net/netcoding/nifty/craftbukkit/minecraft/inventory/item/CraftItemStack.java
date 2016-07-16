@@ -11,9 +11,9 @@ import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.minecraft.material.MaterialData;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.RegexUtil;
-import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.craftbukkit.api.nbt.CraftNbtFactory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.meta.CraftItemMeta;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,9 +24,8 @@ import java.util.Map;
 public final class CraftItemStack implements ItemStack {
 
 	private final org.bukkit.inventory.ItemStack bukkitItem;
-	private final NbtCompound root;
+	private NbtCompound root;
 	private ItemMeta meta;
-	private MaterialData data; // TODO
 
 	private CraftItemStack() {
 		this(new org.bukkit.inventory.ItemStack(org.bukkit.Material.AIR));
@@ -35,25 +34,13 @@ public final class CraftItemStack implements ItemStack {
 	public CraftItemStack(org.bukkit.inventory.ItemStack bukkitItem) {
 		this.bukkitItem = bukkitItem;
 
-		if (Material.AIR != this.getType()) {
-			this.getItemMeta();
-
-			if (this.hasItemMeta() && bukkitItem.hasItemMeta()) {
-				org.bukkit.inventory.meta.ItemMeta bukkitMeta = bukkitItem.getItemMeta();
-				this.meta.setDisplayName(bukkitMeta.getDisplayName());
-				this.meta.setLore(bukkitMeta.getLore());
-				bukkitMeta.getItemFlags().forEach(flag -> this.meta.addItemFlags(ItemFlag.valueOf(flag.name())));
-				bukkitMeta.getEnchants().forEach((enchant, level) -> this.meta.addEnchant(Enchantment.getByName(enchant.getName()), level));
-			}
-		}
+		if (Material.AIR != this.getType())
+			this.initMeta(bukkitItem.getItemMeta());
 
 		if (this.getAmount() <= 0)
 			this.setAmount(1);
 
-		if (org.bukkit.Material.AIR != CraftNbtFactory.getCraftItemStack(this.getHandle()).getType())
-			this.root = Nifty.getNbtFactory().fromItemTag(this);
-		else
-			this.root = Nifty.getNbtFactory().createCompound();
+		this.initNbt();
 	}
 
 	@Override
@@ -104,7 +91,7 @@ public final class CraftItemStack implements ItemStack {
 
 	@Override
 	public MaterialData getData() {
-		return this.data;
+		return CraftConverter.fromBukkitData(this.getHandle().getData());
 	}
 
 	@Override
@@ -124,13 +111,6 @@ public final class CraftItemStack implements ItemStack {
 
 	@Override
 	public ItemMeta getItemMeta(boolean unformatted) {
-		if (!this.hasItemMeta()) {
-			ItemMeta factory = Nifty.getItemFactory().getItemMeta(this.getType());
-
-			if (factory != null)
-				this.setItemMeta0(factory);
-		}
-
 		if (!this.hasItemMeta())
 			return null;
 
@@ -178,6 +158,35 @@ public final class CraftItemStack implements ItemStack {
 		return this.getHandle().hashCode();
 	}
 
+	private void initMeta(org.bukkit.inventory.meta.ItemMeta old) {
+		ItemMeta factory = Nifty.getItemFactory().getItemMeta(this.getType());
+
+		if (factory != null)
+			this.setItemMeta0(factory);
+
+		if (this.hasItemMeta() && old != null) {
+			org.bukkit.inventory.meta.ItemMeta bukkitMeta = bukkitItem.getItemMeta();
+			this.meta.setDisplayName(bukkitMeta.getDisplayName());
+			this.meta.setLore(bukkitMeta.getLore());
+			bukkitMeta.getItemFlags().forEach(flag -> this.meta.addItemFlags(ItemFlag.valueOf(flag.name())));
+			bukkitMeta.getEnchants().forEach((enchant, level) -> this.meta.addEnchant(Enchantment.getByName(enchant.getName()), level));
+		}
+	}
+
+	private void initNbt() {
+		NbtCompound compound;
+
+		if (org.bukkit.Material.AIR != CraftNbtFactory.getCraftItemStack(this.getHandle()).getType())
+			compound = Nifty.getNbtFactory().fromItemTag(this);
+		else
+			compound = Nifty.getNbtFactory().createCompound();
+
+		if (this.root != null)
+			compound.putAll(this.root);
+
+		this.root = compound;
+	}
+
 	@Override
 	public int removeEnchant(Enchantment enchantment) {
 		return 0;
@@ -190,15 +199,7 @@ public final class CraftItemStack implements ItemStack {
 
 	@Override
 	public void setData(MaterialData data) {
-		Material mat = this.getType();
-
-		if (data != null && mat != null && mat.getData() != null) {
-			if (!data.getClass().equals(mat.getData()) && !MaterialData.class.isAssignableFrom(data.getClass()))
-				throw new IllegalArgumentException(StringUtil.format("Provided data is not of type {0}, found {1}!", mat.getData().getName(), data.getClass().getName()));
-		}
-
-		this.data = data;
-		this.getHandle().setData(new org.bukkit.material.MaterialData(data.getItemTypeId(), data.getData()));
+		this.getHandle().setData(CraftConverter.toBukkitData(data));
 	}
 
 	@Override
@@ -215,24 +216,20 @@ public final class CraftItemStack implements ItemStack {
 		else
 			meta = meta.clone();
 
-		if (this.hasItemMeta()) {
-			if (meta.hasDisplayName())
-				meta.setDisplayName(RegexUtil.replaceColor(meta.getDisplayName(), RegexUtil.REPLACE_ALL_PATTERN));
+		if (meta.hasDisplayName())
+			meta.setDisplayName(RegexUtil.replaceColor(meta.getDisplayName(), RegexUtil.REPLACE_ALL_PATTERN));
 
-			if (ListUtil.isEmpty(meta.getLore()))
-				meta.setLore(new ArrayList<>());
+		if (ListUtil.isEmpty(meta.getLore()))
+			meta.setLore(new ArrayList<>());
 
-			List<String> lore = meta.getLore();
+		List<String> lore = meta.getLore();
 
-			for (int i = 0; i < lore.size(); i++)
-				lore.set(i, RegexUtil.replaceColor(lore.get(i), RegexUtil.REPLACE_ALL_PATTERN));
+		for (int i = 0; i < lore.size(); i++)
+			lore.set(i, RegexUtil.replaceColor(lore.get(i), RegexUtil.REPLACE_ALL_PATTERN));
 
-			meta.setLore(lore);
-			this.setItemMeta0(meta);
-			return true;
-		}
-
-		return false;
+		meta.setLore(lore);
+		this.setItemMeta0(meta);
+		return true;
 	}
 
 	private void setItemMeta0(ItemMeta meta) {
@@ -247,8 +244,15 @@ public final class CraftItemStack implements ItemStack {
 	}
 
 	@Override
-	public void setTypeId(int type) {
+	public void setTypeId(int type, boolean initNbt) {
+		int id = this.getTypeId();
 		this.getHandle().setTypeId(type);
+
+		if (this.getTypeId() != id)
+			this.initMeta(((CraftItemMeta)this.meta).getHandle());
+
+		if (initNbt)
+			this.initNbt();
 	}
 
 	@Override
@@ -349,14 +353,8 @@ public final class CraftItemStack implements ItemStack {
 		}
 
 		@Override
-		public Builder type(Material material) {
-			this.item.setType(material);
-			return this;
-		}
-
-		@Override
-		public ItemStack.Builder type(int id) {
-			this.item.setTypeId(id);
+		public Builder type(int id, boolean initNbt) {
+			this.item.setTypeId(id, initNbt);
 			return this;
 		}
 

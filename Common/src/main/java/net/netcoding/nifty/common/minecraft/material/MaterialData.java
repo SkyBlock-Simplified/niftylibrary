@@ -8,11 +8,11 @@ public interface MaterialData extends Cloneable {
 
 	byte getData();
 
-	default Material getItemType() {
-		return Material.getMaterial(this.getItemTypeId());
-	}
+	Material getItemType();
 
-	int getItemTypeId();
+	default int getItemTypeId() {
+		return this.getItemType().getId();
+	}
 
 	void setData(byte data);
 

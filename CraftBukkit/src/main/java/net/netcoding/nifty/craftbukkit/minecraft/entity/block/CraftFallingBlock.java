@@ -4,6 +4,7 @@ import net.netcoding.nifty.common.minecraft.entity.block.FallingBlock;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 
+@SuppressWarnings("deprecation")
 public final class CraftFallingBlock extends CraftEntity implements FallingBlock {
 
 	public CraftFallingBlock(org.bukkit.entity.FallingBlock fallingBlock) {
@@ -38,11 +39,6 @@ public final class CraftFallingBlock extends CraftEntity implements FallingBlock
 	@Override
 	public void setHurtEntities(boolean hurtEntities) {
 		this.getHandle().setHurtEntities(hurtEntities);
-	}
-
-	@Override
-	public boolean willDropItem() {
-		return false; // TODO
 	}
 
 }

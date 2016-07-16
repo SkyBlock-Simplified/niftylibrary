@@ -1,7 +1,6 @@
 package net.netcoding.nifty.common.minecraft.material;
 
 import com.google.common.base.Preconditions;
-import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
@@ -504,10 +503,6 @@ public enum Material {
 	 */
 	public final Class<? extends MaterialData> getData() {
 		return this.ctor;
-	}
-
-	public MaterialData getNewData(byte raw) {
-		return (MaterialData)new Reflection(this.ctor).newInstance(this.getId(), raw);
 	}
 
 	/**
