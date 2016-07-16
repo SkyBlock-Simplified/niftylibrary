@@ -197,7 +197,7 @@ public abstract class ItemDatabase extends CSVStorage {
 				try {
 					Material material = Material.getMaterial(numeric);
 					if (numeric > 0 && Material.AIR == material) continue;
-					ItemStack itemStack = ItemStack.of(material, data); // TODO: Don't initialize NBT
+					ItemStack itemStack = ItemStack.builder().type(material, false).type(data).build();
 					String primaryName = itemStack.getType().name();
 					ItemData itemData;
 

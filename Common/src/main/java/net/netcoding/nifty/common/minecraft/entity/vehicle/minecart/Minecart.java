@@ -83,9 +83,9 @@ public interface Minecart extends Vehicle {
 	 * Sets the display block for this minecart.
 	 * Passing a null value will set the minecart to have no display block.
 	 *
-	 * @param material the material to set as display block.
+	 * @param data The material data to set as display block.
 	 */
-	void setDisplayBlock(MaterialData material);
+	void setDisplayBlock(MaterialData data);
 
 	/**
 	 * Sets the offset of the display block.

@@ -94,7 +94,7 @@ public interface ItemStack extends Cloneable, Serializable {
 
 			if (meta.containsKey("enchants")) {
 				Map<String, Integer> enchants = (Map<String, Integer>)map.get("enchants");
-				enchants.entrySet().stream().forEach(entry -> result.addUnsafeEnchant(Enchantment.getByName(entry.getKey()), entry.getValue()));
+				enchants.entrySet().forEach(entry -> result.addUnsafeEnchant(Enchantment.getByName(entry.getKey()), entry.getValue()));
 			}
 
 			if (meta.containsKey("flags"))
@@ -249,9 +249,20 @@ public interface ItemStack extends Cloneable, Serializable {
 
 	boolean setItemMeta(ItemMeta meta);
 
-	void setType(Material material);
+	default void setType(Material material) {
+		this.setType(material, true);
+	}
 
-	void setTypeId(int type);
+	default void setType(Material material, boolean initNbt) {
+		Preconditions.checkArgument(material != null, "Material cannot be NULL!");
+		this.setTypeId(material.getId(), initNbt);
+	}
+
+	default void setTypeId(int type) {
+		this.setTypeId(type, true);
+	}
+
+	void setTypeId(int type, boolean initNbt);
 
 	interface Builder extends BuilderCore<ItemStack> {
 
@@ -283,9 +294,20 @@ public interface ItemStack extends Cloneable, Serializable {
 
 		Builder nbtPath(String path, Object value);
 
-		Builder type(Material material);
+		default Builder type(Material material) {
+			return this.type(material, true);
+		}
 
-		Builder type(int id);
+		default Builder type(int type) {
+			return this.type(type, true);
+		}
+
+		default Builder type(Material material, boolean initNbt) {
+			Preconditions.checkArgument(material != null, "Material cannot be NULL!");
+			return this.type(material.getId(), initNbt);
+		}
+
+		Builder type(int type, boolean initNbt);
 
 	}
 
