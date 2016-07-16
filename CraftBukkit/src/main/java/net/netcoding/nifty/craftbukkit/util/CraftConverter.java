@@ -4,7 +4,9 @@ import net.netcoding.nifty.common.minecraft.FireworkEffect;
 import net.netcoding.nifty.common.minecraft.block.state.Banner;
 import net.netcoding.nifty.common.minecraft.entity.living.LivingEntity;
 import net.netcoding.nifty.common.minecraft.entity.projectile.source.ProjectileSource;
+import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
+import net.netcoding.nifty.common.minecraft.inventory.recipe.MerchantRecipe;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.minecraft.material.MaterialData;
 import net.netcoding.nifty.common.minecraft.potion.PotionData;
@@ -19,6 +21,8 @@ import net.netcoding.nifty.core.util.misc.Vector;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.living.CraftLivingEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.projectile.source.CraftBlockProjectileSource;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.recipe.CraftMerchantRecipe;
 import net.netcoding.nifty.craftbukkit.minecraft.material.CraftMaterial;
 import net.netcoding.nifty.craftbukkit.minecraft.material.CraftMaterialData;
 
@@ -108,8 +112,23 @@ public final class CraftConverter {
 		return new org.bukkit.util.EulerAngle(vector.getX(), vector.getY(), vector.getZ());
 	}
 
+	public static org.bukkit.inventory.ItemStack toBukkitItem(ItemStack item) {
+		return ((CraftItemStack)((item instanceof CraftItemStack) ? item : ItemStack.builder().fromItem(item).build())).getHandle();
+	}
+
 	public static org.bukkit.block.banner.Pattern toBukkitPattern(Banner.Pattern pattern) {
 		return new org.bukkit.block.banner.Pattern(org.bukkit.DyeColor.valueOf(pattern.getColor().name()), org.bukkit.block.banner.PatternType.getByIdentifier(pattern.getPattern().getIdentifier()));
+	}
+
+	public static org.bukkit.inventory.MerchantRecipe toBukkitRecipe(MerchantRecipe recipe) {
+		if (recipe instanceof CraftMerchantRecipe)
+			return ((CraftMerchantRecipe)recipe).getHandle();
+		else {
+			org.bukkit.inventory.ItemStack bukkitItem = toBukkitItem(recipe.getResult());
+			CraftMerchantRecipe craftRecipe = new CraftMerchantRecipe(new org.bukkit.inventory.MerchantRecipe(bukkitItem, recipe.getUses(), recipe.getMaxUses(), recipe.hasExperienceReward()));
+			craftRecipe.setIngredients(recipe.getIngredients());
+			return craftRecipe.getHandle();
+		}
 	}
 
 	public static org.bukkit.projectiles.ProjectileSource toBukkitSource(ProjectileSource source) {
