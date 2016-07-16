@@ -3,7 +3,7 @@ package net.netcoding.nifty.common.minecraft.entity.living.animal;
 import net.netcoding.nifty.common.minecraft.entity.Tameable;
 import net.netcoding.nifty.common.minecraft.entity.vehicle.Vehicle;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
-import net.netcoding.nifty.common.minecraft.inventory.types.HorseInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.HorseInventory;
 
 /**
  * Represents a Horse.

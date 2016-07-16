@@ -1,10 +1,12 @@
 package net.netcoding.nifty.common.minecraft.entity.living.human;
 
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.api.plugin.messaging.PluginMessageRecipient;
 import net.netcoding.nifty.common.minecraft.OfflinePlayer;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
 import net.netcoding.nifty.core.mojang.OnlineProfile;
+import net.netcoding.nifty.core.util.json.JsonMessage;
 
 public interface Player extends HumanEntity, OfflinePlayer, OnlineProfile, PluginMessageRecipient {
 
@@ -74,6 +76,11 @@ public interface Player extends HumanEntity, OfflinePlayer, OnlineProfile, Plugi
 	void resetPlayerWeather();
 
 	void saveData();
+
+	@Override
+	default void sendMessage(JsonMessage message) throws Exception {
+		Nifty.getMojangRepository().searchByPlayer(this).sendMessage(message);
+	}
 
 	void setAllowFlight(boolean value);
 

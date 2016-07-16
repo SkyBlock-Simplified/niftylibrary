@@ -1,6 +1,6 @@
 package net.netcoding.nifty.common.minecraft.block.state;
 
-import net.netcoding.nifty.common.minecraft.inventory.types.DoubleChestInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.DoubleChestInventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;

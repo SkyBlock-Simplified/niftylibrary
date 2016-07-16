@@ -7,20 +7,11 @@ import net.netcoding.nifty.common.minecraft.material.MaterialData;
 public interface FurnaceRecipe extends Recipe {
 
 	/**
-	 * Sets the input of this furnace recipe.
+	 * Get the experience given by this recipe.
 	 *
-	 * @param input The input material.
+	 * @return Experience level.
 	 */
-	default FurnaceRecipe setInput(MaterialData input) {
-		return this.setInput(input.getItemType());
-	}
-
-	/**
-	 * Sets the input of this furnace recipe.
-	 *
-	 * @param input The input material.
-	 */
-	FurnaceRecipe setInput(Material input);
+	float getExperience();
 
 	/**
 	 * Get the input material.
@@ -37,10 +28,19 @@ public interface FurnaceRecipe extends Recipe {
 	void setExperience(float experience);
 
 	/**
-	 * Get the experience given by this recipe.
+	 * Sets the input of this furnace recipe.
 	 *
-	 * @return Experience level.
+	 * @param input The input material.
 	 */
-	float getExperience();
+	default FurnaceRecipe setInput(MaterialData input) {
+		return this.setInput(input.getItemType());
+	}
+
+	/**
+	 * Sets the input of this furnace recipe.
+	 *
+	 * @param input The input material.
+	 */
+	FurnaceRecipe setInput(Material input);
 
 }

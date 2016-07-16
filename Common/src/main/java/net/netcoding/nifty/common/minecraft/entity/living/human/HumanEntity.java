@@ -7,7 +7,7 @@ import net.netcoding.nifty.common.minecraft.entity.living.Villager;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryView;
-import net.netcoding.nifty.common.minecraft.inventory.types.PlayerInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.permission.Permissible;
 import net.netcoding.nifty.common.minecraft.region.Location;
