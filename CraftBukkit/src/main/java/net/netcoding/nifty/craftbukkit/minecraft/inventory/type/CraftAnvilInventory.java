@@ -1,6 +1,6 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
-import net.netcoding.nifty.common.minecraft.inventory.types.AnvilInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.AnvilInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 
 public final class CraftAnvilInventory extends CraftInventory implements AnvilInventory {

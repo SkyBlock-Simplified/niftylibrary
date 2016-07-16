@@ -114,12 +114,12 @@ public final class CraftArmorStand extends CraftLivingEntity implements ArmorSta
 
 	@Override
 	public void setBoots(ItemStack item) {
-		this.getHandle().setBoots(((CraftItemStack)item).getHandle());
+		this.getHandle().setBoots(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setChestplate(ItemStack item) {
-		this.getHandle().setChestplate(((CraftItemStack)item).getHandle());
+		this.getHandle().setChestplate(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -129,12 +129,12 @@ public final class CraftArmorStand extends CraftLivingEntity implements ArmorSta
 
 	@Override
 	public void setHelmet(ItemStack item) {
-		this.getHandle().setHelmet(((CraftItemStack)item).getHandle());
+		this.getHandle().setHelmet(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setItemInHand(ItemStack item) {
-		this.getHandle().setItemInHand(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemInHand(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public final class CraftArmorStand extends CraftLivingEntity implements ArmorSta
 
 	@Override
 	public void setLeggings(ItemStack item) {
-		this.getHandle().setLeggings(((CraftItemStack)item).getHandle());
+		this.getHandle().setLeggings(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

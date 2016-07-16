@@ -1,9 +1,10 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.BeaconInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.BeaconInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftBeaconInventory extends CraftInventory implements BeaconInventory {
 
@@ -23,7 +24,7 @@ public final class CraftBeaconInventory extends CraftInventory implements Beacon
 
 	@Override
 	public void setItem(ItemStack item) {
-		this.getHandle().setItem(((CraftItemStack)item).getHandle());
+		this.getHandle().setItem(CraftConverter.toBukkitItem(item));
 	}
 
 }

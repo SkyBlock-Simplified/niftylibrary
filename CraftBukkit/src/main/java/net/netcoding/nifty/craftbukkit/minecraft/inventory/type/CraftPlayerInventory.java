@@ -1,10 +1,11 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.PlayerInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.Arrays;
 
@@ -72,22 +73,22 @@ public final class CraftPlayerInventory extends CraftInventory implements Player
 
 	@Override
 	public void setArmorContents(ItemStack[] armorContents) {
-		this.getHandle().setArmorContents(Arrays.stream(armorContents).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new));
+		this.getHandle().setArmorContents(Arrays.stream(armorContents).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new));
 	}
 
 	@Override
 	public void setExtraContents(ItemStack[] extraContents) {
-		this.getHandle().setExtraContents(Arrays.stream(extraContents).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new));
+		this.getHandle().setExtraContents(Arrays.stream(extraContents).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new));
 	}
 
 	@Override
 	public void setBoots(ItemStack item) {
-		this.getHandle().setBoots(((CraftItemStack)item).getHandle());
+		this.getHandle().setBoots(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setChestplate(ItemStack item) {
-		this.getHandle().setChestplate(((CraftItemStack)item).getHandle());
+		this.getHandle().setChestplate(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -97,22 +98,22 @@ public final class CraftPlayerInventory extends CraftInventory implements Player
 
 	@Override
 	public void setHelmet(ItemStack item) {
-		this.getHandle().setHelmet(((CraftItemStack)item).getHandle());
+		this.getHandle().setHelmet(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setItemInHand(ItemStack item) {
-		this.getHandle().setItemInHand(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemInHand(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setItemInOffHand(ItemStack item) {
-		this.getHandle().setItemInOffHand(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemInOffHand(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setLeggings(ItemStack item) {
-		this.getHandle().setLeggings(((CraftItemStack)item).getHandle());
+		this.getHandle().setLeggings(CraftConverter.toBukkitItem(item));
 	}
 
 }

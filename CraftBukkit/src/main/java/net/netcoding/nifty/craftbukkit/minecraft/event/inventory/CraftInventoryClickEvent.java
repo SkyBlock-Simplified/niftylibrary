@@ -5,6 +5,7 @@ import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 @SuppressWarnings("deprecation")
 public class CraftInventoryClickEvent extends CraftInventoryInteractEvent implements InventoryClickEvent {
@@ -60,12 +61,12 @@ public class CraftInventoryClickEvent extends CraftInventoryInteractEvent implem
 
 	@Override
 	public void setCurrentItem(ItemStack item) {
-		this.getHandle().setCurrentItem(((CraftItemStack)item).getHandle());
+		this.getHandle().setCurrentItem(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setCursor(ItemStack item) {
-		this.getHandle().setCursor(((CraftItemStack)item).getHandle());
+		this.getHandle().setCursor(CraftConverter.toBukkitItem(item));
 	}
 
 }

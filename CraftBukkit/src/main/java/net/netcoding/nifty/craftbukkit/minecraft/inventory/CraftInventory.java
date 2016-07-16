@@ -12,6 +12,7 @@ import net.netcoding.nifty.craftbukkit.minecraft.block.state.CraftBlockState;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftLocation;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,7 @@ public class CraftInventory implements Inventory {
 
 	@Override
 	public Map<Integer, ItemStack> addItem(ItemStack... items) throws IllegalArgumentException {
-		org.bukkit.inventory.ItemStack[] bukkitItems = Arrays.stream(items).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new);
+		org.bukkit.inventory.ItemStack[] bukkitItems = Arrays.stream(items).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new);
 		return this.getHandle().addItem(bukkitItems).entrySet().stream().collect(Concurrent.toMap(Map.Entry::getKey, entry -> new CraftItemStack(entry.getValue())));
 	}
 
@@ -101,12 +102,12 @@ public class CraftInventory implements Inventory {
 
 	@Override
 	public void setItem(int index, ItemStack item) {
-		this.getHandle().setItem(index, ((CraftItemStack)item).getHandle());
+		this.getHandle().setItem(index, CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setContents(ItemStack[] items) throws IllegalArgumentException {
-		this.getHandle().setContents(Arrays.stream(items).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new));
+		this.getHandle().setContents(Arrays.stream(items).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new));
 	}
 
 	@Override

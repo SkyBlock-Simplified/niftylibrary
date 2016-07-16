@@ -2,8 +2,9 @@ package net.netcoding.nifty.craftbukkit.minecraft.event.inventory;
 
 import net.netcoding.nifty.common.minecraft.event.inventory.PrepareItemCraftEvent;
 import net.netcoding.nifty.common.minecraft.inventory.recipe.Recipe;
-import net.netcoding.nifty.common.minecraft.inventory.types.CraftingInventory;
-import net.netcoding.nifty.craftbukkit.minecraft.inventory.types.CraftCraftingInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.CraftingInventory;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.recipe.CraftRecipe;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.type.CraftCraftingInventory;
 
 public class CraftPrepareItemCraftEvent extends CraftInventoryEvent implements PrepareItemCraftEvent {
 
@@ -18,7 +19,7 @@ public class CraftPrepareItemCraftEvent extends CraftInventoryEvent implements P
 
 	@Override
 	public Recipe getRecipe() {
-		return null; // TODO
+		return CraftRecipe.convertBukkitRecipe(this.getHandle().getRecipe());
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class CraftThrownPotion extends CraftProjectile implements ThrownPotion {
 
 	@Override
 	public void setItem(ItemStack item) {
-		this.getHandle().setItem(((CraftItemStack)item).getHandle());
+		this.getHandle().setItem(CraftConverter.toBukkitItem(item));
 	}
 
 }

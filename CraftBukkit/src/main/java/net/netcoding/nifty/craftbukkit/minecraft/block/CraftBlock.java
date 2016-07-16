@@ -13,6 +13,7 @@ import net.netcoding.nifty.craftbukkit.minecraft.block.state.CraftBlockState;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftChunk;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftLocation;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public final class CraftBlock implements Block {
 
 	@Override
 	public boolean breakNaturally(ItemStack tool) {
-		return this.getHandle().breakNaturally(((CraftItemStack)tool).getHandle());
+		return this.getHandle().breakNaturally(CraftConverter.toBukkitItem(tool));
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public final class CraftBlock implements Block {
 
 	@Override
 	public Collection<ItemStack> getDrops(ItemStack tool) {
-		return this.getHandle().getDrops(((CraftItemStack)tool).getHandle()).stream().map(CraftItemStack::new).collect(Collectors.toSet());
+		return this.getHandle().getDrops(CraftConverter.toBukkitItem(tool)).stream().map(CraftItemStack::new).collect(Collectors.toSet());
 	}
 
 	@Override

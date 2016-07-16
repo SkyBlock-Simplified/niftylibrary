@@ -2,7 +2,7 @@ package net.netcoding.nifty.craftbukkit.minecraft.inventory.item.enchantment;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.item.enchantment.Enchantment;
-import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 @SuppressWarnings("deprecation")
 public final class CraftEnchantment extends Enchantment {
@@ -16,7 +16,7 @@ public final class CraftEnchantment extends Enchantment {
 
 	@Override
 	public boolean canEnchant(ItemStack item) {
-		return this.getHandle().canEnchantItem(((CraftItemStack)item).getHandle());
+		return this.getHandle().canEnchantItem(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

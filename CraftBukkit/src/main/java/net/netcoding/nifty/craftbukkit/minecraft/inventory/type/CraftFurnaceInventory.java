@@ -1,10 +1,11 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.block.state.Furnace;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.FurnaceInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.FurnaceInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftFurnaceInventory extends CraftInventory implements FurnaceInventory {
 
@@ -39,17 +40,17 @@ public final class CraftFurnaceInventory extends CraftInventory implements Furna
 
 	@Override
 	public void setFuel(ItemStack item) {
-		this.getHandle().setFuel(((CraftItemStack)item).getHandle());
+		this.getHandle().setFuel(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setResult(ItemStack item) {
-		this.getHandle().setResult(((CraftItemStack)item).getHandle());
+		this.getHandle().setResult(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setSmelting(ItemStack item) {
-		this.getHandle().setSmelting(((CraftItemStack)item).getHandle());
+		this.getHandle().setSmelting(CraftConverter.toBukkitItem(item));
 	}
 
 }

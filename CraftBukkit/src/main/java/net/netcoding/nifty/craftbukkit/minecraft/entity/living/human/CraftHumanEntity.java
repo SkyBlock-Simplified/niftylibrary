@@ -6,7 +6,7 @@ import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryView;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.PlayerInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.living.CraftLivingEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.living.CraftVillager;
@@ -14,6 +14,7 @@ import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventoryView;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftLocation;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public abstract class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
@@ -113,7 +114,7 @@ public abstract class CraftHumanEntity extends CraftLivingEntity implements Huma
 
 	@Override
 	public void setItemOnCursor(ItemStack item) {
-		this.getHandle().setItemOnCursor(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemOnCursor(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

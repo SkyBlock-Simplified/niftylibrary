@@ -1,10 +1,11 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.block.state.BrewingStand;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.BrewerInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.BrewerInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftBrewerInventory extends CraftInventory implements BrewerInventory {
 
@@ -34,12 +35,12 @@ public final class CraftBrewerInventory extends CraftInventory implements Brewer
 
 	@Override
 	public void setFuel(ItemStack item) {
-		this.getHandle().setFuel(((CraftItemStack)item).getHandle());
+		this.getHandle().setFuel(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setIngredient(ItemStack item) {
-		this.getHandle().setIngredient(((CraftItemStack)item).getHandle());
+		this.getHandle().setIngredient(CraftConverter.toBukkitItem(item));
 	}
 
 }

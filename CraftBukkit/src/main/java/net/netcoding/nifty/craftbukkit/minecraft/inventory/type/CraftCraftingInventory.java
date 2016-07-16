@@ -1,10 +1,12 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.recipe.Recipe;
-import net.netcoding.nifty.common.minecraft.inventory.types.CraftingInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.CraftingInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.recipe.CraftRecipe;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.Arrays;
 
@@ -26,7 +28,7 @@ public final class CraftCraftingInventory extends CraftInventory implements Craf
 
 	@Override
 	public Recipe getRecipe() {
-		return null; // TODO
+		return CraftRecipe.convertBukkitRecipe(this.getHandle().getRecipe());
 	}
 
 	@Override
@@ -36,12 +38,12 @@ public final class CraftCraftingInventory extends CraftInventory implements Craf
 
 	@Override
 	public void setMatrix(ItemStack[] items) {
-		this.getHandle().setMatrix(Arrays.stream(items).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new));
+		this.getHandle().setMatrix(Arrays.stream(items).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new));
 	}
 
 	@Override
 	public void setResult(ItemStack item) {
-		this.getHandle().setResult(((CraftItemStack)item).getHandle());
+		this.getHandle().setResult(CraftConverter.toBukkitItem(item));
 	}
 
 }

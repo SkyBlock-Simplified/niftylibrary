@@ -5,9 +5,11 @@ import net.netcoding.nifty.common.minecraft.inventory.EntityEquipment;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.Arrays;
 
+@SuppressWarnings("deprecation")
 public final class CraftEntityEquipment implements EntityEquipment {
 
 	private final org.bukkit.inventory.EntityEquipment entityEquipment;
@@ -97,12 +99,12 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setArmorContents(ItemStack[] items) {
-		this.getHandle().setArmorContents(Arrays.stream(items).map(item -> ((CraftItemStack)item).getHandle()).toArray(org.bukkit.inventory.ItemStack[]::new));
+		this.getHandle().setArmorContents(Arrays.stream(items).map(CraftConverter::toBukkitItem).toArray(org.bukkit.inventory.ItemStack[]::new));
 	}
 
 	@Override
 	public void setBoots(ItemStack item) {
-		this.getHandle().setBoots(((CraftItemStack)item).getHandle());
+		this.getHandle().setBoots(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -112,7 +114,7 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setChestplate(ItemStack item) {
-		this.getHandle().setChestplate(((CraftItemStack)item).getHandle());
+		this.getHandle().setChestplate(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -122,7 +124,7 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setHelmet(ItemStack item) {
-		this.getHandle().setHelmet(((CraftItemStack)item).getHandle());
+		this.getHandle().setHelmet(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -132,7 +134,7 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setItemInHand(ItemStack item) {
-		this.getHandle().setItemInHand(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemInHand(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setItemInOffHand(ItemStack item) {
-		this.getHandle().setItemInOffHand(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemInOffHand(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
@@ -152,7 +154,7 @@ public final class CraftEntityEquipment implements EntityEquipment {
 
 	@Override
 	public void setLeggings(ItemStack item) {
-		this.getHandle().setLeggings(((CraftItemStack)item).getHandle());
+		this.getHandle().setLeggings(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

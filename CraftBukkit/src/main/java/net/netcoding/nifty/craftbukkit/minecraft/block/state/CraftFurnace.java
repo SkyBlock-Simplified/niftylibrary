@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.minecraft.block.state;
 
 import net.netcoding.nifty.common.minecraft.block.state.Furnace;
-import net.netcoding.nifty.common.minecraft.inventory.types.FurnaceInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.FurnaceInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 
 public final class CraftFurnace extends CraftBlockState implements Furnace {

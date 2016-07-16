@@ -3,6 +3,7 @@ package net.netcoding.nifty.craftbukkit.minecraft.entity;
 import net.netcoding.nifty.common.minecraft.entity.Item;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftItem extends CraftEntity implements Item {
 
@@ -27,7 +28,7 @@ public final class CraftItem extends CraftEntity implements Item {
 
 	@Override
 	public void setItemStack(ItemStack item) {
-		this.getHandle().setItemStack(((CraftItemStack)item).getHandle());
+		this.getHandle().setItemStack(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

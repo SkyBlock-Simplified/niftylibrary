@@ -1,8 +1,8 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.block.state.DoubleChest;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
-import net.netcoding.nifty.common.minecraft.inventory.types.DoubleChestInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.DoubleChestInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 
 public final class CraftDoubleChestInventory extends CraftInventory implements DoubleChestInventory {

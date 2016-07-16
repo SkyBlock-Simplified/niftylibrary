@@ -1,7 +1,7 @@
 package net.netcoding.nifty.craftbukkit.minecraft.block.state;
 
 import net.netcoding.nifty.common.minecraft.block.state.BrewingStand;
-import net.netcoding.nifty.common.minecraft.inventory.types.BrewerInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.BrewerInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 
 public final class CraftBrewingStand extends CraftBlockState implements BrewingStand {

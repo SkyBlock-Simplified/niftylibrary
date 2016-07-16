@@ -58,12 +58,12 @@ public final class CraftWorld implements World {
 
 	@Override
 	public Item dropItem(Location location, ItemStack item) {
-		return new CraftItem(this.getHandle().dropItem(((CraftLocation)location).getHandle(), ((CraftItemStack)item).getHandle()));
+		return new CraftItem(this.getHandle().dropItem(((CraftLocation)location).getHandle(), CraftConverter.toBukkitItem(item)));
 	}
 
 	@Override
 	public Item dropItemNaturally(Location location, ItemStack item) {
-		return new CraftItem(this.getHandle().dropItemNaturally(((CraftLocation)location).getHandle(), ((CraftItemStack)item).getHandle()));
+		return new CraftItem(this.getHandle().dropItemNaturally(((CraftLocation)location).getHandle(), CraftConverter.toBukkitItem(item)));
 	}
 
 	@Override

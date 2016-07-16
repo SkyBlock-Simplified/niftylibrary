@@ -1,9 +1,10 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.types.EnchantingInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.EnchantingInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftEnchantingInventory extends CraftInventory implements EnchantingInventory {
 
@@ -28,12 +29,12 @@ public final class CraftEnchantingInventory extends CraftInventory implements En
 
 	@Override
 	public void setItem(ItemStack item) {
-		this.getHandle().setItem(((CraftItemStack)item).getHandle());
+		this.getHandle().setItem(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override
 	public void setSecondary(ItemStack item) {
-		this.getHandle().setSecondary(((CraftItemStack)item).getHandle());
+		this.getHandle().setSecondary(CraftConverter.toBukkitItem(item));
 	}
 
 }

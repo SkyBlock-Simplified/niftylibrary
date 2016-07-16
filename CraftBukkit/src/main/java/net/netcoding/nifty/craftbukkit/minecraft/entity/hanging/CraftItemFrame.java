@@ -4,6 +4,7 @@ import net.netcoding.nifty.common.minecraft.Rotation;
 import net.netcoding.nifty.common.minecraft.entity.hanging.ItemFrame;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.item.CraftItemStack;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 public final class CraftItemFrame extends CraftHanging implements ItemFrame {
 
@@ -28,7 +29,7 @@ public final class CraftItemFrame extends CraftHanging implements ItemFrame {
 
 	@Override
 	public void setItem(ItemStack item) {
-		this.getHandle().setItem(((CraftItemStack)item).getHandle());
+		this.getHandle().setItem(CraftConverter.toBukkitItem(item));
 	}
 
 	@Override

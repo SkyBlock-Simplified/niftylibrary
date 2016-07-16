@@ -5,7 +5,6 @@ import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
-import net.netcoding.nifty.core.util.json.JsonMessage;
 import net.netcoding.nifty.craftbukkit.minecraft.region.CraftLocation;
 
 import java.net.InetSocketAddress;
@@ -216,11 +215,6 @@ public final class CraftPlayer extends CraftHumanEntity implements Player {
 	@Override
 	public void saveData() {
 		this.getHandle().saveData();
-	}
-
-	@Override
-	public void sendMessage(JsonMessage message) throws Exception {
-		// TODO
 	}
 
 	@Override

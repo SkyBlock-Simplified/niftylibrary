@@ -2,7 +2,7 @@ package net.netcoding.nifty.craftbukkit.minecraft.inventory;
 
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.craftbukkit.minecraft.inventory.types.*;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.type.*;
 
 public enum CraftInventoryType {
 

@@ -1,8 +1,9 @@
-package net.netcoding.nifty.craftbukkit.minecraft.inventory.types;
+package net.netcoding.nifty.craftbukkit.minecraft.inventory.type;
 
 import net.netcoding.nifty.common.minecraft.inventory.recipe.MerchantRecipe;
-import net.netcoding.nifty.common.minecraft.inventory.types.MerchantInventory;
+import net.netcoding.nifty.common.minecraft.inventory.type.MerchantInventory;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.recipe.CraftRecipe;
 
 public final class CraftMerchantInventory extends CraftInventory implements MerchantInventory {
 
@@ -17,7 +18,7 @@ public final class CraftMerchantInventory extends CraftInventory implements Merc
 
 	@Override
 	public MerchantRecipe getSelectedRecipe() {
-		return null; // TODO
+		return CraftRecipe.convertBukkitRecipe(this.getHandle().getSelectedRecipe(), MerchantRecipe.class);
 	}
 
 	@Override

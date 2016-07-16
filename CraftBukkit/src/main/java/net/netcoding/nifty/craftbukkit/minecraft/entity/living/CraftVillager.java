@@ -4,8 +4,11 @@ import net.netcoding.nifty.common.minecraft.entity.living.Villager;
 import net.netcoding.nifty.common.minecraft.entity.living.human.HumanEntity;
 import net.netcoding.nifty.common.minecraft.inventory.Inventory;
 import net.netcoding.nifty.common.minecraft.inventory.recipe.MerchantRecipe;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.craftbukkit.minecraft.entity.CraftEntity;
 import net.netcoding.nifty.craftbukkit.minecraft.inventory.CraftInventory;
+import net.netcoding.nifty.craftbukkit.minecraft.inventory.recipe.CraftMerchantRecipe;
+import net.netcoding.nifty.craftbukkit.util.CraftConverter;
 
 import java.util.List;
 
@@ -32,7 +35,7 @@ public class CraftVillager extends CraftAgeable implements Villager {
 
 	@Override
 	public List<MerchantRecipe> getRecipes() {
-		return null; // TODO
+		return this.getHandle().getRecipes().stream().map(CraftMerchantRecipe::new).collect(Concurrent.toList());
 	}
 
 	@Override
@@ -57,12 +60,12 @@ public class CraftVillager extends CraftAgeable implements Villager {
 
 	@Override
 	public void setRecipe(int index, MerchantRecipe recipe) {
-		// TODO
+		this.getHandle().setRecipe(index, CraftConverter.toBukkitRecipe(recipe));
 	}
 
 	@Override
 	public void setRecipes(List<MerchantRecipe> recipes) {
-		// TODO
+		this.getHandle().setRecipes(recipes.stream().map(CraftConverter::toBukkitRecipe).collect(Concurrent.toList()));
 	}
 
 	@Override
