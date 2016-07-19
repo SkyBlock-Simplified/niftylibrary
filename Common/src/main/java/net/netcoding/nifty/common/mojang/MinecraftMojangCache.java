@@ -4,51 +4,53 @@ import net.netcoding.nifty.common.api.plugin.MinecraftHelper;
 import net.netcoding.nifty.common.api.plugin.MinecraftPlugin;
 import net.netcoding.nifty.common.minecraft.OfflinePlayer;
 
-public class MinecraftMojangCache<T extends MinecraftMojangProfile> extends MinecraftHelper {
+public abstract class MinecraftMojangCache<T extends MinecraftMojangProfile> extends MinecraftHelper {
 
 	private final T profile;
 
-	public MinecraftMojangCache(MinecraftPlugin plugin, T profile) {
+	protected MinecraftMojangCache(MinecraftPlugin plugin, T profile) {
 		super(plugin);
 		this.profile = profile;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (this == obj) return true;
-		MinecraftMojangProfile profile = null;
+	public final boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+		else {
+			MinecraftMojangProfile profile = null;
 
-		if (obj instanceof MinecraftMojangCache)
-			profile = ((MinecraftMojangCache)obj).getProfile();
-		else if (obj instanceof MinecraftMojangProfile)
-			profile = (MinecraftMojangProfile)obj;
+			if (obj instanceof MinecraftMojangCache)
+				profile = ((MinecraftMojangCache)obj).getProfile();
+			else if (obj instanceof MinecraftMojangProfile)
+				profile = (MinecraftMojangProfile)obj;
 
-		return this.getProfile().equals(profile);
+			return this.getProfile().equals(profile);
+		}
 	}
 
-	public T getProfile() {
+	public final T getProfile() {
 		return this.profile;
 	}
 
-	public OfflinePlayer getOfflinePlayer() {
+	public final OfflinePlayer getOfflinePlayer() {
 		return this.getProfile().getOfflinePlayer();
 	}
 
-	public boolean hasPermissions(String... permissions) {
+	public final boolean hasPermissions(String... permissions) {
 		return super.hasPermissions(this.getProfile(), permissions);
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return this.getProfile().hashCode();
 	}
 
-	public boolean isOnlineLocally() {
+	public final boolean isOnlineLocally() {
 		return this.getProfile().isOnlineLocally();
 	}
 
-	public boolean isOnlineAnywhere() {
+	public final boolean isOnline() {
 		return this.getProfile().isOnline();
 	}
 
