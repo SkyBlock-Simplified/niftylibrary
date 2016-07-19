@@ -11,8 +11,8 @@ import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
 import net.netcoding.nifty.common.minecraft.inventory.item.SkullType;
 import net.netcoding.nifty.common.minecraft.inventory.item.meta.SkullMeta;
 import net.netcoding.nifty.common.minecraft.material.Material;
-import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
+import net.netcoding.nifty.common.reflection.MinecraftReflection;
 import net.netcoding.nifty.common.util.LocationUtil;
 import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.mojang.MojangProfile;
@@ -20,7 +20,7 @@ import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.json.JsonMessage;
 
-public abstract class MinecraftMojangProfile extends MojangProfile {
+public abstract class MinecraftMojangProfile extends MojangProfile<MinecraftMojangProfile> {
 
 	/**
 	 * Checks if the profile is associated to this profile.
