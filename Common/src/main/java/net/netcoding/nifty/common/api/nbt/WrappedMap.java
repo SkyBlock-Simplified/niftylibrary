@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
  * Represents a map that wraps another map and automatically
  * converts entries of its type and another exposed type.
  */
-@SuppressWarnings("unchecked")
 abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper {
 
 	private static final String SUPPORT = "support";
@@ -25,9 +24,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	private final WrappedNativeCache cache = new WrappedNativeCache();
 	private final Map<String, Object> original;
 	private final Object handle;
+	private final boolean root;
 
-	WrappedMap(Object handle, Map<String, Object> original) {
+	WrappedMap(Object handle, boolean root, Map<String, Object> original) {
 		this.handle = handle;
+		this.root = root;
 		this.original = original;
 	}
 
@@ -59,7 +60,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		if (value == null)
 			return null;
 
-		if (DO_NOT_SHOW.contains(key))
+		if (this.doNotShow(key))
 			return null;
 
 		if (!this.original.containsKey(SUPPORT))
@@ -84,7 +85,11 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public boolean containsKey(Object key) {
-		return !DO_NOT_SHOW.contains(key) && this.original.containsKey(key);
+		return !this.doNotShow(key) && this.original.containsKey(key);
+	}
+
+	private boolean doNotShow(Object key) {
+		return this.isRoot() && DO_NOT_SHOW.contains(key);
 	}
 
 	@Override
@@ -137,9 +142,13 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 		return this.size() == 0;
 	}
 
+	public final boolean isRoot() {
+		return this.root;
+	}
+
 	private Iterator<Entry<String, Object>> iterator() {
 		ConcurrentSet<Entry<String, Object>> entrySet = Concurrent.newSet(this.original.entrySet());
-		entrySet.stream().filter(entry -> DO_NOT_SHOW.contains(entry.getKey())).forEach(entrySet::remove);
+		entrySet.stream().filter(entry -> this.doNotShow(entry.getKey())).forEach(entrySet::remove);
 		final Iterator<Entry<String, Object>> proxy = entrySet.iterator();
 
 		return new Iterator<Entry<String, Object>>() {
@@ -172,7 +181,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public Set<String> keySet() {
-		return this.original.keySet().stream().filter(key -> !DO_NOT_SHOW.contains(key)).collect(Collectors.toSet());
+		return this.original.keySet().stream().filter(key -> !this.doNotShow(key)).collect(Collectors.toSet());
 	}
 
 	public boolean notEmpty() {
@@ -181,7 +190,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public Object put(String key, Object value) {
-		if (DO_NOT_SHOW.contains(key))
+		if (this.doNotShow(key))
 			return null;
 
 		Object oldValue = this.wrapOutgoing(key, this.original.put(key, this.unwrapIncoming(key, value)));
@@ -192,7 +201,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
-			if (DO_NOT_SHOW.contains(entry.getKey())) continue;
+			if (this.doNotShow(entry.getKey())) continue;
 			this.original.put(entry.getKey(), this.unwrapIncoming(entry.getKey(), entry.getValue()));
 		}
 
@@ -205,7 +214,7 @@ abstract class WrappedMap extends AbstractMap<String, Object> implements Wrapper
 
 	@Override
 	public Object remove(Object key) {
-		if (DO_NOT_SHOW.contains(key))
+		if (this.doNotShow(key))
 			return null;
 
 		Object oldValue = this.wrapOutgoing(key, this.original.remove(key));

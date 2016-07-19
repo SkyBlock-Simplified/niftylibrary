@@ -5,7 +5,7 @@ abstract class WrappedCompound<W> extends NbtCompound {
 	private final W wrapped;
 
 	WrappedCompound(W wrapped, Object handle) {
-		super(handle);
+		super(handle, true);
 		this.wrapped = wrapped;
 	}
 
