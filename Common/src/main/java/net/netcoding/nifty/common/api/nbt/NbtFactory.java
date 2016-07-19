@@ -23,8 +23,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Factory class for wrapping NBT objects.
+ *
+ * @param <ITEM> The type of ItemStack.
+ * @param <BLOCK> The type of Block.
+ * @param <ENTITY> The type of Entity.
+ */
 @SuppressWarnings("unchecked")
-public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends Entity> {
+public abstract class NbtFactory<ITEM extends ItemStack, BLOCK extends Block, ENTITY extends Entity> {
 
 	// Convert between NBT id and the equivalent class in java
 	static final BiMap<Byte, Class<?>> NBT_CLASS = HashBiMap.create();
@@ -131,28 +138,28 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	/**
 	 * Ensure that the given item can store NBT information.
 	 *
-	 * @param item - The item to check.
+	 * @param item The item to check.
 	 */
-	protected abstract void checkItem(I item);
+	protected abstract void checkItem(ITEM item);
 
 	/**
 	 * Ensure that the given block can store NBT information.
 	 *
-	 * @param block - The item to check.
+	 * @param block The item to check.
 	 */
-	protected abstract void checkBlock(B block);
+	protected abstract void checkBlock(BLOCK block);
 
 	/**
 	 * Ensure that the given entity can store NBT information.
 	 *
-	 * @param entity - The item to check.
+	 * @param entity The item to check.
 	 */
-	protected abstract void checkEntity(E entity);
+	protected abstract void checkEntity(ENTITY entity);
 
 	/**
-	 * Construct a new NBT list of an unspecified type.
+	 * Construct a new NbtList of unspecified type.
 	 *
-	 * @return The NBT list.
+	 * @return The new NbtList.
 	 */
 	@SafeVarargs
 	public final <E> NbtList<E> createList(E... content) {
@@ -160,9 +167,9 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	}
 
 	/**
-	 * Construct a new NBT list of an unspecified type.
+	 * Construct a new NbtList of unspecified type.
 	 *
-	 * @return The NBT list.
+	 * @return The new NbtList.
 	 */
 	public final <E> NbtList<E> createList(Iterable<E> iterable) {
 		NbtList<E> list = new NbtList<>(createNbtTag(NbtType.TAG_LIST, null));
@@ -171,19 +178,19 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	}
 
 	/**
-	 * Construct a new NBT compound.
+	 * Construct a new NbtCompound.
 	 *
-	 * @return The NBT compound.
+	 * @return The new NbtCompound.
 	 */
 	public final NbtCompound createCompound() {
-		return new NbtCompound(createRootNativeCompound());
+		return new NbtCompound(createNativeCompound(), false);
 	}
 
 	/**
 	 * Construct a new NMS NBT tag initialized with the given value.
 	 *
-	 * @param type - the NBT type.
-	 * @param value - the value, or NULL to keep the original value.
+	 * @param type The NBT type.
+	 * @param value The value, or null to keep the original value.
 	 * @return The created tag.
 	 */
 	private static Object createNbtTag(NbtType type, Object value) {
@@ -195,71 +202,78 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 		return tag;
 	}
 
-	protected static Object createRootNativeCompound() {
+	protected static Object createNativeCompound() {
 		return createNbtTag(NbtType.TAG_COMPOUND, null);
 	}
 
 	/**
-	 * Construct a new NBT wrapper from a compound.
+	 * Gets a new NBT wrapper for the given NBTTagCompound.
 	 *
-	 * @param nmsCompound - the NBT compund.
-	 * @return The wrapper.
+	 * @param handle The NBTTagCompound handle.
+	 * @return A wrapper for the given NBTTagCompound.
 	 */
-	public final NbtCompound fromCompound(Object nmsCompound) {
-		return new NbtCompound(nmsCompound);
+	public final NbtCompound fromCompound(Object handle) {
+		return new NbtCompound(handle, false);
 	}
 
 	/**
-	 * Construct a wrapper for an NBT tag stored (in memory) in a block. This is where
+	 * Construct a wrapper for an NBT tag stored in a block. This is where
 	 * auxillary data such as block data and coordinates are stored.
 	 *
-	 * @param block - the block.
-	 * @return A copy of its NBT tag.
+	 * @param block The block to wrap.
+	 * @return A wrapper for the blocks NBT tag.
 	 */
-	public final NbtBlockCompound fromBlockTag(B block) {
+	public final NbtBlockCompound fromBlockTag(BLOCK block) {
 		this.checkBlock(block);
 		return this.fromBlockTag0(block);
 	}
 
-	protected abstract NbtBlockCompound<B> fromBlockTag0(B block);
+	protected abstract NbtBlockCompound<BLOCK> fromBlockTag0(BLOCK block);
 
-	public final NbtEntityCompound fromEntityTag(E entity) {
+	/**
+	 * Construct a wrapper for an NBT tag stored in an entity. This is where
+	 * auxillary data such as entity data and coordinates are stored.
+	 *
+	 * @param entity The entity to wrap.
+	 * @return A wrapper for the entitys NBT tag.
+	 */
+	public final NbtEntityCompound fromEntityTag(ENTITY entity) {
 		this.checkEntity(entity);
 		return this.fromEntityTag0(entity);
 	}
 
-	protected abstract NbtEntityCompound<E> fromEntityTag0(E entity);
+	protected abstract NbtEntityCompound<ENTITY> fromEntityTag0(ENTITY entity);
 
 	/**
-	 * Construct a wrapper for an NBT tag stored (in memory) in an item stack. This is where
+	 * Construct a wrapper for an NBT tag stored in an item stack. This is where
 	 * auxillary data such as enchanting, name and lore is stored. It does not include items
 	 * material, damage value or count.
 	 *
-	 * @param stack - the item stack.
-	 * @return A wrapper for its NBT tag.
+	 * @param stack The item to wrap.
+	 * @return A wrapper for the items NBT tag.
 	 */
-	public final NbtItemCompound fromItemTag(I stack) {
+	public final NbtItemCompound fromItemTag(ITEM stack) {
 		this.checkItem(stack);
 		return this.fromItemTag0(stack);
 	}
 
-	protected abstract NbtItemCompound<I> fromItemTag0(I item);
+	protected abstract NbtItemCompound<ITEM> fromItemTag0(ITEM item);
 
 	/**
-	 * Construct a new NBT wrapper from a list.
+	 * Gets a new NBT wrapper for the given NBTTagList.
 	 *
-	 * @param nmsList - the NBT list.
-	 * @return The wrapper.
+	 * @param handle The NBTTagList handle.
+	 * @return A wrapper for the given NBTTagList.
 	 */
-	public final NbtList fromList(Object nmsList) {
-		return new NbtList(nmsList);
+	public final NbtList fromList(Object handle) {
+		return new NbtList(handle);
 	}
 
 	/**
-	 * Load the content of a file from a stream.
+	 * Creates an NbtCompound from the given stream.
 	 *
-	 * @param stream - The input stream.
-	 * @return The decoded NBT compound.
+	 * @param stream The input stream.
+	 * @return A new NBT compound.
 	 */
 	public final NbtCompound fromStream(InputStream stream) throws IOException {
 		return this.fromCompound(NBT_COMPRESSED_TOOLS.invokeMethod(NBT_TAG_COMPOUND.getClazz(), stream));
@@ -268,19 +282,18 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	/**
 	 * Retrieve the NBT class value.
 	 *
-	 * @param type - the NBT type.
-	/* @param base - the NBT class instance.
+	 * @param type The NBT type.
+	/* @param base The NBT class instance.
 	 * @return The corresponding value.
 	 */
-	@SuppressWarnings("unchecked")
 	protected static <T> T getDataField(NbtType type, Object base) {
 		return (T)new Reflection(base.getClass()).getValue(type.getFieldType(), base);
 	}
 
 	/**
-	 * Retrieve the NBT type from a given NMS NBT tag.
+	 * Retrieve the NBT type from a given NBT tag.
 	 *
-	 * @param nms - the native NBT tag.
+	 * @param nms The native NBT tag.
 	 * @return The corresponding type.
 	 */
 	protected static NbtType getNbtType(Object nms) {
@@ -290,7 +303,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	/**
 	 * Retrieve the nearest NBT type for a given primitive type.
 	 *
-	 * @param primitive - the primitive type.
+	 * @param primitive The primitive type object.
 	 * @return The corresponding type.
 	 */
 	protected static NbtType getPrimitiveType(Object primitive) {
@@ -303,10 +316,10 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	}
 
 	/**
-	 * Save the content of a NBT compound to a stream.
+	 * Save an NbtCompound to the given stream.
 	 *
-	 * @param source - The NBT compound to save.
-	 * @param stream - The output stream.
+	 * @param source The NbtCompound to save.
+	 * @param stream The output stream.
 	 */
 	public static void saveStream(NbtCompound source, OutputStream stream) throws IOException {
 		NBT_COMPRESSED_TOOLS.invokeMethod(Void.class, source.getHandle(), stream);
@@ -317,35 +330,33 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	 * <p>
 	 * The item stack must be a wrapper for a CraftBlock.
 	 *
-	 * @param block - the block, must be a TileEntity.
-	 * @param compound - the updated NBT compound.
-	 * @throws IllegalArgumentException If the stack is not a CraftBlock.
+	 * @param block The block, must be a TileEntity.
+	 * @param compound The NbtCompound to save.
 	 */
-	public final void setBlockTag(B block, NbtCompound compound) {
+	public final void setBlockTag(BLOCK block, NbtCompound compound) {
 		this.checkBlock(block);
 		this.setBlockTag0(block, compound);
 	}
 
-	protected abstract void setBlockTag0(B block, NbtCompound compound);
+	protected abstract void setBlockTag0(BLOCK block, NbtCompound compound);
 
 	/**
 	 * Set the NBT compound tag of a given item stack.
 	 *
-	 * @param item - the item stack, cannot be air.
-	 * @param compound - the new NBT compound, or NULL to remove it.
-	 * @throws IllegalArgumentException If the stack is not a CraftItemStack, or it represents air.
+	 * @param item The item stack, cannot be air.
+	 * @param compound The NbtCompound to save, null to remove it.
 	 */
-	public final void setItemTag(I item, NbtCompound compound) {
+	public final void setItemTag(ITEM item, NbtCompound compound) {
 		this.checkItem(item);
 		this.setItemTag0(item, compound);
 	}
 
-	protected abstract void setItemTag0(I item, NbtCompound compound);
+	protected abstract void setItemTag0(ITEM item, NbtCompound compound);
 
 	/**
 	 * Convert wrapped List and Map objects into their respective NBT counterparts.
 	 *
-	 * @param value - the value of the element to create. Can be a List or a Map.
+	 * @param value The value of the element to create. Can be a List or a Map.
 	 * @return The NBT element.
 	 */
 	protected static Object unwrapValue(Object value) {
@@ -363,7 +374,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 	 * <p>
 	 * All changes to any mutable objects will be reflected in the underlying NBT element(s).
 	 *
-	 * @param nms - the NBT element.
+	 * @param nms The NBT element.
 	 * @return The wrapper equivalent.
 	 */
 	protected static Object wrapNative(Object nms) {
@@ -375,7 +386,7 @@ public abstract class NbtFactory<I extends ItemStack, B extends Block, E extends
 
 			switch (type) {
 				case TAG_COMPOUND:
-					return new NbtCompound(nms);
+					return new NbtCompound(nms, false);
 				case TAG_LIST:
 					return new NbtList(nms);
 				default:

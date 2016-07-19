@@ -35,8 +35,8 @@ import java.util.Set;
 @SuppressWarnings("unchecked")
 public class NbtCompound extends WrappedMap implements Cloneable {
 
-	NbtCompound(Object handle) {
-		super(handle, NbtFactory.getDataField(NbtType.TAG_COMPOUND, handle));
+	NbtCompound(Object handle, boolean root) {
+		super(handle, root, NbtFactory.getDataField(NbtType.TAG_COMPOUND, handle));
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	 * Every element of the path (except the end) are assumed to be compounds. The
 	 * retrieval operation will return false if any of them are missing.
 	 *
-	 * @param path - path to the entry.
-	 * @return True, or false if not found.
+	 * @param path The path to the entry.
+	 * @return True if found.
 	 */
 	public boolean containsPath(String path) {
 		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
@@ -108,7 +108,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	 * Every element of the path (except the end) are assumed to be compounds. The
 	 * retrieval operation will be cancelled if any of them are missing.
 	 *
-	 * @param path - path to the entry.
+	 * @param path The path to the entry.
 	 * @return The value, or NULL if not found.
 	 */
 	public <T> T getPath(String path) {
@@ -125,8 +125,8 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 
 	/**
 	 * Retrieve a map from a given path.
-	 * @param path - path of compounds to look up.
-	 * @param createNew - whether or not to create new compounds on the way.
+	 * @param path The path of compounds to look up.
+	 * @param createNew Whether or not to create new compounds on the way.
 	 * @return The map at this location.
 	 */
 	private NbtCompound getMap(Iterable<String> path, boolean createNew) {
@@ -161,9 +161,9 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	/**
 	 * Retrieve the map by the given name.
 	 *
-	 * @param key - the name of the map.
-	 * @param createNew - whether or not to create a new map if its missing.
-	 * @return An existing map, a new map or NULL.
+	 * @param key The name of the map.
+	 * @param createNew Whether or not to create a new map if its missing.
+	 * @return An existing map, a new map or null.
 	 */
 	public NbtCompound getMap(String key, boolean createNew) {
 		return this.getMap(Collections.singletonList(key), createNew);
@@ -175,13 +175,13 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	 * Every element of the path (except the end) are assumed to be compounds, and will
 	 * be created if they are missing.
 	 *
-	 * @param path - the path to the entry.
-	 * @param value - the new value of this entry.
+	 * @param path The path to the entry.
+	 * @param value The new value of this entry.
 	 * @return This compound, for chaining.
 	 */
 	public NbtCompound putPath(String path, Object value) {
 		List<String> entries = StringUtil.toList(StringUtil.split("\\.", path));
-		Map<String, Object> map = this.getMap(entries.subList(0, entries.size() - 1), true);
+		NbtCompound map = this.getMap(entries.subList(0, entries.size() - 1), true);
 		map.put(entries.get(entries.size() - 1), value);
 		this.save();
 		return this;
@@ -203,7 +203,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	 * Every element of the path (except the end) are assumed to be compounds. The
 	 * retrieval operation will return the last most compound.
 	 *
-	 * @param path - path to the entry.
+	 * @param path The path to the entry.
 	 * @return The last most compound, or this compound if not found..
 	 */
 	public NbtCompound removePath(String path) {
@@ -226,8 +226,7 @@ public class NbtCompound extends WrappedMap implements Cloneable {
 	/**
 	 * Save the content of a NBT compound to a stream.
 	 *
-	 * @param stream - The output stream.
-	 * @throws IOException
+	 * @param stream The output stream.
 	 */
 	public void saveTo(OutputStream stream) throws IOException {
 		NbtFactory.saveStream(this, stream);
