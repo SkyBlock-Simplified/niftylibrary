@@ -1,6 +1,8 @@
 package net.netcoding.nifty.common.mojang;
 
 import com.google.gson.JsonObject;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.api.plugin.messaging.BungeeServer;
 import net.netcoding.nifty.common.minecraft.OfflinePlayer;
@@ -8,8 +10,7 @@ import net.netcoding.nifty.common.minecraft.block.BlockFace;
 import net.netcoding.nifty.common.minecraft.entity.Entity;
 import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemStack;
-import net.netcoding.nifty.common.minecraft.inventory.item.SkullType;
-import net.netcoding.nifty.common.minecraft.inventory.item.meta.SkullMeta;
+import net.netcoding.nifty.common.minecraft.inventory.type.PlayerInventory;
 import net.netcoding.nifty.common.minecraft.material.Material;
 import net.netcoding.nifty.common.reflection.MinecraftPackage;
 import net.netcoding.nifty.common.reflection.MinecraftReflection;
@@ -19,6 +20,9 @@ import net.netcoding.nifty.core.mojang.MojangProfile;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.json.JsonMessage;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 public abstract class MinecraftMojangProfile extends MojangProfile<MinecraftMojangProfile> {
 
@@ -127,12 +131,7 @@ public abstract class MinecraftMojangProfile extends MojangProfile<MinecraftMoja
 	 * @return Skull item with this profiles skin face.
 	 */
 	public final ItemStack getSkull() {
-		ItemStack itemData = ItemStack.of(Material.SKULL_ITEM, (short)SkullType.PLAYER.ordinal());
-		SkullMeta meta = (SkullMeta)itemData.getItemMeta();
-		meta.setOwner(this.getName());
-		meta.setDisplayName(StringUtil.format("{0}{1}''s Head", ChatColor.RESET, this.getName()));
-		itemData.setItemMeta(meta);
-		return itemData;
+		return Nifty.getMiniBlockDatabase().create(this.getUniqueId(), StringUtil.format("{0}{1}''s Head", ChatColor.RESET, this.getName()));
 	}
 
 	/**
@@ -152,6 +151,42 @@ public abstract class MinecraftMojangProfile extends MojangProfile<MinecraftMoja
 	@Override
 	public final boolean isOnline() {
 		return Nifty.getBungeeHelper().isPlayerOnline(this);
+	}
+
+	/**
+	 * Opens a book for this profile.
+	 *
+	 * @param title The title of the book.
+	 * @param author The author of the book.
+	 * @param pages The content of the pages.
+	 */
+	public final void openBook(String title, String author, String... pages) {
+		this.openBook(title, author, Arrays.asList(pages));
+	}
+
+	/**
+	 * Opens a book for this profile.
+	 *
+	 * @param title The title of the book.
+	 * @param author The author of the book.
+	 * @param pages The content of the pages.
+	 */
+	public final void openBook(String title, String author, Collection<String> pages) {
+		if (!this.isOnlineLocally()) return;
+		ItemStack book = ItemStack.of(Material.WRITTEN_BOOK);
+		book.getNbt().put("title", title);
+		book.getNbt().put("author", author);
+		book.getNbt().put("pages", Nifty.getNbtFactory().createList(pages));
+		PlayerInventory inventory = this.getOfflinePlayer().getPlayer().getInventory();
+		int slot = inventory.getHeldItemSlot();
+		ItemStack old = inventory.getItem(slot);
+		inventory.setItem(slot, book);
+		ByteBuf buf = Unpooled.buffer(256);
+		buf.setByte(0, (byte)0);
+		buf.writerIndex(1);
+		Object packetCustomObj = MinecraftReflection.CUSTOM_PAYLOD.newInstance("MC|BOpen", MinecraftReflection.DATA_SERIALIZER.newInstance(buf));
+		this.sendPacket(packetCustomObj);
+		inventory.setItem(slot, old);
 	}
 
 	/**
