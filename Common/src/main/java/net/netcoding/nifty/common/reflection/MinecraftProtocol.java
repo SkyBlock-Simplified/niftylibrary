@@ -11,6 +11,11 @@ import net.netcoding.nifty.core.util.StringUtil;
 
 import java.net.URL;
 
+/**
+ * A list of all current and past protocols.
+ * <p>
+ * Allows for the fetching of new protocols.
+ */
 public enum MinecraftProtocol {
 
 	// http://wiki.vg/Protocol_version_numbers
@@ -285,10 +290,20 @@ public enum MinecraftProtocol {
 		this.version = "v1_RV_pre1".equals(name()) /* April Fools */ ? "1.9.1" : this.name().replaceAll("^v", "").replace("_pre", "-pre").replace("_", ".");
 	}
 
+	/**
+	 * Gets the protocol number.
+	 *
+	 * @return Protocol number.
+	 */
 	public final int getProtocol() {
 		return this.protocol;
 	}
 
+	/**
+	 * Gets the protocol version.
+	 *
+	 * @return Protocol version.
+	 */
 	public final String getVersion() {
 		return this.version;
 	}
@@ -313,18 +328,41 @@ public enum MinecraftProtocol {
 		return MinecraftProtocol.values()[0];
 	}
 
+	/**
+	 * Gets the current protocol number.
+	 *
+	 * @return Current protocol number.
+	 */
 	public static int getCurrentProtocol() {
 		return getCurrent().getProtocol();
 	}
 
+	/**
+	 * Gets the current protocol version.
+	 *
+	 * @return Current protocol version.
+	 */
 	public static String getCurrentVersion() {
 		return getCurrent().getVersion();
 	}
 
+	/**
+	 * Gets the current minecraft server version.
+	 *
+	 * @return Current minecraft server version.
+	 */
 	private static String getServerVersion() {
 		return SERVER_VERSION;
 	}
 
+	/**
+	 * Gets the protocol number that matches the given version.
+	 * <p>
+	 * Attempts to fetch the protocol number if it doesn't exist in this enum.
+	 *
+	 * @param version The protocol version to search with.
+	 * @return Matches protocol number.
+	 */
 	public static int getProtocol(String version) {
 		for (MinecraftProtocol protocol : values()) {
 			if (protocol.getVersion().equals(version))
@@ -344,26 +382,56 @@ public enum MinecraftProtocol {
 		}
 	}
 
+	/**
+	 * Checks if the current server is running forge.
+	 *
+	 * @return True if current server is running forge.
+	 */
 	public static boolean isForge() {
 		return IS_FORGE;
 	}
 
+	/**
+	 * Checks if the current server is running 1.8+.
+	 *
+	 * @return True if current server is running 1.8 or higher.
+	 */
 	public static boolean isPost1_7() {
 		return !isPre1_8();
 	}
 
+	/**
+	 * Checks if the current server is running 1.8-.
+	 *
+	 * @return True if current server is running 1.7.10 or lower.
+	 */
 	public static boolean isPre1_8() {
 		return getCurrentProtocol() <= v1_7_10.getProtocol();
 	}
 
+	/**
+	 * Checks if the current server is before 1.8.3.
+	 *
+	 * @return True if current server is running 1.8.2 or lower.
+	 */
 	public static boolean isPre1_8_3() {
 		return IS_PRE_1_8_3;
 	}
 
+	/**
+	 * Checks if the current server is a release candidate (main release).
+	 *
+	 * @return True if current server is a release candidate.
+	 */
 	public boolean isReleaseCandidate() {
 		return this.rc;
 	}
 
+	/**
+	 * Checks if the current server is running spigot.
+	 *
+	 * @return True if current server is running spigot.
+	 */
 	public static boolean isSpigot() {
 		return IS_SPIGOT;
 	}

@@ -3,6 +3,9 @@ package net.netcoding.nifty.common.reflection;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 
+/**
+ * Allows for assisted access to hidden minecraft fields, methods and classes.
+ */
 public final class MinecraftReflection extends Reflection {
 
 	public static final Reflection INVENTORY = getCompatibleForgeReflection((MinecraftProtocol.isForge() ? "InventoryPlayer" : "IInventory"), MinecraftPackage.MINECRAFT_SERVER, "entity.player");
@@ -10,15 +13,35 @@ public final class MinecraftReflection extends Reflection {
 	public static final Reflection ENTITY_PLAYER = getCompatibleForgeReflection("EntityPlayer", MinecraftPackage.MINECRAFT_SERVER, "entity.player");
 	public static final Reflection PLAYER_CONNECTION = getCompatibleForgeReflection("PlayerConnection", MinecraftPackage.MINECRAFT_SERVER);
 	public static final Reflection NETWORK_MANAGER = new Reflection("NetworkManager", MinecraftPackage.MINECRAFT_SERVER);
+	public static final Reflection CUSTOM_PAYLOD = new Reflection("PacketPlayOutCustomPayload", MinecraftPackage.MINECRAFT_SERVER);
+	public static final Reflection DATA_SERIALIZER = new Reflection("PacketDataSerializer", MinecraftPackage.MINECRAFT_SERVER);
 
+	/**
+	 * Creates a new reflection instance of {@literal clazz}.
+	 *
+	 * @param clazz The class to reflect.
+	 */
 	public MinecraftReflection(Class<?> clazz) {
 		this(clazz.getSimpleName(), clazz.getPackage().getName());
 	}
 
+	/**
+	 * Creates a new reflection instance of {@literal packagePath}.{@literal className}.
+	 *
+	 * @param className The class name to reflect.
+	 * @param packagePath The package the {@literal className} belongs to.
+	 */
 	public MinecraftReflection(String className, String packagePath) {
 		this(className, "", packagePath);
 	}
 
+	/**
+	 * Creates a new reflection instance of {@literal packagePath}.{@literal subPackage}.{@literal className}.
+	 *
+	 * @param className The class name to reflect.
+	 * @param subPackage The sub package the {@literal className} belongs to.
+	 * @param packagePath The package the {@literal className} belongs to.
+	 */
 	public MinecraftReflection(String className, String subPackage, String packagePath) {
 		super(className, subPackage, packagePath);
 	}
