@@ -3,8 +3,14 @@ package net.netcoding.nifty.common.reflection;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 
+/**
+ * Holds packages essential to minecraft reflection.
+ */
 public abstract class MinecraftPackage {
 
+	/**
+	 * The minecraft NMS package {@literal net.minecraft.*}.
+	 */
 	public static final String MINECRAFT_SERVER;
 
 	static {
