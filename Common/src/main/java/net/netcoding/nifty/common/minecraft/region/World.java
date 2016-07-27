@@ -1,5 +1,6 @@
 package net.netcoding.nifty.common.minecraft.region;
 
+import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.Effect;
 import net.netcoding.nifty.common.minecraft.Particle;
 import net.netcoding.nifty.common.minecraft.block.Block;
@@ -90,6 +91,8 @@ public interface World {
 		return this.getBlockAt(location).getTypeId();
 	}
 
+	Border getBorder();
+
 	Chunk getChunkAt(int x, int z);
 
 	default Chunk getChunkAt(Location location) {
@@ -110,6 +113,8 @@ public interface World {
 	Collection<Entity> getEntitiesByClasses(Class<? extends Entity>... clazzes);
 
 	Environment getEnvironment();
+
+	File getFolder();
 
 	long getFullTime();
 
@@ -145,7 +150,9 @@ public interface World {
 
 	List<Entity> getNearbyEntities(Location location, double x, double y, double z);
 
-	List<Player> getPlayers();
+	default List<Player> getPlayers() {
+		return Nifty.getServer().getPlayerList().stream().filter(player -> player.getWorld().equals(this)).collect(Concurrent.toList());
+	}
 
 	Location getSpawnLocation();
 
@@ -163,15 +170,11 @@ public interface World {
 
 	long getTime();
 
+	Type getType();
+
 	int getWaterAnimalSpawnLimit();
 
 	int getWeatherDuration();
-
-	Border getWorldBorder();
-
-	File getWorldFolder();
-
-	Type getWorldType();
 
 	UUID getUniqueId();
 
@@ -216,6 +219,14 @@ public interface World {
 	}
 
 	<T> void playEffect(Location location, Effect effect, T data, int radius);
+
+	default void playSound(Sound sound, float volume, float pitch) {
+		this.playSound(sound.name(), volume, pitch);
+	}
+
+	default void playSound(String sound, float volume, float pitch) {
+		this.getPlayers().forEach(player -> player.playSound(sound, volume, pitch));
+	}
 
 	default void playSound(Location location, Sound sound, float volume, float pitch) {
 		this.playSound(location, sound.name(), volume, pitch); // TODO: Check

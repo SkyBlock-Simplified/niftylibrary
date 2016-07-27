@@ -113,6 +113,11 @@ public class MinecraftJsonMessage extends JsonMessage<MinecraftJsonMessage> {
 		this(TextualComponent.rawText(firstPartText));
 	}
 
+	/**
+	 * Creates a JSON message with component.
+	 *
+	 * @param firstPartText The existing text component in the message.
+	 */
 	public MinecraftJsonMessage(TextualComponent firstPartText) {
 		super(firstPartText);
 	}

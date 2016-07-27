@@ -11,6 +11,7 @@ import net.netcoding.nifty.common.minecraft.inventory.InventoryHolder;
 import net.netcoding.nifty.common.minecraft.inventory.InventoryType;
 import net.netcoding.nifty.common.minecraft.inventory.item.ItemFactory;
 import net.netcoding.nifty.common.minecraft.region.World;
+import net.netcoding.nifty.common.minecraft.sound.Sound;
 import net.netcoding.nifty.core.api.IServer;
 import net.netcoding.nifty.core.util.StringUtil;
 
@@ -19,6 +20,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface Server extends IServer<Player> {
+
+	default void broadcast(String message) {
+		this.getPlayerList().forEach(player -> player.sendMessage(message));
+	}
 
 	default Inventory createInventory(InventoryHolder holder, InventoryType type) {
 		return this.createInventory(holder, type, type.getDefaultTitle());
@@ -123,5 +128,13 @@ public interface Server extends IServer<Player> {
 	}
 
 	List<World> getWorlds();
+
+	default void playSound(Sound sound, float volume, float pitch) {
+		this.playSound(sound.name(), volume, pitch);
+	}
+
+	default void playSound(String sound, float volume, float pitch) {
+		this.getWorlds().forEach(world -> world.playSound(sound, volume, pitch));
+	}
 
 }

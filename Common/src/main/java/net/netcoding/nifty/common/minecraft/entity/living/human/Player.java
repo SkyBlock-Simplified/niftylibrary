@@ -5,6 +5,7 @@ import net.netcoding.nifty.common.api.plugin.messaging.PluginMessageRecipient;
 import net.netcoding.nifty.common.minecraft.OfflinePlayer;
 import net.netcoding.nifty.common.minecraft.region.Location;
 import net.netcoding.nifty.common.minecraft.region.World;
+import net.netcoding.nifty.common.minecraft.sound.Sound;
 import net.netcoding.nifty.core.mojang.OnlineProfile;
 import net.netcoding.nifty.core.util.json.JsonMessage;
 
@@ -70,6 +71,14 @@ public interface Player extends HumanEntity, OfflinePlayer, OnlineProfile, Plugi
 	void loadData();
 
 	boolean performCommand(String command);
+
+	default void playSound(Sound sound, float volume, float pitch) {
+		this.playSound(sound.name(), volume, pitch); // TODO: Check
+	}
+
+	default void playSound(String sound, float volume, float pitch) {
+		this.getWorld().playSound(this.getLocation(), sound, volume, pitch);
+	}
 
 	void resetPlayerTime();
 
