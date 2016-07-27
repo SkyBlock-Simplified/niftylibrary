@@ -16,7 +16,10 @@
 
 	<properties>
 		<skip-copy>true</skip-copy>
-		<minecraft.provider>bukkit</minecraft.provider>
+		<minecraft.provider>minecraft</minecraft.provider>
+		<id>niftylibrary</id>
+		<name>NiftyLibrary</name>
+		<version>4.0.0</version>
 	</properties>
 
 	<modules>
@@ -27,6 +30,11 @@
 	</modules>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-buffer</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>net.netcoding.nifty</groupId>
 			<artifactId>core</artifactId>
