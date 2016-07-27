@@ -11,6 +11,10 @@
 		<version>4.0.0</version>
 	</parent>
 
+	<properties>
+		<minecraft.provider>minecraft</minecraft.provider>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.netcoding.nifty</groupId>
