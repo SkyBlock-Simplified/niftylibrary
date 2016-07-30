@@ -7,8 +7,15 @@ import net.netcoding.nifty.core.api.plugin.PluginDescription;
 
 public abstract class MinecraftPlugin extends MinecraftCore implements Plugin<MinecraftLogger>, Listener {
 
-	public final boolean isEnabled() {
-		return Nifty.getPluginManager().isEnabled(this.getDesc().getName());
+	public final boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+		else if (!(obj instanceof MinecraftPlugin))
+			return false;
+		else {
+			MinecraftPlugin other = (MinecraftPlugin)obj;
+			return other.getName().equalsIgnoreCase(this.getName());
+		}
 	}
 
 	@Override
@@ -17,12 +24,20 @@ public abstract class MinecraftPlugin extends MinecraftCore implements Plugin<Mi
 	}
 
 	@Override
-	public PluginDescription getDesc() {
+	public final PluginDescription getDesc() {
 		return Nifty.getPluginManager().getPluginDescription(this);
 	}
 
 	public final Server getServer() {
 		return Nifty.getServer();
+	}
+
+	public final int hashCode() {
+		return 32 * this.getName().hashCode();
+	}
+
+	public final boolean isEnabled() {
+		return Nifty.getPluginManager().isEnabled(this.getDesc().getName());
 	}
 
 	public void onEnable() { }

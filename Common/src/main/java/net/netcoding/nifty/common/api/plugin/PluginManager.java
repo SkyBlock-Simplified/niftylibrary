@@ -4,34 +4,39 @@ import com.google.common.base.Preconditions;
 import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.command.CommandSource;
 import net.netcoding.nifty.common.minecraft.event.Event;
+import net.netcoding.nifty.common.minecraft.event.server.GameStoppingEvent;
 import net.netcoding.nifty.core.api.plugin.PluginDescription;
+import net.netcoding.nifty.core.api.plugin.annotations.Dependency;
 import net.netcoding.nifty.core.api.plugin.annotations.Plugin;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
-import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
-import org.yaml.snakeyaml.Yaml;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
+import net.netcoding.nifty.core.util.misc.DirectedGraph;
+import net.netcoding.nifty.core.util.misc.TopologicalSort;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 public abstract class PluginManager {
 
-	private final transient ConcurrentMap<MinecraftPlugin, PluginDetails> plugins = Concurrent.newMap();
-	private final transient ConcurrentMap<MinecraftPlugin, ConcurrentSet<ListenerMap>> listeners = Concurrent.newMap();
-	private final transient ConcurrentMap<CommandSource, CommandCache> running = Concurrent.newMap();
+	private final transient ConcurrentLinkedMap<MinecraftPlugin, PluginDetails> plugins = Concurrent.newLinkedMap();
+	private final transient ConcurrentLinkedMap<MinecraftPlugin, ConcurrentSet<ListenerMap>> listeners = Concurrent.newLinkedMap();
+	private final transient ConcurrentLinkedMap<CommandSource, CommandCache> running = Concurrent.newLinkedMap();
+	private transient boolean acceptingRegistrations = true;
+
+	protected PluginManager(MinecraftPlugin plugin, PluginDescription desc) {
+		this.plugins.put(plugin, new PluginDetails(plugin, desc));
+		new PluginUnloader();
+	}
 
 	public void call(Event event) {
 		for (int i = 0; i <= 5; i++) {
@@ -144,6 +149,10 @@ public abstract class PluginManager {
 		return this.listeners.containsKey(plugin);
 	}
 
+	public boolean isAcceptingRegistrations() {
+		return this.acceptingRegistrations;
+	}
+
 	public boolean isRegistered(MinecraftPlugin plugin, Listener listener) {
 		Preconditions.checkArgument(listener != null, "Listener cannot be NULL!");
 
@@ -166,14 +175,11 @@ public abstract class PluginManager {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	public final void loadPlugins() {
-		if (this.plugins.size() > 0)
-			throw new IllegalStateException("Plugins have already been loaded!");
-
-		File pluginsDir = new File(Nifty.getPlugin().getDataFolder(), "modules");
+		this.acceptingRegistrations = false;
+		File pluginsDir = new File(Nifty.getPlugin().getDataFolder(), "plugins");
 		File[] plugins = pluginsDir.listFiles((dir, name) -> StringUtil.notEmpty(name) && name.endsWith(".jar"));
-		Yaml yaml = new Yaml();
+		DirectedGraph<String> graph = new DirectedGraph<>();
 
 		for (File plugin : plugins) {
 			try {
@@ -184,59 +190,52 @@ public abstract class PluginManager {
 
 				for (JarEntry entry : entries) {
 					String className = entry.getName().replace("/", ".").replace(".class", "");
+					boolean found = false;
 
 					try {
 						Class<?> clazz = loader.loadClass(className);
 
 						if (MinecraftPlugin.class.isAssignableFrom(clazz)) {
-							try {
-								main = clazz.asSubclass(MinecraftPlugin.class);
-								String name;
-								String version;
+							main = clazz.asSubclass(MinecraftPlugin.class);
+							found = true;
 
-								if (!main.isAnnotationPresent(Plugin.class)) {
-									JarEntry pluginYml = jar.getJarEntry("plugin.yml");
-
-									if (pluginYml != null) {
-										InputStream stream = jar.getInputStream(pluginYml);
-										Map<String, Object> map = (Map<String, Object>)yaml.load(stream);
-										name = map.get("name").toString();
-										version = map.get("version").toString();
-										// TODO: Read depends, softdepends, commands and permissions
-									} else {
-										Nifty.getLog().console("Located main class but plugin does not have a plugin.yml or Plugin annotation!");
-										break;
-									}
-								} else {
-									Plugin pluginAnno = main.getAnnotation(Plugin.class);
-									name = pluginAnno.name();
-									version = pluginAnno.version();
-									// TODO: Read dependencies
-								}
+							if (main.isAnnotationPresent(Plugin.class)) {
+								Plugin pluginAnno = main.getAnnotation(Plugin.class);
+								String name = pluginAnno.name();
 
 								if (!name.matches("^[A-Za-z0-9 _.-]+$"))
 									throw new IllegalArgumentException(StringUtil.format("Plugin name ''{0}'' contains invalid characters!", name));
 
 								if (name.contains(" "))
-									Nifty.getLog().warn("Plugin name ''{0}'' contains spaces in the name. This is not recommended.");
+									Nifty.getLog().warn("Plugin name ''{0}'' contains spaces in the name. This is not recommended.", name);
 
 								name = name.replace(" ", "_");
+								graph.addNode(name);
+
+								if (pluginAnno.dependencies() != null) {
+									for (Dependency dependency : pluginAnno.dependencies())
+										graph.addEdge(name, dependency.name());
+								}
+
 								MinecraftPlugin iplugin = (MinecraftPlugin)new Reflection(main).newInstance();
 								File dataFolder = new File(plugin.getAbsoluteFile().getParentFile(), name);
-								this.plugins.put(iplugin, new PluginDetails(iplugin, new PluginDescription(name, plugin, dataFolder, version)));
-								iplugin.onEnable();
-							} catch (Exception ignore) {
-								// Will never throw
-							}
+								this.plugins.put(iplugin, new PluginDetails(iplugin, new PluginDescription(name, plugin, dataFolder, pluginAnno.version())));
+							} else
+								throw new IllegalStateException(StringUtil.format("Plugin ''{0}'' is missing @Plugin annotation!", main.getName()));
 						}
-					} catch (ClassNotFoundException ignore) {
-						// Will never throw
-					}
+					} catch (ClassNotFoundException ignore) { /* Will never throw */ }
+
+					if (found)
+						break;
 				}
 			} catch (IOException ioex) {
 				Nifty.getLog().console("Unable to processes jar ''{0}''!", plugin.getName());
 			}
 		}
+
+		ConcurrentList<String> sorted = TopologicalSort.sort(graph);
+		for (String name : sorted)
+			this.plugins.keySet().stream().filter(plugin -> plugin.getName().equalsIgnoreCase(name)).forEach(MinecraftPlugin::onEnable);
 	}
 
 	protected abstract void injectCommand(Command command);
@@ -281,6 +280,29 @@ public abstract class PluginManager {
 			this.listeners.remove(plugin);
 		else
 			throw new IllegalArgumentException(StringUtil.format("Plugin ''{0}'' has no registered listeners!", plugin.getName()));
+	}
+
+	private class PluginUnloader extends MinecraftListener {
+
+		public PluginUnloader() {
+			super(Nifty.getPlugin());
+		}
+
+		@net.netcoding.nifty.common.api.plugin.Event
+		public void onGameStopping(GameStoppingEvent event) {
+			PluginManager.this.plugins.keySet().stream()
+					.collect(Collectors.toCollection(LinkedList::new))
+					.descendingIterator().forEachRemaining(plugin -> {
+				PluginManager.this.unregisterListeners(plugin);
+
+				if (!plugin.equals(Nifty.getPlugin()))
+					plugin.onDisable();
+			});
+
+			PluginManager.this.plugins.clear();
+			PluginManager.this.acceptingRegistrations = true;
+		}
+
 	}
 
 }

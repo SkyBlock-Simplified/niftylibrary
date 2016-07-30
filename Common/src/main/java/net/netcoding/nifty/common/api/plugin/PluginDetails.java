@@ -4,13 +4,15 @@ import net.netcoding.nifty.core.api.plugin.PluginDescription;
 
 final class PluginDetails {
 
-	private final MinecraftLogger log;
+	private final MinecraftPlugin plugin;
 	private final PluginDescription description;
+	private final MinecraftLogger log;
 	private boolean enabled = true;
 
 	PluginDetails(MinecraftPlugin plugin, PluginDescription description) {
-		this.log = new MinecraftLogger(plugin);
+		this.plugin = plugin;
 		this.description = description;
+		this.log = new MinecraftLogger(description);
 	}
 
 	public PluginDescription getDescription() {
@@ -19,6 +21,10 @@ final class PluginDetails {
 
 	public MinecraftLogger getLog() {
 		return this.log;
+	}
+
+	public MinecraftPlugin getPlugin() {
+		return this.plugin;
 	}
 
 	public boolean isEnabled() {

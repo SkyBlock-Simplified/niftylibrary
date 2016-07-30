@@ -4,12 +4,13 @@ import net.netcoding.nifty.common.Nifty;
 import net.netcoding.nifty.common.minecraft.command.CommandSource;
 import net.netcoding.nifty.common.minecraft.entity.living.human.Player;
 import net.netcoding.nifty.core.api.logger.BroadcastLogger;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
 import net.netcoding.nifty.core.util.StringUtil;
 
 public class MinecraftLogger extends BroadcastLogger {
 
-	public MinecraftLogger(MinecraftPlugin plugin) {
-		super(plugin);
+	public MinecraftLogger(PluginDescription desc) {
+		super(desc);
 	}
 
 	@Override

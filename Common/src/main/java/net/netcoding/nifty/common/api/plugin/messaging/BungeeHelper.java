@@ -24,6 +24,7 @@ import net.netcoding.nifty.common.minecraft.event.server.ServerPingEvent;
 import net.netcoding.nifty.common.minecraft.event.server.GameStoppingEvent;
 import net.netcoding.nifty.common.mojang.MinecraftMojangProfile;
 import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.api.service.exceptions.UnknownServiceException;
 import net.netcoding.nifty.core.util.ByteUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
@@ -59,8 +60,10 @@ public abstract class BungeeHelper<T extends MinecraftMojangProfile> {
 	private boolean loadedAllOnce = false;
 
 	protected BungeeHelper(ChannelWrapper niftyChannel) {
-		if (Nifty.getBungeeHelper() != null)
+		try {
+			Nifty.getBungeeHelper();
 			throw new UnsupportedOperationException("Only implementations of NiftyLibrary can extend this class!");
+		} catch (UnknownServiceException ignore) { }
 
 		ServerSocket socket = null;
 
